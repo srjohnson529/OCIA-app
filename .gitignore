@@ -1,0 +1,14 @@
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+.DS_Store
+
+# Functions
+ocia_functions_code/node_modules/
