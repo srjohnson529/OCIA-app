@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catholic Faith Journey</title>
     <style>
+        /* --- Existing Catechism App Styles --- */
         body {
             font-family: 'Georgia', serif;
             text-shadow: 1px 1px 4px #000;
             background-color: #3a6646;
-                background-image: radial-gradient(50% 104%, #457654 46%, #21412A 100%);
+            background-image: radial-gradient(50% 104%, #457654 46%, #21412A 100%);
             color: white;
             margin: 0;
             padding: 20px;
@@ -53,8 +54,9 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+        /* The .hidden class is crucial for hiding sections and the modal initially */
         .hidden {
-            display: none;
+            display: none !important; /* Use !important to ensure it overrides other styles */
         }
         ul {
             list-style-type: none;
@@ -76,137 +78,119 @@
         }
         .lesson-content {
             margin-bottom: 20px;
-            
-.video-placeholder {
-    background-color: transparent; /* Remove any background color */
-    padding: 0; /* Eliminate padding */
-    margin: 0; /* Eliminate margins */
-    border: none; /* Ensure no border */
-    text-align: center; /* Optional: Align left if center is not needed */
-    overflow: hidden; /* Prevent any overflow issues */
-}
-    </style>
-</head>
-<body>
-    <header>
-        
-        <h1>Catholic Faith Journey</h1>
-        <p>A Streamlined App for Catechesis and Spiritual Growth</p>
-    </header>
-
-    <nav>
-        <button onclick="showSection('main')">Main Menu</button>
-    </nav>
-
-    <section id="main">
-        <h2>Main Menu</h2>
-        <ul>
-            <li><button onclick="showSection('lessons')">Lessons (Progressive Instruction & Quizzes)</button></li>
-            <li><button onclick="showSection('spiritual')">Spiritual Formation</button></li>
-            <li><button onclick="showSection('firebase-chat-section')">chat</button></li>
-            <li><button onclick="showSection('resources')">Student Resources</button></li>
-            <li><button onclick="quitApp()">Quit</button></li>
-        </ul>
-    </section>
-
-    <section id="lessons" class="hidden">
-        <h2>Lessons Available</h2>
-        <ul id="lessons-list"></ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-
-    <section id="lesson-content" class="hidden">
-        <h2 id="lesson-title"></h2>
-        <div id="lesson-text" class="lesson-content"></div>
-        <button onclick="startQuiz()">Start Quiz</button>
-        <button onclick="showSection('lessons')">Back</button>
-    </section>
-
-    <section id="quiz" class="hidden">
-        <h2>Quiz</h2>
-        <div id="quiz-questions"></div>
-        <button onclick="submitQuiz()">Submit</button>
-        <button onclick="showSection('lesson-content')">Back</button>
-    </section>
-
-    <section id="spiritual" class="hidden">
-        <h2>Spiritual Formation</h2>
-        <ul>
-            <li><button onclick="showSection('daily')">Lectio Divina</button></li>
-            <li><button onclick="showSection('rosary')">Guided Rosary</button></li>
-            <li><button onclick="showSection('prayers')">Common Prayers</button></li>
-            <li><button onclick="showSection('lotH')">Liturgy of the Hours</button></li>
-        </ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-    
-<!-- Start of Firebase Chat Widget Section -->
-<div id="firebase-chat-section">
-    <style>
-        /* Custom styles for the chat widget - scoped to this section */
-        #firebase-chat-section {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Background for the section itself */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem; /* Padding around the widget */
-            box-sizing: border-box; /* Include padding in element's total width and height */
-            width: 100%; /* Ensure it takes full width of its container */
         }
-        #firebase-chat-section .chat-container {
-            background-color: #ffffff;
-            border-radius: 1rem; /* Rounded corners */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .video-placeholder {
+            background-color: transparent;
+            padding: 0;
+            margin: 0;
+            border: none;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* --- Chat Modal Specific Styles --- */
+        #chat-modal {
+            position: fixed; /* Positions it relative to the viewport */
+            top: 50%;        /* Center vertically */
+            left: 50%;       /* Center horizontally */
+            transform: translate(-50%, -50%); /* Adjust for true centering */
+            width: 90%;      /* Responsive width */
+            max-width: 500px; /* Max width for larger screens */
+            height: 80%;     /* Responsive height */
+            max-height: 600px; /* Max height */
+            background-color: #f0f0f0; /* Light background for the chat box */
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;   /* Ensure it's on top */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Hide scrollbars if content overflows */
+            padding: 20px; /* Inner padding */
+            box-sizing: border-box; /* Include padding in width/height */
+            color: #333; /* Dark text for readability on light background */
+        }
+
+        /* Optional: Overlay background when modal is open */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 42rem; /* Max width for larger screens */
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+            z-index: 999; /* Below the modal, above other content */
+            display: none; /* Hidden by default */
+        }
+        .modal-overlay.active {
+            display: block;
+        }
+
+        /* --- Chat Widget Inner Styles (adapted from your provided snippet) --- */
+        #chat-modal .chat-container { /* Target chat-container inside chat-modal */
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%; /* Take full width of modal */
+            height: 100%; /* Take full height of modal */
             display: flex;
             flex-direction: column;
             overflow: hidden;
             border: 1px solid #e0e0e0;
         }
-        #firebase-chat-section .messages-area {
+        #chat-modal .chat-header { /* This was .p-4.bg-blue-600 in your snippet, adapted to a class */
+            background-color: #3b82f6; /* Blue for chat header */
+            color: white;
+            text-align: center;
+            font-size: 1.5em; /* Adjusted font size */
+            font-weight: bold;
+            padding: 1rem;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+        }
+        #chat-modal .messages-area {
             flex-grow: 1;
             padding: 1.5rem;
             overflow-y: auto;
-            max-height: 28rem; /* Fixed height for scrollable messages */
-            min-height: 10rem; /* Minimum height to prevent collapse */
+            max-height: none; /* Allow messages area to fill available space in modal */
+            min-height: 10rem;
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
             background-color: #f9fafb;
             border-bottom: 1px solid #e0e0e0;
         }
-        #firebase-chat-section .message-bubble {
+        #chat-modal .message-bubble {
             max-width: 85%;
             padding: 0.75rem 1rem;
             border-radius: 1rem;
             word-wrap: break-word;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        #firebase-chat-section .message-bubble.sent {
-            background-color: #dbeafe; /* Light blue for sent messages */
+        #chat-modal .message-bubble.sent {
+            background-color: #dbeafe;
             align-self: flex-end;
             color: #1e40af;
         }
-        #firebase-chat-section .message-bubble.received {
-            background-color: #f3f4f6; /* Light gray for received messages */
+        #chat-modal .message-bubble.received {
+            background-color: #f3f4f6;
             align-self: flex-start;
             color: #374151;
         }
-        #firebase-chat-section .message-sender {
+        #chat-modal .message-sender {
             font-size: 0.75rem;
             font-weight: 600;
             margin-bottom: 0.25rem;
             color: #6b7280;
         }
-        #firebase-chat-section .input-area {
+        #chat-modal .input-area {
             padding: 1.5rem;
             display: flex;
             gap: 0.75rem;
             background-color: #ffffff;
+            border-bottom-left-radius: 0.75rem; /* Match modal border radius */
+            border-bottom-right-radius: 0.75rem; /* Match modal border radius */
         }
-        #firebase-chat-section .input-area input {
+        #chat-modal .input-area input {
             flex-grow: 1;
             padding: 0.75rem 1rem;
             border: 1px solid #d1d5db;
@@ -215,11 +199,11 @@
             outline: none;
             transition: border-color 0.2s;
         }
-        #firebase-chat-section .input-area input:focus {
+        #chat-modal .input-area input:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
         }
-        #firebase-chat-section .input-area button {
+        #chat-modal .input-area button {
             background-color: #3b82f6; /* Blue button */
             color: white;
             padding: 0.75rem 1.5rem;
@@ -230,107 +214,96 @@
             border: none;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        #firebase-chat-section .input-area button:hover {
+        #chat-modal .input-area button:hover {
             background-color: #2563eb;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
-        #firebase-chat-section .loading-message {
+        #chat-modal .loading-message {
             text-align: center;
             padding: 2rem;
             color: #6b7280;
         }
+        #close-chat-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545; /* Red for close button */
+            color: white;
+            border: none;
+            border-radius: 50%; /* Make it round */
+            width: 30px;
+            height: 30px;
+            font-size: 1em;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        #close-chat-button:hover {
+            background-color: #c82333;
+        }
     </style>
 
-    <div class="chat-container">
-        <div class="p-4 bg-blue-600 text-white text-center text-xl font-bold rounded-t-xl">
-            O.C.I.A. Chat
-        </div>
-        <div id="messages-area" class="messages-area">
-            <div id="loading-indicator" class="loading-message">Loading chat...</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Type your message...">
-            <button id="send-button">Send</button>
-        </div>
-    </div>
+    <!-- Firebase SDK CDN links -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
 
-    <!-- Firebase SDKs and Chat Logic -->
     <script type="module">
+        // Firebase SDK imports for modular syntax
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"; 
 
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Your web app's Firebase configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
-        // This is the fallback if __firebase_config is not provided by the Canvas environment.
-        // You've already provided your actual values, so they are used here directly.
-        let firebaseConfig = {
-             apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
-  authDomain: "ocia-application.firebaseapp.com",
-  projectId: "ocia-application",
-  storageBucket: "ocia-application.firebasestorage.app",
-  messagingSenderId: "113168534647",
-  appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
-  measurementId: "G-WRGSXQCY5D"
+        // Your web app's Firebase configuration (from your Firebase Console)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
+            authDomain: "ocia-application.firebaseapp.com",
+            projectId: "ocia-application",
+            storageBucket: "ocia-application.firebasestorage.app",
+            messagingSenderId: "113168534647",
+            appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
+            measurementId: "G-WRGSXQCY5D"
         };
 
-        // This block attempts to use the Firebase config provided by the Canvas environment.
-        // It will override the above 'firebaseConfig' if __firebase_config is defined and valid.
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-            try {
-                const parsedConfig = JSON.parse(__firebase_config);
-                if (parsedConfig && parsedConfig.projectId) { // Basic validation
-                    firebaseConfig = parsedConfig;
-                    console.log("Using Firebase config provided by environment.");
-                } else {
-                    console.warn("Provided __firebase_config is invalid or missing projectId. Using hardcoded config.");
-                }
-            } catch (e) {
-                console.error("Error parsing __firebase_config:", e);
-                console.warn("Using hardcoded Firebase config due to parsing error.");
-            }
-        } else {
-            console.warn("No __firebase_config provided by environment. Using hardcoded config.");
-        }
+        // Initialize Firebase (only once for the entire app)
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app); // Ensure getAnalytics is imported and used correctly
 
+        // Global variables for chat logic (from Canvas environment, if available)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let app; // These are declared here and assigned inside initializeFirebase
-        let db;
-        let auth;
         let currentUserId = null;
         let isAuthReady = false;
 
-        // Get elements within the #firebase-chat-section
-        const messagesArea = document.querySelector('#firebase-chat-section #messages-area');
-        const messageInput = document.querySelector('#firebase-chat-section #message-input');
-        const sendButton = document.querySelector('#firebase-chat-section #send-button');
-        const loadingIndicator = document.querySelector('#firebase-chat-section #loading-indicator');
+        // Get chat elements within the chat modal
+        const messagesArea = document.querySelector('#chat-modal #messages-area');
+        const messageInput = document.querySelector('#chat-modal #message-input');
+        const sendButton = document.querySelector('#chat-modal #send-button');
+        const loadingIndicator = document.querySelector('#chat-modal #loading-indicator');
 
         /**
          * Initializes Firebase and sets up authentication.
          */
-        async function initializeFirebase() {
+        async function initializeFirebaseChat() { // Renamed to avoid conflict with global init
             try {
-                // Initialize Firebase app
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
                 // Listen for authentication state changes
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         currentUserId = user.uid;
                         console.log("Firebase authenticated. User ID:", currentUserId);
                         isAuthReady = true;
-                        if (loadingIndicator) { // Check if element exists before removing
+                        if (loadingIndicator) {
                             loadingIndicator.remove();
                         }
-                        setupRealtimeListener(); // Start listening for messages
+                        setupRealtimeListener();
                     } else {
-                        // If no user is signed in, try to sign in with custom token or anonymously
                         try {
                             if (initialAuthToken) {
                                 await signInWithCustomToken(auth, initialAuthToken);
@@ -349,9 +322,9 @@
                 });
 
             } catch (error) {
-                console.error("Error initializing Firebase:", error);
+                console.error("Error initializing Firebase Chat:", error);
                 if (messagesArea) {
-                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase initialization failed. ${error.message}</div>`;
+                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase Chat initialization failed. ${error.message}</div>`;
                 }
             }
         }
@@ -360,23 +333,21 @@
          * Sets up a real-time listener for messages from Firestore.
          */
         function setupRealtimeListener() {
-            // Ensure Firebase is initialized and user is authenticated before setting up listener
             if (!db || !currentUserId) {
                 console.warn("Firestore or User ID not ready for listener setup.");
                 return;
             }
 
             const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-            const q = query(messagesCollectionRef, orderBy('timestamp', 'asc')); // Order by timestamp
+            const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
 
             onSnapshot(q, (snapshot) => {
                 if (messagesArea) {
-                    messagesArea.innerHTML = ''; // Clear existing messages
+                    messagesArea.innerHTML = '';
                     snapshot.forEach((doc) => {
                         const message = doc.data();
                         displayMessage(message);
                     });
-                    // Scroll to the bottom of the messages area
                     messagesArea.scrollTop = messagesArea.scrollHeight;
                 }
             }, (error) => {
@@ -392,12 +363,11 @@
          * @param {object} message - The message object containing text, senderId, and timestamp.
          */
         function displayMessage(message) {
-            if (!messagesArea) return; // Ensure messagesArea exists
+            if (!messagesArea) return;
 
             const messageElement = document.createElement('div');
             messageElement.classList.add('message-bubble');
 
-            // Determine if the message was sent by the current user
             const isSentByCurrentUser = message.senderId === currentUserId;
             if (isSentByCurrentUser) {
                 messageElement.classList.add('sent');
@@ -405,14 +375,12 @@
                 messageElement.classList.add('received');
             }
 
-            // Display sender ID (or "You" for current user)
             const senderIdDisplay = isSentByCurrentUser ? 'You' : `User: ${message.senderId ? message.senderId.substring(0, 8) + '...' : 'Unknown'}`;
             const senderElement = document.createElement('div');
             senderElement.classList.add('message-sender');
             senderElement.textContent = senderIdDisplay;
             messageElement.appendChild(senderElement);
 
-            // Display message text
             const textElement = document.createElement('div');
             textElement.textContent = message.text;
             messageElement.appendChild(textElement);
@@ -431,7 +399,7 @@
 
             const messageText = messageInput.value.trim();
             if (messageText === '') {
-                return; // Don't send empty messages
+                return;
             }
 
             try {
@@ -439,16 +407,15 @@
                 await addDoc(messagesCollectionRef, {
                     text: messageText,
                     senderId: currentUserId,
-                    timestamp: serverTimestamp() // Firestore server timestamp
+                    timestamp: serverTimestamp()
                 });
-                messageInput.value = ''; // Clear input field
+                messageInput.value = '';
             } catch (error) {
                 console.error("Error sending message:", error);
-                // In a real app, you'd show a user-friendly error message here
             }
         }
 
-        // Event listeners for sending messages, ensuring elements exist
+        // Event listeners for sending messages
         if (sendButton) {
             sendButton.addEventListener('click', sendMessage);
         }
@@ -460,2700 +427,117 @@
             });
         }
 
-        // Initialize Firebase when the DOM content is fully loaded
-        // This ensures all HTML elements are available before script tries to access them
-        document.addEventListener('DOMContentLoaded', initializeFirebase);
+        // Initialize Firebase chat logic when the DOM content is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeFirebaseChat);
     </script>
-</div>
-<!-- End of Firebase Chat Widget Section -->
+</head>
+<body>
+    <header>
+        <h1>Catholic Faith Journey</h1>
+    </header>
+    <nav>
+        <button onclick="showSection('lessons')">Lessons (Progressive Instruction & Quizzes)</button>
+        <button onclick="showSection('spiritual-formation')">Spiritual Formation</button>
+        <button id="chat-menu-button">chat</button> <!-- This button opens the chat modal -->
+        <button onclick="showSection('student-resources')">Student Resources</button>
+        <button onclick="showSection('quit')">Quit</button>
+    </nav>
 
-
-    
-    <section id="main" class="active">
-        <h2>Main Menu</h2>
-        <!-- Existing main menu buttons, e.g. -->
-        <ul>
-            <li><button onclick="showSection('spiritual')">Spiritual Formation</button></li>
-            <!-- Add other existing buttons here if any -->
-            <li><button onclick="showSection('resources')">Resources</button></li>
-        </ul>
+    <!-- Main content sections -->
+    <section id="lessons-section">
+        <h2>Lessons</h2>
+        <!-- Lesson content goes here -->
+        <p>This section will contain progressive instruction and quizzes.</p>
     </section>
 
-    <section id="resources" class="hidden">
-        <h2>Resources</h2>
-        <ul>
-            <li><a href="https://usccb.cld.bz/Catechism-of-the-Catholic-Church/" target="_blank"><button>Catechism of the Catholic Church</button></a></li>
-            <li><a href="https://bible.usccb.org/bible" target="_blank"><button>Holy Bible</button></a></li>
-            <li><a href="https://www.catholic.com/" target="_blank"><button>Catholic Answers</button></a></li>
-            <li><a href="https://catechisminayear.fireside.fm/" target="_blank"><button>Catechism in a Year with Fr. Mike Schmitz</button></a></li>
-        </ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-
-    <section id="daily" class="hidden">
-    <div class="video-placeholder">'<iframe width="560" height="315" src="https://www.youtube.com/embed/gKYEOc3ik9k?si=m74MuYyABkoXRgYt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-    <p><strong>Consider reading and praying with one of the Church's daily readings.</strong><br>
-        <div class="cg_mrc_widget"></div>
-<script src="https://cdn1.catholicgallery.org/wp-content/uploads/widgets/rich-card/cg_mrc_widget.js" async></script>
-<p><strong>Lectio (Read) Slowly and attentively.</strong><br>
-<p><strong>Meditatio (Meditate) Reflect on words or a phrase.</strong><br>
-<p><strong>Oratio (Pray) Talk and listen to God.</strong><br>
-<p><strong>Contemplatio (Compemplate) Rest in God. Savor His love.</strong><br>
-        <button onclick="showSection('spiritual')">Back</button>
-    </section>
-    
-    <section id="spiritual" class="hidden">
+    <section id="spiritual-formation-section" class="hidden">
         <h2>Spiritual Formation</h2>
-        <ul>
-            <li><button onclick="showSection('daily')">Lectio Divina</button></li>
-            <li><button onclick="showSection('rosary')">Guided Rosary</button></li>
-            <li><button onclick="showSection('prayers')">Common Prayers</button></li>
-            <li><button onclick="showSection('lotH')">Liturgy of the Hours</button></li>
-        </ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
+        <!-- Spiritual formation content goes here -->
+        <p>This section will guide you through spiritual growth practices.</p>
     </section>
 
-    <section id="lotH" class="hidden">
-        <h2>Liturgy of the Hours</h2>
-        <p>The Liturgy of the Hours, also known as the Divine Office, is the official prayer of the Catholic Church that sanctifies the day through Psalms, Scripture readings, hymns, and intercessions. It is prayed at fixed times throughout the day, uniting the faithful in continuous praise and petition. Rooted in ancient tradition and emphasized in Vatican II's Sacrosanctum Concilium, it fosters a deeper communion with Christ and the Church. Use the widget below to access today's prayers in English.</p>
-        <iframe src="https://www.ibreviary.com/m2/breviario.php?lang=en" width="340" height="500" style="border: 1px solid #151515;"></iframe>
-        <button onclick="showSection('spiritual')">Back</button>
+    <section id="student-resources-section" class="hidden">
+        <h2>Student Resources</h2>
+        <!-- Student resources content goes here -->
+        <p>Access helpful resources for your journey.</p>
     </section>
 
-    <section id="rosary" class="hidden">
-        <h2>Guided Rosary</h2>
-        <div class="video-placeholder">'<iframe width="560" height="315" src="https://www.youtube.com/embed/HXcWknfC0vI?si=TkBe-4NatYLTEmjw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-        <p>Choose Mysteries:</p>
-        <ul>
-            <li><button onclick="startRosary('Joyful')">Joyful (Monday & Saturday)</button></li>
-            <li><button onclick="startRosary('Sorrowful')">Sorrowful (Tuesday & Friday)</button></li>
-            <li><button onclick="startRosary('Glorious')">Glorious (Wednesday & Sunday)</button></li>
-            <li><button onclick="startRosary('Luminous')">Luminous (Thursday)</button></li>
-        </ul>
-        <div id="rosary-progress" class="hidden"></div>
-        <button onclick="showSection('spiritual')">Back</button>
+    <section id="quit-section" class="hidden">
+        <h2>Quit</h2>
+        <!-- Quit content or confirmation -->
+        <p>Thank you for using the app. You can close this window.</p>
     </section>
 
-    <section id="joyful-rosary" class="hidden">
-        <h2>Joyful Mysteries</h2>
-        <div id="joyful-display"></div>
-        <button onclick="nextPrayer('joyful')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
+    <!-- The Chat Modal HTML Structure (moved outside any <section>) -->
+    <div id="chat-modal" class="hidden">
+        <div class="chat-container">
+            <div class="chat-header">
+                O.C.I.A. Chat
+            </div>
+            <div id="messages-area" class="messages-area">
+                <div id="loading-indicator" class="loading-message">Loading chat...</div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="message-input" placeholder="Type your message...">
+                <button id="send-button">Send</button>
+            </div>
+            <button id="close-chat-button">X</button> <!-- Close button for the modal -->
+        </div>
+    </div>
 
-    <section id="sorrowful-rosary" class="hidden">
-        <h2>Sorrowful Mysteries</h2>
-        <div id="sorrowful-display"></div>
-        <button onclick="nextPrayer('sorrowful')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-
-    <section id="glorious-rosary" class="hidden">
-        <h2>Glorious Mysteries</h2>
-        <div id="glorious-display"></div>
-        <button onclick="nextPrayer('glorious')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-
-    <section id="luminous-rosary" class="hidden">
-        <h2>Luminous Mysteries</h2>
-        <div id="luminous-display"></div>
-        <button onclick="nextPrayer('luminous')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-
-<section id="prayers" class="hidden">
-        <h2 id="prayer-title">Common Catholic Prayers</h2>
-        <ul id="prayers-list">
-            <li><button onclick="showPrayer('Sign of the Cross')">Sign of the Cross</button></li>
-            <li><button onclick="showPrayer('Our Father')">Our Father</button></li>
-            <li><button onclick="showPrayer('Hail Mary')">Hail Mary</button></li>
-            <li><button onclick="showPrayer('Glory Be')">Glory Be</button></li>
-            <li><button onclick="showPrayer('Apostles\' Creed')">Apostles' Creed</button></li>
-            <li><button onclick="showPrayer('Nicene Creed')">Nicene Creed</button></li>
-            <li><button onclick="showPrayer('Act of Contrition')">Act of Contrition</button></li>
-            <li><button onclick="showPrayer('Hail Holy Queen')">Hail Holy Queen</button></li>
-            <li><button onclick="showPrayer('Memorare')">Memorare</button></li>
-            <li><button onclick="showPrayer('Angelus')">Angelus</button></li>
-            <li><button onclick="showPrayer('Prayer to St. Michael')">Prayer to St. Michael</button></li>
-            <li><button onclick="showPrayer('Anima Christi')">Anima Christi</button></li>
-            <li><button onclick="showPrayer('Guardian Angel Prayer')">Guardian Angel Prayer</button></li>
-            <li><button onclick="showPrayer('Grace Before Meals')">Grace Before Meals</button></li>
-            <li><button onclick="showPrayer('Grace After Meals')">Grace After Meals</button></li>
-            <li><button onclick="showPrayer('Morning Offering')">Morning Offering</button></li>
-            <li><button onclick="showPrayer('Act of Faith')">Act of Faith</button></li>
-            <li><button onclick="showPrayer('Act of Hope')">Act of Hope</button></li>
-            <li><button onclick="showPrayer('Act of Love')">Act of Love</button></li>
-            <li><button onclick="showPrayer('Fatima Prayer')">Fatima Prayer</button></li>
-            <li><button onclick="showPrayer('Come Holy Spirit')">Come Holy Spirit</button></li>
-            <li><button onclick="showPrayer('Eternal Rest')">Eternal Rest</button></li>
-            <li><button onclick="showPrayer('Divine Praises')">Divine Praises</button></li>
-            <li><button onclick="showPrayer('Confiteor')">Confiteor</button></li>
-        </ul>
-        <pre id="prayer-text" class="hidden"></pre>
-        <button onclick="resetPrayer()">Back to List</button>
-        <button onclick="showSection('spiritual')">Back to Spiritual Menu</button>
-    </section>
+    <!-- Modal Overlay (for dimming background) -->
+    <div class="modal-overlay"></div>
 
     <script>
-        // Prayer texts
-        const signOfCross = "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.";
-        const apostlesCreed = "I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.";
-        const ourFather = "Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.";
-        const hailMary = "Hail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.";
-        const gloryBe = "Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.";
-		const fatima = "O my Jesus, forgive us our sins, save us from the fires of hell, and lead all sould to heaven, especially those most in need of thy mercy. Amen";
-		const hailholyqueen = "Hail, Holy Queen, Mother of Mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve. To thee do we send up our sighs, mourning and weeping in this valley of tears. Turn, most gracious advocate, thine eyes of mercy toward us, and after this, our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary. Pray for us, O holy Mother of God. That we may be made worthy of the promises of Christ."
-		
-        // Mysteries with scripture
-        const joyfulMysteries = [
-            {name: "The Annunciation", scripture: "Luke 1:26-38\n\nIn the sixth month the angel Gabriel was sent from God to a city of Galilee named Nazareth, to a virgin betrothed to a man whose name was Joseph, of the house of David; and the virgin's name was Mary. And he came to her and said, “Hail, full of grace, the Lord is with you!” But she was greatly troubled at the saying, and considered in her mind what sort of greeting this might be. And the angel said to her, “Do not be afraid, Mary, for you have found favor with God. And behold, you will conceive in your womb and bear a son, and you shall call his name Jesus. He will be great, and will be called the Son of the Most High; and the Lord God will give to him the throne of his father David, and he will reign over the house of Jacob for ever; and of his kingdom there will be no end.” And Mary said to the angel, “How can this be, since I have no husband?” And the angel said to her, “The Holy Spirit will come upon you, and the power of the Most High will overshadow you; therefore the child to be born will be called holy, the Son of God. And behold, your kinswoman Elizabeth in her old age has also conceived a son; and this is the sixth month with her who was called barren. For with God nothing will be impossible.” And Mary said, “Behold, I am the handmaid of the Lord; let it be to me according to your word.” And the angel departed from her."},
-            {name: "The Visitation", scripture: "Luke 1:39-56\n\nIn those days Mary arose and went with haste into the hill country, to a city of Judah, and she entered the house of Zechariah and greeted Elizabeth. And when Elizabeth heard the greeting of Mary, the babe leaped in her womb; and Elizabeth was filled with the Holy Spirit and she exclaimed with a loud cry, “Blessed are you among women, and blessed is the fruit of your womb! And why is this granted me, that the mother of my Lord should come to me? For behold, when the voice of your greeting came to my ears, the babe in my womb leaped for joy. And blessed is she who believed that there would be a fulfilment of what was spoken to her from the Lord.” And Mary said, “My soul magnifies the Lord, and my spirit rejoices in God my Savior, for he has regarded the low estate of his handmaiden. For behold, henceforth all generations will call me blessed; for he who is mighty has done great things for me, and holy is his name. And his mercy is on those who fear him from generation to generation. He has shown strength with his arm, he has scattered the proud in the imagination of their hearts, he has put down the mighty from their thrones, and exalted those of low degree; he has filled the hungry with good things, and the rich he has sent empty away. He has helped his servant Israel, in remembrance of his mercy, as he spoke to our fathers, to Abraham and to his posterity for ever.” And Mary remained with her about three months, and returned to her home."},
-            {name: "The Nativity", scripture: "Luke 2:1-20\n\nIn those days a decree went out from Caesar Augustus that all the world should be enrolled. This was the first enrollment, when Quirinius was governor of Syria. And all went to be enrolled, each to his own city. And Joseph also went up from Galilee, from the city of Nazareth, to Judea, to the city of David, which is called Bethlehem, because he was of the house and lineage of David, to be enrolled with Mary, his betrothed, who was with child. And while they were there, the time came for her to be delivered. And she gave birth to her first-born son and wrapped him in swaddling cloths, and laid him in a manger, because there was no place for them in the inn. And in that region there were shepherds out in the field, keeping watch over their flock by night. And an angel of the Lord appeared to them, and the glory of the Lord shone around them, and they were filled with fear. And the angel said to them, “Be not afraid; for behold, I bring you good news of a great joy which will come to all the people; for to you is born this day in the city of David a Savior, who is Christ the Lord. And this will be a sign for you: you will find a babe wrapped in swaddling cloths and lying in a manger.” And suddenly there was with the angel a multitude of the heavenly host praising God and saying, “Glory to God in the highest, and on earth peace among men with whom he is pleased!” When the angels went away from them into heaven, the shepherds said to one another, “Let us go over to Bethlehem and see this thing that has happened, which the Lord has made known to us.” And they went with haste, and found Mary and Joseph, and the babe lying in a manger. And when they saw it they made known the saying which had been told them concerning this child; and all who heard it wondered at what the shepherds told them. But Mary kept all these things, pondering them in her heart. And the shepherds returned, glorifying and praising God for all they had heard and seen, as it had been told them."},
-            {name: "The Presentation", scripture: "Luke 2:22-38\n\nAnd when the time came for their purification according to the law of Moses, they brought him up to Jerusalem to present him to the Lord (as it is written in the law of the Lord, “Every male that opens the womb shall be called holy to the Lord”) and to offer a sacrifice according to what is said in the law of the Lord, “a pair of turtledoves, or two young pigeons.” Now there was a man in Jerusalem, whose name was Simeon, and this man was righteous and devout, looking for the consolation of Israel, and the Holy Spirit was upon him. And it had been revealed to him by the Holy Spirit that he should not see death before he had seen the Lord’s Christ. And inspired by the Spirit he came into the temple; and when the parents brought in the child Jesus, to do for him according to the custom of the law, he took him up in his arms and blessed God and said, “Lord, now lettest thou thy servant depart in peace, according to thy word; for mine eyes have seen thy salvation which thou hast prepared in the presence of all peoples, a light for revelation to the Gentiles, and for glory to thy people Israel.” And his father and his mother marveled at what was said about him; and Simeon blessed them and said to Mary his mother, “Behold, this child is set for the fall and rising of many in Israel, and for a sign that is spoken against (and a sword will pierce through your own soul also), that thoughts out of many hearts may be revealed.” And there was a prophetess, Anna, the daughter of Phan′u-el, of the tribe of Asher; she was of a great age, having lived with her husband seven years from her virginity, and as a widow till she was eighty-four. She did not depart from the temple, worshiping with fasting and prayer night and day. And coming up at that very hour she gave thanks to God, and spoke of him to all who were looking for the redemption of Jerusalem."},
-            {name: "The Finding in the Temple", scripture: "Luke 2:41-52\n\nNow his parents went to Jerusalem every year at the feast of the Passover. And when he was twelve years old, they went up according to custom; and when the feast was ended, as they were returning, the boy Jesus stayed behind in Jerusalem. His parents did not know it, but supposing him to be in the company they went a day’s journey, and they sought him among their kinsfolk and acquaintances; and when they did not find him, they returned to Jerusalem, seeking him. After three days they found him in the temple, sitting among the teachers, listening to them and asking them questions; and all who heard him were amazed at his understanding and his answers. And when they saw him they were astonished; and his mother said to him, “Son, why have you treated us so? Behold, your father and I have been looking for you anxiously.” And he said to them, “How is it that you sought me? Did you not know that I must be in my Father’s house?” And they did not understand the saying which he spoke to them. And he went down with them and came to Nazareth, and was obedient to them; and his mother kept all these things in her heart. And Jesus increased in wisdom and in stature, and in favor with God and man."}
-        ];
-
-        const sorrowfulMysteries = [
-            {name: "The Agony in the Garden", scripture: "Luke 22:39-46\n\nAnd he came out, and went, as was his custom, to the Mount of Olives; and the disciples followed him. And when he came to the place he said to them, “Pray that you may not enter into temptation.” And he withdrew from them about a stone’s throw, and knelt down and prayed, “Father, if thou art willing, remove this cup from me; nevertheless not my will, but thine, be done.” And there appeared to him an angel from heaven, strengthening him. And being in an agony he prayed more earnestly; and his sweat became like great drops of blood falling down upon the ground. And when he rose from prayer, he came to the disciples and found them sleeping for sorrow, and he said to them, “Why do you sleep? Rise and pray that you may not enter into temptation.”"},
-            {name: "The Scourging at the Pillar", scripture: "John 19:1\n\nThen Pilate took Jesus and scourged him."},
-            {name: "The Crowning with Thorns", scripture: "Matthew 27:27-31\n\nThen the soldiers of the governor took Jesus into the praetorium, and they gathered the whole battalion before him. And they stripped him and put a scarlet robe upon him, and plaiting a crown of thorns they put it on his head, and put a reed in his right hand. And kneeling before him they mocked him, saying, “Hail, King of the Jews!” And they spat upon him, and took the reed and struck him on the head. And when they had mocked him, they stripped him of the robe, and put his own clothes on him, and led him away to crucify him."},
-            {name: "The Carrying of the Cross", scripture: "John 19:16-17\n\nThen he handed him over to them to be crucified. So they took Jesus, and he went out, bearing his own cross, to the place called the place of a skull, which is called in Hebrew Gol′gotha."},
-            {name: "The Crucifixion", scripture: "John 19:18-30\n\nThere they crucified him, and with him two others, one on either side, and Jesus between them. Pilate also wrote a title and put it on the cross; it read, “Jesus of Nazareth, the King of the Jews.” Many of the Jews read this title, for the place where Jesus was crucified was near the city; and it was written in Hebrew, in Latin, and in Greek. The chief priests of the Jews then said to Pilate, “Do not write, ‘The King of the Jews,’ but, ‘This man said, I am King of the Jews.’” Pilate answered, “What I have written I have written.” When the soldiers had crucified Jesus they took his garments and made four parts, one for each soldier; also his tunic. But the tunic was without seam, woven from top to bottom; so they said to one another, “Let us not tear it, but cast lots for it to see whose it shall be.” This was to fulfil the scripture, “They parted my garments among them, and for my clothing they cast lots.” So the soldiers did this. But standing by the cross of Jesus were his mother, and his mother’s sister, Mary the wife of Clopas, and Mary Mag′dalene. When Jesus saw his mother, and the disciple whom he loved standing near, he said to his mother, “Woman, behold, your son!” Then he said to the disciple, “Behold, your mother!” And from that hour the disciple took her to his own home. After this Jesus, knowing that all was now finished, said (to fulfil the scripture), “I thirst.” A bowl full of vinegar stood there; so they put a sponge full of the vinegar on hyssop and held it to his mouth. When Jesus had received the vinegar, he said, “It is finished”; and he bowed his head and gave up his spirit."}
-        ];
-
-        const gloriousMysteries = [
-            {name: "The Resurrection", scripture: "Matthew 28:1-10\n\nNow after the sabbath, toward the dawn of the first day of the week, Mary Mag′dalene and the other Mary went to see the sepulchre. And behold, there was a great earthquake; for an angel of the Lord descended from heaven and came and rolled back the stone, and sat upon it. His appearance was like lightning, and his raiment white as snow. And for fear of him the guards trembled and became like dead men. But the angel said to the women, “Do not be afraid; for I know that you seek Jesus who was crucified. He is not here; for he has risen, as he said. Come, see the place where he lay. Then go quickly and tell his disciples that he has risen from the dead, and behold, he is going before you to Galilee; there you will see him. Lo, I have told you.” So they departed quickly from the tomb with fear and great joy, and ran to tell his disciples. And behold, Jesus met them and said, “Hail!” And they came up and took hold of his feet and worshiped him. Then Jesus said to them, “Do not be afraid; go and tell my brethren to go to Galilee, and there they will see me.”"},
-            {name: "The Ascension", scripture: "Acts 1:6-11\n\nSo when they had come together, they asked him, “Lord, will you at this time restore the kingdom to Israel?” He said to them, “It is not for you to know times or seasons which the Father has fixed by his own authority. But you shall receive power when the Holy Spirit has come upon you; and you shall be my witnesses in Jerusalem and in all Judea and Samar′ia and to the end of the earth.” And when he had said this, as they were looking on, he was lifted up, and a cloud took him out of their sight. And while they were gazing into heaven as he went, behold, two men stood by them in white robes, and said, “Men of Galilee, why do you stand looking into heaven? This Jesus, who was taken up from you into heaven, will come in the same way as you saw him go into heaven.”"},
-            {name: "The Descent of the Holy Spirit", scripture: "Acts 2:1-11\n\nWhen the day of Pentecost had come, they were all together in one place. And suddenly a sound came from heaven like the rush of a mighty wind, and it filled all the house where they were sitting. And there appeared to them tongues as of fire, distributed and resting on each one of them. And they were all filled with the Holy Spirit and began to speak in other tongues, as the Spirit gave them utterance. Now there were dwelling in Jerusalem Jews, devout men from every nation under heaven. And at this sound the multitude came together, and they were bewildered, because each one heard them speaking in his own language. And they were amazed and wondered, saying, “Are not all these who are speaking Galileans? And how is it that we hear, each of us in his own native language? Par′thians and Medes and E′lamites and residents of Mesopota′mia, Judea and Cappado′cia, Pontus and Asia, Phryg′ia and Pamphyl′ia, Egypt and the parts of Libya belonging to Cyre′ne, and visitors from Rome, both Jews and proselytes, Cretans and Arabians, we hear them telling in our own tongues the mighty works of God.”"},
-            {name: "The Assumption", scripture: "Luke 1:46-55\n\nAnd Mary said, “My soul magnifies the Lord, and my spirit rejoices in God my Savior, for he has regarded the low estate of his handmaiden. For behold, henceforth all generations will call me blessed; for he who is mighty has done great things for me, and holy is his name. And his mercy is on those who fear him from generation to generation. He has shown strength with his arm, he has scattered the proud in the imagination of their hearts, he has put down the mighty from their thrones, and exalted those of low degree; he has filled the hungry with good things, and the rich he has sent empty away. He has helped his servant Israel, in remembrance of his mercy, as he spoke to our fathers, to Abraham and to his posterity for ever.”"},
-            {name: "The Coronation of Mary", scripture: "Revelation 12:1\n\nAnd a great portent appeared in heaven, a woman clothed with the sun, with the moon under her feet, and on her head a crown of twelve stars;"}
-        ];
-
-        const luminousMysteries = [
-            {name: "The Baptism of Christ in the Jordan", scripture: "Matthew 3:13-17\n\nThen Jesus came from Galilee to the Jordan to John, to be baptized by him. John would have prevented him, saying, “I need to be baptized by you, and do you come to me?” But Jesus answered him, “Let it be so now; for thus it is fitting for us to fulfil all righteousness.” Then he consented. And when Jesus was baptized, he went up immediately from the water, and behold, the heavens were opened and he saw the Spirit of God descending like a dove, and alighting on him; and lo, a voice from heaven, saying, “This is my beloved Son, with whom I am well pleased.”"},
-            {name: "The Wedding Feast at Cana", scripture: "John 2:1-11\n\nOn the third day there was a marriage at Cana in Galilee, and the mother of Jesus was there; Jesus also was invited to the marriage, with his disciples. When the wine gave out, the mother of Jesus said to him, “They have no wine.” And Jesus said to her, “O woman, what have you to do with me? My hour has not yet come.” His mother said to the servants, “Do whatever he tells you.” Now there were six stone jars standing there, for the Jewish rites of purification, each holding twenty or thirty gallons. Jesus said to them, “Fill the jars with water.” And they filled them up to the brim. He said to them, “Now draw some out, and take it to the steward of the feast.” So they took it. When the steward of the feast tasted the water now become wine, and did not know where it came from (though the servants who had drawn the water knew), the steward of the feast called the bridegroom and said to him, “Every man serves the good wine first; and when men have drunk freely, then the poor wine; but you have kept the good wine until now.” This, the first of his signs, Jesus did at Cana in Galilee, and manifested his glory; and his disciples believed in him."},
-            {name: "Jesus' Proclamation of the Kingdom of God", scripture: "Matthew 5:1-12\n\nSeeing the crowds, he went up on the mountain, and when he sat down his disciples came to him. And he opened his mouth and taught them, saying: “Blessed are the poor in spirit, for theirs is the kingdom of heaven. Blessed are those who mourn, for they shall be comforted. Blessed are the meek, for they shall inherit the earth. Blessed are those who hunger and thirst for righteousness, for they shall be satisfied. Blessed are the merciful, for they shall obtain mercy. Blessed are the pure in heart, for they shall see God. Blessed are the peacemakers, for they shall be called sons of God. Blessed are those who are persecuted for righteousness’ sake, for theirs is the kingdom of heaven. Blessed are you when men revile you and persecute you and utter all kinds of evil against you falsely on my account. Rejoice and be glad, for your reward is great in heaven, for so men persecuted the prophets who were before you.”"},
-            {name: "The Transfiguration", scripture: "Matthew 17:1-9\n\nAnd after six days Jesus took with him Peter and James and John his brother, and led them up a high mountain apart. And he was transfigured before them, and his face shone like the sun, and his garments became white as light. And behold, there appeared to them Moses and Elijah, talking with him. And Peter said to Jesus, “Lord, it is well that we are here; if you wish, I will make three booths here, one for you and one for Moses and one for Elijah.” He was still speaking, when lo, a bright cloud overshadowed them, and a voice from the cloud said, “This is my beloved Son, with whom I am well pleased; listen to him.” When the disciples heard this, they fell on their faces, and were filled with awe. But Jesus came and touched them, saying, “Rise, and have no fear.” And when they lifted up their eyes, they saw no one but Jesus only. And as they were coming down the mountain, Jesus commanded them, “Tell no one the vision, until the Son of man is raised from the dead.”"},
-            {name: "The Institution of the Eucharist", scripture: "Luke 22:14-20\n\nAnd when the hour came, he sat at table, and the apostles with him. And he said to them, “I have earnestly desired to eat this passover with you before I suffer; for I tell you I shall not eat it until it is fulfilled in the kingdom of God.” And he took a cup, and when he had given thanks he said, “Take this, and divide it among yourselves; for I tell you that from now on I shall not drink of the fruit of the vine until the kingdom of God comes.” And he took bread, and when he had given thanks he broke it and gave it to them, saying, “This is my body which is given for you. Do this in remembrance of me.” And likewise the cup after supper, saying, “This cup which is poured out for you is the new covenant in my blood.”"}
-        ];
-
-        // Global rosary states
-    let rosaryStates = {};
-
-    function ordinal(n) {
-        const ord = ['First', 'Second', 'Third', 'Fourth', 'Fifth'];
-        return ord[n - 1];
-    }
-
-    function startRosary(type) {
-        let mysteries;
-        let sectionId = type.toLowerCase() + '-rosary';
-        let displayId = type.toLowerCase() + '-display';
-        switch (type) {
-            case 'Joyful': mysteries = joyfulMysteries; break;
-            case 'Sorrowful': mysteries = sorrowfulMysteries; break;
-            case 'Glorious': mysteries = gloriousMysteries; break;
-            case 'Luminous': mysteries = luminousMysteries; break;
-        }
-        showSection(sectionId);
-
-        let sequence = [];
-        sequence.push({type: 'prayer', name: 'Sign of the Cross', text: signOfCross});
-        sequence.push({type: 'prayer', name: 'Apostles\' Creed', text: apostlesCreed});
-        sequence.push({type: 'prayer', name: 'Our Father', text: ourFather});
-        for (let i = 0; i < 3; i++) sequence.push({type: 'prayer', name: 'Hail Mary', text: hailMary, count: i + 1, total: 3});
-        sequence.push({type: 'prayer', name: 'Glory Be', text: gloryBe});
-        for (let m = 0; m < 5; m++) {
-            sequence.push({type: 'mystery', name: `${ordinal(m + 1)} ${type} Mystery: ${mysteries[m].name}`, scripture: mysteries[m].scripture});
-            sequence.push({type: 'prayer', name: 'Our Father', text: ourFather});
-            for (let i = 0; i < 10; i++) sequence.push({type: 'prayer', name: 'Hail Mary', text: hailMary, count: i + 1, total: 10});
-            sequence.push({type: 'prayer', name: 'Glory Be', text: gloryBe});
-            sequence.push({type: 'prayer', name: 'Fatima Prayer', text: fatima});
-        }
-        sequence.push({type: 'prayer', name: 'Hail Holy Queen', text: hailholyqueen});
-
-        rosaryStates[type.toLowerCase()] = {sequence: sequence, index: 0, displayId: displayId};
-        displayCurrentPrayer(type.toLowerCase());
-    }
-
-    function nextPrayer(type) {
-        let state = rosaryStates[type];
-        if (!state) return;
-        state.index++;
-        if (state.index >= state.sequence.length) {
-            document.getElementById(state.displayId).innerHTML = '<p>Rosary Completed. Amen.</p>';
-            return;
-        }
-        displayCurrentPrayer(type);
-    }
-
-    function displayCurrentPrayer(type) {
-        let state = rosaryStates[type];
-        let item = state.sequence[state.index];
-        let html = '';
-        if (item.type === 'mystery') {
-            html = `<h3>${item.name}</h3><pre>${item.scripture}</pre>`;
-        } else {
-            let prayerName = item.name;
-            if (item.count) {
-                prayerName += ` (${item.count}/${item.total})`;
-            }
-            html = `<h3>${prayerName}</h3><pre>${item.text}</pre>`;
-        }
-        document.getElementById(state.displayId).innerHTML = html;
-    }
-</script>
-
-    <section id="prayers" class="hidden">
-        <h2 id="prayer-title">Common Catholic Prayers</h2>
-        <ul id="prayers-list">
-            <li><button onclick="showPrayer('Sign of the Cross')">Sign of the Cross</button></li>
-            <li><button onclick="showPrayer('Our Father')">Our Father</button></li>
-            <li><button onclick="showPrayer('Hail Mary')">Hail Mary</button></li>
-            <li><button onclick="showPrayer('Glory Be')">Glory Be</button></li>
-            <li><button onclick="showPrayer('Apostles\' Creed')">Apostles' Creed</button></li>
-            <li><button onclick="showPrayer('Nicene Creed')">Nicene Creed</button></li>
-            <li><button onclick="showPrayer('Act of Contrition')">Act of Contrition</button></li>
-            <li><button onclick="showPrayer('Hail Holy Queen')">Hail Holy Queen</button></li>
-            <li><button onclick="showPrayer('Memorare')">Memorare</button></li>
-            <li><button onclick="showPrayer('Angelus')">Angelus</button></li>
-            <li><button onclick="showPrayer('Prayer to St. Michael')">Prayer to St. Michael</button></li>
-            <li><button onclick="showPrayer('Anima Christi')">Anima Christi</button></li>
-            <li><button onclick="showPrayer('Guardian Angel Prayer')">Guardian Angel Prayer</button></li>
-            <li><button onclick="showPrayer('Grace Before Meals')">Grace Before Meals</button></li>
-            <li><button onclick="showPrayer('Grace After Meals')">Grace After Meals</button></li>
-            <li><button onclick="showPrayer('Morning Offering')">Morning Offering</button></li>
-            <li><button onclick="showPrayer('Act of Faith')">Act of Faith</button></li>
-            <li><button onclick="showPrayer('Act of Hope')">Act of Hope</button></li>
-            <li><button onclick="showPrayer('Act of Love')">Act of Love</button></li>
-            <li><button onclick="showPrayer('Fatima Prayer')">Fatima Prayer</button></li>
-            <li><button onclick="showPrayer('Come Holy Spirit')">Come Holy Spirit</button></li>
-            <li><button onclick="showPrayer('Eternal Rest')">Eternal Rest</button></li>
-            <li><button onclick="showPrayer('Divine Praises')">Divine Praises</button></li>
-            <li><button onclick="showPrayer('Confiteor')">Confiteor</button></li>
-        </ul>
-        <pre id="prayer-text" class="hidden"></pre>
-        <button onclick="resetPrayer()">Back to List</button>
-        <button onclick="showSection('spiritual')">Back to Spiritual Menu</button>
-    </section>
-
-    <script>
-        const lessonsData = [
-            {
-                title: "Introduction to OCIA — Rites & Periods + Introduction to Prayer",
-                content: `<p>The Order of Christian Initiation of Adults (OCIA) is the process for adults to enter the Catholic Church. It includes periods like Inquiry, Catechumenate, Purification and Enlightenment (Lent), and Mystagogy. Rites include Acceptance, Scrutinies, and Initiation at Easter Vigil. Introduction to Prayer: Prayer is conversation with God, essential for faith growth (Compendium CCC 535-586).</p>
-<p>Key points from Compendium: All the faithful are called to Christian holiness through union with Christ and the sacraments.</p>
-<p>Relevant Questions: 251-294, 428, 534-536</p>
-<p>Excerpt: "Christian initiation is accomplished by means of the sacraments which establish the foundations of Christian life." (Q251)</p>
-<div class="video-placeholder">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/3vuYCjfO_w4?si=QdqxR9_yz2tyZ98Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div><p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-                    {
-    question: "What is prayer according to the Compendium of the Catechism of the Catholic Church?",
-    options: ["Raising one's mind and heart to God", "A set of rituals", "Only vocal recitation"],
-    correct: 0
-  },
-  {
-    question: "Which of the following is NOT one of the traditional expressions of Christian prayer?",
-    options: ["Contemplative", "Meditative", "Poetic", "Vocal"],
-    correct: 2
-  },
-  {
-    question: "What is the primary goal of the Order of Christian Initiation of Adults (OCIA)?",
-    options: ["To study theology academically", "To prepare adults to receive the sacraments of initiation", "To become lay ministers"],
-    correct: 1
-  },
-  {
-    question: "When is the Rite of Election typically celebrated?",
-    options: ["On Easter Sunday", "At the beginning of Lent", "On Pentecost"],
-    correct: 1
-  },
-  {
-    question: "What are the three major expressions of prayer in the Christian tradition?",
-    options: ["Adoration, Confession, Petition", "Vocal, Meditative, Contemplative", "Praise, Worship, Thanksgiving"],
-    correct: 1
-  },
-  {
-    question: "Who is the model and teacher of prayer in the Gospels?",
-    options: ["St. Paul", "The Apostles", "Jesus Christ"],
-    correct: 2
-  },
-  {
-    question: "What is the 'Our Father' often called in Christian prayer?",
-    options: ["The Lord’s Prayer", "The Apostle’s Creed", "The Morning Offering"],
-    correct: 0
-  },
-  {
-    question: "Which part of the OCIA process is marked by deeper spiritual formation and catechesis?",
-    options: ["Purification and Enlightenment", "Mystagogy", "Catechumenate"],
-    correct: 2
-  },
-  {
-    question: "According to the Catechism, prayer is a ___________ with God.",
-    options: ["Monologue", "Conversation", "Contemplation"],
-    correct: 1
-  },
-  {
-    question: "What does the period of Mystagogy focus on?",
-    options: ["Introducing catechumens to Scripture", "Post-baptismal catechesis and integration into the Church", "Learning about different religions"],
-    correct: 1
-  }
-                ]
-            },
-            {
-                title: "Salvation History & The Kerygma",
-                content: `<p>Salvation History is God's plan to save humanity from sin, unfolding through the Bible from Creation to Christ. The Kerygma is the proclamation: God created us for relationship, sin broke it, Jesus restores through death and resurrection, respond in faith (Compendium CCC 7-10, 50-67).</p>
-<p>Key points from Compendium: All the Old Covenant prefigurations find their fulfillment in Jesus Christ.</p>
-<p>Relevant Questions: 6-9, 79-80, 126, 436-437, 536-537</p>
-<p>Excerpt: "The full and definitive stage of God’s revelation is accomplished in his Word made flesh, Jesus Christ." (Q9)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/IuQm6PxKW44?si=5JAv3NueBDtlDmDs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-                    {
-    question: "What is the Kerygma?",
-    options: ["The moral code of the Church", "The core proclamation of the Gospel", "The list of doctrines from the Council of Trent"],
-    correct: 1
-  },
-  {
-    question: "Which event marks the beginning of salvation history?",
-    options: ["The Exodus", "The Fall of Adam and Eve", "The Creation of the world"],
-    correct: 2
-  },
-  {
-    question: "What is the climax of salvation history?",
-    options: ["The giving of the Ten Commandments", "The birth of the Church", "The life, death, and resurrection of Jesus Christ"],
-    correct: 2
-  },
-  {
-    question: "What was the purpose of God’s covenants with Noah, Abraham, Moses, and David?",
-    options: ["To increase the population", "To prepare humanity for the Messiah", "To abolish sin completely"],
-    correct: 1
-  },
-  {
-    question: "Which statement best summarizes the first proclamation of the Kerygma?",
-    options: ["God loves you and has a plan for your life", "You must obey all the rules", "The Church is infallible"],
-    correct: 0
-  },
-  {
-    question: "What did humanity lose in the Fall (Genesis 3)?",
-    options: ["Free will", "The knowledge of good and evil", "Original holiness and original justice"],
-    correct: 2
-  },
-  {
-    question: "Who fulfills all the promises of the Old Covenant?",
-    options: ["Moses", "Jesus Christ", "King Solomon"],
-    correct: 1
-  },
-  {
-    question: "What does God reveal through salvation history?",
-    options: ["The rules of society", "The process of evolution", "His loving plan to save humanity"],
-    correct: 2
-  },
-  {
-    question: "What must our response be to the Kerygma?",
-    options: ["Be amazed and keep it private", "Repent, believe in the Gospel, and be baptized", "Discuss it philosophically"],
-    correct: 1
-  },
-  {
-    question: "Why is Pentecost important in the story of salvation?",
-    options: ["It marks the end of the Old Testament", "It is when Jesus ascended", "It is the birth of the Church and the outpouring of the Holy Spirit"],
-    correct: 2
-  }
-                ]
-            },
-            {
-                title: "Revelation — Scripture, Tradition",
-                content: `<p>Divine Revelation is transmitted through Scripture and Tradition, both flowing from the same divine well-spring.</p>
-<p>Key points from Compendium: Tradition and Sacred Scripture are bound closely together.</p>
-<p>Relevant Questions: 11-17, 18-24, 430, 438</p>
-<p>Excerpt: "Tradition and Sacred Scripture are bound closely together and communicate one with the other." (Q14)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/lCuyyYSMlxQ?si=ljzG4cY7d2kVjehG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-                    {
-    question: "What is Divine Revelation?",
-    options: ["Human reasoning about God", "God’s free self-communication to humanity", "A collection of religious texts"],
-    correct: 1
-  },
-  {
-    question: "Through what two sources is Divine Revelation transmitted?",
-    options: ["Scripture and reason", "Tradition and Church law", "Sacred Scripture and Sacred Tradition"],
-    correct: 2
-  },
-  {
-    question: "Who is the fullness and finality of God's Revelation?",
-    options: ["Moses", "St. Paul", "Jesus Christ"],
-    correct: 2
-  },
-  {
-    question: "What is Sacred Scripture?",
-    options: ["Church documents", "The inspired Word of God in written form", "Writings of the saints"],
-    correct: 1
-  },
-  {
-    question: "What is Sacred Tradition?",
-    options: ["Optional Church practices", "The oral transmission of the Gospel and teachings of Christ", "New revelations from saints"],
-    correct: 1
-  },
-  {
-    question: "Who has the responsibility of interpreting the Word of God authentically?",
-    options: ["All the baptized", "Theologians", "The Magisterium of the Church"],
-    correct: 2
-  },
-  {
-    question: "What is the Magisterium?",
-    options: ["The teaching authority of the Church", "A book of canon law", "A council of laypeople"],
-    correct: 0
-  },
-  {
-    question: "How is the Bible inspired?",
-    options: ["It contains poetic truths", "It was dictated by angels", "It was written by human authors under the guidance of the Holy Spirit"],
-    correct: 2
-  },
-  {
-    question: "Which statement best describes the relationship between Scripture and Tradition?",
-    options: ["Tradition overrides Scripture", "They are two separate revelations", "They are closely connected and flow from the same divine wellspring"],
-    correct: 2
-  },
-  {
-    question: "Why is it important to read Scripture within the living Tradition of the Church?",
-    options: ["So we can critique it objectively", "To gain historical knowledge only", "To understand it as God intended, in unity with the faith community"],
-    correct: 2
-  }
-                ]
-            },
-            {
-                title: "The Creed",
-                content: `<p>The Creed summarizes the Christian faith, professing belief in God, Jesus, the Holy Spirit, the Church, and eternal life.</p>
-<p>Key points from Compendium: The Creed expresses our confident 'yes' to faith.</p>
-<p>Relevant Questions: 194-217, 442</p>
-<p>Excerpt: "The Hebrew word 'Amen'... expresses our confident and total 'yes' to what we professed in the Creed." (Q217)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/aBaiMWrX9v4?si=J8z6Z6a6jMHeja_R" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#The%20Profession%20of%20the%20Christian%20Faith" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the purpose of the Creed in the life of a Christian?",
-    options: ["To summarize the teachings of the Apostles", "To replace Scripture", "To serve as a personal mission statement"],
-    correct: 0
-  },
-  {
-    question: "Which Creed is most commonly recited at Sunday Mass?",
-    options: ["Apostles’ Creed", "Nicene Creed", "Athanasian Creed"],
-    correct: 1
-  },
-  {
-    question: "What does the word 'creed' mean?",
-    options: ["Law", "Worship", "I believe"],
-    correct: 2
-  },
-  {
-    question: "Which phrase in the Creed affirms belief in Jesus’ divinity?",
-    options: ["Born of the Virgin Mary", "He suffered under Pontius Pilate", "True God from true God, begotten, not made"],
-    correct: 2
-  },
-  {
-    question: "What do we profess about the Church in the Nicene Creed?",
-    options: ["It is democratic and diverse", "It is one, holy, catholic, and apostolic", "It is governed by the local community"],
-    correct: 1
-  },
-  {
-    question: "What is the significance of 'consubstantial with the Father'?",
-    options: ["Jesus is similar to God", "Jesus is a prophet of the Father", "Jesus is of the same divine nature as the Father"],
-    correct: 2
-  },
-  {
-    question: "What do we mean when we profess belief in the 'resurrection of the body'?",
-    options: ["That we will reincarnate", "That our souls will live forever without bodies", "That we will rise again bodily at the end of time"],
-    correct: 2
-  },
-  {
-    question: "What is affirmed by the phrase 'He will come again in glory to judge the living and the dead'?",
-    options: ["The general resurrection", "The second coming of Christ and the final judgment", "The creation of heaven"],
-    correct: 1
-  },
-  {
-    question: "When did the Church formally define the Nicene Creed?",
-    options: ["Council of Jerusalem", "Council of Nicaea (325) and Constantinople (381)", "Vatican II"],
-    correct: 1
-  },
-  {
-    question: "Why do catechumens learn the Creed before baptism?",
-    options: ["To pass a test", "To know Church history", "To personally profess and accept the faith of the Church"],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "God & the Blessed Trinity",
-                content: `<p>God is one in three Persons: Father, Son, and Holy Spirit.</p>
-<p>Key points from Compendium: Grace makes us participants in Trinitarian life.</p>
-<p>Relevant Questions: 36-43, 423, 428</p>
-<p>Excerpt: "That grace is the gratuitous gift that God gives us to make us participants in his trinitarian life." (Q423)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/opiqPLaOoO0?si=jqnYpIeTTf712rSS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20God%20the%20Father" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the central mystery of the Christian faith?",
-    options: ["The Incarnation", "The Trinity", "The Resurrection"],
-    correct: 1
-  },
-  {
-    question: "How many persons are there in one God?",
-    options: ["One", "Two", "Three"],
-    correct: 2
-  },
-  {
-    question: "Who are the three Persons of the Holy Trinity?",
-    options: ["Father, Son, and Spirit of Truth", "Jesus, Mary, and Joseph", "Father, Son, and Holy Spirit"],
-    correct: 2
-  },
-  {
-    question: "Which of the following best describes the relationship of the Persons of the Trinity?",
-    options: ["Three separate gods", "Three modes of one God", "One God in three distinct but equal Persons"],
-    correct: 2
-  },
-  {
-    question: "Which Person of the Trinity became incarnate?",
-    options: ["The Father", "The Son", "The Holy Spirit"],
-    correct: 1
-  },
-  {
-    question: "What does the term 'consubstantial' mean in reference to the Trinity?",
-    options: ["They share similar attributes", "They are united in purpose", "They are of the same divine substance"],
-    correct: 2
-  },
-  {
-    question: "What role is traditionally attributed to the Holy Spirit in the life of the Church?",
-    options: ["Redeemer", "Sanctifier", "Creator"],
-    correct: 1
-  },
-  {
-    question: "Which creed explicitly affirms the doctrine of the Trinity?",
-    options: ["Apostles’ Creed", "Nicene Creed", "Athanasian Creed"],
-    correct: 2
-  },
-  {
-    question: "According to the Catechism, why did God reveal Himself as Trinity?",
-    options: ["To explain divine logic", "To help us understand the Incarnation", "To draw us into communion with Himself"],
-    correct: 2
-  },
-  {
-    question: "What does it mean to say the Trinity is a 'communion of Persons'?",
-    options: ["They communicate often", "They exist in perfect self-giving love and unity", "They rule the Church together"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Creation & Humanity",
-                content: `<p>God created the world out of nothing, and humanity in His image and likeness.</p>
-<p>Key points from Compendium: God created everything for His glory and our good.</p>
-<p>Relevant Questions: 51-67</p>
-<p>Excerpt: "God freely created the universe from nothing." (Q53)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/-dS_V_gXPvk?si=HTcGT07RN0k3xGFY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P19.HTM" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What does the Church teach about the origin of the world?",
-    options: ["It happened by random chance", "It was created by God out of nothing", "It has always existed"],
-    correct: 1
-  },
-  {
-    question: "What does it mean that humans are made in the 'image and likeness of God'?",
-    options: ["They physically resemble God", "They share in God's reason, freedom, and capacity for love", "They are divine beings"],
-    correct: 1
-  },
-  {
-    question: "What is the soul?",
-    options: ["The emotional part of a person", "A temporary life-force", "The spiritual, immortal part of a human being"],
-    correct: 2
-  },
-  {
-    question: "What is Original Sin?",
-    options: ["The first murder in Scripture", "Adam and Eve’s disobedience to God", "The worship of false gods"],
-    correct: 1
-  },
-  {
-    question: "What were the consequences of Original Sin?",
-    options: ["Loss of original holiness, suffering, and death", "Increased intelligence", "Becoming like angels"],
-    correct: 0
-  },
-  {
-    question: "What is the Church’s teaching on the unity of the human race?",
-    options: ["Different races were created separately", "All people descend from one set of first parents", "Only some groups are chosen by God"],
-    correct: 1
-  },
-  {
-    question: "What role do humans have in creation?",
-    options: ["To dominate and destroy it", "To ignore it and focus only on heaven", "To be stewards and caretakers of God's creation"],
-    correct: 2
-  },
-  {
-    question: "What is the purpose of human life according to the Church?",
-    options: ["To seek pleasure and comfort", "To know, love, and serve God in this life and be happy with Him forever in the next", "To improve human evolution"],
-    correct: 1
-  },
-  {
-    question: "What is the destiny of the human body?",
-    options: ["It will decay and disappear forever", "It is meaningless", "It will rise again at the end of time"],
-    correct: 2
-  },
-  {
-    question: "Why did God create humanity?",
-    options: ["To entertain Him", "To fulfill a cosmic necessity", "Out of love, to share His divine life with us"],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Jesus Christ, Incarnation & Public Ministry",
-                content: `<p>Jesus is the Son of God made flesh, who taught, healed, and proclaimed the Kingdom during His public life.</p>
-<p>Key points from Compendium: The Incarnation means the Son of God became man.</p>
-<p>Relevant Questions: 85-100</p>
-<p>Excerpt: "The word 'Incarnation' means that the Son of God assumed human nature." (Q86)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/xphsJLRF9v8?si=wJZ2g75m15Q-BJUi" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20Jesus%20Christ,%20the%20Only%20Son%20of%20God"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the Incarnation?",
-    options: ["God pretending to be human", "Jesus becoming an angel", "The Son of God becoming truly man while remaining truly God"],
-    correct: 2
-  },
-  {
-    question: "Who is Jesus Christ?",
-    options: ["A great moral teacher", "True God and true man, the second Person of the Trinity", "A prophet only"],
-    correct: 1
-  },
-  {
-    question: "What event marks the beginning of Jesus' public ministry?",
-    options: ["His birth in Bethlehem", "His baptism in the Jordan by John the Baptist", "The Sermon on the Mount"],
-    correct: 1
-  },
-  {
-    question: "What did Jesus proclaim during His public ministry?",
-    options: ["A new legal code", "A political revolution", "The Kingdom of God"],
-    correct: 2
-  },
-  {
-    question: "What are the signs of the Kingdom of God in Jesus’ ministry?",
-    options: ["Political power and wealth", "Miracles, healings, and forgiveness of sins", "Temple sacrifices"],
-    correct: 1
-  },
-  {
-    question: "Why did the Son of God become man?",
-    options: ["To show off divine power", "To condemn sinners", "To save us by reconciling us with God and to reveal God’s love"],
-    correct: 2
-  },
-  {
-    question: "What do the miracles of Jesus demonstrate?",
-    options: ["His magical powers", "His compassion and divine authority", "His rivalry with other teachers"],
-    correct: 1
-  },
-  {
-    question: "How did Jesus teach about the Kingdom of God?",
-    options: ["Through commandments only", "Only in the synagogue", "Through parables, actions, and personal example"],
-    correct: 2
-  },
-  {
-    question: "What title did Jesus most often use to refer to Himself?",
-    options: ["Messiah", "Son of God", "Son of Man"],
-    correct: 2
-  },
-  {
-    question: "What is the significance of the Transfiguration?",
-    options: ["Jesus became invisible", "Jesus revealed His divine glory to Peter, James, and John", "Jesus taught His first parable"],
-    correct: 1
-  }
-]
-
-            },
-            {
-                title: "The Paschal Mystery",
-                content: `<p>The Paschal Mystery is Christ's passion, death, resurrection, and ascension.</p>
-<p>Key points from Compendium: The Paschal Mystery is central to salvation.</p>
-<p>Relevant Questions: 106-126</p>
-<p>Excerpt: "The Paschal Mystery of Jesus... is the work of our redemption." (Q106)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/Psg7PokhH6c?si=3fOAlx4EZbrj2Igv" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P1M.HTM"_blank">CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the Paschal Mystery?",
-    options: ["A puzzle in the Bible", "The life of Jesus as a teacher", "The Passion, Death, Resurrection, and Ascension of Jesus",
-    ],
-    correct: 2
-  },
-  {
-    question: "Why did Jesus freely suffer and die on the Cross?",
-    options: ["To prove His strength", "To defeat political enemies", "To save humanity from sin and death"],
-    correct: 2
-  },
-  {
-    question: "What is the significance of the Resurrection?",
-    options: ["It shows Jesus escaped death temporarily", "It proves Jesus is divine and offers eternal life", "It symbolizes good triumphing over evil"],
-    correct: 1
-  },
-  {
-    question: "What event does the Church celebrate on Good Friday?",
-    options: ["The Last Supper", "The Crucifixion and death of Jesus", "The Resurrection"],
-    correct: 1
-  },
-  {
-    question: "What happened at the Last Supper?",
-    options: ["Jesus washed the Apostles' feet", "Jesus instituted the Eucharist and the priesthood", "Jesus wrote the Gospels"],
-    correct: 1
-  },
-  {
-    question: "What is the Ascension?",
-    options: ["Jesus rising from the dead", "Jesus appearing in the tomb", "Jesus being taken up into Heaven in glory"],
-    correct: 2
-  },
-  {
-    question: "How does the Paschal Mystery relate to the sacraments?",
-    options: ["It is only symbolized at Easter", "It is re-presented and made present in the sacraments, especially the Eucharist", "It is remembered only in prayer"],
-    correct: 1
-  },
-  {
-    question: "What is the significance of Jesus’ suffering being 'freely accepted'?",
-    options: ["It fulfilled an ancient prophecy", "It shows that love requires suffering", "It reveals God's perfect love and obedience"],
-    correct: 2
-  },
-  {
-    question: "When is the Paschal Mystery most fully celebrated in the Church year?",
-    options: ["Advent", "Lent", "The Easter Triduum"],
-    correct: 2
-  },
-  {
-    question: "What do Christians hope for through participation in the Paschal Mystery?",
-    options: ["Material blessings", "Political success", "Eternal life with God"],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Holy Spirit & The Church",
-                content: `<p>The Holy Spirit animates the Church, which is the Body of Christ.</p>
-<p>Key points from Compendium: At Pentecost, the Holy Spirit descended on the apostles.</p>
-<p>Relevant Questions: 127-184</p>
-<p>Excerpt: "What happened at Pentecost? The Holy Spirit descended upon the Apostles." (Q144)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/gc9cQdiU9Fs?si=XnyGr4vHMl2bo-1J" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20the%20Holy%20Spirit"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "Who is the Holy Spirit?",
-    options: ["A force of nature", "The third Person of the Holy Trinity", "An angel sent from heaven"],
-    correct: 1
-  },
-  {
-    question: "When was the Holy Spirit sent to the Church in a special way?",
-    options: ["On Holy Thursday", "At the Ascension", "At Pentecost"],
-    correct: 2
-  },
-  {
-    question: "What are the symbols of the Holy Spirit used in Scripture?",
-    options: ["Dove, wind, fire", "Water, sword, lightning", "Star, cloud, eagle"],
-    correct: 0
-  },
-  {
-    question: "What is the role of the Holy Spirit in the Church?",
-    options: ["To replace Jesus", "To animate and guide the Church", "To create laws for the Church"],
-    correct: 1
-  },
-  {
-    question: "What is the Church?",
-    options: ["A human organization", "A community of people who like Jesus", "The People of God, the Body of Christ, and Temple of the Holy Spirit"],
-    correct: 2
-  },
-  {
-    question: "What happened at Pentecost?",
-    options: ["Jesus rose from the dead", "The Apostles received the Holy Spirit and began preaching boldly", "The disciples fled from Jerusalem"],
-    correct: 1
-  },
-  {
-    question: "What is the mission of the Church?",
-    options: ["To preserve ancient traditions", "To entertain the faithful", "To proclaim the Gospel and make disciples of all nations"],
-    correct: 2
-  },
-  {
-    question: "Who is the visible head of the Church on earth?",
-    options: ["The Holy Spirit", "The Pope", "The Bible"],
-    correct: 1
-  },
-  {
-    question: "How is the Church one, holy, catholic, and apostolic?",
-    options: ["By its ancient buildings", "By its legal system", "Through its unity, sanctity, universality, and apostolic foundation"],
-    correct: 2
-  },
-  {
-    question: "How do Christians receive the Holy Spirit today?",
-    options: ["Through nature and good works", "Only through private prayer", "Primarily through the sacraments, especially Baptism and Confirmation"],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Four Marks of the Church",
-                content: `<p>The Church is one, holy, catholic, and apostolic.</p>
-<p>Key points from Compendium: These marks characterize the true Church.</p>
-<p>Relevant Questions: 161-171</p>
-<p>Excerpt: "The Church is one, holy, catholic, and apostolic." (Q161)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/ObkAsmTwCpI?si=IZYWCWmqWriLNUIR" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20the%20Holy%20Spirit"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What are the Four Marks of the Church as stated in the Nicene Creed?",
-    options: ["One, Universal, Apostolic, Christian", "Holy, Catholic, Apostolic, Global", "One, Holy, Catholic, and Apostolic"],
-    correct: 2
-  },
-  {
-    question: "What does it mean that the Church is 'One'?",
-    options: ["There is one church building in every town", "It is united in faith, worship, and leadership", "It only speaks one language"],
-    correct: 1
-  },
-  {
-    question: "Why is the Church called 'Holy'?",
-    options: ["Because all its members are perfect", "Because it was founded by Christ and filled with the Holy Spirit", "Because it has ancient customs"],
-    correct: 1
-  },
-  {
-    question: "What does 'Catholic' mean in the Four Marks?",
-    options: ["Roman", "Universal — for all people, in all times, in all places", "Hierarchical"],
-    correct: 1
-  },
-  {
-    question: "What does it mean that the Church is 'Apostolic'?",
-    options: ["It follows the teachings of Church councils", "It is led by bishops who succeed the Apostles", "It uses ancient apostolic languages"],
-    correct: 1
-  },
-  {
-    question: "How does the Church preserve its unity?",
-    options: ["Through Scripture alone", "Through the Pope and bishops in communion with him", "By limiting diversity"],
-    correct: 1
-  },
-  {
-    question: "How does the Church remain holy despite the sinfulness of its members?",
-    options: ["By removing all sinners", "Because holiness comes from Christ and the sacraments", "Through public penance only"],
-    correct: 1
-  },
-  {
-    question: "What role do the sacraments play in the holiness of the Church?",
-    options: ["They are optional rites", "They are social celebrations", "They are means of grace that sanctify the faithful"],
-    correct: 2
-  },
-  {
-    question: "How is the Church's catholicity expressed?",
-    options: ["By being centered in Rome", "By embracing all cultures and proclaiming the fullness of truth to all", "By maintaining Latin as its official language"],
-    correct: 1
-  },
-  {
-    question: "Why is apostolic succession important?",
-    options: ["It gives the Church historical credibility", "It ensures continuity of teaching and sacramental authority from the Apostles", "It proves the Church is old"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Christ’s Faithful – Hierarchy, Laity, Consecrated",
-                content: `<p>The faithful include the hierarchy (bishops, priests), laity, and consecrated life.</p>
-<p>Key points from Compendium: The bishops proclaim the Gospel authoritatively.</p>
-<p>Relevant Questions: 172-184</p>
-<p>Excerpt: "The bishops in union with the Pope have the duty of proclaiming the Gospel." (Q184)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/0I9fwEsNClM?si=zqQDOjJbAETENehQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20the%20Holy%20Spirit"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "Who are 'Christ’s faithful' in the Church?",
-    options: ["Only priests and religious", "Only baptized Catholics who go to Mass daily", "All the baptized who are united to Christ"],
-    correct: 2
-  },
-  {
-    question: "What is the role of the hierarchy in the Church?",
-    options: ["To govern and serve the People of God through teaching, sanctifying, and leading", "To replace lay participation", "To run the Church’s finances"],
-    correct: 0
-  },
-  {
-    question: "Who makes up the hierarchy of the Church?",
-    options: ["Theologians and catechists", "Pope, bishops, priests, and deacons", "All ordained and lay ministers"],
-    correct: 1
-  },
-  {
-    question: "What is apostolic succession?",
-    options: ["The way the Pope is elected", "The handing on of Church property", "The unbroken line of bishops going back to the Apostles"],
-    correct: 2
-  },
-  {
-    question: "What is the common priesthood of the faithful?",
-    options: ["An honorary title for Church workers", "The baptized sharing in Christ’s mission through their lives and actions", "Reserved for priests only"],
-    correct: 1
-  },
-  {
-    question: "What distinguishes the ministerial priesthood from the common priesthood?",
-    options: ["Priests are more holy", "The ministerial priesthood is received through the Sacrament of Holy Orders to serve the faithful", "It allows lay people to vote in Church councils"],
-    correct: 1
-  },
-  {
-    question: "What is the mission of the laity in the Church?",
-    options: ["To pray privately only", "To support clergy financially", "To sanctify the world by living the Gospel in family, work, and society"],
-    correct: 2
-  },
-  {
-    question: "What is the role of a bishop?",
-    options: ["To lead a parish community", "To govern a diocese, teach the faith, and administer sacraments", "To supervise liturgical music"],
-    correct: 1
-  },
-  {
-    question: "Who is the visible head of the universal Church?",
-    options: ["The College of Cardinals", "The Holy Spirit", "The Pope, successor of St. Peter"],
-    correct: 2
-  },
-  {
-    question: "How do the laity participate in the Church’s mission?",
-    options: ["By becoming clergy", "Through their witness in the world and works of charity, prayer, and evangelization", "By joining monastic communities"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Communion of the Saints & The Blessed Virgin Mary",
-                content: `<p>The communion of saints is the unity of all believers, living and dead. Mary is the Mother of God and the Church.</p>
-<p>Key points from Compendium: The communion of saints includes the faithful on earth, in purgatory, and in heaven.</p>
-<p>Relevant Questions: 194-202</p>
-<p>Excerpt: "The communion of saints is the communion which exists between the members of the Church." (Q194)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/uDY1h_RBNp0?si=XJj0BCJyKOYxJ5jN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P2B.HTM"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the 'Communion of Saints'?",
-    options: ["A feast day for holy people", "A group of canonized saints", "The spiritual union of all members of the Church — on earth, in purgatory, and in heaven"],
-    correct: 2
-  },
-  {
-    question: "Why is Mary called the 'Mother of God'?",
-    options: ["She is divine herself", "She is the mother of Jesus, who is truly God and truly man", "It is a symbolic title"],
-    correct: 1
-  },
-  {
-    question: "What is the Assumption of Mary?",
-    options: ["Her spiritual union with Jesus", "Her entrance into religious life", "Her being taken body and soul into heaven at the end of her earthly life"],
-    correct: 2
-  },
-  {
-    question: "What does the Immaculate Conception refer to?",
-    options: ["Mary conceiving Jesus", "Mary being conceived without Original Sin", "Jesus rising from the dead"],
-    correct: 1
-  },
-  {
-    question: "What is the role of the saints in the life of the Church?",
-    options: ["To replace Christ", "To serve as models of holiness and intercessors for the faithful", "To write Church documents"],
-    correct: 1
-  },
-  {
-    question: "Why do Catholics pray for the dead?",
-    options: ["To comfort the living", "To help the souls in purgatory be purified and enter heaven", "Because it is a cultural tradition"],
-    correct: 1
-  },
-  {
-    question: "Why do Catholics ask Mary and the saints for intercession?",
-    options: ["Because we cannot pray directly to God", "Because they are closer to God and can pray with us and for us", "To worship them as divine"],
-    correct: 1
-  },
-  {
-    question: "What does it mean to venerate Mary?",
-    options: ["To adore her as God", "To honor her uniquely as the Mother of God, but not worship her", "To view her as equal to the Trinity"],
-    correct: 1
-  },
-  {
-    question: "What is the title given to Mary as the model disciple and perfect follower of Christ?",
-    options: ["Queen of Martyrs", "Mother of the Church", "The New Eve"],
-    correct: 2
-  },
-  {
-    question: "How are the saints an encouragement to the faithful on earth?",
-    options: ["They remind us that holiness is possible in every state of life", "They make salvation easier", "They take away our responsibility"],
-    correct: 0
-  }
-]
-            },
-            {
-                title: "Last Things — Death, Judgement, Heaven, Hell",
-                content: `<p>The last things are death, particular judgment, heaven, purgatory, hell, and the final judgment.</p>
-<p>Key points from Compendium: After death, each person receives particular judgment.</p>
-<p>Relevant Questions: 202-216</p>
-<p>Excerpt: "Death is the end of man's earthly pilgrimage." (Q202)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/4HwOeLZg2lM?si=h5nWCOIJQowJm_Wl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P2G.HTM"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What are the 'Last Four Things' in Catholic teaching?",
-    options: ["Birth, life, death, eternity", "Faith, hope, love, and peace", "Death, Judgment, Heaven, and Hell"],
-    correct: 2
-  },
-  {
-    question: "What happens at the moment of death?",
-    options: ["A person is reincarnated", "They enter eternal sleep", "The soul is separated from the body and judged by God"],
-    correct: 2
-  },
-  {
-    question: "What is the 'Particular Judgment'?",
-    options: ["The final judgment of all people together", "The soul’s personal judgment by Christ immediately after death", "A review by one’s guardian angel"],
-    correct: 1
-  },
-  {
-    question: "What is Heaven?",
-    options: ["A paradise on earth", "A temporary reward", "Eternal communion with God, perfect joy and fulfillment of all desire"],
-    correct: 2
-  },
-  {
-    question: "What is Purgatory?",
-    options: ["A second chance at life", "A punishment for mortal sin", "A temporary state of purification for souls destined for Heaven"],
-    correct: 2
-  },
-  {
-    question: "What is Hell?",
-    options: ["A place of correction and growth", "Eternal separation from God by one’s free choice to reject Him", "Only a symbolic concept"],
-    correct: 1
-  },
-  {
-    question: "What is the 'General Judgment'?",
-    options: ["A private moment with God", "God’s final judgment of all humanity at the end of time", "A vote taken by the saints"],
-    correct: 1
-  },
-  {
-    question: "Can someone go to Heaven without choosing God?",
-    options: ["Yes, if they do enough good works", "No, Heaven is the fulfillment of one’s free choice to love God", "Only if they receive last rites"],
-    correct: 1
-  },
-  {
-    question: "Why should Christians meditate on the Last Four Things?",
-    options: ["To be fearful all the time", "To understand Church history", "To live with hope, urgency, and purpose in the light of eternity"],
-    correct: 2
-  },
-  {
-    question: "Who determines a person's eternal destiny?",
-    options: ["The saints", "The individual through their response to God’s grace", "Random chance"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "The Seven Sacraments",
-                content: `<p>The seven sacraments are Baptism, Confirmation, Eucharist, Penance, Anointing, Holy Orders, Matrimony.</p>
-<p>Key points from Compendium: Sacraments are efficacious signs of grace.</p>
-<p>Relevant Questions: 224-250</p>
-<p>Excerpt: "The sacraments are efficacious signs of grace, instituted by Christ." (Q224)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/WnuC7pGyfgw?si=7YLz5OAKARjm7lv6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#The%20Sacramental%20Economy" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is a sacrament?",
-    options: [
-      "A symbol of Church community",
-      "An outward sign instituted by Christ to give grace",
-      "A set of rituals from tradition"
-    ],
-    correct: 1
-  },
-  {
-    question: "How many sacraments are there in the Catholic Church?",
-    options: ["Three", "Seven", "Twelve"],
-    correct: 1
-  },
-  {
-    question: "Who instituted the sacraments?",
-    options: ["The Apostles", "The Early Church", "Jesus Christ"],
-    correct: 2
-  },
-  {
-    question: "What is the purpose of the sacraments?",
-    options: [
-      "To symbolize Christian ideals",
-      "To provide religious entertainment",
-      "To sanctify, build up the Body of Christ, and give worship to God"
-    ],
-    correct: 2
-  },
-  {
-    question: "Which of the following is NOT one of the seven sacraments?",
-    options: ["Baptism", "Eucharist", "Tithing"],
-    correct: 2
-  },
-  {
-    question: "Which sacraments are known as the Sacraments of Initiation?",
-    options: [
-      "Baptism, Confirmation, Eucharist",
-      "Marriage, Holy Orders, Eucharist",
-      "Confession, Baptism, Anointing of the Sick"
-    ],
-    correct: 0
-  },
-  {
-    question: "Which sacraments can be received only once?",
-    options: [
-      "Confirmation, Eucharist, Holy Orders",
-      "Baptism, Confirmation, Holy Orders",
-      "Anointing of the Sick, Marriage, Baptism"
-    ],
-    correct: 1
-  },
-  {
-    question: "What do the sacraments require from the recipient to be fruitful?",
-    options: [
-      "Perfect knowledge of theology",
-      "Proper disposition and openness to grace",
-      "Public recognition by the Church"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is 'grace' in the context of the sacraments?",
-    options: [
-      "A divine reward earned by works",
-      "God’s free and undeserved help that sanctifies us",
-      "An emotional experience during worship"
-    ],
-    correct: 1
-  },
-  {
-    question: "Which sacrament is the source and summit of the Christian life?",
-    options: ["Confirmation", "Holy Orders", "The Eucharist"],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Baptism",
-                content: `<p>Baptism is the sacrament of initiation, forgiving original sin and making us children of God.</p>
-<p>Key points from Compendium: Baptism is necessary for salvation.</p>
-<p>Relevant Questions: 252-267</p>
-<p>Excerpt: "Baptism is the foundation of the whole Christian life." (Q252)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/3nDmpDKZjgo?si=bKH725cSwRVNTwml" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#The%20sacraments%20of%20Christian%20initiation"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What does Baptism do to original sin?",
-    options: ["Ignores it", "Cleanses it completely", "Reduces its effects"],
-    correct: 1
-  },
-  {
-    question: "What are the essential elements for a valid Baptism?",
-    options: ["Oil and salt", "Holy water and incense", "Water and the Trinitarian formula"],
-    correct: 2
-  },
-  {
-    question: "Who can baptize in case of necessity?",
-    options: ["Only a bishop", "Only a Catholic priest", "Anyone with the right intention"],
-    correct: 2
-  },
-  {
-    question: "What is the primary effect of Baptism?",
-    options: ["Becoming a Church member", "Receiving the Holy Spirit", "Becoming a new creation in Christ"],
-    correct: 2
-  },
-  {
-    question: "Which of the following is not a result of Baptism?",
-    options: ["Forgiveness of personal and original sin", "Membership in the Body of Christ", "Immunity from future sin"],
-    correct: 2
-  },
-  {
-    question: "What does the white garment in Baptism symbolize?",
-    options: ["The light of Christ", "Freedom from sin", "A new dignity and purity"],
-    correct: 2
-  },
-  {
-    question: "What does the baptismal candle represent?",
-    options: ["The Holy Spirit", "The Light of Christ", "A symbol of fire and trial"],
-    correct: 1
-  },
-  {
-    question: "Why is Baptism called the 'gateway' sacrament?",
-    options: ["Because it opens the Church doors literally", "Because it is the first sacrament received", "Because it ends sin forever"],
-    correct: 1
-  },
-  {
-    question: "What is the role of godparents in Baptism?",
-    options: ["To officiate the rite", "To give gifts", "To assist in the child’s Christian formation"],
-    correct: 2
-  },
-  {
-    question: "Why can Baptism never be repeated?",
-    options: ["Because it only affects feelings", "Because it imparts an indelible spiritual mark", "Because the Church forbids it"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Confirmation",
-                content: `<p>Confirmation strengthens the baptized with the Holy Spirit.</p>
-<p>Key points from Compendium: It perfects Baptismal grace.</p>
-<p>Relevant Questions: 268-274</p>
-<p>Excerpt: "Confirmation perfects Baptismal grace." (Q268)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/8ZAAdlcE2Ac?si=YWwi9T-Wqh9L5_Nj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the primary effect of the Sacrament of Confirmation?",
-    options: ["Removal of original sin", "Full initiation into the Church", "Special outpouring of the Holy Spirit"],
-    correct: 2
-  },
-  {
-    question: "Which biblical event is most associated with Confirmation?",
-    options: ["The Annunciation", "The Resurrection", "Pentecost"],
-    correct: 2
-  },
-  {
-    question: "What does the anointing with chrism oil symbolize in Confirmation?",
-    options: ["Forgiveness of sins", "Healing", "Being sealed with the Holy Spirit"],
-    correct: 2
-  },
-  {
-    question: "Who is the ordinary minister of Confirmation in the Latin Church?",
-    options: ["Deacon", "Priest", "Bishop"],
-    correct: 2
-  },
-  {
-    question: "What are the essential elements of the Sacrament of Confirmation?",
-    options: ["Laying on of hands and anointing with chrism", "Baptismal renewal and Eucharist", "Prayer and confession"],
-    correct: 0
-  },
-  {
-    question: "Which gift is NOT traditionally listed among the seven gifts of the Holy Spirit?",
-    options: ["Wisdom", "Knowledge", "Joy"],
-    correct: 2
-  },
-  {
-    question: "At what age is Confirmation usually administered in the Latin Rite?",
-    options: ["Age of reason or older", "As an infant", "After marriage"],
-    correct: 0
-  },
-  {
-    question: "What is the purpose of the sponsor in Confirmation?",
-    options: ["To throw a celebration", "To act as a moral guide and spiritual supporter", "To teach catechism"],
-    correct: 1
-  },
-  {
-    question: "What does the phrase 'soldier of Christ' traditionally express in Confirmation theology?",
-    options: ["That the confirmed person is ready to fight in wars", "That the person now defends and spreads the faith", "That they must memorize Church doctrine"],
-    correct: 1
-  },
-  {
-    question: "Why is Confirmation not repeated?",
-    options: ["Because it's unnecessary", "Because it has a lasting effect", "Because it's expensive"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Holy Eucharist",
-                content: `<p>The Eucharist is the source and summit of Christian life, the Body and Blood of Christ.</p>
-<p>Key points from Compendium: It is thanksgiving and memorial of Christ's sacrifice.</p>
-<p>Relevant Questions: 275-294</p>
-<p>Excerpt: "The Eucharist is the very sacrifice of the Body and Blood of the Lord Jesus." (Q275)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/0yTGlYCIvks?si=cxh7EZo_bSjyi4kk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P3W.HTM"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the Eucharist?",
-    options: ["A symbolic meal", "The true Body and Blood of Christ", "A community gathering only"],
-    correct: 1
-  },
-  {
-    question: "What term describes the change of bread and wine into Christ’s Body and Blood?",
-    options: ["Transubstantiation", "Transformation", "Transfiguration"],
-    correct: 0
-  },
-  {
-    question: "Who instituted the Eucharist?",
-    options: ["St. Paul", "The Apostles", "Jesus Christ"],
-    correct: 2
-  },
-  {
-    question: "When did Jesus institute the Eucharist?",
-    options: ["At His baptism", "During the Last Supper", "After the Resurrection"],
-    correct: 1
-  },
-  {
-    question: "What is required to receive the Eucharist worthily?",
-    options: ["A good mood", "Being in a state of grace", "Fasting from food for a full day"],
-    correct: 1
-  },
-  {
-    question: "How often must Catholics receive the Eucharist?",
-    options: ["Once a year during Easter season", "Every Sunday", "Every day"],
-    correct: 0
-  },
-  {
-    question: "What does the Eucharist do for the soul?",
-    options: ["Removes original sin", "Strengthens union with Christ", "Guarantees worldly success"],
-    correct: 1
-  },
-  {
-    question: "What is the name for the part of the Mass where the bread and wine become the Body and Blood?",
-    options: ["The Liturgy of the Word", "The Liturgy of the Eucharist", "The Concluding Rites"],
-    correct: 1
-  },
-  {
-    question: "What do we call the container where consecrated hosts are reserved?",
-    options: ["Ciborium", "Tabernacle", "Chalice"],
-    correct: 1
-  },
-  {
-    question: "What is the Eucharist also called?",
-    options: ["Holy Communion", "Extreme Unction", "Sacrament of the Word"],
-    correct: 0
-  }
-]
-            },
-            {
-                title: "Reconciliation & Anointing",
-                content: `<p>Reconciliation forgives sins after Baptism; Anointing strengthens the sick.</p>
-<p>Key points from Compendium: Penance restores us to grace.</p>
-<p>Relevant Questions: 295-321</p>
-<p>Excerpt: "The sacrament of Penance is for the forgiveness of sins committed after Baptism." (Q295)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/x9zZRIIEVgk?si=L57Nv0FcNEZRm5uT" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#The%20Sacraments%20of%20Healing"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the primary effect of the Sacrament of Reconciliation?",
-    options: ["Inner peace", "Forgiveness of sins and reconciliation with God", "Removal of original sin"],
-    correct: 1
-  },
-  {
-    question: "Who has the authority to forgive sins in the Sacrament of Reconciliation?",
-    options: ["Only the Pope", "Any baptized person", "A validly ordained priest"],
-    correct: 2
-  },
-  {
-    question: "What are the essential elements of a good confession?",
-    options: ["Fasting and prayer", "Contrition, confession, absolution, and satisfaction", "Bible reading and silence"],
-    correct: 1
-  },
-  {
-    question: "What is the 'seal of confession'?",
-    options: ["The prayer of absolution", "A penitent's promise", "The priest’s absolute duty to never reveal sins confessed"],
-    correct: 2
-  },
-  {
-    question: "When should the Anointing of the Sick be received?",
-    options: ["Only before surgery", "When someone is seriously ill or in danger of death", "Every Sunday"],
-    correct: 1
-  },
-  {
-    question: "What are the effects of the Anointing of the Sick?",
-    options: ["A guarantee of physical healing", "Strength, peace, forgiveness of sins, and sometimes physical healing", "A preparation for Baptism"],
-    correct: 1
-  },
-  {
-    question: "Which Scripture passage best reflects the foundation of Anointing of the Sick?",
-    options: ["James 5:14–15", "Matthew 5:1–12", "John 6:51"],
-    correct: 0
-  },
-  {
-    question: "What type of oil is used in the Anointing of the Sick?",
-    options: ["Oil of Catechumens", "Chrism", "Oil of the Sick"],
-    correct: 2
-  },
-  {
-    question: "What is 'contrition' in the context of Reconciliation?",
-    options: ["Reciting a memorized prayer", "Genuine sorrow for having sinned", "A type of sin"],
-    correct: 1
-  },
-  {
-    question: "Who can receive the Anointing of the Sick?",
-    options: ["Only the elderly", "Any Catholic in danger due to illness or old age", "Only those in comas"],
-    correct: 1
-  }
-]
-
-            },
-            {
-                title: "Holy Orders",
-                content: `<p>Holy Orders configures men to Christ as priests, deacons, bishops.</p>
-<p>Key points from Compendium: It is the sacrament of apostolic ministry.</p>
-<p>Relevant Questions: 322-336</p>
-<p>Excerpt: "Holy Orders is the sacrament by which the mission entrusted by Christ to his apostles continues." (Q322)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/kuNiwOv_lro?si=E8cbBVR_56N_tOea" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#The%20Sacraments%20at%20the%20Service%20of%20Communion%20and%20Mission">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the sacrament of Holy Orders primarily directed toward?",
-    options: ["The service of the faithful through teaching, sanctifying, and governing", "Personal sanctification", "Monastic withdrawal", "Receiving personal graces"],
-    correct: 0
-  },
-  {
-    question: "How many degrees are there in the Sacrament of Holy Orders?",
-    options: ["One", "Two", "Three", "Four"],
-    correct: 2
-  },
-  {
-    question: "Which of the following is NOT one of the three degrees of Holy Orders?",
-    options: ["Bishop", "Cardinal", "Priest", "Deacon"],
-    correct: 1
-  },
-  {
-    question: "What is the essential rite of the Sacrament of Holy Orders?",
-    options: ["Anointing with oil", "Proclamation of vows", "Laying on of hands and the consecratory prayer", "Reading of the Gospel"],
-    correct: 2
-  },
-  {
-    question: "Who has the fullness of the Sacrament of Holy Orders?",
-    options: ["Deacon", "Priest", "Bishop", "Abbot"],
-    correct: 2
-  },
-  {
-    question: "Which group can validly confer the Sacrament of Holy Orders?",
-    options: ["Any ordained minister", "The bishop alone", "The priesthood collectively", "The Pope only"],
-    correct: 1
-  },
-  {
-    question: "What special character is imprinted on the soul in Holy Orders?",
-    options: ["A temporary grace", "A seal that configures the recipient to Christ", "A blessing for leadership", "None"],
-    correct: 1
-  },
-  {
-    question: "Why can only baptized men be ordained in the Catholic Church?",
-    options: ["Because of cultural tradition", "Because of Church law", "Because Christ chose only men as apostles", "Because of regional custom"],
-    correct: 2
-  },
-  {
-    question: "Which degree of Holy Orders is primarily focused on service and charity?",
-    options: ["Bishop", "Deacon", "Priest", "Monsignor"],
-    correct: 1
-  },
-  {
-    question: "What does a priest act *in persona Christi* during?",
-    options: ["Teaching Scripture", "Celebrating the Eucharist and administering sacraments", "Parish administration", "Spiritual reading"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Holy Matrimony",
-                content: `<p>Matrimony is the sacrament uniting man and woman in indissoluble bond.</p>
-<p>Key points from Compendium: It is ordered to the good of spouses and children.</p>
-<p>Relevant Questions: 337-350</p>
-<p>Excerpt: "The sacrament of Matrimony establishes a perpetual and exclusive bond between the spouses." (Q337)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/JDBhaeus3Sg?si=z_gAmE0PFEs4mHm6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P50.HTM" target="_blank">CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the primary purpose of the Sacrament of Matrimony?",
-    options: ["Mutual support and sanctification of the spouses", "Legal union", "Economic stability", "Social recognition"],
-    correct: 0
-  },
-  {
-    question: "Who are the ministers of the Sacrament of Matrimony in the Latin Rite?",
-    options: ["The bishop", "The priest", "The deacon", "The spouses themselves"],
-    correct: 3
-  },
-  {
-    question: "What makes a marriage sacramental in the Catholic Church?",
-    options: ["Love between the couple", "Exchange of vows before a priest and two witnesses", "The signing of a certificate", "Living together"],
-    correct: 1
-  },
-  {
-    question: "What are the essential elements of a valid Catholic marriage?",
-    options: ["Consent, blessing, and reception", "Freedom, consent, and openness to life", "Love, patience, and understanding", "Agreement on finances"],
-    correct: 1
-  },
-  {
-    question: "What grace does the Sacrament of Matrimony confer?",
-    options: ["Forgiveness of sins", "The grace to love each other as Christ loves the Church", "Ability to become priests", "Spiritual gifts for ministry"],
-    correct: 1
-  },
-  {
-    question: "Why is marriage considered indissoluble in the Catholic Church?",
-    options: ["Because of natural law", "Because it is a civil contract", "Because it is a covenant that mirrors Christ's union with the Church", "Because of Church politics"],
-    correct: 2
-  },
-  {
-    question: "What does the Church teach about openness to children in marriage?",
-    options: ["It's optional", "It's required only if financially stable", "It's essential to the nature of marriage", "It depends on the culture"],
-    correct: 2
-  },
-  {
-    question: "What role does Christ play in a Catholic marriage?",
-    options: ["He is a symbol of unity", "He blesses the marriage but is not involved", "He becomes present in the couple’s union and love", "None"],
-    correct: 2
-  },
-  {
-    question: "Can a Catholic marry a non-Catholic?",
-    options: ["No, never", "Yes, with a dispensation and proper preparation", "Only outside the Church", "Only if the non-Catholic converts"],
-    correct: 1
-  },
-  {
-    question: "What does the Church call the family formed by marriage?",
-    options: ["A religious order", "A sacramental unit", "The domestic church", "A spiritual assembly"],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Sacred Liturgy & Walking Through the Mass",
-                content: `<p>The liturgy is the public worship of the Church, with the Mass as its center.</p>
-<p>Key points from Compendium: The Mass is the memorial of Christ's Passover.</p>
-<p>Relevant Questions: 218-223</p>
-<p>Excerpt: "The liturgy is the work of the whole Christ, head and body." (Q218)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/6g-zSAgnxxk?si=zgjdBIjaamnaGdEa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P37.HTM"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the Sacred Liturgy?",
-    options: ["The public and official worship of the Church", "A private devotion", "A religious concert", "An informal prayer gathering"],
-    correct: 0
-  },
-  {
-    question: "Who is the primary actor in every liturgical celebration?",
-    options: ["The priest", "The choir", "Christ Himself", "The congregation"],
-    correct: 2
-  },
-  {
-    question: "What is the role of the Holy Spirit in the liturgy?",
-    options: ["To inspire the homily", "To make present the mystery of Christ", "To energize the music", "To help memorize prayers"],
-    correct: 1
-  },
-  {
-    question: "Why is Sunday especially important in the liturgical life of the Church?",
-    options: ["It is a day of rest", "It is when most people are free", "It commemorates the Resurrection of Christ", "It replaces the Sabbath"],
-    correct: 2
-  },
-  {
-    question: "What does the term 'liturgy' literally mean?",
-    options: ["Holy gathering", "Ritual sacrifice", "Public work or service", "Heavenly music"],
-    correct: 2
-  },
-  {
-    question: "What is the source and summit of the Christian life according to the Church?",
-    options: ["The Bible", "Prayer and fasting", "The Sacred Liturgy, especially the Eucharist", "Missionary work"],
-    correct: 2
-  },
-  {
-    question: "What is the function of liturgical signs and symbols?",
-    options: ["They decorate the church", "They entertain the congregation", "They communicate spiritual realities", "They distract from distractions"],
-    correct: 2
-  },
-  {
-    question: "What is the Liturgical Year?",
-    options: ["A calendar of saints", "The academic year for seminarians", "The cycle of seasons and feasts commemorating Christ’s life", "A list of holidays"],
-    correct: 2
-  },
-  {
-    question: "Why does the Church use rites and rituals in the liturgy?",
-    options: ["To maintain tradition", "To make Mass longer", "To express and deepen faith through the body and senses", "To confuse non-Catholics"],
-    correct: 2
-  },
-  {
-    question: "What is the role of music in the Sacred Liturgy?",
-    options: ["It is optional entertainment", "It adds beauty and helps the congregation participate more deeply", "It fills time", "It replaces homilies"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Foundations of Morality I",
-                content: `<p>Morality is based on natural law, revealed in the Commandments, and fulfilled in Christ.</p>
-<p>Key points from Compendium: Human freedom is directed towards the good.</p>
-<p>Relevant Questions: 350-369</p>
-<p>Excerpt: "Morality can be defined as the norms for human behavior." (Q350 approximate)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/sPfx2rVtgxs?si=OM6kF_oeKlci_zR2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#Mans%20Vocation:%20Life%20in%20the%20Spirit" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the basis of human dignity?",
-    options: ["One’s achievements", "Being created in the image and likeness of God", "Social status", "Religious affiliation"],
-    correct: 1
-  },
-  {
-    question: "What does it mean to say that the human person is 'a unity of body and soul'?",
-    options: ["The body and soul are separate", "The soul is more important than the body", "The person is both physical and spiritual", "Only the body matters"],
-    correct: 2
-  },
-  {
-    question: "What is the source of true human freedom?",
-    options: ["Doing whatever we want", "Choosing the good", "Avoiding consequences", "Rejecting authority"],
-    correct: 1
-  },
-  {
-    question: "How does sin affect human freedom?",
-    options: ["It increases our freedom", "It has no effect", "It enslaves and weakens our ability to choose the good", "It is a sign of strong will"],
-    correct: 2
-  },
-  {
-    question: "What is moral responsibility based on?",
-    options: ["Our feelings", "Peer approval", "Freedom and knowledge of our actions", "Success and failure"],
-    correct: 2
-  },
-  {
-    question: "What role does conscience play in moral decision-making?",
-    options: ["It tells us how to avoid punishment", "It helps us discern right from wrong", "It prevents us from making choices", "It forces us to act against our will"],
-    correct: 1
-  },
-  {
-    question: "What is the natural law?",
-    options: ["A civil law code", "A theory of evolution", "The moral law written in the heart of every person", "A list of commandments from the Pope"],
-    correct: 2
-  },
-  {
-    question: "Why must human dignity be respected?",
-    options: ["To avoid conflict", "Because it’s a law", "Because every person is willed and loved by God", "To maintain order in society"],
-    correct: 2
-  },
-  {
-    question: "Which of the following best describes authentic freedom?",
-    options: ["The ability to choose evil", "The power to act rightly and justly", "Freedom from consequences", "The absence of laws"],
-    correct: 1
-  },
-  {
-    question: "What does it mean to be morally responsible for one’s actions?",
-    options: ["You must justify every action to others", "You are accountable for your choices, especially when made freely and knowingly", "Only serious sins matter", "Only civil laws apply"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Foundations of Morality II",
-                content: `<p>Continuation: Conscience, virtues, and passions in moral life.</p>
-<p>Key points from Compendium: Virtues are habits of doing good.</p>
-<p>Relevant Questions: 370-396</p>
-<p>Excerpt: "The moral conscience... urges man to do good and avoid evil." (Q372)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/ooxEQ08rvLw?si=eQjMYbRnl1vZS90r" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#Gods%20Salvation:%20Law%20and%20Grace">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is morality?",
-    options: ["A system of punishment", "A set of social customs", "The goodness or evil of human acts", "Personal opinion about right and wrong"],
-    correct: 2
-  },
-  {
-    question: "What is the natural law?",
-    options: ["Laws of physics", "Instinctual behavior", "The moral order knowable by human reason", "The commandments given to Moses"],
-    correct: 2
-  },
-  {
-    question: "What is the ultimate source of all moral law?",
-    options: ["The Church", "God", "Society", "Human tradition"],
-    correct: 1
-  },
-  {
-    question: "What is divine law?",
-    options: ["Any law created by the Pope", "The revealed law given by God through Scripture and Tradition", "Civil law inspired by religion", "The Ten Amendments"],
-    correct: 1
-  },
-  {
-    question: "Which of the following best expresses the basic principle of morality?",
-    options: ["Do what feels right", "Do what benefits you", "Do good and avoid evil", "Follow the crowd"],
-    correct: 2
-  },
-  {
-    question: "Why is the natural law considered universal?",
-    options: ["Because it is written by different cultures", "Because it is revealed in every religion", "Because it applies to all people, in all places and times", "Because it is voted on by everyone"],
-    correct: 2
-  },
-  {
-    question: "What is the relationship between divine law and natural law?",
-    options: ["They contradict each other", "Divine law is optional if you follow natural law", "Divine law clarifies and fulfills the natural law", "Natural law replaces divine law"],
-    correct: 2
-  },
-  {
-    question: "According to Catholic teaching, when is an action morally good?",
-    options: ["When the intention is good", "When the circumstances are favorable", "Only when the object, intention, and circumstances are all good", "When the Church approves it"],
-    correct: 2
-  },
-  {
-    question: "Can human beings fully understand moral truth without God's revelation?",
-    options: ["Yes, through science alone", "No, we need divine revelation to know all moral truth", "Only if they are saints", "Yes, if they are highly educated"],
-    correct: 1
-  },
-  {
-    question: "What role does Scripture play in morality?",
-    options: ["It provides a historical background", "It gives divine guidance for living a moral life", "It only applies to ancient cultures", "It is optional for believers"],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Foundations of Morality III",
-                content: `<p>Continuation: Sin, mercy, and the New Law of grace.</p>
-<p>Key points from Compendium: Sin is an offense against God.</p>
-<p>Relevant Questions: 397-433</p>
-<p>Excerpt: "Sin is a word, an act or a desire contrary to the eternal Law." (Q397)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/_u3EwK4sy-E?si=tiI721k80BjNM7-Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P64.HTM">CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is a virtue?",
-    options: ["A type of prayer", "A bad habit", "A habitual and firm disposition to do good", "An instinctive reaction"],
-    correct: 2
-  },
-  {
-    question: "What are the theological virtues?",
-    options: ["Faith, Hope, and Charity", "Wisdom, Courage, and Humility", "Knowledge, Piety, and Fortitude", "Justice, Prudence, and Temperance"],
-    correct: 0
-  },
-  {
-    question: "What is sin?",
-    options: ["A psychological condition", "An unavoidable mistake", "An offense against God and reason", "A cultural misunderstanding"],
-    correct: 2
-  },
-  {
-    question: "What is a vice?",
-    options: ["A minor sin", "A good habit", "A habitual disposition to do evil", "A natural instinct"],
-    correct: 2
-  },
-  {
-    question: "What is a mortal sin?",
-    options: ["A sin that hurts others", "A sin done in anger", "A grave sin committed with full knowledge and consent", "A sin that can be forgiven without repentance"],
-    correct: 2
-  },
-  {
-    question: "What is the purpose of forming a good habit?",
-    options: ["To make life more efficient", "To avoid thinking", "To help one grow in virtue and holiness", "To be admired by others"],
-    correct: 2
-  },
-  {
-    question: "What is Catholic Social Teaching primarily concerned with?",
-    options: ["Political activism", "Scientific advancement", "The dignity of the human person and the common good", "Religious ceremonies"],
-    correct: 2
-  },
-  {
-    question: "What is the principle of subsidiarity?",
-    options: ["The Church governs all political systems", "Higher authorities should always intervene first", "Matters should be handled by the smallest competent authority", "The family is subordinate to the state"],
-    correct: 2
-  },
-  {
-    question: "What is the common good?",
-    options: ["What benefits the wealthy", "The good of the majority only", "The sum total of social conditions that allow people to reach fulfillment", "An economic policy"],
-    correct: 2
-  },
-  {
-    question: "How does sin affect the human person?",
-    options: ["It enhances creativity", "It strengthens character", "It wounds human nature and damages relationships with God and others", "It has no real effect"],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Introduction to The Ten Commandments, Commandments 1-3",
-                content: `<p>The Ten Commandments are God's law. First three: Love God above all, honor His name, keep holy the Sabbath.</p>
-<p>Key points from Compendium: The Decalogue is understood in the light of the Covenant.</p>
-<p>Relevant Questions: 434-453</p>
-<p>Excerpt: "The Decalogue must be understood in the light of the Covenant." (Q437)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/pFemAFXCQ9Q?si=_wACn0SEhA46XYDC" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#The%20Ten%20Commandments"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What are the Ten Commandments?",
-    options: [
-      "Suggestions for moral living",
-      "A set of civil laws from ancient Egypt",
-      "God’s revealed moral law given to Moses on Mount Sinai",
-      "Teachings from the New Testament only"
-    ],
-    correct: 2
-  },
-  {
-    question: "What is the purpose of the Ten Commandments?",
-    options: [
-      "To control people through fear",
-      "To guide God’s people in living in right relationship with Him and others",
-      "To replace natural law",
-      "To apply only to ancient Israel"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is the First Commandment?",
-    options: [
-      "You shall not take the name of the Lord your God in vain",
-      "Remember to keep holy the Lord’s Day",
-      "Honor your father and your mother",
-      "You shall have no other gods before Me"
-    ],
-    correct: 3
-  },
-  {
-    question: "What virtue does the First Commandment primarily promote?",
-    options: [
-      "Justice",
-      "Hope",
-      "Faith and worship of the one true God",
-      "Temperance"
-    ],
-    correct: 2
-  },
-  {
-    question: "Which action violates the First Commandment?",
-    options: [
-      "Attending Sunday Mass",
-      "Praying the Rosary",
-      "Worshiping money or success",
-      "Believing in one God"
-    ],
-    correct: 2
-  },
-  {
-    question: "What is the Second Commandment?",
-    options: [
-      "You shall not kill",
-      "You shall not take the name of the Lord your God in vain",
-      "You shall not bear false witness",
-      "Honor your father and your mother"
-    ],
-    correct: 1
-  },
-  {
-    question: "What does the Second Commandment call us to do?",
-    options: [
-      "Use God's name with reverence and avoid blasphemy",
-      "Never speak of God",
-      "Invent new names for God",
-      "Memorize all the titles of the saints"
-    ],
-    correct: 0
-  },
-  {
-    question: "What is a violation of the Second Commandment?",
-    options: [
-      "Saying prayers aloud",
-      "Using God’s name disrespectfully or in vain",
-      "Preaching in public",
-      "Calling Jesus Lord"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is the Third Commandment?",
-    options: [
-      "Remember to keep holy the Lord’s Day",
-      "You shall not steal",
-      "You shall not commit adultery",
-      "You shall not covet your neighbor’s wife"
-    ],
-    correct: 0
-  },
-  {
-    question: "How do Catholics obey the Third Commandment?",
-    options: [
-      "Resting on Saturdays",
-      "Avoiding all physical labor",
-      "Going to Mass on Sundays and refraining from unnecessary work",
-      "Spending Sundays watching TV"
-    ],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Commandments 4 & 5",
-                content: `<p>Honor parents; do not kill.</p>
-<p>Key points from Compendium: The fourth Commandment honors family; fifth protects life.</p>
-<p>Relevant Questions: 454-475</p>
-<p>Excerpt: "The fourth commandment: Honor your father and your mother." (Q454 approximate)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/3p0nG28jNKk?si=ONjgRVmPDAGJJMdy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#%C3%82%E2%80%9CYou%20Shall%20Love%20Your%20Neighbour%20as%20Yourself%C3%82%E2%80%9D"_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the Fourth Commandment?",
-    options: [
-      "You shall not kill",
-      "Honor your father and your mother",
-      "You shall not steal",
-      "Remember to keep holy the Lord’s Day"
-    ],
-    correct: 1
-  },
-  {
-    question: "What virtue does the Fourth Commandment promote?",
-    options: [
-      "Temperance",
-      "Obedience and respect for legitimate authority",
-      "Detachment from material goods",
-      "Silence and solitude"
-    ],
-    correct: 1
-  },
-  {
-    question: "To whom does the Fourth Commandment extend beyond parents?",
-    options: [
-      "Only biological siblings",
-      "Government authorities, teachers, and lawful leaders",
-      "Close friends only",
-      "Religious leaders of any faith"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is a practical way to live out the Fourth Commandment?",
-    options: [
-      "Obeying just civil laws",
-      "Criticizing your parents constantly",
-      "Disregarding school rules",
-      "Avoiding family gatherings"
-    ],
-    correct: 0
-  },
-  {
-    question: "Why is the Fourth Commandment the first among the commandments about love of neighbor?",
-    options: [
-      "Because it's shorter than the others",
-      "Because family is our first community and training ground for love",
-      "Because it refers to God directly",
-      "Because it mentions honor instead of love"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is the Fifth Commandment?",
-    options: [
-      "You shall not commit adultery",
-      "You shall not bear false witness",
-      "You shall not kill",
-      "You shall not covet your neighbor’s goods"
-    ],
-    correct: 2
-  },
-  {
-    question: "What kind of actions violate the Fifth Commandment?",
-    options: [
-      "Only murder",
-      "Murder, hatred, abortion, and unjust anger",
-      "Lying and gossip",
-      "Disobeying traffic laws"
-    ],
-    correct: 1
-  },
-  {
-    question: "What does the Church teach about human life?",
-    options: [
-      "It is valuable only when productive",
-      "It is sacred from conception to natural death",
-      "It is sacred only after baptism",
-      "It begins at birth"
-    ],
-    correct: 1
-  },
-  {
-    question: "How does the Fifth Commandment call us to respect life?",
-    options: [
-      "Only by not killing others",
-      "By promoting peace, avoiding hatred, and defending the vulnerable",
-      "By avoiding physical exercise",
-      "By voting in every election"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is the Church’s teaching on euthanasia under the Fifth Commandment?",
-    options: [
-      "It is an act of mercy",
-      "It is a personal choice with no moral weight",
-      "It is morally unacceptable as it intentionally ends an innocent human life",
-      "It is allowed under canon law"
-    ],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Commandments 6 & 9",
-                content: `<p>Do not commit adultery; do not covet your neighbor's wife.</p>
-<p>Key points from Compendium: Protect marriage and purity.</p>
-<p>Relevant Questions: 487-502</p>
-<p>Excerpt: "The sixth commandment: You shall not commit adultery." (Q487)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/6Y2S58hTLqA?si=9mUXKHDF6fCLJcBi" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P83.HTM"_blank">CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the Sixth Commandment?",
-    options: [
-      "You shall not steal",
-      "You shall not commit adultery",
-      "You shall not bear false witness",
-      "You shall not kill"
-    ],
-    correct: 1
-  },
-  {
-    question: "What virtue does the Sixth Commandment primarily call us to live?",
-    options: [
-      "Justice",
-      "Chastity",
-      "Temperance",
-      "Humility"
-    ],
-    correct: 1
-  },
-  {
-    question: "What does the Church mean by 'adultery'?",
-    options: [
-      "Cheating on a test",
-      "Marital unfaithfulness or sexual relations outside of one's marriage",
-      "Lying under oath",
-      "Disobeying a civil law"
-    ],
-    correct: 1
-  },
-  {
-    question: "How are married couples called to live the Sixth Commandment?",
-    options: [
-      "By remaining celibate",
-      "By remaining open to life and faithful to one another",
-      "By avoiding all affection",
-      "By separating during Lent"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is the Ninth Commandment?",
-    options: [
-      "You shall not covet your neighbor’s wife",
-      "You shall not covet your neighbor’s goods",
-      "You shall not kill",
-      "Honor your father and mother"
-    ],
-    correct: 0
-  },
-  {
-    question: "What inner disposition does the Ninth Commandment address?",
-    options: [
-      "Anger",
-      "Envy of material things",
-      "Impure thoughts and desires",
-      "Desire for revenge"
-    ],
-    correct: 2
-  },
-  {
-    question: "What virtue helps us guard against violations of the Ninth Commandment?",
-    options: [
-      "Chastity and purity of heart",
-      "Courage",
-      "Diligence",
-      "Modesty in dress alone"
-    ],
-    correct: 0
-  },
-  {
-    question: "According to the Church, who is called to chastity?",
-    options: [
-      "Only priests and religious",
-      "Only single people",
-      "All people, according to their state in life",
-      "Only married couples"
-    ],
-    correct: 2
-  },
-  {
-    question: "How does modesty relate to the Sixth and Ninth Commandments?",
-    options: [
-      "It refers only to clothing",
-      "It protects the mystery of the person and guides behavior and speech",
-      "It is an old-fashioned rule",
-      "It only applies to women"
-    ],
-    correct: 1
-  },
-  {
-    question: "How can we grow in purity of heart?",
-    options: [
-      "By ignoring temptations",
-      "Through prayer, sacraments, and forming good habits",
-      "By isolating from others",
-      "By avoiding friendship"
-    ],
-    correct: 1
-  }
-]
-            },
-            {
-                title: "Commandments 7, 8, & 10",
-                content: `<p>Do not steal; do not bear false witness; do not covet goods.</p>
-<p>Key points from Compendium: Protect property, truth, and justice.</p>
-<p>Relevant Questions: 503-527</p>
-<p>Excerpt: "The seventh commandment: You shall not steal." (Q503)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/6kG1PHCyfEU?si=qol3p4SdDPHsbdc2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P89.HTM"_blank">CCC</a></p>`,
-                quiz: [
-  {
-    question: "What is the Seventh Commandment?",
-    options: [
-      "You shall not commit adultery",
-      "You shall not steal",
-      "You shall not covet your neighbor’s wife",
-      "You shall not bear false witness"
-    ],
-    correct: 1
-  },
-  {
-    question: "What virtue is most associated with the Seventh Commandment?",
-    options: [
-      "Chastity",
-      "Justice",
-      "Humility",
-      "Modesty"
-    ],
-    correct: 1
-  },
-  {
-    question: "Which action is a violation of the Seventh Commandment?",
-    options: [
-      "Telling a lie",
-      "Coveting someone's success",
-      "Stealing or damaging another’s property",
-      "Using God's name in vain"
-    ],
-    correct: 2
-  },
-  {
-    question: "What is the Eighth Commandment?",
-    options: [
-      "You shall not bear false witness against your neighbor",
-      "You shall not kill",
-      "You shall not steal",
-      "You shall honor the Sabbath"
-    ],
-    correct: 0
-  },
-  {
-    question: "Which virtue is cultivated by living out the Eighth Commandment?",
-    options: [
-      "Temperance",
-      "Truthfulness",
-      "Obedience",
-      "Fortitude"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is a serious offense against the Eighth Commandment?",
-    options: [
-      "Forgetting to pray",
-      "Murder",
-      "Calumny, or slander",
-      "Missing Mass on Sunday"
-    ],
-    correct: 2
-  },
-  {
-    question: "What does the Tenth Commandment forbid?",
-    options: [
-      "Coveting your neighbor’s goods",
-      "Stealing",
-      "Lying",
-      "Swearing"
-    ],
-    correct: 0
-  },
-  {
-    question: "How is the Tenth Commandment different from the Seventh?",
-    options: [
-      "It focuses on the internal desire to steal, rather than the act",
-      "It is only for the poor",
-      "It refers only to taxes",
-      "There is no difference"
-    ],
-    correct: 0
-  },
-  {
-    question: "What virtue helps us overcome covetousness and envy?",
-    options: [
-      "Prudence",
-      "Detachment and generosity",
-      "Justice",
-      "Silence"
-    ],
-    correct: 1
-  },
-  {
-    question: "Why are the Seventh, Eighth, and Tenth Commandments grouped together in moral teaching?",
-    options: [
-      "They all deal with love of neighbor and respect for truth and property",
-      "They are about prayer and worship",
-      "They are not grouped together",
-      "They all apply only to religious life"
-    ],
-    correct: 0
-  }
-]
-            },
-            {
-                title: "Christian Prayer & the Lord’s Prayer",
-                content: `<p>Prayer is dialogue with God; the Lord's Prayer is the perfect prayer.</p>
-<p>Key points from Compendium: The Lord's Prayer is the prayer of the Church.</p>
-<p>Relevant Questions: 528-598</p>
-<p>Excerpt: "The Lord's Prayer is the prayer of the Church par excellence." (Q580)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/w2ysPSuz7_U?si=yVb8DpqwfCXJ0Iej" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#Prayer%20in%20the%20Christian%20Life" target="_blank">Compendium of the CCC</a></p>`,
-                quiz: [
-  {
-    question: "Who taught us the Lord’s Prayer?",
-    options: [
-      "St. Paul",
-      "Jesus Christ",
-      "Moses",
-      "St. Peter"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is the first petition in the Lord’s Prayer?",
-    options: [
-      "Thy will be done",
-      "Give us this day our daily bread",
-      "Hallowed be Thy name",
-      "Lead us not into temptation"
-    ],
-    correct: 2
-  },
-  {
-    question: "What does 'Hallowed be Thy name' express?",
-    options: [
-      "A wish for God's name to be glorified",
-      "Confession of sin",
-      "Desire for material blessings",
-      "Thanksgiving for creation"
-    ],
-    correct: 0
-  },
-  {
-    question: "What do we ask for when we say, 'Thy kingdom come'?",
-    options: [
-      "To become rich",
-      "For Jesus to return",
-      "For the reign of God to grow in our hearts and the world",
-      "To avoid suffering"
-    ],
-    correct: 2
-  },
-  {
-    question: "What are we asking in 'Give us this day our daily bread'?",
-    options: [
-      "Only for food",
-      "For the Eucharist and all we need for life",
-      "To receive forgiveness",
-      "To avoid temptation"
-    ],
-    correct: 1
-  },
-  {
-    question: "What does 'Forgive us our trespasses as we forgive...' teach us?",
-    options: [
-      "We can only be forgiven if we are perfect",
-      "God's mercy is limited",
-      "We must forgive others to be forgiven",
-      "Only priests can forgive sins"
-    ],
-    correct: 2
-  },
-  {
-    question: "What does 'Lead us not into temptation' ask of God?",
-    options: [
-      "To never let us be tempted",
-      "To strengthen us against trials and help us avoid sin",
-      "To test our faith",
-      "To remove suffering from our lives"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is meant by 'Deliver us from evil'?",
-    options: [
-      "Freedom from discomfort",
-      "Protection from worldly hardship",
-      "Rescue from sin, Satan, and final separation from God",
-      "The removal of death"
-    ],
-    correct: 2
-  },
-  {
-    question: "Why is the Lord’s Prayer called the 'perfect prayer'?",
-    options: [
-      "It covers all types of prayer: adoration, petition, intercession, and thanksgiving",
-      "It is poetic",
-      "It was composed by the Apostles",
-      "It is said at every Mass"
-    ],
-    correct: 0
-  },
-  {
-    question: "In what part of the Mass is the Lord’s Prayer typically prayed?",
-    options: [
-      "Introductory Rites",
-      "Liturgy of the Word",
-      "After the Our Father",
-      "Liturgy of the Eucharist, just before Communion"
-    ],
-    correct: 3
-  }
-]
-            },
-            {
-                title: "Lectio Divina & The Rosary",
-                content: `<p>Lectio Divina is prayerful reading of Scripture; the Rosary meditates on mysteries with Mary.</p>
-<p>Key points from Compendium: Meditative prayer includes Scripture and devotions.</p>
-<p>Relevant Questions: 570-572</p>
-<p>Excerpt: "Meditative prayer is a quest in which the mind seeks to understand Christian life." (Q570)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/qSeASW2M_yo?si=XzA8Fq-PApns6tnX" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/news_services/press/sinodo/documents/bollettino_22_xii-ordinaria-2008/02_inglese/b22_02.html"_blank">Vatican Press Office</a></p>`,
-                quiz: [
-  {
-    question: "What is Lectio Divina?",
-    options: [
-      "A Catholic way of reading novels",
-      "A form of silent meditation unrelated to Scripture",
-      "A traditional way of prayerfully reading Scripture",
-      "A type of Gregorian chant"
-    ],
-    correct: 2
-  },
-  {
-    question: "What is the first step of Lectio Divina?",
-    options: [
-      "Meditatio (meditation)",
-      "Lectio (reading)",
-      "Oratio (prayer)",
-      "Contemplatio (contemplation)"
-    ],
-    correct: 1
-  },
-  {
-    question: "In Lectio Divina, what is 'Meditatio'?",
-    options: [
-      "Silence before prayer",
-      "Recitation of memorized prayers",
-      "Reflecting on what God is saying through the text",
-      "Reciting the psalms aloud"
-    ],
-    correct: 2
-  },
-  {
-    question: "What does 'Contemplatio' involve in Lectio Divina?",
-    options: [
-      "Repeating the reading",
-      "Discussing theology",
-      "Resting in God’s presence beyond words",
-      "Writing a theological reflection"
-    ],
-    correct: 2
-  },
-  {
-    question: "What are the traditional sets of Mysteries of the Rosary?",
-    options: [
-      "Joyful, Sorrowful, Glorious, and Luminous",
-      "Old, New, Eternal, and Divine",
-      "Creation, Redemption, Sanctification, and Glorification",
-      "Morning, Noon, Evening, and Night"
-    ],
-    correct: 0
-  },
-  {
-    question: "How many Hail Marys are prayed in a full Rosary (all 20 decades)?",
-    options: [
-      "50",
-      "100",
-      "200",
-      "150"
-    ],
-    correct: 2
-  },
-  {
-    question: "Which prayer introduces each decade of the Rosary?",
-    options: [
-      "Our Father",
-      "Hail Holy Queen",
-      "Apostles’ Creed",
-      "Glory Be"
-    ],
-    correct: 0
-  },
-  {
-    question: "What is the purpose of the Rosary in Catholic devotion?",
-    options: [
-      "To earn indulgences",
-      "To distract the mind during chores",
-      "To meditate on the life of Christ with Mary",
-      "To fulfill a liturgical obligation"
-    ],
-    correct: 2
-  },
-  {
-    question: "Which Pope added the Luminous Mysteries to the Rosary?",
-    options: [
-      "Pope Paul VI",
-      "Pope Benedict XVI",
-      "Pope John Paul II",
-      "Pope Francis"
-    ],
-    correct: 2
-  },
-  {
-    question: "What role does Scripture play in both Lectio Divina and the Rosary?",
-    options: [
-      "It is optional",
-      "It is merely symbolic",
-      "It is the foundation for meditation and prayer",
-      "It is only used at Mass, not in private prayer"
-    ],
-    correct: 2
-  }
-]
-            },
-            {
-                title: "Liturgy of the Hours or The Divine Office",
-                content: `<p>The Liturgy of the Hours sanctifies the day with prayer, psalms, and readings.</p>
-<p>Key points from Compendium: It is the public prayer of the Church.</p>
-<p>Relevant Questions: 243</p>
-<p>Excerpt: "The Liturgy of the Hours... is the prayer of Christ with his body, the Church." (Q243)</p>
-<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/3z3qhAd0K_I?si=uW9Y3-8GwjAL6_fz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>Online resource: <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html" target="_blank">Sacrosanctum Concilium Chap IV</a></p>`,
-                quiz: [
-  {
-    question: "What is the Liturgy of the Hours?",
-    options: [
-      "A collection of private devotions",
-      "The Church’s official public prayer throughout the day",
-      "A series of Mass readings",
-      "A personal meditation on Scripture"
-    ],
-    correct: 1
-  },
-  {
-    question: "What is another name for the Liturgy of the Hours?",
-    options: [
-      "Rosary Devotions",
-      "Divine Office",
-      "Angelus",
-      "Eucharistic Benediction"
-    ],
-    correct: 1
-  },
-  {
-    question: "Which of the following is NOT one of the major Hours in the Liturgy of the Hours?",
-    options: [
-      "Lauds",
-      "Vespers",
-      "Matins",
-      "Rosary"
-    ],
-    correct: 3
-  },
-  {
-    question: "What are the two 'hinge hours' of the Liturgy of the Hours?",
-    options: [
-      "Terce and Sext",
-      "Matins and Compline",
-      "Lauds and Vespers",
-      "Prime and None"
-    ],
-    correct: 2
-  },
-  {
-    question: "What is typically prayed during each Hour of the Divine Office?",
-    options: [
-      "Only the Our Father",
-      "One Psalm and a homily",
-      "Psalms, Scripture readings, and intercessions",
-      "The Creed and Gospel readings"
-    ],
-    correct: 2
-  },
-  {
-    question: "Who is obliged to pray the Liturgy of the Hours daily?",
-    options: [
-      "All baptized Catholics",
-      "Only bishops",
-      "Priests, deacons, and those in religious life",
-      "Lay people in RCIA"
-    ],
-    correct: 2
-  },
-  {
-    question: "What is the purpose of the Liturgy of the Hours?",
-    options: [
-      "To replace the Mass",
-      "To mark the hours of the day with prayer and sanctify time",
-      "To serve as penance",
-      "To fulfill a Marian devotion"
-    ],
-    correct: 1
-  },
-  {
-    question: "Which book contains the Liturgy of the Hours?",
-    options: [
-      "The Missal",
-      "The Lectionary",
-      "The Breviary",
-      "The Catechism"
-    ],
-    correct: 2
-  },
-  {
-    question: "Can lay people pray the Liturgy of the Hours?",
-    options: [
-      "No, it is only for the ordained",
-      "Yes, and they are encouraged to do so",
-      "Only with a priest present",
-      "Only during Lent"
-    ],
-    correct: 1
-  },
-  {
-    question: "Which Saint is especially known for promoting the Divine Office?",
-    options: [
-      "St. Benedict",
-      "St. Augustine",
-      "St. Francis Xavier",
-      "St. Teresa of Calcutta"
-    ],
-    correct: 0
-  }
-]
-            }
-        ];
-
-        const prayers = {
-            'Sign of the Cross': 'In the name of the Father, and of the Son, and of the Holy Spirit. Amen.',
-            'Our Father': 'Our Father, who art in heaven, hallowed be thy name. Thy kingdom come, thy will be done, on earth as it is in heaven. Give us this day our daily bread, and forgive us our trespasses, as we forgive those who trespass against us. And lead us not into temptation, but deliver us from evil. Amen.',
-            'Hail Mary': 'Hail Mary, full of grace, the Lord is with thee. Blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.',
-            'Glory Be': 'Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.',
-            'Apostles\' Creed': 'I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.',
-            'Nicene Creed': 'I believe in one God, the Father almighty, maker of heaven and earth, of all things visible and invisible. I believe in one Lord Jesus Christ, the Only Begotten Son of God, born of the Father before all ages. God from God, Light from Light, true God from true God, begotten, not made, consubstantial with the Father; through him all things were made. For us men and for our salvation he came down from heaven, and by the Holy Spirit was incarnate of the Virgin Mary, and became man. For our sake he was crucified under Pontius Pilate, he suffered death and was buried, and rose again on the third day in accordance with the Scriptures. He ascended into heaven and is seated at the right hand of the Father. He will come again in glory to judge the living and the dead and his kingdom will have no end. I believe in the Holy Spirit, the Lord, the giver of life, who proceeds from the Father and the Son, who with the Father and the Son is adored and glorified, who has spoken through the prophets. I believe in one, holy, catholic and apostolic Church. I confess one Baptism for the forgiveness of sins and I look forward to the resurrection of the dead and the life of the world to come. Amen.',
-            'Act of Contrition': 'O my God, I am heartily sorry for having offended Thee, and I detest all my sins because of thy just punishments, but most of all because they offend Thee, my God, who art all good and deserving of all my love. I firmly resolve with the help of Thy grace to sin no more and to avoid the near occasion of sin. Amen.',
-            'Hail Holy Queen': 'Hail, Holy Queen, Mother of mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve: to thee do we send up our sighs, mourning and weeping in this vale of tears. Turn then, most gracious Advocate, thine eyes of mercy toward us, and after this our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary! Pray for us O holy Mother of God, that we may be made worthy of the promises of Christ.',
-            'Memorare': 'Remember, O most gracious Virgin Mary, that never was it known that anyone who fled to thy protection, implored thy help, or sought thine intercession was left unaided. Inspired by this confidence, I fly unto thee, O Virgin of virgins, my mother; to thee do I come, before thee I stand, sinful and sorrowful. O Mother of the Word Incarnate, despise not my petitions, but in thy mercy hear and answer me. Amen.',
-            'Angelus': 'The Angel of the Lord declared unto Mary. And she conceived of the Holy Spirit. Hail Mary... Behold the handmaid of the Lord. Be it done unto me according to thy word. Hail Mary... And the Word was made flesh. And dwelt among us. Hail Mary... Pray for us, O holy Mother of God. That we may be made worthy of the promises of Christ. Let us pray: Pour forth, we beseech Thee, O Lord, Thy grace into our hearts, that we to whom the Incarnation of Christ Thy Son was made known by the message of an angel, may by His Passion and Cross be brought to the glory of His Resurrection. Through the same Christ Our Lord. Amen.',
-            'Prayer to St. Michael': 'St. Michael the Archangel, defend us in battle, be our protection against the wickedness and snares of the devil; may God rebuke him, we humbly pray; and do thou, O Prince of the heavenly host, by the power of God, cast into hell Satan and all the evil spirits who prowl through the world seeking the ruin of souls. Amen.',
-            'Anima Christi': 'Soul of Christ, sanctify me. Body of Christ, save me. Blood of Christ, inebriate me. Water from the side of Christ, wash me. Passion of Christ, strengthen me. O good Jesus, hear me. Within Thy wounds hide me. Suffer me not to be separated from Thee. From the malignant enemy defend me. In the hour of my death call me. And bid me come unto Thee. That with Thy Saints I may praise Thee. Forever and ever. Amen.',
-            'Guardian Angel Prayer': 'Angel of God, my guardian dear, to whom God\'s love commits me here, ever this day be at my side, to light and guard, to rule and guide. Amen.',
-            'Grace Before Meals': 'Bless us, O Lord, and these Thy gifts, which we are about to receive from Thy bounty, through Christ our Lord. Amen.',
-            'Grace After Meals': 'We give Thee thanks for all Thy benefits, O Almighty God, who livest and reignest world without end. Amen. May the souls of the faithful departed, through the mercy of God, rest in peace. Amen.',
-            'Morning Offering': 'O Jesus, through the Immaculate Heart of Mary, I offer you my prayers, works, joys, and sufferings of this day for all the intentions of your Sacred Heart, in union with the Holy Sacrifice of the Mass throughout the world, for the salvation of souls, the reparation of sins, the reunion of all Christians, and in particular for the intentions of the Holy Father this month. Amen.',
-            'Act of Faith': 'O my God, I firmly believe that you are one God in three divine Persons, Father, Son, and Holy Spirit. I believe that your divine Son became man and died for our sins and that he will come to judge the living and the dead. I believe these and all the truths which the Holy Catholic Church teaches because you have revealed them who are eternal truth and wisdom, who can neither deceive nor be deceived. Amen.',
-            'Act of Hope': 'O Lord God, I hope by your grace for the pardon of all my sins and after life here to gain eternal happiness because you have promised it who are infinitely powerful, faithful, kind, and merciful. In this hope I intend to live and die. Amen.',
-            'Act of Love': 'O Lord God, I love you above all things and I love my neighbor for your sake because you are the highest, infinite and perfect good, worthy of all my love. In this love I intend to live and die. Amen.',
-            'Fatima Prayer': 'O my Jesus, forgive us our sins, save us from the fires of hell; lead all souls to heaven, help especially those who are in most need of Thy mercy.',
-            'Come Holy Spirit': 'Come Holy Spirit, fill the hearts of your faithful and kindle in them the fire of your love. Send forth your Spirit and they shall be created. And you shall renew the face of the earth. Let us pray. O God, who by the light of the Holy Spirit, did instruct the hearts of the faithful, grant that by the same Holy Spirit we may be truly wise and ever enjoy his consolations. Through the same Christ Our Lord. Amen.',
-            'Eternal Rest': 'Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May the souls of all the faithful departed, through the mercy of God, rest in peace. Amen.',
-            'Divine Praises': 'Blessed be God. Blessed be His Holy Name. Blessed be Jesus Christ, true God and true Man. Blessed be the Name of Jesus. Blessed be His Most Sacred Heart. Blessed be His Most Precious Blood. Blessed be Jesus in the Most Holy Sacrament of the Altar. Blessed be the Holy Spirit, the Paraclete. Blessed be the great Mother of God, Mary most Holy. Blessed be her Holy and Immaculate Conception. Blessed be her Glorious Assumption. Blessed be the name of Mary, Virgin and Mother. Blessed be St. Joseph, her most chaste spouse. Blessed be God in His Angels and in His Saints. Amen.',
-            'Confiteor': 'I confess to almighty God and to you, my brothers and sisters, that I have greatly sinned, in my thoughts and in my words, in what I have done and in what I have failed to do, through my fault, through my fault, through my most grievous fault; therefore I ask blessed Mary ever-Virgin, all the Angels and Saints, and you, my brothers and sisters, to pray for me to the Lord our God.'
-        };
-
-        const rosaryMysteries = {
-            "Joyful": ["The Annunciation", "The Visitation", "The Nativity", "The Presentation", "The Finding in the Temple"],
-            "Sorrowful": ["The Agony in the Garden", "The Scourging at the Pillar", "The Crowning with Thorns", "The Carrying of the Cross", "The Crucifixion"],
-            "Glorious": ["The Resurrection", "The Ascension", "The Descent of the Holy Spirit", "The Assumption", "The Coronation"],
-            "Luminous": ["The Baptism of Jesus", "The Wedding at Cana", "The Proclamation of the Kingdom", "The Transfiguration", "The Institution of the Eucharist"]
-        };
-
-        let currentLesson = null;
-
-        function getProgress() {
-            return parseInt(localStorage.getItem('progress') || '0');
-        }
-
-        function setProgress(progress) {
-            localStorage.setItem('progress', progress);
-        }
-
+        // --- Existing showSection function ---
         function showSection(sectionId) {
-            document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(sectionId).classList.remove('hidden');
-            if (sectionId === 'lessons') {
-                loadLessonsList();
+            // Hide all sections
+            document.querySelectorAll('section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            // Show the requested section
+            const targetSection = document.getElementById(sectionId + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
             }
         }
+        // Initial display for the lessons section
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('lessons');
+        });
 
-        function loadLessonsList() {
-            const list = document.getElementById('lessons-list');
-            list.innerHTML = '';
-            const progress = getProgress();
-            lessonsData.forEach((lesson, index) => {
-                const li = document.createElement('li');
-                if (index <= progress) {
-                    const btn = document.createElement('button');
-                    btn.textContent = lesson.title + ' (Unlocked)';
-                    btn.onclick = () => showLesson(index);
-                    li.appendChild(btn);
-                } else {
-                    li.textContent = lesson.title + ' (Locked - Complete previous lessons)';
-                }
-                list.appendChild(li);
-            });
+
+        // --- Chat Modal Toggle JavaScript ---
+        const chatMenuButton = document.getElementById('chat-menu-button');
+        const chatModal = document.getElementById('chat-modal');
+        const closeChatButton = document.getElementById('close-chat-button');
+        const modalOverlay = document.querySelector('.modal-overlay');
+
+        function openChatModal() {
+            chatModal.classList.remove('hidden');
+            modalOverlay.classList.add('active');
         }
 
-        function showLesson(index) {
-            currentLesson = index;
-            document.getElementById('lesson-title').textContent = lessonsData[index].title;
-            document.getElementById('lesson-text').innerHTML = lessonsData[index].content;
-            showSection('lesson-content');
+        function closeChatModal() {
+            chatModal.classList.add('hidden');
+            modalOverlay.classList.remove('active');
         }
 
-        function startQuiz() {
-            if (currentLesson === null) return;
-            const quizData = lessonsData[currentLesson].quiz;
-            const container = document.getElementById('quiz-questions');
-            container.innerHTML = '';
-            quizData.forEach((q, qIdx) => {
-                const div = document.createElement('div');
-                div.classList.add('quiz-question');
-                div.innerHTML = `<p>${q.question}</p>`;
-                q.options.forEach((opt, oIdx) => {
-                    div.innerHTML += `<label class="quiz-option"><input type="radio" name="q${qIdx}" value="${oIdx}"> ${opt}</label>`;
-                });
-                container.appendChild(div);
-            });
-            showSection('quiz');
+        if (chatMenuButton) {
+            chatMenuButton.addEventListener('click', openChatModal);
+        } else {
+            console.error("Chat menu button with ID 'chat-menu-button' not found.");
         }
 
-        function submitQuiz() {
-            if (currentLesson === null) return;
-            const quizData = lessonsData[currentLesson].quiz;
-            let score = 0;
-            quizData.forEach((q, idx) => {
-                const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-                if (selected && parseInt(selected.value) === q.correct) {
-                    score++;
-                }
-            });
-            if (score === quizData.length) {
-                alert('Congratulations! You passed the quiz.');
-                const progress = getProgress();
-                if (currentLesson + 1 > progress) {
-                    setProgress(currentLesson + 1);
-                }
-                showSection('lessons');
-            } else {
-                alert('Try again after reviewing the material. Score: ' + score + '/' + quizData.length);
-                showSection('lesson-content');
-            }
+        if (closeChatButton) {
+            closeChatButton.addEventListener('click', closeChatModal);
         }
 
+        modalOverlay.addEventListener('click', closeChatModal);
 
-       function showPrayer(prayerName) {
-            document.getElementById('prayers-list').classList.add('hidden');
-            document.getElementById('prayer-text').innerText = prayers[prayerName] || 'Prayer text not found.';
-            document.getElementById('prayer-text').classList.remove('hidden');
-            document.getElementById('prayer-title').innerText = prayerName;
-        }
-
-        function resetPrayer() {
-            document.getElementById('prayers-list').classList.remove('hidden');
-            document.getElementById('prayer-text').classList.add('hidden');
-            document.getElementById('prayer-text').innerText = '';
-            document.getElementById('prayer-title').innerText = 'Common Catholic Prayers';
-        }
-
-        function quitApp() {
-            alert('Thank you for using Catholic Faith Journey. God bless!');
-            window.location.reload();
-        }
-
-        // Initial show
-        showSection('main');
+        // --- Important: Ensure Firebase chat initialization is called only once ---
+        // The initializeFirebaseChat function from the module script above will be called
+        // when DOMContentLoaded fires, so no need to call it again here.
     </script>
 </body>
 </html>
