@@ -243,193 +243,40 @@
         #close-chat-button:hover {
             background-color: #c82333;
         }
+
+        /* --- Username Input Specific Styles --- */
+        #chat-modal .user-status-area {
+            padding: 10px 15px;
+            background-color: #e2e8f0; /* Light gray-blue */
+            border-bottom: 1px solid #cbd5e0;
+            text-align: center;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+        #chat-modal #username-input-area {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #chat-modal #username-input {
+            padding: 8px 12px;
+            border: 1px solid #a0aec0;
+            border-radius: 5px;
+            flex-grow: 1;
+            max-width: 200px; /* Limit input width */
+        }
+        #chat-modal #save-username-button {
+            background-color: #48bb78; /* Green for save */
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #chat-modal #save-username-button:hover {
+            background-color: #38a169;
+        }
     </style>
-
-    <!-- Firebase SDK CDN links -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-
-    <script type="module">
-        // Firebase SDK imports for modular syntax
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"; 
-
-        // Your web app's Firebase configuration (from your Firebase Console)
-        const firebaseConfig = {
-            apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
-            authDomain: "ocia-application.firebaseapp.com",
-            projectId: "ocia-application",
-            storageBucket: "ocia-application.firebasestorage.app",
-            messagingSenderId: "113168534647",
-            appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
-            measurementId: "G-WRGSXQCY5D"
-        };
-
-        // Initialize Firebase (only once for the entire app)
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const analytics = getAnalytics(app); // Ensure getAnalytics is imported and used correctly
-
-        // Global variables for chat logic (from Canvas environment, if available)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let currentUserId = null;
-        let isAuthReady = false;
-
-        // Get chat elements within the chat modal
-        const messagesArea = document.querySelector('#chat-modal #messages-area');
-        const messageInput = document.querySelector('#chat-modal #message-input');
-        const sendButton = document.querySelector('#chat-modal #send-button');
-        const loadingIndicator = document.querySelector('#chat-modal #loading-indicator');
-
-        /**
-         * Initializes Firebase and sets up authentication.
-         */
-        async function initializeFirebaseChat() { // Renamed to avoid conflict with global init
-            try {
-                // Listen for authentication state changes
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        currentUserId = user.uid;
-                        console.log("Firebase authenticated. User ID:", currentUserId);
-                        isAuthReady = true;
-                        if (loadingIndicator) {
-                            loadingIndicator.remove();
-                        }
-                        setupRealtimeListener();
-                    } else {
-                        try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                                console.log("Signed in with custom token.");
-                            } else {
-                                await signInAnonymously(auth);
-                                console.log("Signed in anonymously.");
-                            }
-                        } catch (error) {
-                            console.error("Error signing in:", error);
-                            if (messagesArea) {
-                                messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${error.message}</div>`;
-                            }
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error initializing Firebase Chat:", error);
-                if (messagesArea) {
-                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase Chat initialization failed. ${error.message}</div>`;
-                }
-            }
-        }
-
-        /**
-         * Sets up a real-time listener for messages from Firestore.
-         */
-        function setupRealtimeListener() {
-            if (!db || !currentUserId) {
-                console.warn("Firestore or User ID not ready for listener setup.");
-                return;
-            }
-
-            const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-            const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
-
-            onSnapshot(q, (snapshot) => {
-                if (messagesArea) {
-                    messagesArea.innerHTML = '';
-                    snapshot.forEach((doc) => {
-                        const message = doc.data();
-                        displayMessage(message);
-                    });
-                    messagesArea.scrollTop = messagesArea.scrollHeight;
-                }
-            }, (error) => {
-                console.error("Error listening to messages:", error);
-                if (messagesArea) {
-                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error loading messages: ${error.message}</div>`;
-                }
-            });
-        }
-
-        /**
-         * Displays a single message in the chat area.
-         * @param {object} message - The message object containing text, senderId, and timestamp.
-         */
-        function displayMessage(message) {
-            if (!messagesArea) return;
-
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message-bubble');
-
-            const isSentByCurrentUser = message.senderId === currentUserId;
-            if (isSentByCurrentUser) {
-                messageElement.classList.add('sent');
-            } else {
-                messageElement.classList.add('received');
-            }
-
-            const senderIdDisplay = isSentByCurrentUser ? 'You' : `User: ${message.senderId ? message.senderId.substring(0, 8) + '...' : 'Unknown'}`;
-            const senderElement = document.createElement('div');
-            senderElement.classList.add('message-sender');
-            senderElement.textContent = senderIdDisplay;
-            messageElement.appendChild(senderElement);
-
-            const textElement = document.createElement('div');
-            textElement.textContent = message.text;
-            messageElement.appendChild(textElement);
-
-            messagesArea.appendChild(messageElement);
-        }
-
-        /**
-         * Sends a new message to Firestore.
-         */
-        async function sendMessage() {
-            if (!isAuthReady || !currentUserId || !messageInput) {
-                console.warn("Firebase not ready, user not authenticated, or message input not found to send message.");
-                return;
-            }
-
-            const messageText = messageInput.value.trim();
-            if (messageText === '') {
-                return;
-            }
-
-            try {
-                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-                await addDoc(messagesCollectionRef, {
-                    text: messageText,
-                    senderId: currentUserId,
-                    timestamp: serverTimestamp()
-                });
-                messageInput.value = '';
-            } catch (error) {
-                console.error("Error sending message:", error);
-            }
-        }
-
-        // Event listeners for sending messages
-        if (sendButton) {
-            sendButton.addEventListener('click', sendMessage);
-        }
-        if (messageInput) {
-            messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-        }
-
-        // Initialize Firebase chat logic when the DOM content is fully loaded
-        document.addEventListener('DOMContentLoaded', initializeFirebaseChat);
-    </script>
 </head>
 <body>
     <header>
@@ -474,6 +321,15 @@
             <div class="chat-header">
                 O.C.I.A. Chat
             </div>
+
+            <div id="user-status-area" class="user-status-area">
+                <span id="welcome-message"></span>
+                <div id="username-input-area" class="hidden">
+                    <input type="text" id="username-input" placeholder="Enter your username">
+                    <button id="save-username-button">Save</button>
+                </div>
+            </div>
+
             <div id="messages-area" class="messages-area">
                 <div id="loading-indicator" class="loading-message">Loading chat...</div>
             </div>
@@ -488,56 +344,407 @@
     <!-- Modal Overlay (for dimming background) -->
     <div class="modal-overlay"></div>
 
-    <script>
-        // --- Existing showSection function ---
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            // Show the requested section
-            const targetSection = document.getElementById(sectionId + '-section');
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
+    <script type="module">
+        // Firebase SDK imports for modular syntax
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"; // Removed for now to avoid errors
+
+        // Your web app's Firebase configuration (from your Firebase Console)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
+            authDomain: "ocia-application.firebaseapp.com",
+            projectId: "ocia-application",
+            storageBucket: "ocia-application.firebasestorage.app",
+            messagingSenderId: "113168534647",
+            appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
+            measurementId: "G-WRGSXQCY5D"
+        };
+
+        // Initialize Firebase (only once for the entire app)
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        // const analytics = getAnalytics(app); // Removed for now
+
+        // Global variables for chat logic (from Canvas environment, if available)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let currentUserId = null;
+        let currentUsername = 'Anonymous'; // Default username
+        let isAuthReady = false;
+
+        // --- All JavaScript logic wrapped in DOMContentLoaded ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get chat elements within the chat modal
+            const messagesArea = document.querySelector('#chat-modal #messages-area');
+            const messageInput = document.querySelector('#chat-modal #message-input');
+            const sendButton = document.querySelector('#chat-modal #send-button');
+            const loadingIndicator = document.querySelector('#chat-modal #loading-indicator');
+
+            // Username elements
+            const welcomeMessageSpan = document.querySelector('#chat-modal #welcome-message');
+            const usernameInputArea = document.querySelector('#chat-modal #username-input-area');
+            const usernameInput = document.querySelector('#chat-modal #username-input');
+            const saveUsernameButton = document.querySelector('#chat-modal #save-username-button');
+
+
+            /**
+             * Initializes Firebase and sets up authentication.
+             */
+            async function initializeFirebaseChat() {
+                try {
+                    // Listen for authentication state changes
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            currentUserId = user.uid;
+                            console.log("Firebase authenticated. User ID:", currentUserId);
+                            isAuthReady = true;
+
+                            // Fetch user's username
+                            const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}`);
+                            const userDocSnap = await getDoc(userDocRef);
+
+                            if (userDocSnap.exists() && userDocSnap.data().username) {
+                                currentUsername = userDocSnap.data().username;
+                                welcomeMessageSpan.textContent = `Welcome, ${currentUsername}!`;
+                                usernameInputArea.classList.add('hidden'); // Hide input if username exists
+                                enableChatInput();
+                            } else {
+                                welcomeMessageSpan.textContent = `Welcome! Please set a username:`;
+                                usernameInputArea.classList.remove('hidden'); // Show input if no username
+                                disableChatInput(); // Disable chat input until username is set
+                            }
+
+                            if (loadingIndicator) {
+                                loadingIndicator.remove();
+                            }
+                            setupRealtimeListener();
+                        } else {
+                            try {
+                                if (initialAuthToken) {
+                                    await signInWithCustomToken(auth, initialAuthToken);
+                                    console.log("Signed in with custom token.");
+                                } else {
+                                    await signInAnonymously(auth);
+                                    console.log("Signed in anonymously.");
+                                }
+                            } catch (error) {
+                                console.error("Error signing in:", error);
+                                if (messagesArea) {
+                                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${error.message}</div>`;
+                                }
+                            }
+                        }
+                    });
+
+                } catch (error) {
+                    console.error("Error initializing Firebase Chat:", error);
+                    if (messagesArea) {
+                        messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase Chat initialization failed. ${error.message}</div>`;
+                    }
+                }
+            }
+
+            /**
+             * Saves the user's chosen username to Firestore.
+             */
+            async function saveUsername() {
+                const newUsername = usernameInput.value.trim();
+                if (newUsername.length < 3) {
+                    alert('Username must be at least 3 characters long.'); // Using alert for simplicity, consider custom modal
+                    return;
+                }
+
+                if (!currentUserId) {
+                    console.error("Cannot save username: User not authenticated.");
+                    return;
+                }
+
+                try {
+                    const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}`);
+                    await setDoc(userDocRef, { username: newUsername }, { merge: true });
+                    currentUsername = newUsername;
+                    welcomeMessageSpan.textContent = `Welcome, ${currentUsername}!`;
+                    usernameInputArea.classList.add('hidden'); // Hide input
+                    enableChatInput(); // Enable chat input
+                    console.log("Username saved:", newUsername);
+                } catch (error) {
+                    console.error("Error saving username:", error);
+                    alert("Error saving username. Please try again."); // Using alert for simplicity
+                }
+            }
+
+            /**
+             * Enables the chat message input and send button.
+             */
+            function enableChatInput() {
+                if (messageInput) messageInput.disabled = false;
+                if (sendButton) sendButton.disabled = false;
+            }
+
+            /**
+             * Disables the chat message input and send button.
+             */
+            function disableChatInput() {
+                if (messageInput) messageInput.disabled = true;
+                if (sendButton) sendButton.disabled = true;
+            }
+
+            /**
+             * Sets up a real-time listener for messages from Firestore.
+             */
+            function setupRealtimeListener() {
+                if (!db || !currentUserId) {
+                    console.warn("Firestore or User ID not ready for listener setup.");
+                    return;
+                }
+
+                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
+                const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
+
+                onSnapshot(q, (snapshot) => {
+                    if (messagesArea) {
+                        messagesArea.innerHTML = '';
+                        snapshot.forEach((doc) => {
+                            const message = doc.data();
+                            displayMessage(message);
+                        });
+                        messagesArea.scrollTop = messagesArea.scrollHeight;
+                    }
+                }, (error) => {
+                    console.error("Error listening to messages:", error);
+                    if (messagesArea) {
+                        messagesArea.innerHTML = `<div class="loading-message text-red-500">Error loading messages: ${error.message}</div>`;
+                    }
+                });
+            }
+
+            /**
+             * Displays a single message in the chat area.
+             * @param {object} message - The message object containing text, senderId, and timestamp.
+             */
+            function displayMessage(message) {
+                if (!messagesArea) return;
+
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message-bubble');
+
+                const isSentByCurrentUser = message.senderId === currentUserId;
+                if (isSentByCurrentUser) {
+                    messageElement.classList.add('sent');
+                } else {
+                    messageElement.classList.add('received');
+                }
+
+                // Use username if available, otherwise fallback to truncated senderId
+                const senderDisplayName = message.username || (message.senderId ? `User: ${message.senderId.substring(0, 8)}...` : 'Unknown');
+                
+                const senderElement = document.createElement('div');
+                senderElement.classList.add('message-sender');
+                senderElement.textContent = senderDisplayName;
+                messageElement.appendChild(senderElement);
+
+                const textElement = document.createElement('div');
+                textElement.textContent = message.text;
+                messageElement.appendChild(textElement);
+
+                messagesArea.appendChild(messageElement);
+            }
+
+            /**
+             * Sends a new message to Firestore.
+             */
+            async function sendMessage() {
+                if (!isAuthReady || !currentUserId || !messageInput || !currentUsername || currentUsername === 'Anonymous') {
+                    console.warn("Firebase not ready, user not authenticated, username not set, or message input not found to send message.");
+                    // Optionally, show a message to the user: "Please set your username first!"
+                    alert("Please set your username before sending messages.");
+                    return;
+                }
+
+                const messageText = messageInput.value.trim();
+                if (messageText === '') {
+                    return;
+                }
+
+                try {
+                    const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
+                    await addDoc(messagesCollectionRef, {
+                        text: messageText,
+                        senderId: currentUserId,
+                        username: currentUsername, // Include the username in the message
+                        timestamp: serverTimestamp()
+                    });
+                    messageInput.value = '';
+                } catch (error) {
+                    console.error("Error sending message:", error);
+                }
+            }
+
+            // Event listeners for sending messages
+            if (sendButton) {
+                sendButton.addEventListener('click', sendMessage);
+            }
+            if (messageInput) {
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+
+            // Event listener for saving username
+            if (saveUsernameButton) {
+                saveUsernameButton.addEventListener('click', saveUsername);
+            }
+            if (usernameInput) {
+                usernameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        saveUsername();
+                    }
+                });
+            }
+
+
+            // --- Existing showSection function ---
+            function showSection(sectionId) {
+                // Hide all sections
+                document.querySelectorAll('section').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                // Show the requested section
+                const targetSection = document.getElementById(sectionId + '-section');
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                }
+            }
+            // Initial display for the lessons section
+            showSection('lessons');
+
+
+            // --- Chat Modal Toggle JavaScript ---
+            const chatMenuButton = document.getElementById('chat-menu-button');
+            const chatModal = document.getElementById('chat-modal');
+            const closeChatButton = document.getElementById('close-chat-button');
+            const modalOverlay = document.querySelector('.modal-overlay');
+
+            function openChatModal() {
+                chatModal.classList.remove('hidden');
+                modalOverlay.classList.add('active');
+            }
+
+            function closeChatModal() {
+                chatModal.classList.add('hidden');
+                modalOverlay.classList.remove('active');
+            }
+
+            if (chatMenuButton) {
+                chatMenuButton.addEventListener('click', openChatModal);
+            } else {
+                console.error("Chat menu button with ID 'chat-menu-button' not found.");
+            }
+
+            if (closeChatButton) {
+                closeChatButton.addEventListener('click', closeChatModal);
+            }
+
+            modalOverlay.addEventListener('click', closeChatModal);
+
+            // Initialize Firebase chat logic after all elements and listeners are set up
+            initializeFirebaseChat();
+        }); // End of DOMContentLoaded listener
+
+        // --- Prayer texts and Rosary logic (outside DOMContentLoaded if not using DOM elements directly) ---
+        // If these functions rely on DOM elements that are dynamically created or hidden,
+        // they might need to be called within DOMContentLoaded or after elements are visible.
+        // For now, keeping them here assuming they are called by button clicks.
+        const signOfCross = "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.";
+        const apostlesCreed = "I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born by the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.";
+        const ourFather = "Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.";
+        const hailMary = "Hail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.";
+        const gloryBe = "Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.";
+        const fatima = "O my Jesus, forgive us our sins, save us from the fires of hell, and lead all souls to heaven, especially those most in need of thy mercy. Amen";
+        const hailholyqueen = "Hail, Holy Queen, Mother of Mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve. To thee do we send up our sighs, mourning and weeping in this valley of tears. Turn, most gracious advocate, thine eyes of mercy toward us, and after this, our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary. Pray for us, O holy Mother of God. That we may be made worthy of the promises of Christ."
+        
+        // Mysteries with scripture
+        const joyfulMysteries = [
+            {name: "The Annunciation", scripture: "Luke 1:26-38\n\nIn the sixth month the angel Gabriel was sent from God to a city of Galilee named Nazareth, to a virgin betrothed to a man whose name was Joseph, of the house of David; and the virgin's name was Mary. And he came to her and said, “Hail, full of grace, the Lord is with you!” But she was greatly troubled at the saying, and considered in her mind what sort of greeting this might be. And the angel said to her, “Do not be afraid, Mary, for you have found favor with God. And behold, you will conceive in your womb and bear a son, and you shall call his name Jesus. He will be great, and will be called the Son of the Most High; and the Lord God will give to him the throne of his father David, and he will reign over the house of Jacob for ever; and of his kingdom there will be no end.” And Mary said to the angel, “How can this be, since I have no husband?” And the angel said to her, “The Holy Spirit will come upon you, and the power of the Most High will overshadow you; therefore the child to be born will be called holy, the Son of God. And behold, your kinswoman Elizabeth in her old age has also conceived a son; and this is the sixth month with her who was called barren. For with God nothing will be impossible.” And Mary said, “Behold, I am the handmaid of the Lord; let it be to me according to your word.” And the angel departed from her."},
+            {name: "The Visitation", scripture: "Luke 1:39-56\n\nIn those days Mary arose and went with haste into the hill country, to a city of Judah, and she entered the house of Zechariah and greeted Elizabeth. And when Elizabeth heard the greeting of Mary, the babe leaped in her womb; and Elizabeth was filled with the Holy Spirit and she exclaimed with a loud cry, “Blessed are you among women, and blessed is the fruit of your womb! And why is this granted me, that the mother of my Lord should come to me? For behold, when the voice of your greeting came to my ears, the babe in my womb leaped for joy. And blessed is she who believed that there would be a fulfilment of what was spoken to her from the Lord.” And Mary said, “My soul magnifies the Lord, and my spirit rejoices in God my Savior, for he has regarded the low estate of his handmaiden. For behold, henceforth all generations will call me blessed; for he who is mighty has done great things for me, and holy is his name. And his mercy is on those who fear him"}
+            // ... (rest of your existing prayer texts and rosary logic)
+        ];
+
+        // Placeholder for missing rosary and prayer functions for brevity in this example.
+        // You would have these functions already in your Catechism app.html
+        function startRosary(mysteryType) {
+            console.log("Starting Rosary for:", mysteryType);
+            // Implement your rosary logic here
+            alert(`Rosary for ${mysteryType} started! (Functionality to be implemented)`);
+        }
+
+        function nextPrayer(mysteryType) {
+            console.log("Next prayer for:", mysteryType);
+            // Implement your next prayer logic here
+            alert(`Next prayer in ${mysteryType} mysteries! (Functionality to be implemented)`);
+        }
+
+        const prayersData = {
+            "Sign of the Cross": signOfCross,
+            "Our Father": ourFather,
+            "Hail Mary": hailMary,
+            "Glory Be": gloryBe,
+            "Apostles' Creed": apostlesCreed,
+            "Fatima Prayer": fatima,
+            "Hail Holy Queen": hailholyqueen,
+            // ... add all your other prayers here
+        };
+
+        function showPrayer(prayerName) {
+            const prayerTextElement = document.getElementById('prayer-text');
+            const prayersListElement = document.getElementById('prayers-list');
+            const prayerTitleElement = document.getElementById('prayer-title');
+
+            if (prayersData[prayerName] && prayerTextElement && prayersListElement && prayerTitleElement) {
+                prayerTextElement.textContent = prayersData[prayerName];
+                prayerTextElement.classList.remove('hidden');
+                prayersListElement.classList.add('hidden'); // Hide the list of buttons
+                prayerTitleElement.textContent = prayerName; // Update title to current prayer
+            } else {
+                console.error("Prayer not found or elements missing:", prayerName);
             }
         }
-        // Initial display for the lessons section
-        document.addEventListener('DOMContentLoaded', () => {
-            showSection('lessons');
-        });
 
+        function resetPrayer() {
+            const prayerTextElement = document.getElementById('prayer-text');
+            const prayersListElement = document.getElementById('prayers-list');
+            const prayerTitleElement = document.getElementById('prayer-title');
 
-        // --- Chat Modal Toggle JavaScript ---
-        const chatMenuButton = document.getElementById('chat-menu-button');
-        const chatModal = document.getElementById('chat-modal');
-        const closeChatButton = document.getElementById('close-chat-button');
-        const modalOverlay = document.querySelector('.modal-overlay');
-
-        function openChatModal() {
-            chatModal.classList.remove('hidden');
-            modalOverlay.classList.add('active');
+            if (prayerTextElement && prayersListElement && prayerTitleElement) {
+                prayerTextElement.classList.add('hidden');
+                prayersListElement.classList.remove('hidden'); // Show the list of buttons
+                prayerTitleElement.textContent = "Common Catholic Prayers"; // Reset title
+            }
         }
 
-        function closeChatModal() {
-            chatModal.classList.add('hidden');
-            modalOverlay.classList.remove('active');
+        // Placeholder for quitApp, startQuiz, submitQuiz functions
+        function quitApp() {
+            alert("Thank you for using Catholic Faith Journey!");
+            // You might want to close the window or redirect
+            // window.close(); // Note: This might not work in all browsers
         }
 
-        if (chatMenuButton) {
-            chatMenuButton.addEventListener('click', openChatModal);
-        } else {
-            console.error("Chat menu button with ID 'chat-menu-button' not found.");
+        function startQuiz() {
+            alert("Starting quiz! (Functionality to be implemented)");
+            // Implement quiz start logic
         }
 
-        if (closeChatButton) {
-            closeChatButton.addEventListener('click', closeChatModal);
+        function submitQuiz() {
+            alert("Submitting quiz! (Functionality to be implemented)");
+            // Implement quiz submission logic
         }
 
-        modalOverlay.addEventListener('click', closeChatModal);
-
-        // --- Important: Ensure Firebase chat initialization is called only once ---
-        // The initializeFirebaseChat function from the module script above will be called
-        // when DOMContentLoaded fires, so no need to call it again here.
     </script>
 </body>
 </html>
