@@ -244,7 +244,7 @@
             background-color: #c82333;
         }
 
-        /* --- Username Input Specific Styles --- */
+        /* --- Username/Class Input Specific Styles --- */
         #chat-modal .user-status-area {
             padding: 10px 15px;
             background-color: #e2e8f0; /* Light gray-blue */
@@ -253,27 +253,30 @@
             font-size: 0.9em;
             color: #4a5568;
         }
-        #chat-modal #username-input-area {
+        #chat-modal #username-class-input-area { /* New ID for combined input area */
             display: flex;
+            flex-direction: column; /* Stack inputs vertically */
             gap: 10px;
             justify-content: center;
             align-items: center;
             margin-top: 10px;
         }
-        #chat-modal #username-input {
+        #chat-modal #username-input,
+        #chat-modal #class-input { /* Apply styles to both inputs */
             padding: 8px 12px;
             border: 1px solid #a0aec0;
             border-radius: 5px;
             flex-grow: 1;
-            max-width: 200px; /* Limit input width */
+            width: 80%; /* Make them take more width */
+            max-width: 250px; /* Limit input width */
         }
-        #chat-modal #save-username-button {
+        #chat-modal #save-profile-button { /* Renamed button */
             background-color: #48bb78; /* Green for save */
             padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
         }
-        #chat-modal #save-username-button:hover {
+        #chat-modal #save-profile-button:hover {
             background-color: #38a169;
         }
     </style>
@@ -283,11 +286,11 @@
         <h1>Catholic Faith Journey</h1>
     </header>
     <nav>
-        <button onclick="showSection('lessons')">Lessons (Progressive Instruction & Quizzes)</button>
-        <button onclick="showSection('spiritual-formation')">Spiritual Formation</button>
+        <button id="lessons-nav-button">Lessons (Progressive Instruction & Quizzes)</button>
+        <button id="spiritual-nav-button">Spiritual Formation</button>
         <button id="chat-menu-button">chat</button> <!-- This button opens the chat modal -->
-        <button onclick="showSection('student-resources')">Student Resources</button>
-        <button onclick="showSection('quit')">Quit</button>
+        <button id="resources-nav-button">Student Resources</button>
+        <button id="quit-nav-button">Quit</button>
     </nav>
 
     <!-- Main content sections -->
@@ -324,9 +327,11 @@
 
             <div id="user-status-area" class="user-status-area">
                 <span id="welcome-message"></span>
-                <div id="username-input-area" class="hidden">
+                <span id="current-class-display"></span> <!-- New span for class display -->
+                <div id="username-class-input-area" class="hidden"> <!-- Renamed ID -->
                     <input type="text" id="username-input" placeholder="Enter your username">
-                    <button id="save-username-button">Save</button>
+                    <input type="text" id="class-input" placeholder="Enter your Class Name (e.g., OCIA 1)"> <!-- New input for class -->
+                    <button id="save-profile-button">Save Profile</button> <!-- Renamed button -->
                 </div>
             </div>
 
@@ -348,7 +353,7 @@
         // Firebase SDK imports for modular syntax
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"; // Removed for now to avoid errors
 
         // Your web app's Firebase configuration (from your Firebase Console)
@@ -374,27 +379,61 @@
 
         let currentUserId = null;
         let currentUsername = 'Anonymous'; // Default username
+        let currentClassId = null; // New variable for class ID
         let isAuthReady = false;
 
-        // --- All JavaScript logic wrapped in DOMContentLoaded ---
+        // --- showSection function (moved to global scope for programmatic event listeners) ---
+        // This function now handles both direct IDs and IDs ending with '-section'
+        function showSection(sectionId) {
+            console.log("showSection called with:", sectionId);
+            // Hide all sections
+            document.querySelectorAll('section').forEach(section => {
+                if (!section.classList.contains('hidden')) { // Only add if not already hidden
+                    section.classList.add('hidden');
+                    console.log("Added 'hidden' to:", section.id);
+                }
+            });
+
+            // Try to find the section by direct ID first
+            let targetSection = document.getElementById(sectionId);
+            
+            // If not found, try with '-section' suffix (for consistency with naming)
+            if (!targetSection) {
+                targetSection = document.getElementById(sectionId + '-section');
+            }
+
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                console.log("Removed 'hidden' from:", targetSection.id);
+            } else {
+                console.error("Target section not found with ID:", sectionId, "or", sectionId + '-section');
+            }
+        }
+
+        // --- All other JavaScript logic wrapped in DOMContentLoaded ---
         document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOMContentLoaded fired.");
+
             // Get chat elements within the chat modal
             const messagesArea = document.querySelector('#chat-modal #messages-area');
             const messageInput = document.querySelector('#chat-modal #message-input');
             const sendButton = document.querySelector('#chat-modal #send-button');
             const loadingIndicator = document.querySelector('#chat-modal #loading-indicator');
 
-            // Username elements
+            // Username/Class elements
             const welcomeMessageSpan = document.querySelector('#chat-modal #welcome-message');
-            const usernameInputArea = document.querySelector('#chat-modal #username-input-area');
+            const currentClassDisplay = document.querySelector('#chat-modal #current-class-display');
+            const usernameClassInputArea = document.querySelector('#chat-modal #username-class-input-area');
             const usernameInput = document.querySelector('#chat-modal #username-input');
-            const saveUsernameButton = document.querySelector('#chat-modal #save-username-button');
+            const classInput = document.querySelector('#chat-modal #class-input');
+            const saveProfileButton = document.querySelector('#chat-modal #save-profile-button');
 
 
             /**
              * Initializes Firebase and sets up authentication.
              */
             async function initializeFirebaseChat() {
+                console.log("initializeFirebaseChat called.");
                 try {
                     // Listen for authentication state changes
                     onAuthStateChanged(auth, async (user) => {
@@ -403,25 +442,33 @@
                             console.log("Firebase authenticated. User ID:", currentUserId);
                             isAuthReady = true;
 
-                            // Fetch user's username
+                            // Fetch user's profile (username and classId)
                             const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}`);
                             const userDocSnap = await getDoc(userDocRef);
 
-                            if (userDocSnap.exists() && userDocSnap.data().username) {
+                            if (userDocSnap.exists() && userDocSnap.data().username && userDocSnap.data().classId) {
                                 currentUsername = userDocSnap.data().username;
+                                currentClassId = userDocSnap.data().classId;
                                 welcomeMessageSpan.textContent = `Welcome, ${currentUsername}!`;
-                                usernameInputArea.classList.add('hidden'); // Hide input if username exists
+                                currentClassDisplay.textContent = ` (Class: ${currentClassId})`;
+                                usernameClassInputArea.classList.add('hidden'); // Hide input if profile exists
                                 enableChatInput();
                             } else {
-                                welcomeMessageSpan.textContent = `Welcome! Please set a username:`;
-                                usernameInputArea.classList.remove('hidden'); // Show input if no username
-                                disableChatInput(); // Disable chat input until username is set
+                                welcomeMessageSpan.textContent = `Welcome! Please set your profile:`;
+                                currentClassDisplay.textContent = ''; // Clear class display
+                                usernameClassInputArea.classList.remove('hidden'); // Show input if no profile
+                                disableChatInput(); // Disable chat input until profile is set
+                                // Pre-fill inputs if partial data exists (e.g., if only username was set before)
+                                if (userDocSnap.exists()) {
+                                    usernameInput.value = userDocSnap.data().username || '';
+                                    classInput.value = userDocSnap.data().classId || '';
+                                }
                             }
 
                             if (loadingIndicator) {
                                 loadingIndicator.remove();
                             }
-                            setupRealtimeListener();
+                            setupRealtimeListener(); // Always set up listener after auth, it will filter by classId
                         } else {
                             try {
                                 if (initialAuthToken) {
@@ -449,31 +496,45 @@
             }
 
             /**
-             * Saves the user's chosen username to Firestore.
+             * Saves the user's chosen username and class ID to Firestore.
              */
-            async function saveUsername() {
+            async function saveProfile() {
                 const newUsername = usernameInput.value.trim();
+                const newClassId = classInput.value.trim();
+
                 if (newUsername.length < 3) {
-                    alert('Username must be at least 3 characters long.'); // Using alert for simplicity, consider custom modal
+                    alert('Username must be at least 3 characters long.');
+                    return;
+                }
+                if (newClassId.length < 2) {
+                    alert('Class Name must be at least 2 characters long.');
                     return;
                 }
 
                 if (!currentUserId) {
-                    console.error("Cannot save username: User not authenticated.");
+                    console.error("Cannot save profile: User not authenticated.");
                     return;
                 }
 
                 try {
                     const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}`);
-                    await setDoc(userDocRef, { username: newUsername }, { merge: true });
+                    await setDoc(userDocRef, { username: newUsername, classId: newClassId }, { merge: true });
+                    
                     currentUsername = newUsername;
+                    currentClassId = newClassId; // Update currentClassId
+                    
                     welcomeMessageSpan.textContent = `Welcome, ${currentUsername}!`;
-                    usernameInputArea.classList.add('hidden'); // Hide input
+                    currentClassDisplay.textContent = ` (Class: ${currentClassId})`;
+                    usernameClassInputArea.classList.add('hidden'); // Hide input
                     enableChatInput(); // Enable chat input
-                    console.log("Username saved:", newUsername);
+                    console.log("User profile saved:", { username: newUsername, classId: newClassId });
+
+                    // Re-setup listener to apply new class filter
+                    setupRealtimeListener(); 
+
                 } catch (error) {
-                    console.error("Error saving username:", error);
-                    alert("Error saving username. Please try again."); // Using alert for simplicity
+                    console.error("Error saving profile:", error);
+                    alert("Error saving profile. Please try again.");
                 }
             }
 
@@ -497,17 +558,24 @@
              * Sets up a real-time listener for messages from Firestore.
              */
             function setupRealtimeListener() {
-                if (!db || !currentUserId) {
-                    console.warn("Firestore or User ID not ready for listener setup.");
+                if (!db || !currentUserId || !currentClassId) {
+                    console.warn("Firestore, User ID, or Class ID not ready for listener setup. Chat messages will not load.");
+                    if (messagesArea) {
+                         messagesArea.innerHTML = `<div class="loading-message">Please set your username and class to view chat messages.</div>`;
+                    }
                     return;
                 }
 
                 const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-                const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
+                // Query messages where classId matches current user's classId
+                const q = query(messagesCollectionRef, where('classId', '==', currentClassId), orderBy('timestamp', 'asc'));
 
                 onSnapshot(q, (snapshot) => {
                     if (messagesArea) {
                         messagesArea.innerHTML = '';
+                        if (snapshot.empty) {
+                            messagesArea.innerHTML = `<div class="loading-message">No messages in this class yet. Be the first to say hello!</div>`;
+                        }
                         snapshot.forEach((doc) => {
                             const message = doc.data();
                             displayMessage(message);
@@ -524,7 +592,7 @@
 
             /**
              * Displays a single message in the chat area.
-             * @param {object} message - The message object containing text, senderId, and timestamp.
+             * @param {object} message - The message object containing text, senderId, username, classId, and timestamp.
              */
             function displayMessage(message) {
                 if (!messagesArea) return;
@@ -539,7 +607,7 @@
                     messageElement.classList.add('received');
                 }
 
-                // Use username if available, otherwise fallback to truncated senderId
+                // Use username from message data, fallback to truncated senderId if somehow missing
                 const senderDisplayName = message.username || (message.senderId ? `User: ${message.senderId.substring(0, 8)}...` : 'Unknown');
                 
                 const senderElement = document.createElement('div');
@@ -558,10 +626,9 @@
              * Sends a new message to Firestore.
              */
             async function sendMessage() {
-                if (!isAuthReady || !currentUserId || !messageInput || !currentUsername || currentUsername === 'Anonymous') {
-                    console.warn("Firebase not ready, user not authenticated, username not set, or message input not found to send message.");
-                    // Optionally, show a message to the user: "Please set your username first!"
-                    alert("Please set your username before sending messages.");
+                if (!isAuthReady || !currentUserId || !messageInput || !currentUsername || currentUsername === 'Anonymous' || !currentClassId) {
+                    console.warn("Firebase not ready, user not authenticated, username/class not set, or message input not found to send message.");
+                    alert("Please set your username and class name before sending messages.");
                     return;
                 }
 
@@ -575,7 +642,8 @@
                     await addDoc(messagesCollectionRef, {
                         text: messageText,
                         senderId: currentUserId,
-                        username: currentUsername, // Include the username in the message
+                        username: currentUsername,
+                        classId: currentClassId, // Include the classId in the message
                         timestamp: serverTimestamp()
                     });
                     messageInput.value = '';
@@ -587,6 +655,7 @@
             // Event listeners for sending messages
             if (sendButton) {
                 sendButton.addEventListener('click', sendMessage);
+                console.log("Send button event listener attached.");
             }
             if (messageInput) {
                 messageInput.addEventListener('keypress', (e) => {
@@ -594,35 +663,30 @@
                         sendMessage();
                     }
                 });
+                console.log("Message input keypress listener attached.");
             }
 
-            // Event listener for saving username
-            if (saveUsernameButton) {
-                saveUsernameButton.addEventListener('click', saveUsername);
+            // Event listener for saving profile (username and class)
+            if (saveProfileButton) {
+                saveProfileButton.addEventListener('click', saveProfile);
+                console.log("Save Profile button event listener attached.");
             }
             if (usernameInput) {
                 usernameInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
-                        saveUsername();
+                        saveProfile();
                     }
                 });
+                console.log("Username input keypress listener attached.");
             }
-
-
-            // --- Existing showSection function ---
-            function showSection(sectionId) {
-                // Hide all sections
-                document.querySelectorAll('section').forEach(section => {
-                    section.classList.add('hidden');
+            if (classInput) {
+                classInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        saveProfile();
+                    }
                 });
-                // Show the requested section
-                const targetSection = document.getElementById(sectionId + '-section');
-                if (targetSection) {
-                    targetSection.classList.remove('hidden');
-                }
+                console.log("Class input keypress listener attached.");
             }
-            // Initial display for the lessons section
-            showSection('lessons');
 
 
             // --- Chat Modal Toggle JavaScript ---
@@ -634,33 +698,67 @@
             function openChatModal() {
                 chatModal.classList.remove('hidden');
                 modalOverlay.classList.add('active');
+                console.log("Chat modal opened.");
             }
 
             function closeChatModal() {
                 chatModal.classList.add('hidden');
                 modalOverlay.classList.remove('active');
+                console.log("Chat modal closed.");
             }
 
             if (chatMenuButton) {
                 chatMenuButton.addEventListener('click', openChatModal);
+                console.log("Chat menu button event listener attached.");
             } else {
                 console.error("Chat menu button with ID 'chat-menu-button' not found.");
             }
 
             if (closeChatButton) {
                 closeChatButton.addEventListener('click', closeChatModal);
+                console.log("Close chat button event listener attached.");
             }
 
-            modalOverlay.addEventListener('click', closeChatModal);
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', closeChatModal);
+                console.log("Modal overlay click listener attached.");
+            }
+
+
+            // --- Attach event listeners for main navigation buttons ---
+            const lessonsNavButton = document.getElementById('lessons-nav-button');
+            const spiritualNavButton = document.getElementById('spiritual-nav-button');
+            const resourcesNavButton = document.getElementById('resources-nav-button');
+            const quitNavButton = document.getElementById('quit-nav-button');
+
+            if (lessonsNavButton) {
+                lessonsNavButton.addEventListener('click', () => showSection('lessons'));
+                console.log("Lessons nav button listener attached.");
+            } else { console.error("Lessons nav button not found."); }
+
+            if (spiritualNavButton) {
+                spiritualNavButton.addEventListener('click', () => showSection('spiritual-formation'));
+                console.log("Spiritual nav button listener attached.");
+            } else { console.error("Spiritual nav button not found."); }
+
+            if (resourcesNavButton) {
+                resourcesNavButton.addEventListener('click', () => showSection('student-resources'));
+                console.log("Resources nav button listener attached.");
+            } else { console.error("Resources nav button not found."); }
+
+            if (quitNavButton) {
+                quitNavButton.addEventListener('click', () => showSection('quit'));
+                console.log("Quit nav button listener attached.");
+            } else { console.error("Quit nav button not found."); }
+
 
             // Initialize Firebase chat logic after all elements and listeners are set up
             initializeFirebaseChat();
         }); // End of DOMContentLoaded listener
 
-        // --- Prayer texts and Rosary logic (outside DOMContentLoaded if not using DOM elements directly) ---
-        // If these functions rely on DOM elements that are dynamically created or hidden,
-        // they might need to be called within DOMContentLoaded or after elements are visible.
-        // For now, keeping them here assuming they are called by button clicks.
+        // --- Prayer texts and Rosary logic (globally accessible) ---
+        // These functions are globally accessible because they are defined outside DOMContentLoaded.
+        // They are called by inline onclick attributes in the HTML.
         const signOfCross = "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.";
         const apostlesCreed = "I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born by the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.";
         const ourFather = "Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.";
@@ -706,13 +804,18 @@
             const prayersListElement = document.getElementById('prayers-list');
             const prayerTitleElement = document.getElementById('prayer-title');
 
-            if (prayersData[prayerName] && prayerTextElement && prayersListElement && prayerTitleElement) {
-                prayerTextElement.textContent = prayersData[prayerName];
-                prayerTextElement.classList.remove('hidden');
-                prayersListElement.classList.add('hidden'); // Hide the list of buttons
-                prayerTitleElement.textContent = prayerName; // Update title to current prayer
+            if (prayerTextElement && prayersListElement && prayerTitleElement) {
+                if (prayersData[prayerName]) {
+                    prayerTextElement.textContent = prayersData[prayerName];
+                    prayerTextElement.classList.remove('hidden');
+                    prayersListElement.classList.add('hidden'); // Hide the list of buttons
+                    prayerTitleElement.textContent = prayerName; // Update title to current prayer
+                    console.log(`Showing prayer: ${prayerName}`);
+                } else {
+                    console.error("Prayer not found:", prayerName);
+                }
             } else {
-                console.error("Prayer not found or elements missing:", prayerName);
+                console.error("Prayer display elements missing.");
             }
         }
 
@@ -725,23 +828,29 @@
                 prayerTextElement.classList.add('hidden');
                 prayersListElement.classList.remove('hidden'); // Show the list of buttons
                 prayerTitleElement.textContent = "Common Catholic Prayers"; // Reset title
+                console.log("Resetting prayer view.");
+            } else {
+                console.error("Prayer reset elements missing.");
             }
         }
 
         // Placeholder for quitApp, startQuiz, submitQuiz functions
         function quitApp() {
             alert("Thank you for using Catholic Faith Journey!");
+            console.log("Quit app initiated.");
             // You might want to close the window or redirect
             // window.close(); // Note: This might not work in all browsers
         }
 
         function startQuiz() {
             alert("Starting quiz! (Functionality to be implemented)");
+            console.log("Starting quiz.");
             // Implement quiz start logic
         }
 
         function submitQuiz() {
             alert("Submitting quiz! (Functionality to be implemented)");
+            console.log("Submitting quiz.");
             // Implement quiz submission logic
         }
 
