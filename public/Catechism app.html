@@ -18,12 +18,8 @@
             min-height: 100vh; /* Ensure body takes full viewport height */
             display: flex;
             flex-direction: column;
-            /* New: Default pointer-events to auto for the body */
             pointer-events: auto;
-        }
-        /* New: Class to disable pointer events on the body when an alert is active */
-        body.body-no-pointer-events {
-            pointer-events: none;
+            overflow-x: hidden; /* Prevent horizontal scroll during animation */
         }
 
         header {
@@ -142,7 +138,7 @@
             text-align: center;
             color: #333;
             animation: fadeIn 0.3s ease-out;
-            pointer-events: auto; /* IMPORTANT: Ensure alert itself is always clickable */
+            pointer-events: auto;
         }
         #custom-alert-modal .alert-message {
             margin-bottom: 20px;
@@ -175,12 +171,12 @@
             animation: fadeOut 0.3s ease-out forwards;
         }
 
-        /* NEW: Rule to hide the custom alert modal when it has the 'hidden' class */
+        /* Rule to hide the custom alert modal when it has the 'hidden' class */
         #custom-alert-modal.hidden {
             display: none;
         }
 
-        /* --- NEW: Alert Overlay for Custom Alert --- */
+        /* Alert Overlay for Custom Alert */
         #alert-overlay {
             position: fixed;
             top: 0;
@@ -190,7 +186,7 @@
             background-color: rgba(0, 0, 0, 0.6); /* Slightly darker for alerts */
             z-index: 9999; /* Just below the custom alert */
             display: none; /* Hidden by default */
-            pointer-events: auto; /* IMPORTANT: Ensure overlay is always clickable (to close alert if needed, though OK button is primary) */
+            pointer-events: auto;
         }
         #alert-overlay.active {
             display: block;
@@ -440,9 +436,34 @@
             font-weight: bold;
             color: #21412A;
         }
+
+        /* --- Startup Animation Styles (Canvas) --- */
+        #animation-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #21412A; /* Dark background */
+            z-index: 10001; /* Higher than everything else */
+            opacity: 1;
+            transition: opacity 1s ease-out; /* Only opacity for smooth fade */
+            display: block; /* Ensure canvas is block-level */
+        }
+        #animation-canvas.fade-out {
+            opacity: 0;
+        }
+        /* Hidden after fade-out to remove from layout and pointer events */
+        #animation-canvas.hidden {
+            display: none;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Startup Animation Canvas -->
+    <canvas id="animation-canvas"></canvas>
+
     <header>
         <h1>Catholic Faith Journey</h1>
     </header>
@@ -577,8 +598,6 @@
             alertMessageElement.textContent = message;
             customAlertModal.classList.remove('hidden');
             alertOverlay.classList.add('active'); // Activate the alert overlay
-            // Disable pointer events on the entire body
-            document.body.classList.add('body-no-pointer-events');
         }
 
         alertOkButton.addEventListener('click', () => {
@@ -587,8 +606,6 @@
                 customAlertModal.classList.add('hidden');
                 customAlertModal.classList.remove('fade-out');
                 alertOverlay.classList.remove('active'); // Deactivate the alert overlay
-                // Re-enable pointer events on the entire body
-                document.body.classList.remove('body-no-pointer-events');
             }, { once: true }); // Ensure listener is removed after animation
         });
 
@@ -640,6 +657,195 @@
             const classInput = document.querySelector('#chat-section #class-input');
             const saveProfileButton = document.querySelector('#chat-section #save-profile-button');
 
+            // Startup animation elements
+            const animationCanvas = document.getElementById('animation-canvas');
+            const ctx = animationCanvas.getContext('2d');
+            let animationFrameId; // To store the requestAnimationFrame ID
+
+            // Set canvas dimensions
+            function resizeCanvas() {
+                animationCanvas.width = window.innerWidth;
+                animationCanvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas(); // Initial resize
+
+            const OCIA_TEXT = "OCIA";
+            const FONT_SIZE = 120; // Large font for impact
+            const FONT_FAMILY = 'Georgia, serif';
+            const TEXT_COLOR = 'white';
+            const CROSS_COLOR = 'rgba(255, 255, 255, 0.7)'; // Semi-transparent white
+            const CROSS_SIZE = 100; // Size of the cross
+
+            // Letter objects for animation
+            const letters = [];
+            const finalPositions = []; // To store where each letter should end up
+
+            // Calculate final positions for OCIA text (centered horizontally, above the cross)
+            ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
+            const textWidth = ctx.measureText(OCIA_TEXT).width;
+            const startX = (animationCanvas.width / 2) - (textWidth / 2);
+            const startY = (animationCanvas.height / 2) - (CROSS_SIZE / 2) - FONT_SIZE / 2 - 30; // Above cross, with some padding
+
+            for (let i = 0; i < OCIA_TEXT.length; i++) {
+                const char = OCIA_TEXT[i];
+                const charWidth = ctx.measureText(char).width;
+                const prevCharsWidth = ctx.measureText(OCIA_TEXT.substring(0, i)).width;
+                finalPositions.push({
+                    x: startX + prevCharsWidth + charWidth / 2, // Center of the character
+                    y: startY + FONT_SIZE / 2 // Center of the character
+                });
+
+                // Initial random positions for letters (off-screen, from edges)
+                const startEdge = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
+                let initialX, initialY;
+                if (startEdge === 0) { // Top
+                    initialX = Math.random() * animationCanvas.width;
+                    initialY = -FONT_SIZE;
+                } else if (startEdge === 1) { // Right
+                    initialX = animationCanvas.width + FONT_SIZE;
+                    initialY = Math.random() * animationCanvas.height;
+                } else if (startEdge === 2) { // Bottom
+                    initialX = Math.random() * animationCanvas.width;
+                    initialY = animationCanvas.height + FONT_SIZE;
+                } else { // Left
+                    initialX = -FONT_SIZE;
+                    initialY = Math.random() * animationCanvas.height;
+                }
+
+                letters.push({
+                    char: char,
+                    x: initialX,
+                    y: initialY,
+                    vx: 0, // Start with 0 velocity, let spring/swirl pull them in
+                    vy: 0,
+                    opacity: 0,
+                    scale: 0.5,
+                    angle: Math.random() * Math.PI * 2, // Random initial rotation
+                    targetX: finalPositions[i].x,
+                    targetY: finalPositions[i].y,
+                    swirlRadius: 150 + Math.random() * 100, // Random swirl radius
+                    swirlAngleOffset: Math.random() * Math.PI * 2, // Random offset for swirl phase
+                    swirlSpeed: 0.02 + Math.random() * 0.03 // Random swirl speed
+                });
+            }
+
+            let animationStartTime;
+            const ANIMATION_DURATION = 4000; // 4 seconds for the main animation
+
+            function drawCross(x, y, size, color) {
+                ctx.fillStyle = color;
+                ctx.fillRect(x - size / 6, y - size / 2, size / 3, size); // Vertical bar
+                ctx.fillRect(x - size / 2, y - size / 6, size, size / 3); // Horizontal bar
+            }
+
+            function animate(currentTime) {
+                if (!animationStartTime) animationStartTime = currentTime;
+                const elapsedTime = currentTime - animationStartTime;
+
+                ctx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+
+                // Draw the cross silhouette
+                drawCross(animationCanvas.width / 2, animationCanvas.height / 2, CROSS_SIZE, CROSS_COLOR);
+
+                letters.forEach((letter, index) => {
+                    const target = finalPositions[index];
+
+                    // Swirling motion
+                    const swirlX = Math.cos(elapsedTime * letter.swirlSpeed + letter.swirlAngleOffset) * letter.swirlRadius;
+                    const swirlY = Math.sin(elapsedTime * letter.swirlSpeed + letter.swirlAngleOffset) * letter.swirlRadius;
+
+                    // Attraction to target
+                    const dx = target.x - letter.x;
+                    const dy = target.y - letter.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // Apply physics if not close enough to target
+                    if (distance > 1) { 
+                        const springFactor = 0.02;
+                        const friction = 0.95;
+                        
+                        letter.vx += dx * springFactor;
+                        letter.vy += dy * springFactor;
+
+                        // Add swirl to velocity, adjusted relative to canvas center
+                        letter.vx += (swirlX - (letter.x - animationCanvas.width / 2)) * 0.001;
+                        letter.vy += (swirlY - (letter.y - animationCanvas.height / 2)) * 0.001;
+
+                        letter.vx *= friction;
+                        letter.vy *= friction;
+
+                        letter.x += letter.vx;
+                        letter.y += letter.vy;
+
+                        // Fade in and scale up
+                        letter.opacity = Math.min(1, letter.opacity + 0.01);
+                        letter.scale = Math.min(1, letter.scale + 0.01);
+
+                        // Rotate
+                        letter.angle += 0.05;
+                    } else {
+                        // Snap to final position and full opacity/scale if very close
+                        letter.x = target.x;
+                        letter.y = target.y;
+                        letter.opacity = 1;
+                        letter.scale = 1;
+                        letter.angle = 0; // Stop rotation
+                    }
+
+                    ctx.save();
+                    ctx.translate(letter.x, letter.y);
+                    ctx.rotate(letter.angle);
+                    ctx.scale(letter.scale, letter.scale);
+                    ctx.globalAlpha = letter.opacity;
+                    ctx.fillStyle = TEXT_COLOR;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
+                    ctx.fillText(letter.char, 0, 0);
+                    ctx.restore();
+                });
+
+                // Main animation loop termination logic
+                if (elapsedTime < ANIMATION_DURATION) {
+                    animationFrameId = requestAnimationFrame(animate);
+                } else {
+                    // Force all letters to their final positions before fading out
+                    letters.forEach(letter => {
+                        letter.x = letter.targetX;
+                        letter.y = letter.targetY;
+                        letter.opacity = 1;
+                        letter.scale = 1;
+                        letter.angle = 0;
+                    });
+                    // Redraw one last time with final positions
+                    ctx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+                    drawCross(animationCanvas.width / 2, animationCanvas.height / 2, CROSS_SIZE, CROSS_COLOR);
+                    letters.forEach(letter => {
+                        ctx.save();
+                        ctx.translate(letter.x, letter.y);
+                        ctx.rotate(letter.angle);
+                        ctx.scale(letter.scale, letter.scale);
+                        ctx.globalAlpha = letter.opacity;
+                        ctx.fillStyle = TEXT_COLOR;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
+                        ctx.fillText(letter.char, 0, 0);
+                        ctx.restore();
+                    });
+
+                    // Animation complete, start fade out
+                    animationCanvas.classList.add('fade-out');
+                    animationCanvas.addEventListener('transitionend', () => {
+                        animationCanvas.classList.add('hidden'); // Fully remove after fade
+                        showSection('lessons'); // Show the initial section
+                    }, { once: true });
+                }
+            }
+
+            // Start the animation loop
+            animationFrameId = requestAnimationFrame(animate);
 
             /**
              * Initializes Firebase and sets up authentication.
@@ -968,13 +1174,6 @@
             } else { console.error("Quit nav button not found."); }
 
 
-            // Initial display for the lessons section
-            showSection('lessons'); // Call this after all sections are in DOM and showSection is defined
-
-            // Initialize Firebase chat logic after all elements and listeners are set up
-            initializeFirebaseChat();
-
-
             // --- Rosary Logic Initialization ---
             const rosaryStartButton = document.getElementById('rosary-start-button');
             const rosaryNextButton = document.getElementById('rosary-next-button');
@@ -1072,7 +1271,6 @@
 
             function resetRosary() {
                 initializeRosary();
-                showAlert("Rosary has been reset.");
             }
 
             // Event Listeners for Rosary Buttons
@@ -1095,9 +1293,6 @@
             if (rosaryBackToSpiritualButton) {
                 rosaryBackToSpiritualButton.addEventListener('click', () => showSection('spiritual-formation'));
             }
-
-            // Initial display for the lessons section
-            showSection('lessons'); // Call this after all sections are in DOM and showSection is defined
 
             // Initialize Firebase chat logic after all elements and listeners are set up
             initializeFirebaseChat();
