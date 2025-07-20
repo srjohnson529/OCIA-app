@@ -43,9 +43,14 @@
             cursor: pointer;
             border-radius: 5px;
             font-size: 1em;
+            /* Enhanced Button Hover Effect */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         button:hover {
             background-color: #5f5429;
+            transform: translateY(-2px); /* Subtle lift effect */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
         }
         section {
             background: #9C8547;
@@ -53,10 +58,20 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            /* Smooth Section Transitions */
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute; /* To allow sections to overlap during transition */
+            width: calc(100% - 40px); /* Account for body padding */
+            max-width: 900px; /* Adjust as per your main content max-width */
+            left: 50%;
+            transform: translateX(-50%);
         }
         /* The .hidden class is crucial for hiding sections and the modal initially */
         .hidden {
             display: none !important; /* Use !important to ensure it overrides other styles */
+            opacity: 0; /* For fade-out effect */
+            pointer-events: none; /* Disable interactions when hidden */
         }
         ul {
             list-style-type: none;
@@ -87,6 +102,54 @@
             text-align: center;
             overflow: hidden;
         }
+
+        /* --- Custom Alert Modal Styles --- */
+        #custom-alert-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 1001; /* Higher than chat modal */
+            max-width: 350px;
+            text-align: center;
+            color: #333;
+            animation: fadeIn 0.3s ease-out;
+        }
+        #custom-alert-modal .alert-message {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        #custom-alert-modal .alert-ok-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        #custom-alert-modal .alert-ok-button:hover {
+            background-color: #2563eb;
+        }
+        /* Animation for custom alert */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translate(-50%, -50%); }
+            to { opacity: 0; transform: translate(-50%, -60%); }
+        }
+        .fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
 
         /* --- Chat Modal Specific Styles --- */
         #chat-modal {
@@ -349,6 +412,12 @@
     <!-- Modal Overlay (for dimming background) -->
     <div class="modal-overlay"></div>
 
+    <!-- Custom Alert Modal Structure -->
+    <div id="custom-alert-modal" class="hidden">
+        <div class="alert-message"></div>
+        <button class="alert-ok-button">OK</button>
+    </div>
+
     <script type="module">
         // Firebase SDK imports for modular syntax
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -381,6 +450,29 @@
         let currentUsername = 'Anonymous'; // Default username
         let currentClassId = null; // New variable for class ID
         let isAuthReady = false;
+
+        // --- Custom Alert Modal Functions ---
+        const customAlertModal = document.getElementById('custom-alert-modal');
+        const alertMessageElement = customAlertModal.querySelector('.alert-message');
+        const alertOkButton = customAlertModal.querySelector('.alert-ok-button');
+
+        function showAlert(message) {
+            alertMessageElement.textContent = message;
+            customAlertModal.classList.remove('hidden');
+            // Ensure modal-overlay is active when alert is shown
+            document.querySelector('.modal-overlay').classList.add('active'); 
+        }
+
+        alertOkButton.addEventListener('click', () => {
+            customAlertModal.classList.add('fade-out');
+            customAlertModal.addEventListener('animationend', () => {
+                customAlertModal.classList.add('hidden');
+                customAlertModal.classList.remove('fade-out');
+                // Deactivate modal-overlay only when alert closes
+                document.querySelector('.modal-overlay').classList.remove('active');
+            }, { once: true }); // Ensure listener is removed after animation
+        });
+
 
         // --- showSection function (moved to global scope for programmatic event listeners) ---
         // This function now handles both direct IDs and IDs ending with '-section'
@@ -503,11 +595,11 @@
                 const newClassId = classInput.value.trim();
 
                 if (newUsername.length < 3) {
-                    alert('Username must be at least 3 characters long.');
+                    showAlert('Username must be at least 3 characters long.'); // Using custom alert
                     return;
                 }
                 if (newClassId.length < 2) {
-                    alert('Class Name must be at least 2 characters long.');
+                    showAlert('Class Name must be at least 2 characters long.'); // Using custom alert
                     return;
                 }
 
@@ -534,7 +626,7 @@
 
                 } catch (error) {
                     console.error("Error saving profile:", error);
-                    alert("Error saving profile. Please try again.");
+                    showAlert("Error saving profile. Please try again."); // Using custom alert
                 }
             }
 
@@ -628,7 +720,7 @@
             async function sendMessage() {
                 if (!isAuthReady || !currentUserId || !messageInput || !currentUsername || currentUsername === 'Anonymous' || !currentClassId) {
                     console.warn("Firebase not ready, user not authenticated, username/class not set, or message input not found to send message.");
-                    alert("Please set your username and class name before sending messages.");
+                    showAlert("Please set your username and class name before sending messages."); // Using custom alert
                     return;
                 }
 
@@ -747,7 +839,10 @@
             } else { console.error("Resources nav button not found."); }
 
             if (quitNavButton) {
-                quitNavButton.addEventListener('click', () => showSection('quit'));
+                quitNavButton.addEventListener('click', () => {
+                    showAlert("Thank you for using Catholic Faith Journey! You can close this window.");
+                    console.log("Quit app initiated.");
+                });
                 console.log("Quit nav button listener attached.");
             } else { console.error("Quit nav button not found."); }
 
@@ -782,13 +877,13 @@
         function startRosary(mysteryType) {
             console.log("Starting Rosary for:", mysteryType);
             // Implement your rosary logic here
-            alert(`Rosary for ${mysteryType} started! (Functionality to be implemented)`);
+            showAlert(`Rosary for ${mysteryType} started! (Functionality to be implemented)`);
         }
 
         function nextPrayer(mysteryType) {
             console.log("Next prayer for:", mysteryType);
             // Implement your next prayer logic here
-            alert(`Next prayer in ${mysteryType} mysteries! (Functionality to be implemented)`);
+            showAlert(`Next prayer in ${mysteryType} mysteries! (Functionality to be implemented)`);
         }
 
         const prayersData = {
@@ -837,22 +932,15 @@
             }
         }
 
-        // Placeholder for quitApp, startQuiz, submitQuiz functions
-        function quitApp() {
-            alert("Thank you for using Catholic Faith Journey!");
-            console.log("Quit app initiated.");
-            // You might want to close the window or redirect
-            // window.close(); // Note: This might not work in all browsers
-        }
-
+        // Placeholder for startQuiz, submitQuiz functions
         function startQuiz() {
-            alert("Starting quiz! (Functionality to be implemented)");
+            showAlert("Starting quiz! (Functionality to be implemented)");
             console.log("Starting quiz.");
             // Implement quiz start logic
         }
 
         function submitQuiz() {
-            alert("Submitting quiz! (Functionality to be implemented)");
+            showAlert("Submitting quiz! (Functionality to be implemented)");
             console.log("Submitting quiz.");
             // Implement quiz submission logic
         }
