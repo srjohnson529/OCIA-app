@@ -752,6 +752,9 @@
             } else { console.error("Quit nav button not found."); }
 
 
+            // Initial display for the lessons section
+            showSection('lessons'); // Call this after all sections are in DOM and showSection is defined
+
             // Initialize Firebase chat logic after all elements and listeners are set up
             initializeFirebaseChat();
         }); // End of DOMContentLoaded listener
