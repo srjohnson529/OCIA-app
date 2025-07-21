@@ -63,7 +63,7 @@
         .main-content-container {
   display: fadeIn .5s;
   opacity: 0;
-  transition: opacity 3s ease-out;
+  transition: opacity 0s ease-out;
 }
         /* --- Main Content Container --- */
 .main-content-container {
@@ -94,8 +94,7 @@
             /* Smooth Section Transitions */
             opacity: 1;
             visibility: visible; /* Default visible */
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-            
+            transition: opacity 1s ease-in-out;
             position: absolute; /* Keep absolute for transitions, but manage parent */
             width: 100%; /* Take full width of its relative parent */
             top: 0; /* Align to top of parent */
@@ -507,7 +506,7 @@
             text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
             letter-spacing: 2px;
             /* Combined animation for smoother flow */
-            animation: bannerIntroAnimation 5s ease-in-out forwards; 
+            animation: bannerIntroAnimation 4s ease-in-out forwards; 
         }
 
         #splash-title-banner h1 {
@@ -521,7 +520,7 @@
     @keyframes bannerIntroAnimation {
             0% {
                 opacity: 0;
-                transform: scale(0.5);
+                transform: scale(0.1);
             }
            70% { /* Swell up to max, then immediately starts shrinking */
                 opacity: 1;
@@ -575,16 +574,16 @@
         <h1>CATECHUMEN</h1>
     </header>
     <nav>
-        <button id="lessons-nav-button">Lessons (Progressive Instruction & Quizzes)</button>
+        <button id="lessons-nav-button">Lessons & Quizzes</button>
         <button id="spiritual-nav-button">Spiritual Formation</button>
         <button id="chat-menu-button">Chat</button> <!-- This button now shows the integrated chat section -->
         <button id="resources-nav-button">Student Resources</button>
         <button id="quit-nav-button">Quit</button>
     </nav>
 
-    <!-- Main content container for sections -->
+  <!-- Main content container for sections -->
     <div class="main-content-container">
-        <section id="lessons-section">
+        <section id="lessons-section" class="hidden">
             <h2>Lessons</h2>
             <!-- Lesson content goes here -->
             <p>This section will contain progressive instruction and quizzes.</p>
@@ -619,6 +618,7 @@
 
         <!-- The Integrated Chat Section -->
         <section id="chat-section" class="hidden">
+            <h2>O.C.I.A. Chat</h2>
             <div class="chat-container">
                 <div class="chat-header">
                     Community Chat
@@ -653,6 +653,7 @@
         </section>
     </div> <!-- End of .main-content-container -->
 
+
     <!-- Custom Alert Modal Structure -->
     <div id="custom-alert-modal" class="hidden">
         <div class="alert-message"></div>
@@ -661,8 +662,7 @@
 
     <!-- Alert Overlay for Custom Alert -->
     <div id="alert-overlay"></div>
-
-
+    
     <script type="module">
         // Firebase SDK imports for modular syntax
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -780,15 +780,19 @@
                 splashScreen.classList.add('fade-out');
             });
 
-            // Listen for the end of the splash screen fade-out
-            splashScreen.addEventListener('transitionend', () => {
-                // Once the splash screen has faded out, hide it completely and show the main content
-                splashScreen.style.display = 'none';
-                if (mainContentContainer) {
-                    mainContentContainer.style.display = 'flex'; // Or 'block', depending on layout
-                    mainContentContainer.classList.add('visible'); // Trigger fade-in for main content
+ // Listen for the end of the splash screen fade-out
+            splashScreen.addEventListener('transitionend', (e) => {
+                if (e.propertyName === 'opacity') { // Ensure we only react to the opacity transition
+                    // Once the splash screen has faded out, hide it completely
+                    splashScreen.style.display = 'none';
+
+                    if (mainContentContainer) {
+                        // Trigger the fade-in for the main content by adding the 'visible' class
+                        // The CSS transition on .main-content-container.visible will handle the smooth fade.
+                        mainContentContainer.classList.add('visible');
+                    }
+                    // Removed the automatic showSection('lessons'); call here
                 }
-                showSection('lessons'); // Show the initial section of the app
             }, { once: true }); // Ensure this listener only fires once
 
 
