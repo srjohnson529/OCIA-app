@@ -1426,6 +1426,54 @@
             console.log("Submitting quiz.");
             // Implement quiz submission logic
         }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+    // Get references to the modal elements
+    const customAlertModal = document.getElementById('custom-alert-modal');
+    const alertMessage = customAlertModal.querySelector('.alert-message');
+    const alertOkButton = customAlertModal.querySelector('.alert-ok-button');
+    const alertOverlay = document.getElementById('alert-overlay');
+
+    /**
+     * Shows the custom alert modal with a given message.
+     * @param {string} message The message to display in the alert.
+     */
+    window.showAlert = function(message) {
+        alertMessage.textContent = message; // Set the message
+        customAlertModal.classList.remove('hidden'); // Show the modal
+        alertOverlay.classList.remove('hidden');     // Show the overlay
+    };
+
+    // Add event listener to the OK button to close the modal
+    if (alertOkButton) {
+        alertOkButton.addEventListener('click', function() {
+            customAlertModal.classList.add('hidden'); // Hide the modal
+            alertOverlay.classList.add('hidden');     // Hide the overlay
+        });
+    }
+
+    // You might also want to close the modal if the overlay is clicked (optional)
+    if (alertOverlay) {
+        alertOverlay.addEventListener('click', function() {
+            customAlertModal.classList.add('hidden');
+            alertOverlay.classList.add('hidden');
+        });
+    }
+
+    // --- Examples of how to use the showAlert function based on your screenshots ---
+
+    // Example 1: "Congratulations! You got a perfect score!"
+    // You would call this after a quiz is completed and scored.
+    // showAlert("Congratulations! You got a perfect score! 🎉");
+
+    // Example 2: "Profile saved! You can now chat."
+    // You would call this after a profile is successfully saved.
+    // showAlert("Profile saved! You can now chat.");
+
+    // Example 3: "Thank you for using Catechumen. God bless!"
+    // You would call this when the user quits or at the end of a session.
+    // showAlert("Thank you for using Catechumen. God bless!");
+});
 
     </script>
 </body>
