@@ -59,31 +59,30 @@
             transform: translateY(-2px); /* Subtle lift effect */
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
         }
+        button:disabled {
+            background-color: #a0a0a0;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
         /* Main content sections container */
         .main-content-container {
-  display: fadeIn .5s;
-  opacity: 0;
-  transition: opacity 0s ease-out;
-}
-        /* --- Main Content Container --- */
-.main-content-container {
-  position: relative; /* For positioning internal sections */
-  flex-grow: 1;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  display: none;         /* Hidden by default */
-  opacity: 0;            /* Invisible initially */
-  justify-content: center;
-  align-items: flex-start;
-  transition: opacity 1s ease-in-out;
-}
+            position: relative; /* For positioning internal sections */
+            flex-grow: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: none;        /* Hidden by default */
+            opacity: 0;           /* Invisible initially */
+            justify-content: center;
+            align-items: flex-start;
+            transition: opacity 1s ease-in-out;
+        }
 
-/* This class will be added by JS after splash screen */
-.main-content-container.visible {
-  display: flex;
-  opacity: 1;
-}
+        /* This class will be added by JS after splash screen */
+        .main-content-container.visible {
+            display: flex; /* Or block, depending on desired layout */
+            opacity: 1;
+        }
 
         section {
             background: #9C8547;
@@ -249,8 +248,8 @@
         }
         
         #chat-section {
-  			text-shadow: none;
-		}
+            text-shadow: none;
+        }
         #chat-section .messages-area {
             flex-grow: 1;
             padding: 1.5rem;
@@ -418,7 +417,7 @@
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
-        #rosary-display {
+        .rosary-display-content { /* Renamed from #rosary-display to be a class */
             margin-top: 30px;
             background-color: rgba(255, 255, 255, 0.9);
             padding: 25px;
@@ -432,71 +431,49 @@
             justify-content: center;
             align-items: center;
         }
-        #rosary-display h3 {
+        .rosary-display-content h3 {
             font-size: 1.8em;
             color: #6A0505;
             margin-bottom: 15px;
             text-align: center;
         }
-        #rosary-display p {
+        .rosary-display-content p {
             font-size: 1.1em;
             line-height: 1.8;
             margin-bottom: 10px;
             text-align: center;
         }
-        #rosary-display .scripture {
+        .rosary-display-content .scripture {
             font-style: italic;
             color: #555;
             margin-top: 15px;
             white-space: pre-wrap; /* Preserve line breaks in scripture */
         }
-        #rosary-display .rosary-current-prayer {
+        .rosary-display-content .rosary-current-prayer {
             font-weight: bold;
             color: #21412A;
         }
 
-  /* --- Splash Screen Styles --- */
-  #splash-screen {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #21412A;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  opacity: 0; /* Start transparent */
-  animation: splashFadeIn 1s ease-out forwards;
-  pointer-events: auto;
-  transition: opacity 1s ease-out;
-}
+    /* --- Splash Screen Styles --- */
+    #splash-screen {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #21412A;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 1; /* Start opaque */
+        transition: opacity 1s ease-out; /* For fade-out */
+        pointer-events: auto;
+    }
 
-  #splash-screen.fade-out {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-      /* --- Splash Screen Styles --- */
-        #splash-screen {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #21412A;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 1s ease-out;
-            pointer-events: auto;
-        }
-
-        #splash-screen.fade-out {
-            opacity: 0;
-            pointer-events: none; /* Disable interactions after fade out starts */
-        }
+    #splash-screen.fade-out {
+        opacity: 0;
+        pointer-events: none; /* Disable interactions after fade out starts */
+    }
 
         #splash-title-banner {
             color: #ffffff;
@@ -517,12 +494,12 @@
         }
 
         /* New combined animation for the banner */
-    @keyframes bannerIntroAnimation {
+        @keyframes bannerIntroAnimation {
             0% {
                 opacity: 0;
                 transform: scale(0.1);
             }
-           70% { /* Swell up to max, then immediately starts shrinking */
+            70% { /* Swell up to max, then immediately starts shrinking */
                 opacity: 1;
                 transform: scale(2.2);
             }
@@ -531,159 +508,108 @@
                 transform: scale(0.1);
             }
         }
+
+        /* Footer styles for the Quit button */
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            margin-top: auto; /* Pushes footer to the bottom */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* --- Common Prayers Section Specific Styles --- */
+        #prayers-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Center buttons horizontally */
+            gap: 10px; /* Space between buttons */
+            padding: 0; /* Remove default ul padding */
+            margin-top: 20px; /* Add some space above the buttons */
+        }
+
+        #prayers-list li {
+            margin: 0; /* Remove default li margin, replaced by gap */
+        }
+
+        #prayers-list button {
+            flex-grow: 1; /* Allow buttons to grow to fill space */
+            min-width: 150px; /* Minimum width for buttons */
+            max-width: 200px; /* Max width to prevent them from becoming too wide */
+        }
     </style>
+</head>
+<body>
 
 <!-- Splash Screen HTML -->
 <div id="splash-screen">
-  <div id="splash-title-banner">
-    <h1>CATECHUMEN</h1>
-  </div>
+    <div id="splash-title-banner">
+        <h1>CATECHUMEN</h1>
+    </div>
 </div>
 
-<script>
-  window.addEventListener('load', () => {
-    const splashScreen = document.getElementById('splash-screen');
-    const mainContent = document.querySelector('.main-content-container');
+<header>
+    <h1>CATECHUMEN</h1>
+</header>
+<nav>
+    <button id="home-nav-button">Home</button>
+    <button id="lessons-nav-button">Lessons & Quizzes</button>
+    <button id="spiritual-nav-button">Spiritual Formation</button>
+    <button id="chat-menu-button">Chat</button>
+    <button id="resources-nav-button">Student Resources</button>
+</nav>
 
-    // Hide main content immediately
-    if (mainContent) {
-      mainContent.style.display = 'none';
-      mainContent.classList.remove('visible');
-    }
-
-    // Trigger fade-out after animation duration (7.5s)
-    setTimeout(() => {
-      splashScreen.classList.add('fade-out');
-
-      // Wait for fade-out transition to finish (1s), then show main content
-      setTimeout(() => {
-        splashScreen.style.display = 'none';
-
-        if (mainContent) {
-          mainContent.style.display = 'flex'; // or 'block'
-          requestAnimationFrame(() => {
-            mainContent.classList.add('visible'); // triggers opacity transition
-          });
-        }
-      }, 1000); // match CSS transition duration
-    }, 4500); // match total splash animation time
-  });
-</script>
-
-    <header>
-        <h1>CATECHUMEN</h1>
-    </header>
-    <nav>
-        <button id="lessons-nav-button">Lessons & Quizzes</button>
-        <button id="spiritual-nav-button">Spiritual Formation</button>
-        <button id="chat-menu-button">Chat</button> <!-- This button now shows the integrated chat section -->
-        <button id="resources-nav-button">Student Resources</button>
-        <button id="quit-nav-button">Quit</button>
-    </nav>
-
-  <!-- Main content container for sections -->
-    <div class="main-content-container">
-        <section id="lessons-section" class="hidden">
-            <h2>Lessons</h2>
-            <!-- Lesson content goes here -->
-            <p>This section will contain progressive instruction and quizzes.</p>
-            <div id="lesson-controls">
-                <button id="lesson-start-button">Start Lessons</button>
-            </div>
-        </section>
-        
-        <section id="lessons" class="hidden">
-        <h2>Lessons Available</h2>
-        <ul id="lessons-list"></ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
+<!-- Main content container for sections -->
+<div class="main-content-container">
+    <section id="main-menu-section">
+        <h2>Welcome to Catechumen!</h2>
+        <p>Use the navigation above to explore the app.</p>
     </section>
 
-    <section id="lesson-content" class="hidden">
-        <h2 id="lesson-title"></h2>
-        <div id="lesson-text" class="lesson-content"></div>
-        <button onclick="startQuiz()">Start Quiz</button>
-        <button onclick="showSection('lessons')">Back</button>
+    <!-- Lessons List Section -->
+    <section id="lessons-list-section" class="hidden">
+        <h2 id="lessons-section-title">Lessons & Quizzes</h2>
+        <h3>Select a lesson to begin:</h3>
+        <ul id="lessons-list">
+            <!-- Lesson items will be rendered here by JavaScript -->
+        </ul>
     </section>
 
-    <section id="quiz" class="hidden">
-        <h2>Quiz</h2>
-        <div id="quiz-questions"></div>
-        <button onclick="submitQuiz()">Submit</button>
-        <button onclick="showSection('lesson-content')">Back</button>
+    <!-- Current Lesson View Section (formerly inside lessons-section) -->
+    <section id="lesson-content-section" class="hidden">
+        <h3 id="current-lesson-title"></h3>
+        <div id="current-lesson-content" class="lesson-content"></div>
+        <div class="video-placeholder hidden">
+            <iframe id="lesson-video" width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <button id="take-quiz-button">Take Quiz</button>
+        <button id="back-to-lessons-list-button">Back to Lessons</button>
     </section>
-        
 
-        <section id="spiritual-formation-section" class="hidden">
+    <section id="quiz-section" class="hidden">
+        <h2 id="quiz-title"></h2>
+        <div id="quiz-questions-container">
+        </div>
+        <button id="submit-quiz-button">Submit Quiz</button>
+        <button id="back-to-lesson-from-quiz-button">Back to Lesson</button>
+    </section>
+
+    <section id="spiritual-formation-section" class="hidden">
         <h2>Spiritual Formation</h2>
         <ul>
-            <li><button onclick="showSection('daily')">Lectio Divina</button></li>
-            <li><button onclick="showSection('rosary')">Guided Rosary</button></li>
-            <li><button onclick="showSection('prayers')">Common Prayers</button></li>
-            <li><button onclick="showSection('lotH')">Liturgy of the Hours</button></li>
+            <li><button onclick="showSection('daily-section')">Lectio Divina</button></li>
+            <li><button onclick="showSection('rosary-main-section')">Guided Rosary</button></li>
+            <li><button onclick="showSection('prayers-section')">Common Prayers</button></li>
+            <li><button onclick="showSection('lotH-section')">Liturgy of the Hours</button></li>
         </ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
+        <button onclick="showSection('main-menu-section')">Back to Main Menu</button>
     </section>
 
-        <section id="rosary-section" class="hidden">
-            <h2>The Holy Rosary</h2>
-            <div id="rosary-display">
-                <h3 id="current-mystery-title"></h3>
-                <p id="current-prayer-text" class="rosary-current-prayer"></p>
-                <p id="current-scripture" class="scripture"></p>
-            </div>
-            <div id="rosary-controls">
-                <button id="rosary-start-button">Start Rosary</button>
-                <button id="rosary-next-button" class="hidden">Next Prayer</button>
-                <button id="rosary-reset-button" class="hidden">Reset Rosary</button>
-                <button id="rosary-back-to-spiritual-button">Back to Spiritual Formation</button>
-            </div>
-        </section>
-        
-         <section id="student-resources-section" class="hidden">
-        <h2>Student Resources</h2>
-        <ul>
-            <li><a href="https://usccb.cld.bz/Catechism-of-the-Catholic-Church/" target="_blank"><button>Catechism of the Catholic Church</button></a></li>
-            <li><a href="https://bible.usccb.org/bible" target="_blank"><button>Holy Bible</button></a></li>
-            <li><a href="https://www.catholic.com/" target="_blank"><button>Catholic Answers</button></a></li>
-            <li><a href="https://catechisminayear.fireside.fm/" target="_blank"><button>Catechism in a Year with Fr. Mike Schmitz</button></a></li>
-        </ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-    
-    
-    <section id="daily" class="hidden">
-    <div class="video-placeholder">'<iframe width="560" height="315" src="https://www.youtube.com/embed/gKYEOc3ik9k?si=m74MuYyABkoXRgYt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
-    <p><strong>Consider reading and praying with one of the Church's daily readings.</strong><br>
-        <div class="cg_mrc_widget"></div>
-<script src="https://cdn1.catholicgallery.org/wp-content/uploads/widgets/rich-card/cg_mrc_widget.js" async></script>
-<p><strong>Lectio (Read) Slowly and attentively.</strong><br>
-<p><strong>Meditatio (Meditate) Reflect on words or a phrase.</strong><br>
-<p><strong>Oratio (Pray) Talk and listen to God.</strong><br>
-<p><strong>Contemplatio (Compemplate) Rest in God. Savor His love.</strong><br>
-        <button onclick="showSection('spiritual')">Back</button>
-    </section>
-    
-    <section id="spiritual" class="hidden">
-        <h2>Spiritual Formation</h2>
-        <ul>
-            <li><button onclick="showSection('daily')">Lectio Divina</button></li>
-            <li><button onclick="showSection('rosary')">Guided Rosary</button></li>
-            <li><button onclick="showSection('prayers')">Common Prayers</button></li>
-            <li><button onclick="showSection('lotH')">Liturgy of the Hours</button></li>
-        </ul>
-        <button onclick="showSection('main')">Back to Main Menu</button>
-    </section>
-
-    <section id="lotH" class="hidden">
-        <h2>Liturgy of the Hours</h2>
-        <p>The Liturgy of the Hours, also known as the Divine Office, is the official prayer of the Catholic Church that sanctifies the day through Psalms, Scripture readings, hymns, and intercessions. It is prayed at fixed times throughout the day, uniting the faithful in continuous praise and petition. Rooted in ancient tradition and emphasized in Vatican II's Sacrosanctum Concilium, it fosters a deeper communion with Christ and the Church. Use the widget below to access today's prayers in English.</p>
-        <iframe src="https://www.ibreviary.com/m2/breviario.php?lang=en" width="340" height="500" style="border: 1px solid #151515;"></iframe>
-        <button onclick="showSection('spiritual')">Back</button>
-    </section>
-
-    <section id="rosary" class="hidden">
+    <section id="rosary-main-section" class="hidden"> <!-- Renamed from #rosary-section to avoid conflict with rosary functionality section -->
         <h2>Guided Rosary</h2>
-        <div class="video-placeholder">'<iframe width="560" height="315" src="https://www.youtube.com/embed/HXcWknfC0vI?si=TkBe-4NatYLTEmjw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
+        <div class="video-placeholder">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
         <p>Choose Mysteries:</p>
         <ul>
             <li><button onclick="startRosary('Joyful')">Joyful (Monday & Saturday)</button></li>
@@ -692,43 +618,86 @@
             <li><button onclick="startRosary('Luminous')">Luminous (Thursday)</button></li>
         </ul>
         <div id="rosary-progress" class="hidden"></div>
-        <button onclick="showSection('spiritual')">Back</button>
+        <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Formation</button>
     </section>
 
-    <section id="joyful-rosary" class="hidden">
+    <!-- Specific Rosary Mystery Sections (will be managed by JS, not direct showSection from nav) -->
+    <section id="joyful-rosary-section" class="hidden">
         <h2>Joyful Mysteries</h2>
-        <div id="joyful-display"></div>
-        <button onclick="nextPrayer('joyful')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
+        <div id="joyful-display" class="rosary-display-content"></div>
+        <div id="rosary-controls-joyful" class="rosary-controls">
+            <button id="joyful-next-button">Next Prayer</button>
+            <button onclick="showSection('rosary-main-section')">Back to Mysteries</button>
+            <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Menu</button>
+        </div>
     </section>
 
-    <section id="sorrowful-rosary" class="hidden">
+    <section id="sorrowful-rosary-section" class="hidden">
         <h2>Sorrowful Mysteries</h2>
-        <div id="sorrowful-display"></div>
-        <button onclick="nextPrayer('sorrowful')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
+        <div id="sorrowful-display" class="rosary-display-content"></div>
+        <div id="rosary-controls-sorrowful" class="rosary-controls">
+            <button id="sorrowful-next-button">Next Prayer</button>
+            <button onclick="showSection('rosary-main-section')">Back to Mysteries</button>
+            <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Menu</button>
+        </div>
     </section>
 
-    <section id="glorious-rosary" class="hidden">
+    <section id="glorious-rosary-section" class="hidden">
         <h2>Glorious Mysteries</h2>
-        <div id="glorious-display"></div>
-        <button onclick="nextPrayer('glorious')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
+        <div id="glorious-display" class="rosary-display-content"></div>
+        <div id="rosary-controls-glorious" class="rosary-controls">
+            <button id="glorious-next-button">Next Prayer</button>
+            <button onclick="showSection('rosary-main-section')">Back to Mysteries</button>
+            <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Menu</button>
+        </div>
     </section>
 
-    <section id="luminous-rosary" class="hidden">
+    <section id="luminous-rosary-section" class="hidden">
         <h2>Luminous Mysteries</h2>
-        <div id="luminous-display"></div>
-        <button onclick="nextPrayer('luminous')">Next</button>
-        <button onclick="showSection('rosary')">Back to Mysteries</button>
-        <button onclick="showSection('main')">Back to Main Menu</button>
+        <div id="luminous-display" class="rosary-display-content"></div>
+        <div id="rosary-controls-luminous" class="rosary-controls">
+            <button id="luminous-next-button">Next Prayer</button>
+            <button onclick="showSection('rosary-main-section')">Back to Mysteries</button>
+            <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Menu</button>
+        </div>
+    </section>
+    
+    <section id="student-resources-section" class="hidden">
+        <h2>Student Resources</h2>
+        <ul>
+            <li><a href="https://usccb.cld.bz/Catechism-of-the-Catholic-Church/" target="_blank"><button>Catechism of the Catholic Church</button></a></li>
+            <li><a href="https://bible.usccb.org/bible" target="_blank"><button>Holy Bible</button></a></li>
+            <li><a href="https://www.catholic.com/" target="_blank"><button>Catholic Answers</button></a></li>
+            <li><a href="https://catechisminayear.fireside.fm/" target="_blank"><button>Catechism in a Year with Fr. Mike Schmitz</button></a></li>
+        </ul>
+        <button onclick="showSection('main-menu-section')">Back to Main Menu</button>
+    </section>
+    
+    <section id="daily-section" class="hidden"> <!-- Renamed from #daily -->
+        <h2>Lectio Divina</h2>
+        <div class="video-placeholder">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <p><strong>Consider reading and praying with one of the Church's daily readings.</strong></p>
+        <div class="cg_mrc_widget"></div>
+        <script src="https://cdn1.catholicgallery.org/wp-content/uploads/widgets/rich-card/cg_mrc_widget.js" async></script>
+        <p><strong>Lectio (Read) Slowly and attentively.</strong></p>
+        <p><strong>Meditatio (Meditate) Reflect on words or a phrase.</strong></p>
+        <p><strong>Oratio (Pray) Talk and listen to God.</strong></p>
+        <p><strong>Contemplatio (Compemplate) Rest in God. Savor His love.</strong></p>
+        <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Formation</button>
+    </section>
+    
+    <section id="lotH-section" class="hidden"> <!-- Renamed from #lotH -->
+        <h2>Liturgy of the Hours</h2>
+        <p>The Liturgy of the Hours, also known as the Divine Office, is the official prayer of the Catholic Church that sanctifies the day through Psalms, Scripture readings, hymns, and intercessions. It is prayed at fixed times throughout the day, uniting the faithful in continuous praise and petition. Rooted in ancient tradition and emphasized in Vatican II's Sacrosanctum Concilium, it fosters a deeper communion with Christ and the Church. Use the widget below to access today's prayers in English.</p>
+        <iframe src="https://www.ibreviary.com/m2/breviario.php?lang=en" width="340" height="500" style="border: 1px solid #151515;"></iframe>
+        <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Formation</button>
     </section>
 
-<section id="prayers" class="hidden">
-        <h2 id="prayer-title">Common Catholic Prayers</h2>
+    <section id="prayers-section" class="hidden"> <h2 id="prayer-title">Common Catholic Prayers</h2>
+        <!-- Moved prayer-text here to appear above buttons -->
+        <pre id="prayer-text" class="hidden"></pre>
         <ul id="prayers-list">
             <li><button onclick="showPrayer('Sign of the Cross')">Sign of the Cross</button></li>
             <li><button onclick="showPrayer('Our Father')">Our Father</button></li>
@@ -755,56 +724,478 @@
             <li><button onclick="showPrayer('Divine Praises')">Divine Praises</button></li>
             <li><button onclick="showPrayer('Confiteor')">Confiteor</button></li>
         </ul>
-        <pre id="prayer-text" class="hidden"></pre>
-        <button onclick="resetPrayer()">Back to List</button>
-        <button onclick="showSection('spiritual')">Back to Spiritual Menu</button>
+        <button id="back-to-prayers-list-button" class="hidden">Back to List</button>
+        <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Menu</button>
     </section>
 
-    <script>
-        // Prayer texts
-        const signOfCross = ".";
-        const apostlesCreed = ".";
-        const ourFather = ".";
-        const hailMary = ".";
-        const gloryBe = ".";
-		const fatima = ". Amen";
-		const hailholyqueen = "."
-		
-        // Mysteries with scripture
-        const joyfulMysteries = [
-            {name: "The Annunciation", scripture: "Luke 1:26-38\n\n"},
-            {name: "The Visitation", scripture: "Luke 1:39-56\n\n"},
-            {name: "The Nativity", scripture: "Luke 2:1-20\n\n"},
-            {name: "The Presentation", scripture: "Luke 2:22-38\n\n"},
-            {name: "The Finding in the Temple", scripture: "Luke 2:41-52\n\n"}
-        ];
+    <section id="chat-section" class="hidden">
+        <div class="chat-container">
+            <div class="chat-header">Catechumen Chat</div>
+            <div class="messages-area" id="messages-area">
+                <div class="message-bubble received">
+                    <div class="message-sender">Host</div>
+                    Use this space to ask questions, share your thoughts, and connect with your catechists and fellow classmates. 
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type your message...">
+                <button id="send-button">Send</button>
+            </div>
+            <div id="username-class-input-area">
+                <input type="text" id="username-input" placeholder="Your Username (e.g., JohnD)">
+                <input type="text" id="class-input" placeholder="Your Class (e.g., RCIA, 10th Grade)">
+                <button id="save-profile-button">Save Profile</button>
+            </div>
+        </div>
+    </section>
+</div>
 
-        const sorrowfulMysteries = [
-            {name: "The Agony in the Garden", scripture: "Luke 22:39-46\n\n”"},
-            {name: "The Scourging at the Pillar", scripture: "John 19:1\n\n"},
-            {name: "The Crowning with Thorns", scripture: "Matthew 27:27-31\n\n"},
-            {name: "The Carrying of the Cross", scripture: "John 19:16-17\n\n"},
-            {name: "The Crucifixion", scripture: "John 19:18-30\n\n"}
-        ];
+<!-- Custom Alert Modal and Overlay HTML (ensure these are at the end of body for z-index) -->
+<div id="custom-alert-modal" class="hidden">
+    <p class="alert-message"></p>
+    <button class="alert-ok-button">OK</button>
+</div>
+<div id="alert-overlay" class="hidden"></div>
 
-        const gloriousMysteries = [
-            {name: "The Resurrection", scripture: "Matthew 28:1-10\n\n"},
-            {name: "The Ascension", scripture: "Acts 1:6-11\n\n”"},
-            {name: "The Descent of the Holy Spirit", scripture: "Acts 2:1-11\n\n”"},
-            {name: "The Assumption", scripture: "Luke 1:46-55\n\n”"},
-            {name: "The Coronation of Mary", scripture: "Revelation 12:1\n\n"}
-        ];
+<footer>
+    <button id="quit-nav-button">Quit</button>
+</footer>
 
-        const luminousMysteries = [
-            {name: "The Baptism of Christ in the Jordan", scripture: "Matthew 3:13-17\n\n.”"},
-            {name: "The Wedding Feast at Cana", scripture: "John 2:1-11\n\n"},
-            {name: "Jesus' Proclamation of the Kingdom of God", scripture: "Matthew 5:1-12\n\n”"},
-            {name: "The Transfiguration", scripture: "Matthew 17:1-9\n\n”"},
-            {name: "The Institution of the Eucharist", scripture: "Luke 22:14-20\n\n”"}
-        ];
+<script>
+    // --- Global Variables ---
+    const splashScreen = document.getElementById('splash-screen');
+    const mainContentContainer = document.querySelector('.main-content-container');
+    const homeNavButton = document.getElementById('home-nav-button'); // New Home button
+    const lessonsNavButton = document.getElementById('lessons-nav-button');
+    const spiritualNavButton = document.getElementById('spiritual-nav-button');
+    const chatMenuButton = document.getElementById('chat-menu-button');
+    const resourcesNavButton = document.getElementById('resources-nav-button');
+    const quitNavButton = document.getElementById('quit-nav-button'); // Now in footer
 
-        // Global rosary states
-    let rosaryStates = {};
+    // Updated lesson section variables
+    const lessonsListSection = document.getElementById('lessons-list-section'); // New section for the list
+    const lessonsList = document.getElementById('lessons-list');
+    const lessonContentSection = document.getElementById('lesson-content-section'); // New section for individual lesson view
+    const currentLessonTitle = document.getElementById('current-lesson-title');
+    const currentLessonContent = document.getElementById('current-lesson-content');
+    const lessonVideo = document.getElementById('lesson-video');
+    const takeQuizButton = document.getElementById('take-quiz-button');
+    const backToLessonsListButton = document.getElementById('back-to-lessons-list-button');
+
+    const quizSection = document.getElementById('quiz-section');
+    const quizTitle = document.getElementById('quiz-title');
+    const quizQuestionsContainer = document.getElementById('quiz-questions-container');
+    const submitQuizButton = document.getElementById('submit-quiz-button');
+    const backToLessonFromQuizButton = document.getElementById('back-to-lesson-from-quiz-button');
+
+    // Chat elements
+    const messagesArea = document.getElementById('messages-area');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const usernameInput = document.getElementById('username-input');
+    const classInput = document.getElementById('class-input');
+    const saveProfileButton = document.getElementById('save-profile-button');
+
+    // Custom Alert Modal elements
+    const customAlertModal = document.getElementById('custom-alert-modal');
+    const alertMessageElement = customAlertModal.querySelector('.alert-message');
+    const alertOkButton = customAlertModal.querySelector('.alert-ok-button');
+    const alertOverlay = document.getElementById('alert-overlay');
+
+    // Rosary elements
+    // Removed old rosary display elements, they will be dynamically generated
+    const rosaryStartButton = document.getElementById('rosary-start-button'); // This button is not used in the new logic
+    const rosaryNextButton = document.getElementById('rosary-next-button'); // This button is not used in the new logic
+    const rosaryResetButton = document.getElementById('rosary-reset-button'); // This button is not used in the new logic
+    const rosaryBackToSpiritualButton = document.getElementById('rosary-back-to-spiritual-button'); // This button is not used in the new logic
+
+    // Prayers section elements
+    const prayersListContainer = document.getElementById('prayers-list');
+    const prayerTextElement = document.getElementById('prayer-text');
+    const backToPrayersListButton = document.getElementById('back-to-prayers-list-button');
+
+
+    // --- Data (Fill with your actual content) ---
+    const lessonsData = [
+        {
+            id: 'lesson1',
+            title: 'Lesson 1: Introduction to Catholicism',
+            content: 'This lesson covers the basics of the Catholic faith.',
+            videoUrl: 'https://www.youtube.com/embed/fWf17B57Wj4',
+            quiz: [
+                {
+                    question: 'What is the central mystery of the Catholic faith?',
+                    options: ['The Trinity', 'The Incarnation', 'The Resurrection', 'The Eucharist'],
+                    correct: 0 // Index of the correct answer
+                },
+                {
+                    question: 'Who is the current Pope?',
+                    options: ['Pope Benedict XVI', 'Pope John Paul II', 'Pope Francis', 'Pope Peter'],
+                    correct: 2 // Index of the correct answer
+                }
+            ]
+        },
+        {
+            id: 'lesson2',
+            title: 'Lesson 2: The Sacraments',
+            content: 'An overview of the seven sacraments of the Catholic Church.',
+            videoUrl: 'https://www.youtube.com/embed/fWf17B57Wj4',
+            quiz: [
+                {
+                    question: 'How many sacraments are there in the Catholic Church?',
+                    options: ['5', '7', '10', '12'],
+                    correct: 1 // Index of the correct answer
+                },
+                {
+                    question: 'Which sacrament is the source and summit of Christian life?',
+                    options: ['Baptism', 'Confirmation', 'Eucharist', 'Reconciliation'],
+                    correct: 2
+                }
+            ]
+        },
+        {
+            id: 'lesson3',
+            title: 'Lesson 3: The Ten Commandments',
+            content: 'A detailed look at the Ten Commandments and their meaning.',
+            videoUrl: 'https://www.youtube.com/embed/fWf17B57Wj4',
+            quiz: [
+                {
+                    question: 'How many commandments did God give to Moses?',
+                    options: ['5', '7', '10', '12'],
+                    correct: 2
+                }
+            ]
+        }
+    ];
+
+    const prayersData = {
+        "Sign of the Cross": "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.",
+        "Our Father": "Our Father, Who art in Heaven, hallowed be Thy Name. Thy Kingdom come, Thy Will be done, on earth as it is in Heaven. Give us this day our daily bread, and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.",
+        "Hail Mary": "Hail Mary, full of grace, the Lord is with thee. Blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.",
+        "Glory Be": "Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.",
+        "Apostles' Creed": "I believe in God, the Father Almighty, Creator of Heaven and earth; and in Jesus Christ, His only Son, Our Lord; Who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died, and was buried. He descended into Hell; the third day He arose again from the dead; He ascended into Heaven, and sitteth at the right hand of God, the Father Almighty; from thence He shall come to judge the living and the dead. I believe in the Holy Spirit, the Holy Catholic Church, the communion of Saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.",
+        "Nicene Creed": "I believe in one God, the Father almighty, maker of heaven and earth, of all things visible and invisible. I believe in one Lord Jesus Christ, the Only Begotten Son of God, born of the Father before all ages. God from God, Light from Light, true God from true God, begotten, not made, consubstantial with the Father; through him all things were made. For us men and for our salvation he came down from heaven, and by the Holy Spirit was incarnate of the Virgin Mary, and became man. For our sake he was crucified under Pontius Pilate, he suffered death and was buried, and rose again on the third day in accordance with the Scriptures. He ascended into heaven and is seated at the right hand of the Father. He will come again in glory to judge the living and the dead and his kingdom will have no end. I believe in the Holy Spirit, the Lord, the giver of life, who proceeds from the Father and the Son, who with the Father and the Son is adored and glorified, who has spoken through the prophets. I believe in one, holy, catholic and apostolic Church. I confess one Baptism for the forgiveness of sins and I look forward to the resurrection of the dead and the life of the world to come. Amen.",
+        "Act of Contrition": "O my God, I am heartily sorry for having offended Thee, and I detest all my sins because of Thy just punishments, but most of all because they offend Thee, my God, Who art all good and deserving of all my love. I firmly resolve, with the help of Thy grace, to sin no more and to avoid the near occasions of sin. Amen.",
+        "Hail Holy Queen": "Hail, Holy Queen, Mother of Mercy, our life, our sweetness, and our hope. To thee do we cry, poor banished children of Eve; to thee do we send up our sighs, mourning and weeping in this valley of tears. Turn then, most gracious Advocate, thine eyes of mercy toward us, and after this our exile, show unto us the blessed Fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary. Pray for us, O Holy Mother of God, that we may be made worthy of the promises of Christ. Amen.",
+        "Memorare": "Remember, O most gracious Virgin Mary, that never was it known that anyone who fled to thy protection, implored thy help, or sought thy intercession was left unaided. Inspired by this confidence, I fly unto thee, O Virgin of virgins, my Mother. To thee do I come, before thee I stand, sinful and sorrowful. O Mother of the Word Incarnate, despise not my petitions, but in thy mercy hear and answer me. Amen.",
+        "Angelus": "The Angel of the Lord declared unto Mary. And she conceived of the Holy Spirit.\n\nHail Mary...\n\nBehold the handmaid of the Lord. Be it done unto me according to Thy Word.\n\nHail Mary...\n\nAnd the Word was made Flesh. And dwelt among us.\n\nHail Mary...\n\nPray for us, O Holy Mother of God. That we may be made worthy of the promises of Christ.\n\nLet us pray. Pour forth, we beseech Thee, O Lord, Thy grace into our hearts; that we, to whom the Incarnation of Christ, Thy Son, was made known by the message of an Angel, may by His Passion and Cross be brought to the glory of His Resurrection. Through the same Christ Our Lord. Amen.",
+        "Prayer to St. Michael": "Saint Michael the Archangel, defend us in battle. Be our protection against the wickedness and snares of the Devil. May God rebuke him, we humbly pray; and do thou, O Prince of the Heavenly Host, by the power of God, cast into hell Satan, and all the evil spirits, who prowl about the world seeking the ruin of souls. Amen.",
+        "Anima Christi": "Soul of Christ, sanctify me. Body of Christ, save me. Blood of Christ, inebriate me. Water from the side of Christ, wash me. Passion of Christ, strengthen me. O good Jesus, hear me. Within Thy wounds hide me. Permit me not to be separated from Thee. From the wicked foe defend me. At the hour of my death call me. And bid me come to Thee, that with Thy Saints I may praise Thee. Forever and ever. Amen.",
+        "Guardian Angel Prayer": "Angel of God, my guardian dear, to whom God's love commits me here, ever this day be at my side, to light and guard, to rule and guide. Amen.",
+        "Grace Before Meals": "Bless us, O Lord, and these thy gifts, which we are about to receive from thy bounty, through Christ our Lord. Amen.",
+        "Grace After Meals": "We give Thee thanks for all Thy benefits, O Almighty God, Who livest and reignest forever and ever. Amen. May the souls of the faithful departed, through the mercy of God, rest in peace. Amen.",
+        "Morning Offering": "O Jesus, through the Immaculate Heart of Mary, I offer You my prayers, works, joys, and sufferings of this day for all the intentions of Your Sacred Heart, in union with the Holy Sacrifice of the Mass throughout the world, in reparation for my sins, for the intentions of all our associates, and for the conversion of sinners. Amen.",
+        "Act of Faith": "O my God, I firmly believe that you are one God in three divine Persons, Father, Son, and Holy Spirit. I believe that your divine Son became man and died for our sins, and that he will come to judge the living and the dead. I believe these and all the truths which the holy Catholic Church teaches, because you have revealed them, who can neither deceive nor be deceived. Amen.",
+        "Act of Hope": "O my God, relying on your almighty help and promises, I hope to gain eternal life and the graces necessary to obtain it, because you are all-good and merciful. Amen.",
+        "Act of Love": "O my God, I love you above all things, with my whole heart and soul, because you are all-good and worthy of all my love. I love my neighbor as myself for love of you. I forgive all who have injured me and ask pardon of all whom I have injured. Amen.",
+        "Fatima Prayer": "O my Jesus, forgive us our sins, save us from the fires of hell, lead all souls to Heaven, especially those in most need of Thy mercy. Amen.",
+        "Come Holy Spirit": "Come, Holy Spirit, fill the hearts of Thy faithful and enkindle in them the fire of Thy love. Send forth Thy Spirit and they shall be created. And Thou shalt renew the face of the earth. O, God, Who by the light of the Holy Spirit, didst instruct the hearts of the faithful, grant that by the same Holy Spirit we may be truly wise and ever enjoy His consolations, Through Christ Our Lord. Amen.",
+        "Eternal Rest": "Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May the souls of the faithful departed, through the mercy of God, rest in peace. Amen.",
+        "Divine Praises": "Blessed be God.\nBlessed be His Holy Name.\nBlessed be Jesus Christ, true God and true Man.\nBlessed be the Name of Jesus.\nBlessed be His Most Sacred Heart.\nBlessed be His Most Precious Blood.\nBlessed be Jesus in the Most Holy Sacrament of the Altar.\nBlessed be the Holy Spirit, the Paraclete.\nBlessed be the great Mother of God, Mary Most Holy.\nBlessed be her Holy and Immaculate Conception.\nBlessed be her Glorious Assumption.\nBlessed be the Name of Mary, Virgin and Mother.\nBlessed be St. Joseph, her most chaste spouse.\nBlessed be God in His Angels and and in His Saints. Amen.",
+        "Confiteor": "I confess to almighty God and to you, my brothers and sisters, that I have greatly sinned, in my thoughts and in my words, in what I have done and in what I have failed to do, through my fault, through my fault, through my most grievous fault; therefore I ask blessed Mary ever-Virgin, all the Angels and Saints, and you, my brothers and sisters, to pray for me to the Lord our God. Amen."
+    };
+
+    // Mysteries with scripture (Added placeholder scripture content)
+    const joyfulMysteries = [
+        {name: "The Annunciation", scripture: "Luke 1:26-38\n\nThe Angel Gabriel announces to Mary that she will conceive by the Holy Spirit and bear a son, Jesus."},
+        {name: "The Visitation", scripture: "Luke 1:39-56\n\nMary visits her cousin Elizabeth, who is also pregnant, and John the Baptist leaps in her womb."},
+        {name: "The Nativity", scripture: "Luke 2:1-20\n\nJesus is born in Bethlehem and laid in a manger, as angels proclaim His birth to shepherds."},
+        {name: "The Presentation", scripture: "Luke 2:22-38\n\nMary and Joseph present Jesus in the Temple, where Simeon and Anna prophesy about Him."},
+        {name: "The Finding in the Temple", scripture: "Luke 2:41-52\n\nJesus, at age twelve, is found in the Temple, astounding teachers with His wisdom."}
+    ];
+
+    const sorrowfulMysteries = [
+        {name: "The Agony in the Garden", scripture: "Luke 22:39-46\n\nJesus prays in Gethsemane, sweating blood as He contemplates His Passion."},
+        {name: "The Scourging at the Pillar", scripture: "John 19:1\n\nPilate has Jesus scourged severely, hoping to appease the crowd."},
+        {name: "The Crowning with Thorns", scripture: "Matthew 27:27-31\n\nSoldiers mock Jesus, placing a crown of thorns on His head and hailing Him as 'King of the Jews'."},
+        {name: "The Carrying of the Cross", scripture: "John 19:16-17\n\nJesus carries His heavy cross through Jerusalem, stumbling along the way."},
+        {name: "The Crucifixion", scripture: "John 19:18-30\n\nJesus is nailed to the cross and dies, offering salvation to humanity."}
+    ];
+
+    const gloriousMysteries = [
+        {name: "The Resurrection", scripture: "Matthew 28:1-10\n\nJesus rises from the dead on the third day, appearing to His disciples."},
+        {name: "The Ascension", scripture: "Acts 1:6-11\n\nJesus ascends into Heaven forty days after His Resurrection, promising the Holy Spirit."},
+        {name: "The Descent of the Holy Spirit", scripture: "Acts 2:1-11\n\nThe Holy Spirit descends upon the apostles and Mary at Pentecost, empowering them to preach."},
+        {name: "The Assumption", scripture: "Luke 1:46-55\n\nMary is taken body and soul into heavenly glory at the end of her earthly life."},
+        {name: "The Coronation of Mary", scripture: "Revelation 12:1\n\nMary is crowned Queen of Heaven and Earth by her Son, Jesus Christ."}
+    ];
+
+    const luminousMysteries = [
+        {name: "The Baptism of Christ in the Jordan", scripture: "Matthew 3:13-17\n\nJesus is baptized by John the Baptist, and the Holy Spirit descends upon Him."},
+        {name: "The Wedding Feast at Cana", scripture: "John 2:1-11\n\nAt Mary's request, Jesus performs His first public miracle, turning water into wine."},
+        {name: "Jesus' Proclamation of the Kingdom of God", scripture: "Mark 1:14-15\n\nJesus begins His public ministry, proclaiming the good news of the Kingdom of God and calling for repentance."},
+        {name: "The Transfiguration", scripture: "Matthew 17:1-8\n\nJesus is transfigured before Peter, James, and John, revealing His divine glory."},
+        {name: "The Institution of the Eucharist", scripture: "Luke 22:14-20\n\nAt the Last Supper, Jesus institutes the Eucharist, giving His Body and Blood as spiritual food."}
+    ];
+
+
+    // --- Custom Alert Modal Functions (defined ONCE globally) ---
+    function showAlert(message, callback = null) {
+        alertMessageElement.textContent = message;
+        customAlertModal.classList.remove('hidden');
+        alertOverlay.classList.add('active'); // Use 'active' for overlay display
+        customAlertModal._alertCallback = callback; // Store the callback
+    }
+
+    if (alertOkButton) {
+        alertOkButton.addEventListener('click', () => {
+            customAlertModal.classList.add('fade-out'); // Start fade-out animation
+
+            // Immediately hide the modal and overlay after starting fade-out,
+            // then clean up animation class after animationend.
+            // This makes it more robust if animationend is missed.
+            customAlertModal.classList.add('hidden'); // Hide the modal immediately
+            alertOverlay.classList.remove('active'); // Deactivate the alert overlay
+
+            function handleAnimationEnd() {
+                customAlertModal.classList.remove('fade-out'); // Remove fade-out class
+                // Call the stored callback if it exists
+                if (customAlertModal._alertCallback) {
+                    customAlertModal._alertCallback();
+                    customAlertModal._alertCallback = null; // Clear callback
+                }
+                customAlertModal.removeEventListener('animationend', handleAnimationEnd); // Remove itself
+            }
+
+            // Listen for the 'animationend' event on the modal itself
+            customAlertModal.addEventListener('animationend', handleAnimationEnd, { once: true }); // Ensure it runs only once
+        });
+    }
+
+    // Optional: Close modal if overlay is clicked
+    if (alertOverlay) {
+        alertOverlay.addEventListener('click', () => {
+            // Only allow closing by clicking overlay if the modal itself isn't in a transition
+            if (!customAlertModal.classList.contains('fade-out')) {
+                customAlertModal.classList.add('hidden');
+                alertOverlay.classList.remove('active');
+                // Decide if clicking overlay should trigger the callback
+                if (customAlertModal._alertCallback) {
+                    customAlertModal._alertCallback();
+                    customAlertModal._alertCallback = null;
+                }
+            }
+        });
+    }
+
+
+    // --- Section Management ---
+    let currentActiveSection = null;
+
+    function showSection(sectionId) {
+        const sections = document.querySelectorAll('.main-content-container section');
+        let targetSection = document.getElementById(sectionId);
+
+        if (!targetSection) {
+            console.error(`Section with ID "${sectionId}" not found.`);
+            showAlert(`Error: Section "${sectionId}" not found.`);
+            return;
+        }
+
+        // Hide current section if one is active
+        if (currentActiveSection && currentActiveSection !== targetSection) {
+            currentActiveSection.classList.add('hidden');
+            currentActiveSection.classList.remove('active'); // Remove active class
+        }
+
+        // Show the target section
+        targetSection.classList.remove('hidden');
+        targetSection.classList.add('active'); // Add active class
+        currentActiveSection = targetSection;
+
+        // Special handling for lessons sections
+        if (sectionId === 'lessons-list-section') {
+            // When showing the lessons list, ensure lesson content and quiz are hidden
+            lessonContentSection.classList.add('hidden');
+            quizSection.classList.add('hidden');
+            renderLessonsList(); // Re-render the list when navigating to lessons section
+        } else if (sectionId === 'lesson-content-section') {
+            // When showing lesson content, ensure the list and quiz are hidden
+            lessonsListSection.classList.add('hidden');
+            quizSection.classList.add('hidden');
+        } else if (sectionId === 'quiz-section') {
+            // When showing quiz, ensure lesson list and content are hidden
+            lessonsListSection.classList.add('hidden');
+            lessonContentSection.classList.add('hidden');
+        }
+        // Special handling for prayers section: ensure prayers list is visible initially
+        if (sectionId === 'prayers-section') {
+            document.getElementById('prayers-list').classList.remove('hidden');
+            prayerTextElement.classList.add('hidden');
+            backToPrayersListButton.classList.add('hidden');
+        }
+    }
+
+
+    // --- Splash Screen Logic ---
+    window.addEventListener('load', () => {
+        // Initial state: hide main content
+        if (mainContentContainer) {
+            mainContentContainer.style.display = 'none'; // Ensure it's not visible initially
+            mainContentContainer.classList.remove('visible');
+        }
+
+        // Trigger fade-out after banner animation duration (4s, as per @keyframes bannerIntroAnimation)
+        setTimeout(() => {
+            splashScreen.classList.add('fade-out');
+
+            // Wait for splash screen fade-out transition to finish (1s CSS transition), then show main content
+            splashScreen.addEventListener('transitionend', (e) => {
+                if (e.propertyName === 'opacity' && splashScreen.classList.contains('fade-out')) {
+                    splashScreen.style.display = 'none'; // Fully hide splash screen
+                    if (mainContentContainer) {
+                        mainContentContainer.style.display = 'flex'; // Or 'block', based on desired layout
+                        // Use requestAnimationFrame to ensure CSS transition is applied after display change
+                        requestAnimationFrame(() => {
+                            mainContentContainer.classList.add('visible'); // Triggers opacity transition
+                        });
+                        showSection('main-menu-section'); // Show the initial section
+                    }
+                }
+            }, { once: true }); // Ensure this listener only runs once
+        }, 4000); // Match total splash animation time (bannerIntroAnimation duration)
+    });
+
+
+    // --- Lessons & Quizzes Functions ---
+    let currentLesson = null; // Stores the currently viewed lesson object
+    let currentQuiz = null; // Stores the quiz data for the current lesson
+
+    // Progress tracking functions
+    function getProgress() {
+        // Get the highest unlocked lesson index from localStorage. Default to 0 (first lesson unlocked).
+        return parseInt(localStorage.getItem('unlockedLessonIndex') || '0');
+    }
+
+    function setProgress(lessonIndex) {
+        // Set the highest unlocked lesson index in localStorage
+        localStorage.setItem('unlockedLessonIndex', lessonIndex.toString());
+        renderLessonsList(); // Re-render lessons to update unlocked state
+    }
+
+    function renderLessonsList() {
+        lessonsList.innerHTML = ''; // Clear previous list
+        const unlockedIndex = getProgress();
+
+        lessonsData.forEach((lesson, index) => {
+            const listItem = document.createElement('li');
+            const lessonButton = document.createElement('button');
+            lessonButton.textContent = lesson.title;
+            
+            // Disable button if lesson is not yet unlocked
+            if (index > unlockedIndex) {
+                lessonButton.disabled = true;
+                lessonButton.textContent += ' (Locked)';
+            } else {
+                lessonButton.addEventListener('click', () => viewLesson(lesson.id));
+            }
+            listItem.appendChild(lessonButton);
+            lessonsList.appendChild(listItem);
+        });
+        // Ensure quiz/back buttons are hidden when the lesson list is shown
+        takeQuizButton.classList.add('hidden');
+        backToLessonsListButton.classList.add('hidden');
+    }
+
+    function viewLesson(lessonId) {
+        currentLesson = lessonsData.find(lesson => lesson.id === lessonId);
+        if (currentLesson) {
+            currentLessonTitle.textContent = currentLesson.title;
+            currentLessonContent.innerHTML = currentLesson.content; // Use innerHTML for rich content
+
+            const videoContainer = lessonContentSection.querySelector('.video-placeholder'); // Use lessonContentSection
+            if (currentLesson.videoUrl) {
+                lessonVideo.src = currentLesson.videoUrl;
+                videoContainer.classList.remove('hidden');
+            } else {
+                lessonVideo.src = ''; // Clear source
+                videoContainer.classList.add('hidden');
+            }
+
+            showSection('lesson-content-section'); // Show the new lesson content section
+            
+            // Show/hide take quiz button based on if the lesson has quiz data
+            if (currentLesson.quiz && currentLesson.quiz.length > 0) {
+                takeQuizButton.classList.remove('hidden');
+            } else {
+                takeQuizButton.classList.add('hidden');
+            }
+            
+            // Always show the "Back to Lessons" button when viewing a specific lesson
+            backToLessonsListButton.classList.remove('hidden');
+
+        } else {
+            showAlert('Lesson not found!');
+            // Ensure buttons are hidden if lesson not found
+            takeQuizButton.classList.add('hidden');
+            backToLessonsListButton.classList.add('hidden');
+        }
+    }
+
+    function startQuiz() {
+        if (!currentLesson || !currentLesson.quiz || currentLesson.quiz.length === 0) {
+            showAlert('No quiz available for this lesson.');
+            return;
+        }
+
+        currentQuiz = currentLesson.quiz;
+        quizTitle.textContent = `Quiz for: ${currentLesson.title}`;
+        quizQuestionsContainer.innerHTML = ''; // Clear previous questions
+
+        currentQuiz.forEach((q, qIdx) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('quiz-question');
+            questionDiv.innerHTML = `<p><strong>${qIdx + 1}. ${q.question}</strong></p>`; // Added question numbering
+
+            q.options.forEach((opt, oIdx) => {
+                const label = document.createElement('label');
+                label.classList.add('quiz-option');
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = `question-${qIdx}`; // Unique name for each question
+                input.value = oIdx; // Store index as value
+                label.appendChild(input);
+                label.append(opt); // Display the option text
+                questionDiv.appendChild(label);
+            });
+            quizQuestionsContainer.appendChild(questionDiv);
+        });
+
+        showSection('quiz-section'); // Show the quiz section
+    }
+
+    function submitQuiz() {
+        if (currentLesson === null) return; // Ensure a lesson is selected
+        const quizData = currentLesson.quiz; // Use currentLesson.quiz directly
+        let score = 0;
+        let totalQuestions = quizData.length;
+        let currentLessonIndex = lessonsData.indexOf(currentLesson); // Get the index of the current lesson
+
+        quizData.forEach((q, idx) => {
+            const selected = document.querySelector(`input[name="question-${idx}"]:checked`);
+            if (selected && parseInt(selected.value) === q.correct) {
+                score++;
+            }
+        });
+
+        if (score === totalQuestions) {
+            showAlert('Congratulations! You passed the quiz. All questions answered correctly.', () => {
+                const progress = getProgress();
+                // Unlock the next lesson if this one is the current highest unlocked
+                if (currentLessonIndex + 1 > progress) {
+                    setProgress(currentLessonIndex + 1);
+                }
+                showSection('lessons-list-section'); // Go back to lessons list
+            });
+        } else {
+            showAlert(`Try again after reviewing the material. You scored ${score} out of ${totalQuestions}.`, () => {
+                showSection('lesson-content-section'); // Go back to lesson content
+            });
+        }
+    }
+
+    // --- Rosary Functions ---
+    let rosaryStates = {}; // Centralized state for each mystery type
 
     function ordinal(n) {
         const ord = ['First', 'Second', 'Third', 'Fourth', 'Fifth'];
@@ -813,41 +1204,66 @@
 
     function startRosary(type) {
         let mysteries;
-        let sectionId = type.toLowerCase() + '-rosary';
-        let displayId = type.toLowerCase() + '-display';
+        let sectionId = type.toLowerCase() + '-rosary-section'; // Use existing section IDs
+        let displayId = type.toLowerCase() + '-display'; // Use existing display IDs
+
         switch (type) {
             case 'Joyful': mysteries = joyfulMysteries; break;
             case 'Sorrowful': mysteries = sorrowfulMysteries; break;
             case 'Glorious': mysteries = gloriousMysteries; break;
             case 'Luminous': mysteries = luminousMysteries; break;
+            default: return; // Should not happen
         }
-        showSection(sectionId);
+        
+        showSection(sectionId); // Show the specific rosary section
 
         let sequence = [];
-        sequence.push({type: 'prayer', name: 'Sign of the Cross', text: signOfCross});
-        sequence.push({type: 'prayer', name: 'Apostles\' Creed', text: apostlesCreed});
-        sequence.push({type: 'prayer', name: 'Our Father', text: ourFather});
-        for (let i = 0; i < 3; i++) sequence.push({type: 'prayer', name: 'Hail Mary', text: hailMary, count: i + 1, total: 3});
-        sequence.push({type: 'prayer', name: 'Glory Be', text: gloryBe});
+        // Introductory Prayers
+        sequence.push({type: 'prayer', name: 'Sign of the Cross', text: prayersData['Sign of the Cross']});
+        sequence.push({type: 'prayer', name: 'Apostles\' Creed', text: prayersData['Apostles\' Creed']});
+        sequence.push({type: 'prayer', name: 'Our Father', text: prayersData['Our Father']});
+        for (let i = 0; i < 3; i++) {
+            sequence.push({type: 'prayer', name: 'Hail Mary', text: prayersData['Hail Mary'], count: i + 1, total: 3});
+        }
+        sequence.push({type: 'prayer', name: 'Glory Be', text: prayersData['Glory Be']});
+        sequence.push({type: 'prayer', name: 'Fatima Prayer', text: prayersData['Fatima Prayer']});
+
+        // Mysteries and Decades
         for (let m = 0; m < 5; m++) {
             sequence.push({type: 'mystery', name: `${ordinal(m + 1)} ${type} Mystery: ${mysteries[m].name}`, scripture: mysteries[m].scripture});
-            sequence.push({type: 'prayer', name: 'Our Father', text: ourFather});
-            for (let i = 0; i < 10; i++) sequence.push({type: 'prayer', name: 'Hail Mary', text: hailMary, count: i + 1, total: 10});
-            sequence.push({type: 'prayer', name: 'Glory Be', text: gloryBe});
-            sequence.push({type: 'prayer', name: 'Fatima Prayer', text: fatima});
+            sequence.push({type: 'prayer', name: 'Our Father', text: prayersData['Our Father']});
+            for (let i = 0; i < 10; i++) {
+                sequence.push({type: 'prayer', name: 'Hail Mary', text: prayersData['Hail Mary'], count: i + 1, total: 10});
+            }
+            sequence.push({type: 'prayer', name: 'Glory Be', text: prayersData['Glory Be']});
+            sequence.push({type: 'prayer', name: 'Fatima Prayer', text: prayersData['Fatima Prayer']});
         }
-        sequence.push({type: 'prayer', name: 'Hail Holy Queen', text: hailholyqueen});
+        
+        // Concluding Prayer
+        sequence.push({type: 'prayer', name: 'Hail Holy Queen', text: prayersData['Hail Holy Queen']});
+        sequence.push({type: 'prayer', name: 'Sign of the Cross', text: prayersData['Sign of the Cross']}); // End with Sign of the Cross
 
         rosaryStates[type.toLowerCase()] = {sequence: sequence, index: 0, displayId: displayId};
         displayCurrentPrayer(type.toLowerCase());
+
+        // Ensure next/back buttons are visible for the specific rosary section
+        document.getElementById(`${type.toLowerCase()}-next-button`).classList.remove('hidden');
+        document.getElementById(`${type.toLowerCase()}-rosary-section`).querySelector('button[onclick="showSection(\'rosary-main-section\')"]').classList.remove('hidden');
+        document.getElementById(`${type.toLowerCase()}-rosary-section`).querySelector('button[onclick="showSection(\'spiritual-formation-section\')"]').classList.remove('hidden');
     }
 
     function nextPrayer(type) {
         let state = rosaryStates[type];
         if (!state) return;
+        
         state.index++;
         if (state.index >= state.sequence.length) {
-            document.getElementById(state.displayId).innerHTML = '<p>Rosary Completed. Amen.</p>';
+            showAlert('Rosary Completed! 🙏', () => {
+                document.getElementById(state.displayId).innerHTML = '<p>Rosary Completed. Amen.</p>';
+                // Reset state after completion
+                state.index = 0;
+                showSection('rosary-main-section'); // Go back to the main rosary selection
+            });
             return;
         }
         displayCurrentPrayer(type);
@@ -857,624 +1273,193 @@
         let state = rosaryStates[type];
         let item = state.sequence[state.index];
         let html = '';
+        let displayElement = document.getElementById(state.displayId);
+
+        if (!displayElement) {
+            console.error(`Display element with ID "${state.displayId}" not found.`);
+            return;
+        }
+
         if (item.type === 'mystery') {
-            html = `<h3>${item.name}</h3><pre>${item.scripture}</pre>`;
+            html = `<h3>${item.name}</h3><pre class="scripture">${item.scripture}</pre>`;
         } else {
             let prayerName = item.name;
             if (item.count) {
                 prayerName += ` (${item.count}/${item.total})`;
             }
-            html = `<h3>${prayerName}</h3><pre>${item.text}</pre>`;
+            html = `<h3>${prayerName}</h3><pre class="rosary-current-prayer">${item.text}</pre>`;
         }
-        document.getElementById(state.displayId).innerHTML = html;
+        displayElement.innerHTML = html;
     }
+
+    function resetRosary(type) { // Added type parameter for specific reset
+        showAlert("Rosary progress reset!", () => {
+            if (rosaryStates[type]) {
+                rosaryStates[type].index = 0; // Reset index for the specific type
+            }
+            showSection('rosary-main-section'); // Go back to the spiritual main menu
+        });
+    }
+
+    // --- Common Prayers Functions ---
+    function renderPrayersList() {
+        prayersListContainer.innerHTML = '';
+        for (const prayerName in prayersData) {
+            const listItem = document.createElement('li');
+            const prayerButton = document.createElement('button');
+            prayerButton.textContent = prayerName;
+            prayerButton.addEventListener('click', () => viewPrayer(prayerName));
+            listItem.appendChild(prayerButton);
+            prayersListContainer.appendChild(listItem);
+        }
+    }
+
+    function viewPrayer(prayerName) {
+        const prayerContent = prayersData[prayerName];
+        if (prayerContent) {
+            prayerTextElement.innerHTML = `<h3>${prayerName}</h3><p>${prayerContent.replace(/\n/g, '<br>')}</p>`;
+            document.getElementById('prayers-list').classList.add('hidden');
+            prayerTextElement.classList.remove('hidden');
+            backToPrayersListButton.classList.remove('hidden');
+        } else {
+            showAlert('Prayer not found.');
+        }
+    }
+
+    // --- Event Listeners ---
+    function initListeners() {
+        // Navigation Buttons
+        if (homeNavButton) { // New Home button listener
+            homeNavButton.addEventListener('click', () => showSection('main-menu-section'));
+        }
+        if (lessonsNavButton) {
+            lessonsNavButton.addEventListener('click', () => showSection('lessons-list-section')); // Changed to new lessons list section
+        }
+        if (spiritualNavButton) {
+            spiritualNavButton.addEventListener('click', () => showSection('spiritual-formation-section'));
+        }
+        if (chatMenuButton) {
+            chatMenuButton.addEventListener('click', () => showSection('chat-section'));
+        }
+        if (resourcesNavButton) {
+            resourcesNavButton.addEventListener('click', () => showSection('student-resources-section'));
+        }
+        if (quitNavButton) {
+            quitNavButton.addEventListener('click', () => showAlert('Are you sure you want to quit? This will close the application.', () => {
+                window.close(); // Attempt to close the window/tab
+            }));
+        }
+
+        // Lessons Section
+        if (backToLessonsListButton) {
+            backToLessonsListButton.addEventListener('click', () => {
+                showSection('lessons-list-section'); // Go back to the lessons list section
+            });
+        }
+
+        if (takeQuizButton) {
+            takeQuizButton.addEventListener('click', startQuiz);
+        }
+
+        // Quiz Section
+        if (submitQuizButton) {
+            submitQuizButton.addEventListener('click', submitQuiz);
+        }
+        if (backToLessonFromQuizButton) {
+            backToLessonFromQuizButton.addEventListener('click', () => {
+                if (currentLesson) {
+                    viewLesson(currentLesson.id); // Go back to the specific lesson content
+                } else {
+                    showSection('lessons-list-section'); // Fallback to lesson list if no current lesson
+                }
+            });
+        }
+
+        // Chat Section
+        if (sendButton) {
+            sendButton.addEventListener('click', () => {
+                const message = userInput.value;
+                if (message.trim() !== '') {
+                    messagesArea.innerHTML += `<div class="message-bubble sent"><div class="message-sender">You</div>${message}</div>`;
+                    userInput.value = ''; // Clear input
+                    messagesArea.scrollTop = messagesArea.scrollHeight; // Scroll to bottom
+                    // Add AI response logic here later
+                }
+            });
+        }
+
+        if (saveProfileButton) {
+            saveProfileButton.addEventListener('click', () => {
+                const username = usernameInput.value.trim();
+                const userClass = classInput.value.trim();
+                if (username && userClass) {
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('userClass', userClass);
+                    showAlert('Profile saved successfully!');
+                } else {
+                    showAlert('Please enter both username and class.');
+                }
+            });
+        }
+
+        // Spiritual Section (Rosary and Prayers List buttons)
+        document.getElementById('start-joyful-rosary-button')?.addEventListener('click', () => startRosary('Joyful'));
+        document.getElementById('start-sorrowful-rosary-button')?.addEventListener('click', () => startRosary('Sorrowful'));
+        document.getElementById('start-glorious-rosary-button')?.addEventListener('click', () => startRosary('Glorious'));
+        document.getElementById('start-luminous-rosary-button')?.addEventListener('click', () => startRosary('Luminous'));
+
+
+        // Attach event listeners to the common Rosary navigation buttons within each rosary section
+        document.getElementById('joyful-next-button')?.addEventListener('click', () => nextPrayer('joyful'));
+        document.getElementById('sorrowful-next-button')?.addEventListener('click', () => nextPrayer('sorrowful'));
+        document.getElementById('glorious-next-button')?.addEventListener('click', () => nextPrayer('glorious'));
+        document.getElementById('luminous-next-button')?.addEventListener('click', () => nextPrayer('luminous'));
+
+        // Reset buttons for each rosary type
+        document.getElementById('joyful-rosary-section')?.querySelector('button[onclick*="showSection(\'rosary-main-section\')"]').addEventListener('click', () => resetRosary('joyful'));
+        document.getElementById('sorrowful-rosary-section')?.querySelector('button[onclick*="showSection(\'rosary-main-section\')"]').addEventListener('click', () => resetRosary('sorrowful'));
+        document.getElementById('glorious-rosary-section')?.querySelector('button[onclick*="showSection(\'rosary-main-section\')"]').addEventListener('click', () => resetRosary('glorious'));
+        document.getElementById('luminous-rosary-section')?.querySelector('button[onclick*="showSection(\'rosary-main-section\')"]').addEventListener('click', () => resetRosary('luminous'));
+
+
+        // Prayers specific listeners
+        document.querySelectorAll('#prayers-list button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                viewPrayer(event.target.textContent);
+            });
+        });
+        if (backToPrayersListButton) {
+            backToPrayersListButton.addEventListener('click', resetPrayer);
+        }
+    }
+
+    // --- Initializations ---
+    // Ensure this runs after all elements are available
+    document.addEventListener('DOMContentLoaded', () => {
+        initListeners(); // Initialize all event listeners
+        // Any other DOM-ready initializations
+    });
+
+    // Handle initial user profile load
+    window.addEventListener('load', () => {
+        const savedUsername = localStorage.getItem('username');
+        const savedClass = localStorage.getItem('userClass');
+        if (usernameInput && classInput) {
+            usernameInput.value = savedUsername || '';
+            classInput.value = savedClass || '';
+        }
+        // Render lessons list on load to apply initial locked/unlocked states
+        renderLessonsList();
+    });
+
+    // Dummy resetPrayer function, replace with actual logic if needed
+    function resetPrayer() {
+        document.getElementById('prayers-list').classList.remove('hidden');
+        prayerTextElement.classList.add('hidden');
+        backToPrayersListButton.classList.add('hidden');
+    }
+
 </script>
 
-    <section id="prayers" class="hidden">
-        <h2 id="prayer-title">Common Catholic Prayers</h2>
-        <ul id="prayers-list">
-            <li><button onclick="showPrayer('Sign of the Cross')">Sign of the Cross</button></li>
-            <li><button onclick="showPrayer('Our Father')">Our Father</button></li>
-            <li><button onclick="showPrayer('Hail Mary')">Hail Mary</button></li>
-            <li><button onclick="showPrayer('Glory Be')">Glory Be</button></li>
-            <li><button onclick="showPrayer('Apostles\' Creed')">Apostles' Creed</button></li>
-            <li><button onclick="showPrayer('Nicene Creed')">Nicene Creed</button></li>
-            <li><button onclick="showPrayer('Act of Contrition')">Act of Contrition</button></li>
-            <li><button onclick="showPrayer('Hail Holy Queen')">Hail Holy Queen</button></li>
-            <li><button onclick="showPrayer('Memorare')">Memorare</button></li>
-            <li><button onclick="showPrayer('Angelus')">Angelus</button></li>
-            <li><button onclick="showPrayer('Prayer to St. Michael')">Prayer to St. Michael</button></li>
-            <li><button onclick="showPrayer('Anima Christi')">Anima Christi</button></li>
-            <li><button onclick="showPrayer('Guardian Angel Prayer')">Guardian Angel Prayer</button></li>
-            <li><button onclick="showPrayer('Grace Before Meals')">Grace Before Meals</button></li>
-            <li><button onclick="showPrayer('Grace After Meals')">Grace After Meals</button></li>
-            <li><button onclick="showPrayer('Morning Offering')">Morning Offering</button></li>
-            <li><button onclick="showPrayer('Act of Faith')">Act of Faith</button></li>
-            <li><button onclick="showPrayer('Act of Hope')">Act of Hope</button></li>
-            <li><button onclick="showPrayer('Act of Love')">Act of Love</button></li>
-            <li><button onclick="showPrayer('Fatima Prayer')">Fatima Prayer</button></li>
-            <li><button onclick="showPrayer('Come Holy Spirit')">Come Holy Spirit</button></li>
-            <li><button onclick="showPrayer('Eternal Rest')">Eternal Rest</button></li>
-            <li><button onclick="showPrayer('Divine Praises')">Divine Praises</button></li>
-            <li><button onclick="showPrayer('Confiteor')">Confiteor</button></li>
-        </ul>
-        <pre id="prayer-text" class="hidden"></pre>
-        <button onclick="resetPrayer()">Back to List</button>
-        <button onclick="showSection('spiritual')">Back to Spiritual Menu</button>
-    </section>
-    
-    
-
-        <!-- The Integrated Chat Section -->
-        <section id="chat-section" class="hidden">
-            <h2>O.C.I.A. Chat</h2>
-            <div class="chat-container">
-                <div class="chat-header">
-                    Community Chat
-                </div>
-
-                <div id="user-status-area" class="user-status-area">
-                    <span id="welcome-message"></span>
-                    <span id="current-class-display"></span>
-                    <div id="username-class-input-area" class="hidden">
-                        <input type="text" id="username-input" placeholder="Enter your username">
-                        <input type="text" id="class-input" placeholder="Enter your Class Name (e.g., OCIA 1)">
-                        <button id="save-profile-button">Save Profile</button>
-                    </div>
-                </div>
-
-                <div id="messages-area" class="messages-area">
-                    <div id="loading-indicator" class="loading-message">Loading chat...</div>
-                </div>
-                <div class="input-area">
-                    <input type="text" id="message-input" placeholder="Type your message...">
-                    <button id="send-button">Send</button>
-                </div>
-                <!-- The close button might be less relevant for an integrated section, but kept for now -->
-                <button id="close-chat-button">X</button> 
-            </div>
-        </section>
-
-        <section id="quit-section" class="hidden">
-            <h2>Quit</h2>
-            <!-- Quit content or confirmation -->
-            <p>Thank you for using the app. You can close this window.</p>
-        </section>
-    </div> <!-- End of .main-content-container -->
-
-
-    <!-- Custom Alert Modal Structure -->
-    <div id="custom-alert-modal" class="hidden">
-        <div class="alert-message"></div>
-        <button class="alert-ok-button">OK</button>
-    </div>
-
-    <!-- Alert Overlay for Custom Alert -->
-    <div id="alert-overlay"></div>
-    
-    <script type="module">
-        // Firebase SDK imports for modular syntax
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Your web app's Firebase configuration (from your Firebase Console)
-        const firebaseConfig = {
-            apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
-            authDomain: "ocia-application.firebaseapp.com",
-            projectId: "ocia-application",
-            storageBucket: "ocia-application.firebasestorage.app",
-            messagingSenderId: "113168534647",
-            appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
-            measurementId: "G-WRGSXQCY5D"
-        };
-
-        // Initialize Firebase (only once for the entire app)
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Global variables for chat logic (from Canvas environment, if available)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let currentUserId = null;
-        let currentUsername = 'Anonymous'; // Default username
-        let currentClassId = null; // New variable for class ID
-        let isAuthReady = false;
-
-        // --- Custom Alert Modal Functions ---
-        const customAlertModal = document.getElementById('custom-alert-modal');
-        const alertMessageElement = customAlertModal.querySelector('.alert-message');
-        const alertOkButton = customAlertModal.querySelector('.alert-ok-button');
-        const alertOverlay = document.getElementById('alert-overlay'); // Dedicated overlay for alert
-
-        function showAlert(message) {
-            alertMessageElement.textContent = message;
-            customAlertModal.classList.remove('hidden');
-            alertOverlay.classList.add('active'); // Activate the alert overlay
-        }
-
-        alertOkButton.addEventListener('click', () => {
-            customAlertModal.classList.add('fade-out');
-            customAlertModal.addEventListener('animationend', () => {
-                customAlertModal.classList.add('hidden');
-                customAlertModal.classList.remove('fade-out');
-                alertOverlay.classList.remove('active'); // Deactivate the alert overlay
-            }, { once: true }); // Ensure listener is removed after animation
-        });
-
-
-        // --- showSection function (moved to global scope for programmatic event listeners) ---
-        // This function now handles both direct IDs and IDs ending with '-section'
-        function showSection(sectionId) {
-            console.log("showSection called with:", sectionId);
-            // Hide all sections with a slight delay for transition
-            document.querySelectorAll('.main-content-container section').forEach(section => {
-                if (!section.classList.contains('hidden')) {
-                    section.classList.add('hidden');
-                    console.log("Added 'hidden' to:", section.id);
-                }
-            });
-
-            // Find the target section
-            let targetSection = document.getElementById(sectionId);
-            if (!targetSection) {
-                targetSection = document.getElementById(sectionId + '-section');
-            }
-
-            // Show the target section after a small delay to allow others to fade out
-            if (targetSection) {
-                setTimeout(() => {
-                    targetSection.classList.remove('hidden');
-                    console.log("Removed 'hidden' from:", targetSection.id);
-                }, 100); // Small delay, adjust as needed based on transition duration
-            } else {
-                console.error("Target section not found with ID:", sectionId, "or", sectionId + '-section');
-            }
-        }
-
-        // --- All other JavaScript logic wrapped in DOMContentLoaded ---
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOMContentLoaded fired.");
-
-            // Get chat elements within the chat section
-            const messagesArea = document.querySelector('#chat-section #messages-area');
-            const messageInput = document.querySelector('#chat-section #message-input');
-            const sendButton = document.querySelector('#chat-section #send-button');
-            const loadingIndicator = document.querySelector('#chat-section #loading-indicator');
-
-            // Username/Class elements
-            const welcomeMessageSpan = document.querySelector('#chat-section #welcome-message');
-            const currentClassDisplay = document.querySelector('#chat-section #current-class-display');
-            const usernameClassInputArea = document.querySelector('#chat-section #username-class-input-area');
-            const usernameInput = document.querySelector('#chat-section #username-input');
-            const classInput = document.querySelector('#chat-section #class-input');
-            const saveProfileButton = document.querySelector('#chat-section #save-profile-button');
-
-            // Startup animation elements
-            const splashScreen = document.getElementById('splash-screen');
-            const splashTitleBanner = document.getElementById('splash-title-banner');
-            const mainContentContainer = document.querySelector('.main-content-container');
-
-            // Hide main content initially (already done by CSS, but good to ensure)
-            if (mainContentContainer) {
-                mainContentContainer.style.display = 'none';
-                mainContentContainer.classList.remove('visible'); // Ensure it's not visible
-            }
-
-            // Listen for the end of the title banner animation
-            splashTitleBanner.addEventListener('animationend', () => {
-                // Once the title banner animation is done, start fading out the whole splash screen
-                splashScreen.classList.add('fade-out');
-            });
-
- // Listen for the end of the splash screen fade-out
-            splashScreen.addEventListener('transitionend', (e) => {
-                if (e.propertyName === 'opacity') { // Ensure we only react to the opacity transition
-                    // Once the splash screen has faded out, hide it completely
-                    splashScreen.style.display = 'none';
-
-                    if (mainContentContainer) {
-                        // Trigger the fade-in for the main content by adding the 'visible' class
-                        // The CSS transition on .main-content-container.visible will handle the smooth fade.
-                        mainContentContainer.classList.add('visible');
-                    }
-                    // Removed the automatic showSection('lessons'); call here
-                }
-            }, { once: true }); // Ensure this listener only fires once
-
-
-            /**
-             * Initializes Firebase and sets up authentication.
-             */
-            async function initializeFirebaseChat() {
-                console.log("initializeFirebaseChat called.");
-                try {
-                    // Listen for authentication state changes
-                    onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            currentUserId = user.uid;
-                            console.log("Firebase authenticated. User ID:", currentUserId);
-                            isAuthReady = true;
-
-                            // Fetch user's profile (username and classId)
-                            const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}`);
-                            const userDocSnap = await getDoc(userDocRef);
-
-                            if (userDocSnap.exists() && userDocSnap.data().username && userDocSnap.data().classId) {
-                                currentUsername = userDocSnap.data().username;
-                                currentClassId = userDocSnap.data().classId;
-                                welcomeMessageSpan.textContent = `Welcome, ${currentUsername}!`;
-                                currentClassDisplay.textContent = ` (Class: ${currentClassId})`;
-                                usernameClassInputArea.classList.add('hidden'); // Hide input if profile exists
-                                enableChatInput();
-                            } else {
-                                welcomeMessageSpan.textContent = `Welcome! Please set your profile:`;
-                                currentClassDisplay.textContent = ''; // Clear class display
-                                usernameClassInputArea.classList.remove('hidden'); // Show input if no profile
-                                disableChatInput(); // Disable chat input until profile is set
-                                // Pre-fill inputs if partial data exists (e.g., if only username was set before)
-                                if (userDocSnap.exists()) {
-                                    usernameInput.value = userDocSnap.data().username || '';
-                                    classInput.value = userDocSnap.data().classId || '';
-                                }
-                            }
-
-                            if (loadingIndicator) {
-                                loadingIndicator.remove();
-                            }
-                            setupRealtimeListener(); // Always set up listener after auth, it will filter by classId
-                        } else {
-                            // This is the section to modify
-                            try {
-                                if (initialAuthToken) {
-                                    // Attempt custom token sign-in first
-                                    await signInWithCustomToken(auth, initialAuthToken);
-                                    console.log("Signed in with custom token.");
-                                } else {
-                                    // Fallback to anonymous sign-in if no custom token
-                                    await signInAnonymously(auth);
-                                    console.log("Signed in anonymously.");
-                                }
-                            } catch (error) {
-                                console.error("Error during initial sign-in attempt:", error);
-                                // If custom token fails, try anonymous as a fallback
-                                if (error.code === 'auth/custom-token-mismatch' || error.code === 'auth/invalid-custom-token') {
-                                    console.warn("Custom token failed, attempting anonymous sign-in as fallback.");
-                                    try {
-                                        await signInAnonymously(auth);
-                                        console.log("Signed in anonymously after custom token failure.");
-                                    } catch (anonError) {
-                                        console.error("Error signing in anonymously as fallback:", anonError);
-                                        if (messagesArea) {
-                                            messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${anonError.message}</div>`;
-                                        }
-                                    }
-                                } else {
-                                    // Other Firebase auth errors
-                                    if (messagesArea) {
-                                        messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${error.message}</div>`;
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                } catch (error) {
-                    console.error("Error initializing Firebase Chat:", error);
-                    if (messagesArea) {
-                        messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase Chat initialization failed. ${error.message}</div>`;
-                    }
-                }
-            }
-
-            /**
-             * Saves the user's chosen username and class ID to Firestore.
-             */
-            async function saveProfile() {
-                const newUsername = usernameInput.value.trim();
-                const newClassId = classInput.value.trim();
-
-                if (newUsername.length < 0) {
-                    showAlert('Username must be at least 3 characters long.'); // Using custom alert
-                    return;
-                }
-                if (newClassId.length < 0) {
-                    showAlert('Class Name must be at least 2 characters long.'); // Using custom alert
-                    return;
-                }
-
-                if (!currentUserId) {
-                    console.error("Cannot save profile: User not authenticated.");
-                    return;
-                }
-
-                try {
-                    const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}`);
-                    await setDoc(userDocRef, { username: newUsername, classId: newClassId }, { merge: true });
-                    
-                    currentUsername = newUsername;
-                    currentClassId = newClassId; // Update currentClassId
-                    
-                    welcomeMessageSpan.textContent = `Welcome, ${currentUsername}!`;
-                    currentClassDisplay.textContent = ` (Class: ${currentClassId})`;
-                    usernameClassInputArea.classList.add('hidden'); // Hide input
-                    enableChatInput(); // Enable chat input
-                    console.log("User profile saved:", { username: newUsername, classId: newClassId });
-
-                    // Re-setup listener to apply new class filter
-                    setupRealtimeListener(); 
-
-                } catch (error) {
-                    console.error("Error saving profile:", error);
-                    showAlert("Error saving profile. Please try again."); // Using custom alert
-                }
-            }
-
-            /**
-             * Enables the chat message input and send button.
-             */
-            function enableChatInput() {
-                if (messageInput) messageInput.disabled = false;
-                if (sendButton) sendButton.disabled = false;
-            }
-
-            /**
-             * Disables the chat message input and send button.
-             */
-            function disableChatInput() {
-                if (messageInput) messageInput.disabled = true;
-                if (sendButton) sendButton.disabled = true;
-            }
-
-            /**
-             * Sets up a real-time listener for messages from Firestore.
-             */
-            function setupRealtimeListener() {
-                if (!db || !currentUserId || !currentClassId) {
-                    console.warn("Firestore, User ID, or Class ID not ready for listener setup. Chat messages will not load.");
-                    if (messagesArea) {
-                         messagesArea.innerHTML = `<div class="loading-message">Please set your username and class to view chat messages.</div>`;
-                    }
-                    return;
-                }
-
-                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-                // Query messages where classId matches current user's classId
-                const q = query(messagesCollectionRef, where('classId', '==', currentClassId), orderBy('timestamp', 'asc'));
-
-                onSnapshot(q, (snapshot) => {
-                    if (messagesArea) {
-                        messagesArea.innerHTML = '';
-                        if (snapshot.empty) {
-                            messagesArea.innerHTML = `<div class="loading-message">No messages in this class yet. Be the first to say hello!</div>`;
-                        }
-                        snapshot.forEach((doc) => {
-                            const message = doc.data();
-                            displayMessage(message);
-                        });
-                        messagesArea.scrollTop = messagesArea.scrollHeight;
-                    }
-                }, (error) => {
-                    console.error("Error listening to messages:", error);
-                    if (messagesArea) {
-                        messagesArea.innerHTML = `<div class="loading-message text-red-500">Error loading messages: ${error.message}</div>`;
-                    }
-                });
-            }
-
-            /**
-             * Displays a single message in the chat area.
-             * @param {object} message - The message object containing text, senderId, username, classId, and timestamp.
-             */
-            function displayMessage(message) {
-                if (!messagesArea) return;
-
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('message-bubble');
-
-                const isSentByCurrentUser = message.senderId === currentUserId;
-                if (isSentByCurrentUser) {
-                    messageElement.classList.add('sent');
-                } else {
-                    messageElement.classList.add('received');
-                }
-
-                // Use username from message data, fallback to truncated senderId if somehow missing
-                const senderDisplayName = message.username || (message.senderId ? `User: ${message.senderId.substring(0, 8)}...` : 'Unknown');
-                
-                const senderElement = document.createElement('div');
-                senderElement.classList.add('message-sender');
-                senderElement.textContent = senderDisplayName;
-                messageElement.appendChild(senderElement);
-
-                const textElement = document.createElement('div');
-                textElement.textContent = message.text;
-                messageElement.appendChild(textElement);
-
-                messagesArea.appendChild(messageElement);
-            }
-
-            /**
-             * Sends a new message to Firestore.
-             */
-            async function sendMessage() {
-                if (!isAuthReady || !currentUserId || !messageInput || !currentUsername || currentUsername === 'Anonymous' || !currentClassId) {
-                    console.warn("Firebase not ready, user not authenticated, username/class not set, or message input not found to send message.");
-                    showAlert("Please set your username and class name before sending messages."); // Using custom alert
-                    return;
-                }
-
-                const messageText = messageInput.value.trim();
-                if (messageText === '') {
-                    return;
-                }
-
-                try {
-                    const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-                    await addDoc(messagesCollectionRef, {
-                        text: messageText,
-                        senderId: currentUserId,
-                        username: currentUsername,
-                        classId: currentClassId, // Include the classId in the message
-                        timestamp: serverTimestamp()
-                    });
-                    messageInput.value = '';
-                } catch (error) {
-                    console.error("Error sending message:", error);
-                }
-            }
-
-            // Event listeners for sending messages
-            if (sendButton) {
-                sendButton.addEventListener('click', sendMessage);
-            }
-            if (messageInput) {
-                messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        sendMessage();
-                    }
-                });
-            }
-
-            // Event listener for saving profile (username and class)
-            if (saveProfileButton) {
-                saveProfileButton.addEventListener('click', saveProfile);
-            }
-            if (usernameInput) {
-                usernameInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        saveProfile();
-                    }
-                });
-            }
-            if (classInput) {
-                classInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        saveProfile();
-                    }
-                });
-            }
-
-
-            // --- Chat Section Toggle JavaScript ---
-            const chatMenuButton = document.getElementById('chat-menu-button');
-            const closeChatButton = document.getElementById('close-chat-button');
-            // chatSection is no longer needed here as it's not directly toggling pointer-events for the alert.
-
-            if (chatMenuButton) {
-                chatMenuButton.addEventListener('click', () => showSection('chat-section'));
-            } else {
-                console.error("Chat menu button with ID 'chat-menu-button' not found.");
-            }
-
-            if (closeChatButton) {
-                // For an integrated section, 'closing' means going back to lessons or spiritual formation
-                closeChatButton.addEventListener('click', () => showSection('lessons-section')); // Default to lessons
-            }
-
-
-            // --- Attach event listeners for main navigation buttons ---
-            const lessonsNavButton = document.getElementById('lessons-nav-button');
-            const spiritualNavButton = document.getElementById('spiritual-nav-button');
-            const resourcesNavButton = document.getElementById('resources-nav-button');
-            const quitNavButton = document.getElementById('quit-nav-button');
-
-            if (lessonsNavButton) {
-                lessonsNavButton.addEventListener('click', () => showSection('lessons'));
-            } else { console.error("Lessons nav button not found."); }
-
-            if (spiritualNavButton) {
-                spiritualNavButton.addEventListener('click', () => showSection('spiritual-formation'));
-            } else { console.error("Spiritual nav button not found."); }
-
-            if (resourcesNavButton) {
-                resourcesNavButton.addEventListener('click', () => showSection('student-resources'));
-            } else { console.error("Resources nav button not found."); }
-
-            if (quitNavButton) {
-                quitNavButton.addEventListener('click', () => {
-                    showAlert("Thank you for using Catechumen! You can close this window.");
-                });
-            } else { console.error("Quit nav button not found."); }
-
-            // Initialize Firebase chat logic after all elements and listeners are set up
-            initializeFirebaseChat();
-        }); // End of DOMContentLoaded listener
-
-        // --- Prayer texts (globally accessible) ---
-        // These are constants and do not rely on DOM elements, so can be outside DOMContentLoaded.
-        const signOfCross = ".";
-        const apostlesCreed = ".";
-        const ourFather = ".";
-        const hailMary = ".";
-        const gloryBe = ".";
-        const fatima = ".";
-        const hailholyqueen = "."
-        
-        // Placeholder for missing rosary and prayer functions for brevity in this example.
-        // You would have these functions already in your Catechism app.html
-        function startQuiz() {
-            showAlert("Starting quiz! (Functionality to be implemented)");
-            console.log("Starting quiz.");
-            // Implement quiz start logic
-        }
-
-        function submitQuiz() {
-            showAlert("Submitting quiz! (Functionality to be implemented)");
-            console.log("Submitting quiz.");
-            // Implement quiz submission logic
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-    // Get references to the modal elements
-    const customAlertModal = document.getElementById('custom-alert-modal');
-    const alertMessage = customAlertModal.querySelector('.alert-message');
-    const alertOkButton = customAlertModal.querySelector('.alert-ok-button');
-    const alertOverlay = document.getElementById('alert-overlay');
-
-    /**
-     * Shows the custom alert modal with a given message.
-     * @param {string} message The message to display in the alert.
-     */
-    window.showAlert = function(message) {
-        alertMessage.textContent = message; // Set the message
-        customAlertModal.classList.remove('hidden'); // Show the modal
-        alertOverlay.classList.remove('hidden');     // Show the overlay
-    };
-
-    // Add event listener to the OK button to close the modal
-    if (alertOkButton) {
-        alertOkButton.addEventListener('click', function() {
-            customAlertModal.classList.add('hidden'); // Hide the modal
-            alertOverlay.classList.add('hidden');     // Hide the overlay
-        });
-    }
-
-    // You might also want to close the modal if the overlay is clicked (optional)
-    if (alertOverlay) {
-        alertOverlay.addEventListener('click', function() {
-            customAlertModal.classList.add('hidden');
-            alertOverlay.classList.add('hidden');
-        });
-    }
-
-    // --- Examples of how to use the showAlert function based on your screenshots ---
-
-    // Example 1: "Congratulations! You got a perfect score!"
-    // You would call this after a quiz is completed and scored.
-    // showAlert("Congratulations! You got a perfect score! 🎉");
-
-    // Example 2: "Profile saved! You can now chat."
-    // You would call this after a profile is successfully saved.
-    // showAlert("Profile saved! You can now chat.");
-
-    // Example 3: "Thank you for using Catechumen. God bless!"
-    // You would call this when the user quits or at the end of a session.
-    // showAlert("Thank you for using Catechumen. God bless!");
-});
-
-    </script>
 </body>
 </html>
