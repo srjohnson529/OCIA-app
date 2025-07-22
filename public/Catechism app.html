@@ -90,19 +90,21 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            /* Removed: position: absolute; width: 100%; top: 0; left: 0; */
+            /* Smooth Section Transitions */
             opacity: 1;
             visibility: visible; /* Default visible */
             transition: opacity 1s ease-in-out;
+            position: absolute; /* Keep absolute for transitions, but manage parent */
+            width: 100%; /* Take full width of its relative parent */
+            top: 0; /* Align to top of parent */
+            left: 0; /* Align to left of parent */
             box-sizing: border-box; /* Include padding in width */
-            display: block; /* Default display for sections, allows them to be in flow */
         }
-        /* The .hidden class is crucial for hiding sections with transitions AND removing from flow */
+        /* The .hidden class is crucial for hiding sections with transitions */
         section.hidden {
             opacity: 0;
             visibility: hidden; /* Hide element visually and from screen readers */
             pointer-events: none; /* Disable interactions when hidden */
-            display: none; /* Crucial: removes element from document flow */
         }
         ul {
             list-style-type: none;
@@ -728,11 +730,11 @@
 
     <section id="chat-section" class="hidden">
         <div class="chat-container">
-            <div class="chat-header">Catechumen AI Chat</div>
+            <div class="chat-header">Catechumen Chat</div>
             <div class="messages-area" id="messages-area">
                 <div class="message-bubble received">
-                    <div class="message-sender">Catechumen AI</div>
-                    Hello! I'm here to help you learn about the Catholic faith. What's on your mind?
+                    <div class="message-sender">Host</div>
+                    Use this space to ask questions, share your thoughts, and connect with your catechists and fellow classmates. 
                 </div>
             </div>
             <div class="input-area">
@@ -992,50 +994,35 @@
 
         // Hide current section if one is active
         if (currentActiveSection && currentActiveSection !== targetSection) {
-            currentActiveSection.classList.add('hidden'); // Start fade out
-            // After transition, set display: none to remove from flow
-            setTimeout(() => {
-                if (currentActiveSection) { // Check if it's still the active section to hide
-                    currentActiveSection.style.display = 'none';
-                    currentActiveSection.classList.remove('active'); // Remove active class
-                }
-            }, 1000); // Match CSS transition duration
+            currentActiveSection.classList.add('hidden');
+            currentActiveSection.classList.remove('active'); // Remove active class
         }
 
         // Show the target section
-        targetSection.style.display = 'block'; // Make it display immediately
-        requestAnimationFrame(() => { // Use rAF to ensure display change is applied before transition
-            targetSection.classList.remove('hidden'); // Start fade in
-            targetSection.classList.add('active'); // Add active class
-        });
+        targetSection.classList.remove('hidden');
+        targetSection.classList.add('active'); // Add active class
         currentActiveSection = targetSection;
 
         // Special handling for lessons sections
         if (sectionId === 'lessons-list-section') {
+            // When showing the lessons list, ensure lesson content and quiz are hidden
             lessonContentSection.classList.add('hidden');
-            lessonContentSection.style.display = 'none'; // Ensure it's hidden and not taking space
             quizSection.classList.add('hidden');
-            quizSection.style.display = 'none'; // Ensure it's hidden and not taking space
-            renderLessonsList();
+            renderLessonsList(); // Re-render the list when navigating to lessons section
         } else if (sectionId === 'lesson-content-section') {
+            // When showing lesson content, ensure the list and quiz are hidden
             lessonsListSection.classList.add('hidden');
-            lessonsListSection.style.display = 'none'; // Ensure it's hidden and not taking space
             quizSection.classList.add('hidden');
-            quizSection.style.display = 'none'; // Ensure it's hidden and not taking space
         } else if (sectionId === 'quiz-section') {
+            // When showing quiz, ensure lesson list and content are hidden
             lessonsListSection.classList.add('hidden');
-            lessonsListSection.style.display = 'none'; // Ensure it's hidden and not taking space
             lessonContentSection.classList.add('hidden');
-            lessonContentSection.style.display = 'none'; // Ensure it's hidden and not taking space
         }
         // Special handling for prayers section: ensure prayers list is visible initially
         if (sectionId === 'prayers-section') {
             document.getElementById('prayers-list').classList.remove('hidden');
-            document.getElementById('prayers-list').style.display = 'flex'; // Ensure it's display flex
             prayerTextElement.classList.add('hidden');
-            prayerTextElement.style.display = 'none'; // Ensure it's hidden
             backToPrayersListButton.classList.add('hidden');
-            backToPrayersListButton.style.display = 'none'; // Ensure it's hidden
         }
     }
 
@@ -1332,11 +1319,8 @@
         if (prayerContent) {
             prayerTextElement.innerHTML = `<h3>${prayerName}</h3><p>${prayerContent.replace(/\n/g, '<br>')}</p>`;
             document.getElementById('prayers-list').classList.add('hidden');
-            document.getElementById('prayers-list').style.display = 'none'; // Ensure it's hidden and not taking space
             prayerTextElement.classList.remove('hidden');
-            prayerTextElement.style.display = 'block'; // Ensure it's displayed
             backToPrayersListButton.classList.remove('hidden');
-            backToPrayersListButton.style.display = 'block'; // Ensure it's displayed
         } else {
             showAlert('Prayer not found.');
         }
@@ -1471,11 +1455,8 @@
     // Dummy resetPrayer function, replace with actual logic if needed
     function resetPrayer() {
         document.getElementById('prayers-list').classList.remove('hidden');
-        document.getElementById('prayers-list').style.display = 'flex'; // Ensure it's display flex
         prayerTextElement.classList.add('hidden');
-        prayerTextElement.style.display = 'none'; // Ensure it's hidden
         backToPrayersListButton.classList.add('hidden');
-        backToPrayersListButton.style.display = 'none'; // Ensure it's hidden
     }
 
 </script>
