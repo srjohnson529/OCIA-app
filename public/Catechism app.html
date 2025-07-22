@@ -819,53 +819,688 @@
     const lessonsData = [
         {
             id: 'lesson1',
-            title: 'Lesson 1: Introduction to Catholicism',
-            content: 'This lesson covers the basics of the Catholic faith.',
-            videoUrl: 'https://www.youtube.com/embed/fWf17B57Wj4',
-            quiz: [
-                {
-                    question: 'What is the central mystery of the Catholic faith?',
-                    options: ['The Trinity', 'The Incarnation', 'The Resurrection', 'The Eucharist'],
-                    correct: 0 // Index of the correct answer
-                },
-                {
-                    question: 'Who is the current Pope?',
-                    options: ['Pope Benedict XVI', 'Pope John Paul II', 'Pope Francis', 'Pope Peter'],
-                    correct: 2 // Index of the correct answer
-                }
-            ]
-        },
-        {
-            id: 'lesson2',
-            title: 'Lesson 2: The Sacraments',
-            content: 'An overview of the seven sacraments of the Catholic Church.',
-            videoUrl: 'https://www.youtube.com/embed/fWf17B57Wj4',
-            quiz: [
-                {
-                    question: 'How many sacraments are there in the Catholic Church?',
-                    options: ['5', '7', '10', '12'],
-                    correct: 1 // Index of the correct answer
-                },
-                {
-                    question: 'Which sacrament is the source and summit of Christian life?',
-                    options: ['Baptism', 'Confirmation', 'Eucharist', 'Reconciliation'],
-                    correct: 2
-                }
-            ]
-        },
-        {
-            id: 'lesson3',
-            title: 'Lesson 3: The Ten Commandments',
-            content: 'A detailed look at the Ten Commandments and their meaning.',
-            videoUrl: 'https://www.youtube.com/embed/fWf17B57Wj4',
-            quiz: [
-                {
-                    question: 'How many commandments did God give to Moses?',
-                    options: ['5', '7', '10', '12'],
-                    correct: 2
-                }
-            ]
-        }
+            title: "Introduction to OCIA — Rites & Periods + Introduction to Prayer",
+            content: `<p>The Order of Christian Initiation of Adults (OCIA) is the process for adults to enter the Catholic Church. It includes periods like Inquiry, Catechumenate, Purification and Enlightenment (Lent), and Mystagogy. Rites include Acceptance, Scrutinies, and Initiation at Easter Vigil. Introduction to Prayer: Prayer is conversation with God, essential for faith growth (Compendium CCC 535-586).</p>
+<p>Key points from Compendium: All the faithful are called to Christian holiness through union with Christ and the sacraments.</p>
+<p>Relevant Questions: 251-294, 428, 534-536</p>
+<p>Excerpt: "Christian initiation is accomplished by means of the sacraments which establish the foundations of Christian life." (Q251)</p>
+<div class="video-placeholder">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/3vuYCjfO_w4?si=QdqxR9_yz2tyZ98Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div><p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+                    {
+                question: "What is prayer according to the Compendium of the Catechism of the Catholic Church?",
+                options: ["Raising one's mind and heart to God", "A set of rituals", "Only vocal recitation"],
+                correct: 0
+            },
+            {
+                question: "Which of the following is NOT one of the traditional expressions of Christian prayer?",
+                options: ["Contemplative", "Meditative", "Poetic", "Vocal"],
+                correct: 2
+            },
+            {
+                question: "What is the primary goal of the Order of Christian Initiation of Adults (OCIA)?",
+                options: ["To study theology academically", "To prepare adults to receive the sacraments of initiation", "To become lay ministers"],
+                correct: 1
+            },
+            {
+                question: "When is the Rite of Election typically celebrated?",
+                options: ["On Easter Sunday", "At the beginning of Lent", "On Pentecost"],
+                correct: 1
+            },
+            {
+                question: "What are the three major expressions of prayer in the Christian tradition?",
+                options: ["Adoration, Confession, Petition", "Vocal, Meditative, Contemplative", "Praise, Worship, Thanksgiving"],
+                correct: 1
+            },
+            {
+                question: "Who is the model and teacher of prayer in the Gospels?",
+                options: ["St. Paul", "The Apostles", "Jesus Christ"],
+                correct: 2
+            },
+            {
+                question: "What is the 'Our Father' often called in Christian prayer?",
+                options: ["The Lord’s Prayer", "The Apostle’s Creed", "The Morning Offering"],
+                correct: 0
+            },
+            {
+                question: "Which part of the OCIA process is marked by deeper spiritual formation and catechesis?",
+                options: ["Purification and Enlightenment", "Mystagogy", "Catechumenate"],
+                correct: 2
+            },
+            {
+                question: "According to the Catechism, prayer is a ___________ with God.",
+                options: ["Monologue", "Conversation", "Contemplation"],
+                correct: 1
+            },
+            {
+                question: "What does the period of Mystagogy focus on?",
+                options: ["Introducing catechumens to Scripture", "Post-baptismal catechesis and integration into the Church", "Learning about different religions"],
+                correct: 1
+            }
+                ]
+            },
+            {
+                id: 'lesson2',
+                title: "Salvation History & The Kerygma",
+                content: `<p>Salvation History is God's plan to save humanity from sin, unfolding through the Bible from Creation to Christ. The Kerygma is the proclamation: God created us for relationship, sin broke it, Jesus restores through death and resurrection, respond in faith (Compendium CCC 7-10, 50-67).</p>
+<p>Key points from Compendium: All the Old Covenant prefigurations find their fulfillment in Jesus Christ.</p>
+<p>Relevant Questions: 6-9, 79-80, 126, 436-437, 536-537</p>
+<p>Excerpt: "The full and definitive stage of God’s revelation is accomplished in his Word made flesh, Jesus Christ." (Q9)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/IuQm6PxKW44?si=5JAv3NueBDtlDmDs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+                    {
+                question: "What is the Kerygma?",
+                options: ["The moral code of the Church", "The core proclamation of the Gospel", "The list of doctrines from the Council of Trent"],
+                correct: 1
+            },
+            {
+                question: "Which event marks the beginning of salvation history?",
+                options: ["The Exodus", "The Fall of Adam and Eve", "The Creation of the world"],
+                correct: 2
+            },
+            {
+                question: "What is the climax of salvation history?",
+                options: ["The giving of the Ten Commandments", "The birth of the Church", "The life, death, and resurrection of Jesus Christ"],
+                correct: 2
+            },
+            {
+                question: "What was the purpose of God’s covenants with Noah, Abraham, Moses, and David?",
+                options: ["To increase the population", "To prepare humanity for the Messiah", "To abolish sin completely"],
+                correct: 1
+            },
+            {
+                question: "Which statement best summarizes the first proclamation of the Kerygma?",
+                options: ["God loves you and has a plan for your life", "You must obey all the rules", "The Church is infallible"],
+                correct: 0
+            },
+            {
+                question: "What did humanity lose in the Fall (Genesis 3)?",
+                options: ["Free will", "The knowledge of good and evil", "Original holiness and original justice"],
+                correct: 2
+            },
+            {
+                question: "Who fulfills all the promises of the Old Covenant?",
+                options: ["Moses", "Jesus Christ", "King Solomon"],
+                correct: 1
+            },
+            {
+                question: "What does God reveal through salvation history?",
+                options: ["The rules of society", "The process of evolution", "His loving plan to save humanity"],
+                correct: 2
+            },
+            {
+                question: "What must our response be to the Kerygma?",
+                options: ["Be amazed and keep it private", "Repent, believe in the Gospel, and be baptized", "Discuss it philosophically"],
+                correct: 1
+            },
+            {
+                question: "Why is Pentecost important in the story of salvation?",
+                options: ["It marks the end of the Old Testament", "It is when Jesus ascended", "It is the birth of the Church and the outpouring of the Holy Spirit"],
+                correct: 2
+            }
+                ]
+            },
+            {
+                id: 'lesson3',
+                title: "Revelation — Scripture, Tradition",
+                content: `<p>Divine Revelation is transmitted through Scripture and Tradition, both flowing from the same divine well-spring.</p>
+<p>Key points from Compendium: Tradition and Sacred Scripture are bound closely together.</p>
+<p>Relevant Questions: 11-17, 18-24, 430, 438</p>
+<p>Excerpt: "Tradition and Sacred Scripture are bound closely together and communicate one with the other." (Q14)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/lCuyyYSMlxQ?si=ljzG4cY7d2kVjehG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+                    {
+                question: "What is Divine Revelation?",
+                options: ["Human reasoning about God", "God’s free self-communication to humanity", "A collection of religious texts"],
+                correct: 1
+            },
+            {
+                question: "Through what two sources is Divine Revelation transmitted?",
+                options: ["Scripture and reason", "Tradition and Church law", "Sacred Scripture and Sacred Tradition"],
+                correct: 2
+            },
+            {
+                question: "Who is the fullness and finality of God's Revelation?",
+                options: ["Moses", "St. Paul", "Jesus Christ"],
+                correct: 2
+            },
+            {
+                question: "What is Sacred Scripture?",
+                options: ["Church documents", "The inspired Word of God in written form", "Writings of the saints"],
+                correct: 1
+            },
+            {
+                question: "What is Sacred Tradition?",
+                options: ["Optional Church practices", "The oral transmission of the Gospel and teachings of Christ", "New revelations from saints"],
+                correct: 1
+            },
+            {
+                question: "Who has the responsibility of interpreting the Word of God authentically?",
+                options: ["All the baptized", "Theologians", "The Magisterium of the Church"],
+                correct: 2
+            },
+            {
+                question: "What is the Magisterium?",
+                options: ["The teaching authority of the Church", "A book of canon law", "A council of laypeople"],
+                correct: 0
+            },
+            {
+                question: "How is the Bible inspired?",
+                options: ["It contains poetic truths", "It was dictated by angels", "It was written by human authors under the guidance of the Holy Spirit"],
+                correct: 2
+            },
+            {
+                question: "Which statement best describes the relationship between Scripture and Tradition?",
+                options: ["Tradition overrides Scripture", "They are two separate revelations", "They are closely connected and flow from the same divine wellspring"],
+                correct: 2
+            },
+            {
+                question: "Why is it important to read Scripture within the living Tradition of the Church?",
+                options: ["So we can critique it objectively", "To gain historical knowledge only", "To understand it as God intended, in unity with the faith community"],
+                correct: 2
+            }
+                ]
+            },
+            {
+                id: 'lesson4',
+                title: "The Creed",
+                content: `<p>The Creed summarizes the Christian faith, professing belief in God, Jesus, the Holy Spirit, the Church, and eternal life.</p>
+<p>Key points from Compendium: The Creed expresses our confident 'yes' to faith.</p>
+<p>Relevant Questions: 194-217, 442</p>
+<p>Excerpt: "The Hebrew word 'Amen'... expresses our confident and total 'yes' to what we professed in the Creed." (Q217)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/aBaiMWrX9v4?si=J8z6Z6a6jMHeja_R" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#The%20Profession%20of%20the%20Christian%20Faith" target="_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+            {
+                question: "What is the purpose of the Creed in the life of a Christian?",
+                options: ["To summarize the teachings of the Apostles", "To replace Scripture", "To serve as a personal mission statement"],
+                correct: 0
+            },
+            {
+                question: "Which Creed is most commonly recited at Sunday Mass?",
+                options: ["Apostles’ Creed", "Nicene Creed", "Athanasian Creed"],
+                correct: 1
+            },
+            {
+                question: "What does the word 'creed' mean?",
+                options: ["Law", "Worship", "I believe"],
+                correct: 2
+            },
+            {
+                question: "Which phrase in the Creed affirms belief in Jesus’ divinity?",
+                options: ["Born of the Virgin Mary", "He suffered under Pontius Pilate", "True God from true God, begotten, not made"],
+                correct: 2
+            },
+            {
+                question: "What do we profess about the Church in the Nicene Creed?",
+                options: ["It is democratic and diverse", "It is one, holy, catholic, and apostolic", "It is governed by the local community"],
+                correct: 1
+            },
+            {
+                question: "What is the significance of 'consubstantial with the Father'?",
+                options: ["Jesus is similar to God", "Jesus is a prophet of the Father", "Jesus is of the same divine nature as the Father"],
+                correct: 2
+            },
+            {
+                question: "What do we mean when we profess belief in the 'resurrection of the body'?",
+                options: ["That we will reincarnate", "That our souls will live forever without bodies", "That we will rise again bodily at the end of time"],
+                correct: 2
+            },
+            {
+                question: "What is affirmed by the phrase 'He will come again in glory to judge the living and the dead'?",
+                options: ["The general resurrection", "The second coming of Christ and the final judgment", "The creation of heaven"],
+                correct: 1
+            },
+            {
+                question: "When did the Church formally define the Nicene Creed?",
+                options: ["Council of Jerusalem", "Council of Nicaea (325) and Constantinople (381)", "Vatican II"],
+                correct: 1
+            },
+            {
+                question: "Why do catechumens learn the Creed before baptism?",
+                options: ["To pass a test", "To know Church history", "To personally profess and accept the faith of the Church"],
+                correct: 2
+            }
+]
+            },
+            {
+                id: 'lesson5',
+                title: "God & the Blessed Trinity",
+                content: `<p>God is one in three Persons: Father, Son, and Holy Spirit.</p>
+<p>Key points from Compendium: Grace makes us participants in Trinitarian life.</p>
+<p>Relevant Questions: 36-43, 423, 428</p>
+<p>Excerpt: "That grace is the gratuitous gift that God gives us to make us participants in his trinitarian life." (Q423)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/opiqPLaOoO0?si=jqnYpIeTTf712rSS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20God%20the%20Father" target="_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+            {
+                question: "What is the central mystery of the Christian faith?",
+                options: ["The Incarnation", "The Trinity", "The Resurrection"],
+                correct: 1
+            },
+            {
+                question: "How many persons are there in one God?",
+                options: ["One", "Two", "Three"],
+                correct: 2
+            },
+            {
+                question: "Who are the three Persons of the Holy Trinity?",
+                options: ["Father, Son, and Spirit of Truth", "Jesus, Mary, and Joseph", "Father, Son, and Holy Spirit"],
+                correct: 2
+            },
+            {
+                question: "Which of the following best describes the relationship of the Persons of the Trinity?",
+                options: ["Three separate gods", "Three modes of one God", "One God in three distinct but equal Persons"],
+                correct: 2
+            },
+            {
+                question: "Which Person of the Trinity became incarnate?",
+                options: ["The Father", "The Son", "The Holy Spirit"],
+                correct: 1
+            },
+            {
+                question: "What does the term 'consubstantial' mean in reference to the Trinity?",
+                options: ["They share similar attributes", "They are united in purpose", "They are of the same divine substance"],
+                correct: 2
+            },
+            {
+                question: "What role is traditionally attributed to the Holy Spirit in the life of the Church?",
+                options: ["Redeemer", "Sanctifier", "Creator"],
+                correct: 1
+            },
+            {
+                question: "Which creed explicitly affirms the doctrine of the Trinity?",
+                options: ["Apostles’ Creed", "Nicene Creed", "Athanasian Creed"],
+                correct: 2
+            },
+            {
+                question: "According to the Catechism, why did God reveal Himself as Trinity?",
+                options: ["To explain divine logic", "To help us understand the Incarnation", "To draw us into communion with Himself"],
+                correct: 2
+            },
+            {
+                question: "What does it mean to say the Trinity is a 'communion of Persons'?",
+                options: ["They communicate often", "They exist in perfect self-giving love and unity", "They rule the Church together"],
+                correct: 1
+            }
+]
+            },
+            {
+                id: 'lesson6',
+                title: "Creation & Humanity",
+                content: `<p>God created the world out of nothing, and humanity in His image and likeness.</p>
+<p>Key points from Compendium: God created everything for His glory and our good.</p>
+<p>Relevant Questions: 51-67</p>
+<p>Excerpt: "God freely created the universe from nothing." (Q53)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/-dS_V_gXPvk?si=HTcGT07RN0k3xGFY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P19.HTM" target="_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+            {
+                question: "What does the Church teach about the origin of the world?",
+                options: ["It happened by random chance", "It was created by God out of nothing", "It has always existed"],
+                correct: 1
+            },
+            {
+                question: "What does it mean that humans are made in the 'image and likeness of God'?",
+                options: ["They physically resemble God", "They share in God's reason, freedom, and capacity for love", "They are divine beings"],
+                correct: 1
+            },
+            {
+                question: "What is the soul?",
+                options: ["The emotional part of a person", "A temporary life-force", "The spiritual, immortal part of a human being"],
+                correct: 2
+            },
+            {
+                question: "What is Original Sin?",
+                options: ["The first murder in Scripture", "Adam and Eve’s disobedience to God", "The worship of false gods"],
+                correct: 1
+            },
+            {
+                question: "What were the consequences of Original Sin?",
+                options: ["Loss of original holiness, suffering, and death", "Increased intelligence", "Becoming like angels"],
+                correct: 0
+            },
+            {
+                question: "What is the Church’s teaching on the unity of the human race?",
+                options: ["Different races were created separately", "All people descend from one set of first parents", "Only some groups are chosen by God"],
+                correct: 1
+            },
+            {
+                question: "What role do humans have in creation?",
+                options: ["To dominate and destroy it", "To ignore it and focus only on heaven", "To be stewards and caretakers of God's creation"],
+                correct: 2
+            },
+            {
+                question: "What is the purpose of human life according to the Church?",
+                options: ["To seek pleasure and comfort", "To know, love, and serve God in this life and be happy with Him forever in the next", "To improve human evolution"],
+                correct: 1
+            },
+            {
+                question: "What is the destiny of the human body?",
+                options: ["It will decay and disappear forever", "It is meaningless", "It will rise again at the end of time"],
+                correct: 2
+            },
+            {
+                question: "Why did God create humanity?",
+                options: ["To entertain Him", "To fulfill a cosmic necessity", "Out of love, to share His divine life with us"],
+                correct: 2
+            }
+]
+            },
+            {
+                id: 'lesson7',
+                title: "Jesus Christ, Incarnation & Public Ministry",
+                content: `<p>Jesus is the Son of God made flesh, who taught, healed, and proclaimed the Kingdom during His public life.</p>
+<p>Key points from Compendium: The Incarnation means the Son of God became man.</p>
+<p>Relevant Questions: 85-100</p>
+<p>Excerpt: "The word 'Incarnation' means that the Son of God assumed human nature." (Q86)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/xphsJLRF9v8?si=wJZ2g75m15Q-BJUi" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
+<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20Jesus%20Christ,%20the%20Only%20Son%20of%20God"_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+            {
+                question: "What is the Incarnation?",
+                options: ["God pretending to be human", "Jesus becoming an angel", "The Son of God becoming truly man while remaining truly God"],
+                correct: 2
+            },
+            {
+                question: "Who is Jesus Christ?",
+                options: ["A great moral teacher", "True God and true man, the second Person of the Trinity", "A prophet only"],
+                correct: 1
+            },
+            {
+                question: "What event marks the beginning of Jesus' public ministry?",
+                options: ["His birth in Bethlehem", "His baptism in the Jordan by John the Baptist", "The Sermon on the Mount"],
+                correct: 1
+            },
+            {
+                question: "What did Jesus proclaim during His public ministry?",
+                options: ["A new legal code", "A political revolution", "The Kingdom of God"],
+                correct: 2
+            },
+            {
+                question: "What are the signs of the Kingdom of God in Jesus’ ministry?",
+                options: ["Political power and wealth", "Miracles, healings, and forgiveness of sins", "Temple sacrifices"],
+                correct: 1
+            },
+            {
+                question: "Why did the Son of God become man?",
+                options: ["To show off divine power", "To condemn sinners", "To save us by reconciling us with God and to reveal God’s love"],
+                correct: 2
+            },
+            {
+                question: "What do the miracles of Jesus demonstrate?",
+                options: ["His magical powers", "His compassion and divine authority", "His rivalry with other teachers"],
+                correct: 1
+            },
+            {
+                question: "How did Jesus teach about the Kingdom of God?",
+                options: ["Through commandments only", "Only in the synagogue", "Through parables, actions, and personal example"],
+                correct: 2
+            },
+            {
+                question: "What title did Jesus most often use to refer to Himself?",
+                options: ["Messiah", "Son of God", "Son of Man"],
+                correct: 2
+            },
+            {
+                question: "What is the significance of the Transfiguration?",
+                options: ["Jesus became invisible", "Jesus revealed His divine glory to Peter, James, and John", "Jesus taught His first parable"],
+                correct: 1
+            }
+]
+            },
+            {
+                id: 'lesson8',
+                title: "The Paschal Mystery",
+                content: `<p>The Paschal Mystery is Christ's passion, death, resurrection, and ascension.</p>
+<p>Key points from Compendium: The Paschal Mystery is central to salvation.</p>
+<p>Relevant Questions: 106-126</p>
+<p>Excerpt: "The Paschal Mystery of Jesus... is the work of our redemption." (Q106)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/Psg7PokhH6c?si=3fOAlx4EZbrj2Igv" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
+<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P1M.HTM"_blank">CCC</a></p>`,
+                quiz: [
+            {
+                question: "What is the Paschal Mystery?",
+                options: ["A puzzle in the Bible", "The life of Jesus as a teacher", "The Passion, Death, Resurrection, and Ascension of Jesus",
+                ],
+                correct: 2
+            },
+            {
+                question: "Why did Jesus freely suffer and die on the Cross?",
+                options: ["To prove His strength", "To defeat political enemies", "To save humanity from sin and death"],
+                correct: 2
+            },
+            {
+                question: "What is the significance of the Resurrection?",
+                options: ["It shows Jesus escaped death temporarily", "It proves Jesus is divine and offers eternal life", "It symbolizes good triumphing over evil"],
+                correct: 1
+            },
+            {
+                question: "What event does the Church celebrate on Good Friday?",
+                options: ["The Last Supper", "The Crucifixion and death of Jesus", "The Resurrection"],
+                correct: 1
+            },
+            {
+                question: "What happened at the Last Supper?",
+                options: ["Jesus washed the Apostles' feet", "Jesus instituted the Eucharist and the priesthood", "Jesus wrote the Gospels"],
+                correct: 1
+            },
+            {
+                question: "What is the Ascension?",
+                options: ["Jesus rising from the dead", "Jesus appearing in the tomb", "Jesus being taken up into Heaven in glory"],
+                correct: 2
+            },
+            {
+                question: "How does the Paschal Mystery relate to the sacraments?",
+                options: ["It is only symbolized at Easter", "It is re-presented and made present in the sacraments, especially the Eucharist", "It is remembered only in prayer"],
+                correct: 1
+            },
+            {
+                question: "What is the significance of Jesus’ suffering being 'freely accepted'?",
+                options: ["It fulfilled an ancient prophecy", "It shows that love requires suffering", "It reveals God's perfect love and obedience"],
+                correct: 2
+            },
+            {
+                question: "When is the Paschal Mystery most fully celebrated in the Church year?",
+                options: ["Advent", "Lent", "The Easter Triduum"],
+                correct: 2
+            },
+            {
+                question: "What do Christians hope for through participation in the Paschal Mystery?",
+                options: ["Material blessings", "Political success", "Eternal life with God"],
+                correct: 2
+            }
+]
+            },
+            {
+                id: 'lesson9',
+                title: "Holy Spirit & The Church",
+                content: `<p>The Holy Spirit animates the Church, which is the Body of Christ.</p>
+<p>Key points from Compendium: At Pentecost, the Holy Spirit descended on the apostles.</p>
+<p>Relevant Questions: 127-184</p>
+<p>Excerpt: "What happened at Pentecost? The Holy Spirit descended upon the Apostles." (Q144)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/gc9cQdiU9Fs?si=XnyGr4vHMl2bo-1J" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
+<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20the%20Holy%20Spirit"_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+            {
+                question: "Who is the Holy Spirit?",
+                options: ["A force of nature", "The third Person of the Holy Trinity", "An angel sent from heaven"],
+                correct: 1
+            },
+            {
+                question: "When was the Holy Spirit sent to the Church in a special way?",
+                options: ["On Holy Thursday", "At the Ascension", "At Pentecost"],
+                correct: 2
+            },
+            {
+                question: "What are the symbols of the Holy Spirit used in Scripture?",
+                options: ["Dove, wind, fire", "Water, sword, lightning", "Star, cloud, eagle"],
+                correct: 0
+            },
+            {
+                question: "What is the role of the Holy Spirit in the Church?",
+                options: ["To replace Jesus", "To animate and guide the Church", "To create laws for the Church"],
+                correct: 1
+            },
+            {
+                question: "What is the Church?",
+                options: ["A human organization", "A community of people who like Jesus", "The People of God, the Body of Christ, and Temple of the Holy Spirit"],
+                correct: 2
+            },
+            {
+                question: "What happened at Pentecost?",
+                options: ["Jesus rose from the dead", "The Apostles received the Holy Spirit and began preaching boldly", "The disciples fled from Jerusalem"],
+                correct: 1
+            },
+            {
+                question: "What is the mission of the Church?",
+                options: ["To preserve ancient traditions", "To entertain the faithful", "To proclaim the Gospel and make disciples of all nations"],
+                correct: 2
+            },
+            {
+                question: "Who is the visible head of the Church on earth?",
+                options: ["The Holy Spirit", "The Pope", "The Bible"],
+                correct: 1
+            },
+            {
+                question: "How is the Church one, holy, catholic, and apostolic?",
+                options: ["By its ancient buildings", "By its legal system", "Through its unity, sanctity, universality, and apostolic foundation"],
+                correct: 2
+            },
+            {
+                question: "How do Christians receive the Holy Spirit today?",
+                options: ["Through nature and good works", "Only through private prayer", "Primarily through the sacraments, especially Baptism and Confirmation"],
+                correct: 2
+            }
+]
+            },
+            {
+                id: 'lesson10',
+                title: "Four Marks of the Church",
+                content: `<p>The Church is one, holy, catholic, and apostolic.</p>
+<p>Key points from Compendium: These marks characterize the true Church.</p>
+<p>Relevant Questions: 161-171</p>
+<p>Excerpt: "The Church is one, holy, catholic, and apostolic." (Q161)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/ObkAsmTwCpI?si=IZYWCWmqWriLNUIR" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
+<p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html#I%20Believe%20in%20the%20Holy%20Spirit"_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+            {
+                question: "What are the Four Marks of the Church as stated in the Nicene Creed?",
+                options: ["One, Universal, Apostolic, Christian", "Holy, Catholic, Apostolic, Global", "One, Holy, Catholic, and Apostolic"],
+                correct: 2
+            },
+            {
+                question: "What does it mean that the Church is 'One'?",
+                options: ["There is one church building in every town", "It is united in faith, worship, and leadership", "It only speaks one language"],
+                correct: 1
+            },
+            {
+                question: "Why is the Church called 'Holy'?",
+                options: ["Because all its members are perfect", "Because it was founded by Christ and filled with the Holy Spirit", "Because it has ancient customs"],
+                correct: 1
+            },
+            {
+                question: "What does 'Catholic' mean in the Four Marks?",
+                options: ["Roman", "Universal — for all people, in all times, in all places", "Hierarchical"],
+                correct: 1
+            },
+            {
+                question: "What does it mean that the Church is 'Apostolic'?",
+                options: ["It follows the teachings of Church councils", "It is led by bishops who succeed the Apostles", "It uses ancient apostolic languages"],
+                correct: 1
+            },
+            {
+                question: "How does the Church preserve its unity?",
+                options: ["Through Scripture alone", "Through the Pope and bishops in communion with him", "By limiting diversity"],
+                correct: 1
+            },
+            {
+                question: "How does the Church remain holy despite the sinfulness of its members?",
+                options: ["By removing all sinners", "Because holiness comes from Christ and the sacraments", "Through public penance only"],
+                correct: 1
+            },
+            {
+                question: "What role do the sacraments play in the holiness of the Church?",
+                options: ["They are optional rites", "They are social celebrations", "They are means of grace that sanctify the faithful"],
+                correct: 2
+            },
+            {
+                question: "How is the Church's catholicity expressed?",
+                options: ["By being centered in Rome", "By embracing all cultures and proclaiming the fullness of truth to all", "By maintaining Latin as its official language"],
+                correct: 1
+            },
+            {
+                question: "Why is apostolic succession important?",
+                options: ["It gives the Church historical credibility", "It ensures continuity of teaching and sacramental authority from the Apostles", "It proves the Church is old"],
+                correct: 1
+            }
+]
+            },
+            {
+                id: 'lesson11',
+                title: "Christ’s Faithful – Hierarchy, Laity, Consecrated",
+                content: `<p>The faithful include the hierarchy (bishops, priests), laity, and consecrated life.</p>
+<p>Key points from Compendium: The bishops proclaim the Gospel authoritatively.</p>
+<p>Relevant Questions: 172-184</p>
+<p>Excerpt: "The bishops in union with the Pope have the duty of proclaiming the Gospel." (Q184)</p>
+<div class="video-placeholder"><iframe width="560" height="315" src="https://www.youtube.com/embed/0I9fwEsNClM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>Online resource: <a href="https://www.vatican.va/archive/ENG0015/__P1M.HTM"_blank">Compendium of the CCC</a></p>`,
+                quiz: [
+            {
+                question: "What are the three categories of Christ's faithful?",
+                options: ["Priests, deacons, and bishops", "Hierarchy, laity, and consecrated life", "Men, women, and children"],
+                correct: 1
+            },
+            {
+                question: "Who constitutes the hierarchy of the Church?",
+                options: ["Only the Pope", "Bishops, priests, and deacons", "All baptized Catholics"],
+                correct: 1
+            },
+            {
+                question: "What is the primary role of the laity in the Church?",
+                options: ["To serve as priests", "To evangelize and sanctify the world through their daily lives", "To govern the Church"],
+                correct: 1
+            },
+            {
+                question: "What is the consecrated life?",
+                options: ["Marriage", "A state of life recognized by the Church, where individuals dedicate themselves to God through vows", "A temporary commitment to prayer"],
+                correct: 1
+            },
+            {
+                question: "Who is the successor of St. Peter and the visible head of the Church?",
+                options: ["The local bishop", "The Pope", "A council of cardinals"],
+                correct: 1
+            },
+            {
+                question: "What is the 'common priesthood of the faithful'?",
+                options: ["All men are called to be priests", "Participation of all baptized in Christ's priestly mission through prayer and sacrifice", "Only those ordained can pray"],
+                correct: 1
+            },
+            {
+                question: "What is the 'ministerial priesthood'?",
+                options: ["The priesthood of all believers", "The ordained ministry of bishops and priests", "The role of deacons only"],
+                correct: 1
+            },
+            {
+                question: "How do members of the consecrated life live out their dedication to God?",
+                options: ["By living in solitude", "Through vows of poverty, chastity, and obedience", "By accumulating wealth for the Church"],
+                correct: 1
+            },
+            {
+                question: "What is the role of deacons?",
+                options: ["To offer the sacrifice of the Mass", "To assist bishops and priests in ministry, especially in service and charity", "To govern dioceses"],
+                correct: 1
+            },
+            {
+                question: "How do the different states of life (hierarchy, laity, consecrated) work together in the Church?",
+                options: ["They compete for power", "They each have distinct roles that contribute to the Church's mission", "They operate independently"],
+                correct: 1
+            }
+                ]
+            }
     ];
 
     const prayersData = {
