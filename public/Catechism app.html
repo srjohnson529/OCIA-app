@@ -80,7 +80,7 @@
 
         /* This class will be added by JS after splash screen */
         .main-content-container.visible {
-            display: flex; /* Or block, depending on desired layout */
+            display: block; /* Or block, depending on desired layout */
             opacity: 1;
         }
 
@@ -94,7 +94,7 @@
             opacity: 1;
             visibility: visible; /* Default visible */
             transition: opacity 1s ease-in-out;
-            position: absolute; /* Keep absolute for transitions, but manage parent */
+            position: relative; /* Keep absolute for transitions, but manage parent */
             width: 100%; /* Take full width of its relative parent */
             top: 0; /* Align to top of parent */
             left: 0; /* Align to left of parent */
