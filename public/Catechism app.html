@@ -2895,21 +2895,6 @@
     }
 
 </script>
-<script>
-window.addEventListener('load', () => {
-    // If splash screen is hidden or transition fails, show main content anyway
-    setTimeout(() => {
-        const mainContentContainer = document.querySelector('.main-content-container');
-        if (mainContentContainer && mainContentContainer.style.display === 'none') {
-            mainContentContainer.style.display = 'flex';
-            mainContentContainer.classList.add('visible');
-            if (typeof showSection === 'function') {
-                showSection('main-menu-section');
-            }
-        }
-    }, 5000); // 5 seconds fallback
-});
-</script>
 
 </body>
 </html>
