@@ -205,6 +205,187 @@
             display: block;
         }
 
+        /* --- Integrated Chat Section Styles --- */
+        /* This section now combines the previous #chat-section and #firebase-chat-section */
+        #chat-section { 
+            width: 100%; /* Take full width of its parent .main-content-container */
+            max-width: 900px; /* Match other sections */
+            margin: 0 auto; /* Center it */
+            height: auto; /* Allow height to adjust to content */
+            min-height: 400px; /* Ensure some minimum height */
+            background-color: #f0f0f0; /* Light background for the chat box */
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1; /* Normal stacking context within main-content-container */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Hide scrollbars if content overflows */
+            padding: 20px; /* Inner padding */
+            box-sizing: border-box; /* Include padding in width/height */
+            color: #333; /* Dark text for readability on light background */
+            text-shadow: none; /* Remove text shadow for chat content */
+        }
+
+        /* --- Chat Widget Inner Styles (adapted from your provided snippet) --- */
+        #chat-section .chat-container { /* Target chat-container inside chat-section */
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%; /* Take full width of section */
+            height: 100%; /* Take full height of section */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        #chat-section .chat-header { /* This was .p-4.bg-blue-600 in your snippet, adapted to a class */
+            background-color: #3a6646; /* Green for chat header */
+            color: white;
+            text-align: center;
+            font-size: 1.5em; /* Adjusted font size */
+            font-weight: bold;
+            padding: 1rem;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+        }
+        
+        #chat-section .messages-area {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: none; /* Allow messages area to fill available space in section */
+            min-height: 10rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        #chat-section .message-bubble {
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        #chat-section .message-bubble.sent {
+            background-color: #dbeafe;
+            align-self: flex-end;
+            color: #1e40af;
+        }
+        #chat-section .message-bubble.received {
+            background-color: #f3f4f6;
+            align-self: flex-start;
+            color: #374151;
+        }
+        #chat-section .message-sender {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #6b7280;
+        }
+        #chat-section .input-area {
+            padding: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            background-color: #ffffff;
+            border-bottom-left-radius: 0.75rem; /* Match section border radius */
+            border-bottom-right-radius: 0.75rem; /* Match section border radius */
+        }
+        #chat-section .input-area input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #chat-section .input-area input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+        #chat-section .input-area button {
+            background-color: #9C8547; /* Blue button */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #chat-section .input-area button:hover {
+            background-color: #5f5429;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        #chat-section .loading-message {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        #close-chat-button { /* Still needed if you want a close button within the integrated chat */
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545; /* Red for close button */
+            color: white;
+            border: none;
+            border-radius: 50%; /* Make it round */
+            width: 30px;
+            height: 30px;
+            font-size: 1em;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        #close-chat-button:hover {
+            background-color: #5f5429;
+        }
+
+        /* --- Username/Class Input Specific Styles --- */
+        #chat-section .user-status-area {
+            padding: 10px 15px;
+            background-color: #e2e8f0; /* Light gray-blue */
+            border-bottom: 1px solid #cbd5e0;
+            text-align: center;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+        #chat-section #username-class-input-area { /* New ID for combined input area */
+            display: flex;
+            flex-direction: column; /* Stack inputs vertically */
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #chat-section #username-input,
+        #chat-section #class-input { /* Apply styles to both inputs */
+            padding: 8px 12px;
+            border: 1px solid #a0aec0;
+            border-radius: 5px;
+            flex-grow: 1;
+            width: 80%; /* Make them take more width */
+            max-width: 250px; /* Limit input width */
+        }
+        #chat-section #save-profile-button { /* Renamed button */
+            background-color: #9C8547; /* Green for save */
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #chat-section #save-profile-button:hover {
+            background-color: #5f5429;
+        }
+        #chat-section .user-id-display {
+            font-size: 0.8em;
+            color: #6a6a6a;
+            margin-top: 5px;
+        }
 
         /* --- Rosary Section Specific Styles --- */
         #rosary-section {
@@ -366,6 +547,72 @@
             max-width: 200px; /* Max width to prevent them from becoming too wide */
         }
     </style>
+    <!-- Firebase SDKs - ONLY ONE SET HERE -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script> <!-- Required for Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script> <!-- Required for Firestore Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script> <!-- Required for Analytics -->
+    <!-- Add other Firebase services you use, e.g., firebase-storage-compat.js -->
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
+            authDomain: "ocia-application.firebaseapp.com",
+            projectId: "ocia-application",
+            storageBucket: "ocia-application.firebasestorage.app",
+            messagingSenderId: "113168534647",
+            appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
+            measurementId: "G-WRGSXQCY5D"
+        };
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Use __firebase_config provided by the Canvas environment
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                
+                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.projectId) {
+                    console.error("Firebase config is missing or empty. Cannot initialize Firebase.");
+                    showAlert("Firebase configuration is missing. Chat and progress saving will not work.");
+                    return;
+                }
+
+                window.firebaseApp = initializeApp(firebaseConfig);
+                window.db = getFirestore(window.firebaseApp);
+                window.auth = getAuth(window.firebaseApp);
+
+                // Authenticate user
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (initialAuthToken) {
+                    await signInWithCustomToken(window.auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(window.auth);
+                }
+
+                // Listen for auth state changes and set userId
+                onAuthStateChanged(window.auth, async (user) => {
+                    if (user) {
+                        window.currentUserId = user.uid;
+                        console.log("Firebase initialized. User ID:", window.currentUserId);
+                        // Load user profile and lesson progress after auth
+                        await loadUserProfile();
+                        await loadLessonProgress();
+                        setupChatListener(); // Setup chat listener only after auth and profile load
+                        updateChatUserIdDisplay(); // Update UI with user ID
+                    } else {
+                        window.currentUserId = null;
+                        console.log("No user signed in.");
+                        updateChatUserIdDisplay(); // Clear user ID display
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase or authenticating:", error);
+                showAlert("Failed to initialize Firebase. Chat and progress saving may not work. Error: " + error.message);
+            }
+        });
+    </script>
 </head>
 <body>
 
@@ -383,7 +630,7 @@
     <button id="home-nav-button">Home</button>
     <button id="lessons-nav-button">Lessons & Quizzes</button>
     <button id="spiritual-nav-button">Spiritual Formation</button>
-    <button id="firebase-chat-button">Chat</button>
+    <button id="chat-menu-button">Chat</button> <!-- Renamed for consistency -->
     <button id="resources-nav-button">Student Resources</button>
 </nav>
 
@@ -436,378 +683,11 @@
         </ul>
         <button onclick="showSection('main-menu-section')">Back to Main Menu</button>
     </section>
-           <!-- Start of Firebase Chat Widget Section -->
-<div id="firebase-chat-section" class="hidden">
-<!-- Firebase SDK CDN links (use "compat" versions for simpler HTML integration) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script> <!-- Required for Authentication -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script> <!-- Required for Firestore Database -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script> <!-- Required for Analytics -->
-    <!-- Add other Firebase services you use, e.g., firebase-storage-compat.js -->
-
-    <script>
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        const firebaseConfig = {
-            apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
-            authDomain: "ocia-application.firebaseapp.com",
-            projectId: "ocia-application",
-            storageBucket: "ocia-application.firebasestorage.app",
-            messagingSenderId: "113168534647",
-            appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
-            measurementId: "G-WRGSXQCY5D"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-
-        // Get references to Firebase services you use
-        const auth = firebase.auth(); // For Firebase Authentication
-        const db = firebase.firestore(); // For Cloud Firestore
-        const analytics = firebase.analytics(); // For Firebase Analytics (if you enabled it)
-
-        // You can now use 'app', 'auth', 'db', 'analytics' etc. throughout your application's JavaScript
-        // For example, to check authentication state:
-        // auth.onAuthStateChanged(user => {
-        //   if (user) {
-        //     console.log("User is signed in:", user.uid);
-        //   } else {
-        //     console.log("No user is signed in.");
-        //   }
-        // });
-    </script>
-
-    <style>
-        /* Custom styles for the chat widget - scoped to this section */
-        #firebase-chat-section {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Background for the section itself */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem; /* Padding around the widget */
-            box-sizing: border-box; /* Include padding in element's total width and height */
-            width: 100%; /* Ensure it takes full width of its container */
-        }
-        #firebase-chat-section .chat-container {
-            background-color: #ffffff;
-            border-radius: 1rem; /* Rounded corners */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 42rem; /* Max width for larger screens */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-        }
-        #firebase-chat-section .messages-area {
-            flex-grow: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            max-height: 28rem; /* Fixed height for scrollable messages */
-            min-height: 10rem; /* Minimum height to prevent collapse */
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            background-color: #f9fafb;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        #firebase-chat-section .message-bubble {
-            max-width: 85%;
-            padding: 0.75rem 1rem;
-            border-radius: 1rem;
-            word-wrap: break-word;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        #firebase-chat-section .message-bubble.sent {
-            background-color: #dbeafe; /* Light blue for sent messages */
-            align-self: flex-end;
-            color: #1e40af;
-        }
-        #firebase-chat-section .message-bubble.received {
-            background-color: #f3f4f6; /* Light gray for received messages */
-            align-self: flex-start;
-            color: #374151;
-        }
-        #firebase-chat-section .message-sender {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #6b7280;
-        }
-        #firebase-chat-section .input-area {
-            padding: 1.5rem;
-            display: flex;
-            gap: 0.75rem;
-            background-color: #ffffff;
-        }
-        #firebase-chat-section .input-area input {
-            flex-grow: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        #firebase-chat-section .input-area input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-        }
-        #firebase-chat-section .input-area button {
-            background-color: #3b82f6; /* Blue button */
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, box-shadow 0.2s;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        #firebase-chat-section .input-area button:hover {
-            background-color: #2563eb;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        #firebase-chat-section .loading-message {
-            text-align: center;
-            padding: 2rem;
-            color: #6b7280;
-        }
-    </style>
-
-    <div class="chat-container" class="hidden">
-        <div class="p-4 bg-blue-600 text-white text-center text-xl font-bold rounded-t-xl">
-            O.C.I.A. Chat
-        </div>
-        <div id="messages-area" class="messages-area">
-            <div id="loading-indicator" class="loading-message">Loading chat...</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Type your message...">
-            <button id="send-button">Send</button>
-        </div>
-    </div>
-
-    <!-- Firebase SDKs and Chat Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Your web app's Firebase configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
-        // This is the fallback if __firebase_config is not provided by the Canvas environment.
-        // You've already provided your actual values, so they are used here directly.
-        let firebaseConfig = {
-             apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
-  authDomain: "ocia-application.firebaseapp.com",
-  projectId: "ocia-application",
-  storageBucket: "ocia-application.firebasestorage.app",
-  messagingSenderId: "113168534647",
-  appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
-  measurementId: "G-WRGSXQCY5D"
-        };
-
-        // This block attempts to use the Firebase config provided by the Canvas environment.
-        // It will override the above 'firebaseConfig' if __firebase_config is defined and valid.
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-            try {
-                const parsedConfig = JSON.parse(__firebase_config);
-                if (parsedConfig && parsedConfig.projectId) { // Basic validation
-                    firebaseConfig = parsedConfig;
-                    console.log("Using Firebase config provided by environment.");
-                } else {
-                    console.warn("Provided __firebase_config is invalid or missing projectId. Using hardcoded config.");
-                }
-            } catch (e) {
-                console.error("Error parsing __firebase_config:", e);
-                console.warn("Using hardcoded Firebase config due to parsing error.");
-            }
-        } else {
-            console.warn("No __firebase_config provided by environment. Using hardcoded config.");
-        }
-
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let app; // These are declared here and assigned inside initializeFirebase
-        let db;
-        let auth;
-        let currentUserId = null;
-        let isAuthReady = false;
-
-        // Get elements within the #firebase-chat-section
-        const messagesArea = document.querySelector('#firebase-chat-section #messages-area');
-        const messageInput = document.querySelector('#firebase-chat-section #message-input');
-        const sendButton = document.querySelector('#firebase-chat-section #send-button');
-        const loadingIndicator = document.querySelector('#firebase-chat-section #loading-indicator');
-
-        /**
-         * Initializes Firebase and sets up authentication.
-         */
-        async function initializeFirebase() {
-            try {
-                // Initialize Firebase app
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Listen for authentication state changes
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        currentUserId = user.uid;
-                        console.log("Firebase authenticated. User ID:", currentUserId);
-                        isAuthReady = true;
-                        if (loadingIndicator) { // Check if element exists before removing
-                            loadingIndicator.remove();
-                        }
-                        setupRealtimeListener(); // Start listening for messages
-                    } else {
-                        // If no user is signed in, try to sign in with custom token or anonymously
-                        try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                                console.log("Signed in with custom token.");
-                            } else {
-                                await signInAnonymously(auth);
-                                console.log("Signed in anonymously.");
-                            }
-                        } catch (error) {
-                            console.error("Error signing in:", error);
-                            if (messagesArea) {
-                                messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${error.message}</div>`;
-                            }
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error initializing Firebase:", error);
-                if (messagesArea) {
-                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase initialization failed. ${error.message}</div>`;
-                }
-            }
-        }
-
-        /**
-         * Sets up a real-time listener for messages from Firestore.
-         */
-        function setupRealtimeListener() {
-            // Ensure Firebase is initialized and user is authenticated before setting up listener
-            if (!db || !currentUserId) {
-                console.warn("Firestore or User ID not ready for listener setup.");
-                return;
-            }
-
-            const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-            const q = query(messagesCollectionRef, orderBy('timestamp', 'asc')); // Order by timestamp
-
-            onSnapshot(q, (snapshot) => {
-                if (messagesArea) {
-                    messagesArea.innerHTML = ''; // Clear existing messages
-                    snapshot.forEach((doc) => {
-                        const message = doc.data();
-                        displayMessage(message);
-                    });
-                    // Scroll to the bottom of the messages area
-                    messagesArea.scrollTop = messagesArea.scrollHeight;
-                }
-            }, (error) => {
-                console.error("Error listening to messages:", error);
-                if (messagesArea) {
-                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error loading messages: ${error.message}</div>`;
-                }
-            });
-        }
-
-        /**
-         * Displays a single message in the chat area.
-         * @param {object} message - The message object containing text, senderId, and timestamp.
-         */
-        function displayMessage(message) {
-            if (!messagesArea) return; // Ensure messagesArea exists
-
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message-bubble');
-
-            // Determine if the message was sent by the current user
-            const isSentByCurrentUser = message.senderId === currentUserId;
-            if (isSentByCurrentUser) {
-                messageElement.classList.add('sent');
-            } else {
-                messageElement.classList.add('received');
-            }
-
-            // Display sender ID (or "You" for current user)
-            const senderIdDisplay = isSentByCurrentUser ? 'You' : `User: ${message.senderId ? message.senderId.substring(0, 8) + '...' : 'Unknown'}`;
-            const senderElement = document.createElement('div');
-            senderElement.classList.add('message-sender');
-            senderElement.textContent = senderIdDisplay;
-            messageElement.appendChild(senderElement);
-
-            // Display message text
-            const textElement = document.createElement('div');
-            textElement.textContent = message.text;
-            messageElement.appendChild(textElement);
-
-            messagesArea.appendChild(messageElement);
-        }
-
-        /**
-         * Sends a new message to Firestore.
-         */
-        async function sendMessage() {
-            if (!isAuthReady || !currentUserId || !messageInput) {
-                console.warn("Firebase not ready, user not authenticated, or message input not found to send message.");
-                return;
-            }
-
-            const messageText = messageInput.value.trim();
-            if (messageText === '') {
-                return; // Don't send empty messages
-            }
-
-            try {
-                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-                await addDoc(messagesCollectionRef, {
-                    text: messageText,
-                    senderId: currentUserId,
-                    timestamp: serverTimestamp() // Firestore server timestamp
-                });
-                messageInput.value = ''; // Clear input field
-            } catch (error) {
-                console.error("Error sending message:", error);
-                // In a real app, you'd show a user-friendly error message here
-            }
-        }
-
-        // Event listeners for sending messages, ensuring elements exist
-        if (sendButton) {
-            sendButton.addEventListener('click', sendMessage);
-        }
-        if (messageInput) {
-            messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-        }
-
-        // Initialize Firebase when the DOM content is fully loaded
-        // This ensures all HTML elements are available before script tries to access them
-        document.addEventListener('DOMContentLoaded', initializeFirebase);
-    </script>
-</div>
-<!-- End of Firebase Chat Widget Section -->
-		<button onclick="showSection('main')">Back</button>
-    </section>
 
     <section id="rosary-main-section" class="hidden"> <!-- Renamed from #rosary-section to avoid conflict with rosary functionality section -->
         <h2>Guided Rosary</h2>
         <div class="video-placeholder">
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <iframe width="560" height="315" src="https://placehold.co/560x315/cccccc/333333?text=Guided+Rosary+Video" title="Guided Rosary Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
         <p>Choose Mysteries:</p>
         <ul>
@@ -875,7 +755,7 @@
     <section id="daily-section" class="hidden"> <!-- Renamed from #daily -->
         <h2>Lectio Divina</h2>
         <div class="video-placeholder">
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <iframe width="560" height="315" src="https://placehold.co/560x315/cccccc/333333?text=Lectio+Divina+Video" title="Lectio Divina Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
         <p><strong>Consider reading and praying with one of the Church's daily readings.</strong></p>
         <div class="cg_mrc_widget"></div>
@@ -927,117 +807,30 @@
         <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Menu</button>
     </section>
 
-    <style>
-        /* Custom styles for the chat widget - scoped to this section */
-        #firebase-chat-section {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Background for the section itself */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem; /* Padding around the widget */
-            box-sizing: border-box; /* Include padding in element's total width and height */
-            width: 100%; /* Ensure it takes full width of its container */
-        }
-        #firebase-chat-section .chat-container {
-            background-color: #ffffff;
-            border-radius: 1rem; /* Rounded corners */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 42rem; /* Max width for larger screens */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-        }
-        #firebase-chat-section .messages-area {
-            flex-grow: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            max-height: 28rem; /* Fixed height for scrollable messages */
-            min-height: 10rem; /* Minimum height to prevent collapse */
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            background-color: #f9fafb;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        #firebase-chat-section .message-bubble {
-            max-width: 85%;
-            padding: 0.75rem 1rem;
-            border-radius: 1rem;
-            word-wrap: break-word;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        #firebase-chat-section .message-bubble.sent {
-            background-color: #dbeafe; /* Light blue for sent messages */
-            align-self: flex-end;
-            color: #1e40af;
-        }
-        #firebase-chat-section .message-bubble.received {
-            background-color: #f3f4f6; /* Light gray for received messages */
-            align-self: flex-start;
-            color: #374151;
-        }
-        #firebase-chat-section .message-sender {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #6b7280;
-        }
-        #firebase-chat-section .input-area {
-            padding: 1.5rem;
-            display: flex;
-            gap: 0.75rem;
-            background-color: #ffffff;
-        }
-        #firebase-chat-section .input-area input {
-            flex-grow: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        #firebase-chat-section .input-area input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-        }
-        #firebase-chat-section .input-area button {
-            background-color: #3b82f6; /* Blue button */
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, box-shadow 0.2s;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        #firebase-chat-section .input-area button:hover {
-            background-color: #2563eb;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        #firebase-chat-section .loading-message {
-            text-align: center;
-            padding: 2rem;
-            color: #6b7280;
-        }
-    </style>
-
-    <div class="chat-container" class="hidden">
-        <div class="p-4 bg-blue-600 text-white text-center text-xl font-bold rounded-t-xl">
-            O.C.I.A. Chat
+    <!-- Consolidated Chat Section -->
+    <section id="chat-section" class="hidden">
+        <div class="chat-container">
+            <div class="chat-header">Catechumen Chat</div>
+            <div class="user-status-area">
+                <span id="chat-user-id">User ID: Loading...</span> | 
+                <span id="chat-username-display">Username: Loading...</span> | 
+                <span id="chat-class-display">Class: Loading...</span>
+            </div>
+            <div class="messages-area" id="messages-area">
+                <div id="loading-indicator" class="loading-message">Loading chat...</div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type your message...">
+                <button id="send-button">Send</button>
+            </div>
+            <div id="username-class-input-area">
+                <input type="text" id="username-input" placeholder="Your Username (e.g., JohnD)">
+                <input type="text" id="class-input" placeholder="Your Class (e.g., RCIA, 10th Grade)">
+                <button id="save-profile-button">Save Profile</button>
+            </div>
         </div>
-        <div id="messages-area" class="messages-area">
-            <div id="loading-indicator" class="loading-message">Loading chat...</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Type your message...">
-            <button id="send-button">Send</button>
-        </div>
-    </div>
+    </section>
+</div>
 
 <!-- Custom Alert Modal and Overlay HTML (ensure these are at the end of body for z-index) -->
 <div id="custom-alert-modal" class="hidden">
@@ -1050,16 +843,19 @@
     <button id="quit-nav-button">Quit</button>
 </footer>
 
-<script>
-    // --- Global Variables ---
+<script type="module" defer>
+    // Import Firebase functions directly for use in this script block
+    import { doc, getDoc, setDoc, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Global Variables (now also including Firebase instances) ---
     const splashScreen = document.getElementById('splash-screen');
     const mainContentContainer = document.querySelector('.main-content-container');
-    const homeNavButton = document.getElementById('home-nav-button'); // New Home button
+    const homeNavButton = document.getElementById('home-nav-button');
     const lessonsNavButton = document.getElementById('lessons-nav-button');
     const spiritualNavButton = document.getElementById('spiritual-nav-button');
-    const chatMenuButton = document.getElementById('chat-menu-button');
+    const chatMenuButton = document.getElementById('chat-menu-button'); // This correctly references the chat button
     const resourcesNavButton = document.getElementById('resources-nav-button');
-    const quitNavButton = document.getElementById('quit-nav-button'); // Now in footer
+    const quitNavButton = document.getElementById('quit-nav-button');
 
     // Updated lesson section variables
     const lessonsListSection = document.getElementById('lessons-list-section');
@@ -1074,19 +870,23 @@
     const backToLessonsListButton = document.getElementById('back-to-lessons-list-button');
     const backToCategoriesButton = document.getElementById('back-to-categories-button');
 
- const quizSection = document.getElementById('quiz-section');
+    const quizSection = document.getElementById('quiz-section');
     const quizTitle = document.getElementById('quiz-title');
     const quizQuestionsContainer = document.getElementById('quiz-questions-container');
     const submitQuizButton = document.getElementById('submit-quiz-button');
     const backToLessonFromQuizButton = document.getElementById('back-to-lesson-from-quiz-button');
 
-    // Chat elements
+    // Chat elements (now correctly referencing elements within the single #chat-section)
     const messagesArea = document.getElementById('messages-area');
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
     const usernameInput = document.getElementById('username-input');
     const classInput = document.getElementById('class-input');
     const saveProfileButton = document.getElementById('save-profile-button');
+    const chatUserIdDisplay = document.getElementById('chat-user-id');
+    const chatUsernameDisplay = document.getElementById('chat-username-display');
+    const chatClassDisplay = document.getElementById('chat-class-display');
+    const loadingIndicator = document.getElementById('loading-indicator'); // For chat loading
 
     // Custom Alert Modal elements
     const customAlertModal = document.getElementById('custom-alert-modal');
@@ -1095,11 +895,7 @@
     const alertOverlay = document.getElementById('alert-overlay');
 
     // Rosary elements
-    // Removed old rosary display elements, they will be dynamically generated
-    const rosaryStartButton = document.getElementById('rosary-start-button'); // This button is not used in the new logic
-    const rosaryNextButton = document.getElementById('rosary-next-button'); // This button is not used in the new logic
-    const rosaryResetButton = document.getElementById('rosary-reset-button'); // This button is not used in the new logic
-    const rosaryBackToSpiritualButton = document.getElementById('rosary-back-to-spiritual-button'); // This button is not used in the new logic
+    let rosaryStates = {}; // Centralized state for each mystery type
 
     // Prayers section elements
     const prayersListContainer = document.getElementById('prayers-list');
@@ -1107,7 +903,7 @@
     const backToPrayersListButton = document.getElementById('back-to-prayers-list-button');
 
 
-       // --- Data (Fill with your actual content) ---
+    // --- Data (Fill with your actual content) ---
     const lessonsData = {
         "The Profession of Faith": [
             {
@@ -2120,10 +1916,13 @@
         ]
     };
 
+    // Flattened list of all lessons for progress tracking (order matters!)
+    const allLessonsFlat = Object.values(lessonsData).flat();
+
     const prayersData = {
         "Sign of the Cross": "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.",
         "Our Father": "Our Father, Who art in Heaven, hallowed be Thy Name. Thy Kingdom come, Thy Will be done, on earth as it is in Heaven. Give us this day our daily bread, and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.",
-        "Hail Mary": "Hail Mary, full of grace, the Lord is with thee. Blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.",
+        "Hail Mary": "Hail Mary, full of grace, the Lord is with thee. Blessed art thou among women, and and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.",
         "Glory Be": "Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.",
         "Apostles' Creed": "I believe in God, the Father Almighty, Creator of Heaven and earth; and in Jesus Christ, His only Son, Our Lord; Who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died, and was buried. He descended into Hell; the third day He arose again from the dead; He ascended into Heaven, and sitteth at the right hand of God, the Father Almighty; from thence He shall come to judge the living and the dead. I believe in the Holy Spirit, the Holy Catholic Church, the communion of Saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.",
         "Nicene Creed": "I believe in one God, the Father almighty, maker of heaven and earth, of all things visible and invisible. I believe in one Lord Jesus Christ, the Only Begotten Son of God, born of the Father before all ages. God from God, Light from Light, true God from true God, begotten, not made, consubstantial with the Father; through him all things were made. For us men and for our salvation he came down from heaven, and by the Holy Spirit was incarnate of the Virgin Mary, and became man. For our sake he was crucified under Pontius Pilate, he suffered death and was buried, and rose again on the third day in accordance with the Scriptures. He ascended into heaven and is seated at the right hand of the Father. He will come again in glory to judge the living and the dead and his kingdom will have no end. I believe in the Holy Spirit, the Lord, the giver of life, who proceeds from the Father and the Son, who with the Father and the Son is adored and glorified, who has spoken through the prophets. I believe in one, holy, catholic and apostolic Church. I confess one Baptism for the forgiveness of sins and I look forward to the resurrection of the dead and the life of the world to come. Amen.",
@@ -2233,6 +2032,7 @@
 
     // --- Section Management ---
     let currentActiveSection = null;
+    let currentCategory = null; // Tracks the currently selected lesson category
 
     function showSection(sectionId) {
         const sections = document.querySelectorAll('.main-content-container section');
@@ -2244,37 +2044,43 @@
             return;
         }
 
-        // Hide current section if one is active
-        if (currentActiveSection && currentActiveSection !== targetSection) {
-            currentActiveSection.classList.add('hidden');
-            currentActiveSection.classList.remove('active'); // Remove active class
+        // 1. Hide ALL sections immediately by setting display to 'none'
+        sections.forEach(section => {
+            section.style.display = 'none';
+            section.classList.add('hidden'); // Ensure hidden class is present for fade-in later
+            section.classList.remove('active');
+        });
+
+        // 2. Determine display type for the target section and show it
+        let displayType = 'block';
+        if (sectionId === 'chat-section') {
+            displayType = 'flex'; // Chat section needs flex for its internal layout
+        } else if (sectionId === 'prayers-section') {
+            displayType = 'block'; // prayers-section itself is block, its content is flex
         }
+        
+        targetSection.style.display = displayType; // Make it display immediately
 
-        // Show the target section
-        targetSection.classList.remove('hidden');
-        targetSection.classList.add('active'); // Add active class
-        currentActiveSection = targetSection;
+        // Use requestAnimationFrame to ensure the display change is rendered
+        // before the opacity transition is triggered.
+        requestAnimationFrame(() => {
+            targetSection.classList.remove('hidden'); // Remove hidden to trigger fade-in
+            targetSection.classList.add('active'); // Add active class
+        });
+        currentActiveSection = targetSection; // Update current active section
 
-        // Special handling for lessons sections
+        // Special handling for specific sections that might need internal elements adjusted
         if (sectionId === 'lessons-list-section') {
-            // When showing the lessons list, ensure lesson content and quiz are hidden
-            lessonContentSection.classList.add('hidden');
-            quizSection.classList.add('hidden');
-            renderLessonsList(); // Re-render the list when navigating to lessons section
-        } else if (sectionId === 'lesson-content-section') {
-            // When showing lesson content, ensure the list and quiz are hidden
-            lessonsListSection.classList.add('hidden');
-            quizSection.classList.add('hidden');
-        } else if (sectionId === 'quiz-section') {
-            // When showing quiz, ensure lesson list and content are hidden
-            lessonsListSection.classList.add('hidden');
-            lessonContentSection.classList.add('hidden');
+            renderLessonsList(); // Ensure the list is rendered/updated
         }
-        // Special handling for prayers section: ensure prayers list is visible initially
+        // Specific prayer list display needs to be handled though.
         if (sectionId === 'prayers-section') {
             document.getElementById('prayers-list').classList.remove('hidden');
+            document.getElementById('prayers-list').style.display = 'flex'; 
             prayerTextElement.classList.add('hidden');
+            prayerTextElement.style.display = 'none'; 
             backToPrayersListButton.classList.add('hidden');
+            backToPrayersListButton.style.display = 'none'; 
         }
     }
 
@@ -2309,7 +2115,7 @@
     });
 
 
-   // --- Lessons & Quizzes Functions ---
+    // --- Lessons & Quizzes Functions ---
     let currentLesson = null; // Stores the currently viewed lesson object
     let currentQuiz = null; // Stores the quiz data for the current lesson
     let unlockedLessonIndex = 0; // Default to 0, will be loaded from Firestore
@@ -2540,10 +2346,7 @@
         }
     }
 
-
     // --- Rosary Functions ---
-    let rosaryStates = {}; // Centralized state for each mystery type
-
     function ordinal(n) {
         const ord = ['First', 'Second', 'Third', 'Fourth', 'Fifth'];
         return ord[n - 1];
@@ -2673,14 +2476,159 @@
         }
     }
 
+    // --- Firebase User Profile Functions ---
+    async function loadUserProfile() {
+        if (!window.db || !window.currentUserId) {
+            console.warn("Firestore not initialized or user not authenticated. Cannot load user profile.");
+            return;
+        }
+        try {
+            const profileDocRef = doc(window.db, `artifacts/${window.appId}/users/${window.currentUserId}/profile/user_data`);
+            const profileSnap = await getDoc(profileDocRef);
+            if (profileSnap.exists()) {
+                const data = profileSnap.data();
+                window.currentUsername = data.username || 'Guest';
+                window.currentUserClass = data.userClass || 'N/A';
+                usernameInput.value = window.currentUsername;
+                classInput.value = window.currentUserClass;
+            } else {
+                // If no profile, set default and save it
+                window.currentUsername = 'Guest';
+                window.currentUserClass = 'N/A';
+                usernameInput.value = window.currentUsername;
+                classInput.value = window.currentUserClass;
+                await saveUserProfile(); // Save initial profile
+            }
+            updateChatUserIdDisplay();
+            console.log("User profile loaded:", window.currentUsername, window.currentUserClass);
+        } catch (error) {
+            console.error("Error loading user profile from Firestore:", error);
+            showAlert("Failed to load user profile. Chat functionality might be limited.");
+        }
+    }
+
+    async function saveUserProfile() {
+        if (!window.db || !window.currentUserId) {
+            showAlert("Firebase not initialized or user not authenticated. Cannot save profile.");
+            return;
+        }
+        const username = usernameInput.value.trim();
+        const userClass = classInput.value.trim();
+
+        if (username && userClass) {
+            try {
+                const profileDocRef = doc(window.db, `artifacts/${window.appId}/users/${window.currentUserId}/profile/user_data`);
+                await setDoc(profileDocRef, {
+                    username: username,
+                    userClass: userClass,
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+                window.currentUsername = username;
+                window.currentUserClass = userClass;
+                updateChatUserIdDisplay();
+                showAlert('Profile saved successfully!');
+            } catch (error) {
+                console.error("Error saving user profile to Firestore:", error);
+                showAlert("Failed to save profile. Error: " + error.message);
+            }
+        } else {
+            showAlert('Please enter both username and class to save your profile.');
+        }
+    }
+
+    function updateChatUserIdDisplay() {
+        if (chatUserIdDisplay) {
+            chatUserIdDisplay.textContent = `User ID: ${window.currentUserId || 'N/A'}`;
+        }
+        if (chatUsernameDisplay) {
+            chatUsernameDisplay.textContent = `Username: ${window.currentUsername || 'Guest'}`;
+        }
+        if (chatClassDisplay) {
+            chatClassDisplay.textContent = `Class: ${window.currentUserClass || 'N/A'}`;
+        }
+    }
+
+    // --- Firebase Chat Functions ---
+    function setupChatListener() {
+        if (!window.db) {
+            console.warn("Firestore not initialized. Cannot set up chat listener.");
+            return;
+        }
+        try {
+            const chatCollectionRef = collection(window.db, `artifacts/${window.appId}/public/data/chat_messages`);
+            const q = query(chatCollectionRef, orderBy('timestamp')); // Order by timestamp for chronological display
+
+            onSnapshot(q, (snapshot) => {
+                if (loadingIndicator) { // Remove loading indicator once messages start loading
+                    loadingIndicator.remove();
+                }
+                messagesArea.innerHTML = ''; // Clear existing messages
+                snapshot.forEach((doc) => {
+                    const messageData = doc.data();
+                    const messageClass = messageData.userId === window.currentUserId ? 'sent' : 'received';
+                    const senderName = messageData.username || 'Anonymous';
+                    const senderClass = messageData.userClass ? ` (${messageData.userClass})` : '';
+                    const messageHtml = `
+                        <div class="message-bubble ${messageClass}">
+                            <div class="message-sender">${senderName}${senderClass}</div>
+                            ${messageData.text}
+                        </div>
+                    `;
+                    messagesArea.innerHTML += messageHtml;
+                });
+                messagesArea.scrollTop = messagesArea.scrollHeight; // Scroll to bottom
+            }, (error) => {
+                console.error("Error listening to chat messages:", error);
+                showAlert("Failed to load chat messages. Error: " + error.message);
+                if (loadingIndicator) {
+                    loadingIndicator.textContent = `Error loading chat: ${error.message}`;
+                }
+            });
+        } catch (error) {
+            console.error("Error setting up chat listener:", error);
+            showAlert("Failed to set up chat listener. Please try again later.");
+        }
+    }
+
+    async function sendMessage() {
+        if (!window.db || !window.currentUserId) {
+            showAlert("Please sign in or ensure Firebase is initialized to send messages.");
+            return;
+        }
+        const messageText = userInput.value.trim();
+        if (messageText === '') {
+            return; // Don't send empty messages
+        }
+
+        try {
+            const chatCollectionRef = collection(window.db, `artifacts/${window.appId}/public/data/chat_messages`);
+            await addDoc(chatCollectionRef, {
+                userId: window.currentUserId,
+                username: window.currentUsername,
+                userClass: window.currentUserClass,
+                text: messageText,
+                timestamp: serverTimestamp() // Use serverTimestamp for consistent timestamps
+            });
+            userInput.value = ''; // Clear input field
+        } catch (error) {
+            console.error("Error sending message:", error);
+            showAlert("Failed to send message. Error: " + error.message);
+        }
+    }
+
+
     // --- Event Listeners ---
     function initListeners() {
         // Navigation Buttons
-        if (homeNavButton) { // New Home button listener
+        if (homeNavButton) {
             homeNavButton.addEventListener('click', () => showSection('main-menu-section'));
         }
         if (lessonsNavButton) {
-            lessonsNavButton.addEventListener('click', () => showSection('lessons-list-section')); // Changed to new lessons list section
+            lessonsNavButton.addEventListener('click', () => {
+                currentCategory = null; // Reset current category when going to main lessons view
+                renderLessonsList(); // Ensure categories are rendered
+                showSection('lessons-list-section');
+            });
         }
         if (spiritualNavButton) {
             spiritualNavButton.addEventListener('click', () => showSection('spiritual-formation-section'));
@@ -2700,7 +2648,17 @@
         // Lessons Section
         if (backToLessonsListButton) {
             backToLessonsListButton.addEventListener('click', () => {
-                showSection('lessons-list-section'); // Go back to the lessons list section
+                if (currentCategory) {
+                    showCategoryLessons(currentCategory); // Go back to the lessons list within the current category
+                } else {
+                    renderLessonsList(); // Fallback to category list if no current category
+                }
+            });
+        }
+        if (backToCategoriesButton) {
+            backToCategoriesButton.addEventListener('click', () => {
+                currentCategory = null; // Clear current category
+                renderLessonsList(); // Show the main category selection
             });
         }
 
@@ -2717,44 +2675,34 @@
                 if (currentLesson) {
                     viewLesson(currentLesson.id); // Go back to the specific lesson content
                 } else {
-                    showSection('lessons-list-section'); // Fallback to lesson list if no current lesson
+                    showCategoryLessons(currentCategory); // Fallback to lesson list in current category
                 }
             });
         }
 
         // Chat Section
         if (sendButton) {
-            sendButton.addEventListener('click', () => {
-                const message = userInput.value;
-                if (message.trim() !== '') {
-                    messagesArea.innerHTML += `<div class="message-bubble sent"><div class="message-sender">You</div>${message}</div>`;
-                    userInput.value = ''; // Clear input
-                    messagesArea.scrollTop = messagesArea.scrollHeight; // Scroll to bottom
-                    // Add AI response logic here later
+            sendButton.addEventListener('click', sendMessage);
+        }
+        if (userInput) {
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
                 }
             });
         }
 
         if (saveProfileButton) {
-            saveProfileButton.addEventListener('click', () => {
-                const username = usernameInput.value.trim();
-                const userClass = classInput.value.trim();
-                if (username && userClass) {
-                    localStorage.setItem('username', username);
-                    localStorage.setItem('userClass', userClass);
-                    showAlert('Profile saved successfully!');
-                } else {
-                    showAlert('Please enter both username and class.');
-                }
-            });
+            saveProfileButton.addEventListener('click', saveUserProfile);
         }
 
         // Spiritual Section (Rosary and Prayers List buttons)
-        document.getElementById('start-joyful-rosary-button')?.addEventListener('click', () => startRosary('Joyful'));
-        document.getElementById('start-sorrowful-rosary-button')?.addEventListener('click', () => startRosary('Sorrowful'));
-        document.getElementById('start-glorious-rosary-button')?.addEventListener('click', () => startRosary('Glorious'));
-        document.getElementById('start-luminous-rosary-button')?.addEventListener('click', () => startRosary('Luminous'));
-
+        document.getElementById('rosary-main-section').querySelectorAll('button').forEach(button => {
+            if (button.onclick && button.onclick.toString().includes('startRosary')) {
+                const type = button.onclick.toString().match(/startRosary\('(\w+)'\)/)[1];
+                button.addEventListener('click', () => startRosary(type));
+            }
+        });
 
         // Attach event listeners to the common Rosary navigation buttons within each rosary section
         document.getElementById('joyful-next-button')?.addEventListener('click', () => nextPrayer('joyful'));
@@ -2770,40 +2718,29 @@
 
 
         // Prayers specific listeners
-        document.querySelectorAll('#prayers-list button').forEach(button => {
-            button.addEventListener('click', (event) => {
-                viewPrayer(event.target.textContent);
-            });
-        });
+        renderPrayersList(); // Render the prayer list initially
         if (backToPrayersListButton) {
             backToPrayersListButton.addEventListener('click', resetPrayer);
         }
     }
 
     // --- Initializations ---
-    // Ensure this runs after all elements are available
-    document.addEventListener('DOMContentLoaded', () => {
-        initListeners(); // Initialize all event listeners
-        // Any other DOM-ready initializations
-    });
-
     // Handle initial user profile load
     window.addEventListener('load', () => {
-        const savedUsername = localStorage.getItem('username');
-        const savedClass = localStorage.getItem('userClass');
-        if (usernameInput && classInput) {
-            usernameInput.value = savedUsername || '';
-            classInput.value = savedClass || '';
-        }
-        // Render lessons list on load to apply initial locked/unlocked states
-        renderLessonsList();
+        // Firebase initialization is handled in the <script type="module"> block in the head
+        // The onAuthStateChanged listener will trigger loadUserProfile and loadLessonProgress
+        // and then setupChatListener.
+        initListeners(); // Initialize all event listeners that don't depend on Firebase being fully ready
     });
 
     // Dummy resetPrayer function, replace with actual logic if needed
     function resetPrayer() {
         document.getElementById('prayers-list').classList.remove('hidden');
+        document.getElementById('prayers-list').style.display = 'flex'; // Ensure it's display flex
         prayerTextElement.classList.add('hidden');
+        prayerTextElement.style.display = 'none'; // Ensure it's hidden
         backToPrayersListButton.classList.add('hidden');
+        backToPrayersListButton.style.display = 'none'; // Ensure it's hidden
     }
 
 </script>
