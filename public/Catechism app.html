@@ -80,7 +80,7 @@
 
         /* This class will be added by JS after splash screen */
         .main-content-container.visible {
-            display: block; /* Or block, depending on desired layout */
+            display: flex; /* Or block, depending on desired layout */
             opacity: 1;
         }
 
@@ -554,64 +554,215 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script> <!-- Required for Analytics -->
     <!-- Add other Firebase services you use, e.g., firebase-storage-compat.js -->
 
-    <script>
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        const firebaseConfig = {
-            apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
-            authDomain: "ocia-application.firebaseapp.com",
-            projectId: "ocia-application",
-            storageBucket: "ocia-application.firebasestorage.app",
-            messagingSenderId: "113168534647",
-            appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
-            measurementId: "G-WRGSXQCY5D"
+    <!-- Firebase SDKs and Chat Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Your web app's Firebase configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
+        // This is the fallback if __firebase_config is not provided by the Canvas environment.
+        // You've already provided your actual values, so they are used here directly.
+        let firebaseConfig = {
+             apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
+  authDomain: "ocia-application.firebaseapp.com",
+  projectId: "ocia-application",
+  storageBucket: "ocia-application.firebasestorage.app",
+  messagingSenderId: "113168534647",
+  appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
+  measurementId: "G-WRGSXQCY5D"
         };
-        
-        document.addEventListener('DOMContentLoaded', async () => {
+
+        // This block attempts to use the Firebase config provided by the Canvas environment.
+        // It will override the above 'firebaseConfig' if __firebase_config is defined and valid.
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
             try {
-                // Use __firebase_config provided by the Canvas environment
-                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                
-                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.projectId) {
-                    console.error("Firebase config is missing or empty. Cannot initialize Firebase.");
-                    showAlert("Firebase configuration is missing. Chat and progress saving will not work.");
-                    return;
-                }
-
-                window.firebaseApp = initializeApp(firebaseConfig);
-                window.db = getFirestore(window.firebaseApp);
-                window.auth = getAuth(window.firebaseApp);
-
-                // Authenticate user
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (initialAuthToken) {
-                    await signInWithCustomToken(window.auth, initialAuthToken);
+                const parsedConfig = JSON.parse(__firebase_config);
+                if (parsedConfig && parsedConfig.projectId) { // Basic validation
+                    firebaseConfig = parsedConfig;
+                    console.log("Using Firebase config provided by environment.");
                 } else {
-                    await signInAnonymously(window.auth);
+                    console.warn("Provided __firebase_config is invalid or missing projectId. Using hardcoded config.");
                 }
+            } catch (e) {
+                console.error("Error parsing __firebase_config:", e);
+                console.warn("Using hardcoded Firebase config due to parsing error.");
+            }
+        } else {
+            console.warn("No __firebase_config provided by environment. Using hardcoded config.");
+        }
 
-                // Listen for auth state changes and set userId
-                onAuthStateChanged(window.auth, async (user) => {
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app; // These are declared here and assigned inside initializeFirebase
+        let db;
+        let auth;
+        let currentUserId = null;
+        let isAuthReady = false;
+
+        // Get elements within the #firebase-chat-section
+        const messagesArea = document.querySelector('#firebase-chat-section #messages-area');
+        const messageInput = document.querySelector('#firebase-chat-section #message-input');
+        const sendButton = document.querySelector('#firebase-chat-section #send-button');
+        const loadingIndicator = document.querySelector('#firebase-chat-section #loading-indicator');
+
+        /**
+         * Initializes Firebase and sets up authentication.
+         */
+        async function initializeFirebase() {
+            try {
+                // Initialize Firebase app
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        window.currentUserId = user.uid;
-                        console.log("Firebase initialized. User ID:", window.currentUserId);
-                        // Load user profile and lesson progress after auth
-                        await loadUserProfile();
-                        await loadLessonProgress();
-                        setupChatListener(); // Setup chat listener only after auth and profile load
-                        updateChatUserIdDisplay(); // Update UI with user ID
+                        currentUserId = user.uid;
+                        console.log("Firebase authenticated. User ID:", currentUserId);
+                        isAuthReady = true;
+                        if (loadingIndicator) { // Check if element exists before removing
+                            loadingIndicator.remove();
+                        }
+                        setupRealtimeListener(); // Start listening for messages
                     } else {
-                        window.currentUserId = null;
-                        console.log("No user signed in.");
-                        updateChatUserIdDisplay(); // Clear user ID display
+                        // If no user is signed in, try to sign in with custom token or anonymously
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                                console.log("Signed in with custom token.");
+                            } else {
+                                await signInAnonymously(auth);
+                                console.log("Signed in anonymously.");
+                            }
+                        } catch (error) {
+                            console.error("Error signing in:", error);
+                            if (messagesArea) {
+                                messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${error.message}</div>`;
+                            }
+                        }
                     }
                 });
 
             } catch (error) {
-                console.error("Error initializing Firebase or authenticating:", error);
-                showAlert("Failed to initialize Firebase. Chat and progress saving may not work. Error: " + error.message);
+                console.error("Error initializing Firebase:", error);
+                if (messagesArea) {
+                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase initialization failed. ${error.message}</div>`;
+                }
             }
-        });
+        }
+
+        /**
+         * Sets up a real-time listener for messages from Firestore.
+         */
+        function setupRealtimeListener() {
+            // Ensure Firebase is initialized and user is authenticated before setting up listener
+            if (!db || !currentUserId) {
+                console.warn("Firestore or User ID not ready for listener setup.");
+                return;
+            }
+
+            const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
+            const q = query(messagesCollectionRef, orderBy('timestamp', 'asc')); // Order by timestamp
+
+            onSnapshot(q, (snapshot) => {
+                if (messagesArea) {
+                    messagesArea.innerHTML = ''; // Clear existing messages
+                    snapshot.forEach((doc) => {
+                        const message = doc.data();
+                        displayMessage(message);
+                    });
+                    // Scroll to the bottom of the messages area
+                    messagesArea.scrollTop = messagesArea.scrollHeight;
+                }
+            }, (error) => {
+                console.error("Error listening to messages:", error);
+                if (messagesArea) {
+                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error loading messages: ${error.message}</div>`;
+                }
+            });
+        }
+
+        /**
+         * Displays a single message in the chat area.
+         * @param {object} message - The message object containing text, senderId, and timestamp.
+         */
+        function displayMessage(message) {
+            if (!messagesArea) return; // Ensure messagesArea exists
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-bubble');
+
+            // Determine if the message was sent by the current user
+            const isSentByCurrentUser = message.senderId === currentUserId;
+            if (isSentByCurrentUser) {
+                messageElement.classList.add('sent');
+            } else {
+                messageElement.classList.add('received');
+            }
+
+            // Display sender ID (or "You" for current user)
+            const senderIdDisplay = isSentByCurrentUser ? 'You' : `User: ${message.senderId ? message.senderId.substring(0, 8) + '...' : 'Unknown'}`;
+            const senderElement = document.createElement('div');
+            senderElement.classList.add('message-sender');
+            senderElement.textContent = senderIdDisplay;
+            messageElement.appendChild(senderElement);
+
+            // Display message text
+            const textElement = document.createElement('div');
+            textElement.textContent = message.text;
+            messageElement.appendChild(textElement);
+
+            messagesArea.appendChild(messageElement);
+        }
+
+        /**
+         * Sends a new message to Firestore.
+         */
+        async function sendMessage() {
+            if (!isAuthReady || !currentUserId || !messageInput) {
+                console.warn("Firebase not ready, user not authenticated, or message input not found to send message.");
+                return;
+            }
+
+            const messageText = messageInput.value.trim();
+            if (messageText === '') {
+                return; // Don't send empty messages
+            }
+
+            try {
+                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
+                await addDoc(messagesCollectionRef, {
+                    text: messageText,
+                    senderId: currentUserId,
+                    timestamp: serverTimestamp() // Firestore server timestamp
+                });
+                messageInput.value = ''; // Clear input field
+            } catch (error) {
+                console.error("Error sending message:", error);
+                // In a real app, you'd show a user-friendly error message here
+            }
+        }
+
+        // Event listeners for sending messages, ensuring elements exist
+        if (sendButton) {
+            sendButton.addEventListener('click', sendMessage);
+        }
+        if (messageInput) {
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // Initialize Firebase when the DOM content is fully loaded
+        // This ensures all HTML elements are available before script tries to access them
+        document.addEventListener('DOMContentLoaded', initializeFirebase);
     </script>
 </head>
 <body>
