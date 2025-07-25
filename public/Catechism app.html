@@ -346,6 +346,32 @@
             background-color: #5f5429;
         }
 
+        /* --- Username/Class Input Specific Styles --- */
+        #chat-section .user-status-area {
+            padding: 10px 15px;
+            background-color: #e2e8f0; /* Light gray-blue */
+            border-bottom: 1px solid #cbd5e0;
+            text-align: center;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+        #chat-section #username-class-input-area { /* New ID for combined input area */
+            display: flex;
+            flex-direction: column; /* Stack inputs vertically */
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #chat-section #username-input,
+        #chat-section #class-input { /* Apply styles to both inputs */
+            padding: 8px 12px;
+            border: 1px solid #a0aec0;
+            border-radius: 5px;
+            flex-grow: 1;
+            width: 80%; /* Make them take more width */
+            max-width: 250px; /* Limit input width */
+        }
         #chat-section #save-profile-button { /* Renamed button */
             background-color: #9C8547; /* Green for save */
             padding: 8px 15px;
@@ -521,6 +547,217 @@
             max-width: 200px; /* Max width to prevent them from becoming too wide */
         }
     </style>
+
+    <!-- Firebase SDKs and Chat Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Your web app's Firebase configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
+        // This is the fallback if __firebase_config is not provided by the Canvas environment.
+        // You've already provided your actual values, so they are used here directly.
+        let firebaseConfig = {
+             apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
+  authDomain: "ocia-application.firebaseapp.com",
+  projectId: "ocia-application",
+  storageBucket: "ocia-application.firebasestorage.app",
+  messagingSenderId: "113168534647",
+  appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
+  measurementId: "G-WRGSXQCY5D"
+        };
+
+        // This block attempts to use the Firebase config provided by the Canvas environment.
+        // It will override the above 'firebaseConfig' if __firebase_config is defined and valid.
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            try {
+                const parsedConfig = JSON.parse(__firebase_config);
+                if (parsedConfig && parsedConfig.projectId) { // Basic validation
+                    firebaseConfig = parsedConfig;
+                    console.log("Using Firebase config provided by environment.");
+                } else {
+                    console.warn("Provided __firebase_config is invalid or missing projectId. Using hardcoded config.");
+                }
+            } catch (e) {
+                console.error("Error parsing __firebase_config:", e);
+                console.warn("Using hardcoded Firebase config due to parsing error.");
+            }
+        } else {
+            console.warn("No __firebase_config provided by environment. Using hardcoded config.");
+        }
+
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app; // These are declared here and assigned inside initializeFirebase
+        let db;
+        let auth;
+        let currentUserId = null;
+        let isAuthReady = false;
+
+        // Get elements within the #firebase-chat-section
+        const messagesArea = document.querySelector('#firebase-chat-section #messages-area');
+        const messageInput = document.querySelector('#firebase-chat-section #message-input');
+        const sendButton = document.querySelector('#firebase-chat-section #send-button');
+        const loadingIndicator = document.querySelector('#firebase-chat-section #loading-indicator');
+
+        /**
+         * Initializes Firebase and sets up authentication.
+         */
+        async function initializeFirebase() {
+            try {
+                // Initialize Firebase app
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        console.log("Firebase authenticated. User ID:", currentUserId);
+                        isAuthReady = true;
+                        if (loadingIndicator) { // Check if element exists before removing
+                            loadingIndicator.remove();
+                        }
+                        setupRealtimeListener(); // Start listening for messages
+                    } else {
+                        // If no user is signed in, try to sign in with custom token or anonymously
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                                console.log("Signed in with custom token.");
+                            } else {
+                                await signInAnonymously(auth);
+                                console.log("Signed in anonymously.");
+                            }
+                        } catch (error) {
+                            console.error("Error signing in:", error);
+                            if (messagesArea) {
+                                messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${error.message}</div>`;
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                if (messagesArea) {
+                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase initialization failed. ${error.message}</div>`;
+                }
+            }
+        }
+
+        /**
+         * Sets up a real-time listener for messages from Firestore.
+         */
+        function setupRealtimeListener() {
+            // Ensure Firebase is initialized and user is authenticated before setting up listener
+            if (!db || !currentUserId) {
+                console.warn("Firestore or User ID not ready for listener setup.");
+                return;
+            }
+
+            const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
+            const q = query(messagesCollectionRef, orderBy('timestamp', 'asc')); // Order by timestamp
+
+            onSnapshot(q, (snapshot) => {
+                if (messagesArea) {
+                    messagesArea.innerHTML = ''; // Clear existing messages
+                    snapshot.forEach((doc) => {
+                        const message = doc.data();
+                        displayMessage(message);
+                    });
+                    // Scroll to the bottom of the messages area
+                    messagesArea.scrollTop = messagesArea.scrollHeight;
+                }
+            }, (error) => {
+                console.error("Error listening to messages:", error);
+                if (messagesArea) {
+                    messagesArea.innerHTML = `<div class="loading-message text-red-500">Error loading messages: ${error.message}</div>`;
+                }
+            });
+        }
+
+        /**
+         * Displays a single message in the chat area.
+         * @param {object} message - The message object containing text, senderId, and timestamp.
+         */
+        function displayMessage(message) {
+            if (!messagesArea) return; // Ensure messagesArea exists
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-bubble');
+
+            // Determine if the message was sent by the current user
+            const isSentByCurrentUser = message.senderId === currentUserId;
+            if (isSentByCurrentUser) {
+                messageElement.classList.add('sent');
+            } else {
+                messageElement.classList.add('received');
+            }
+
+            // Display sender ID (or "You" for current user)
+            const senderIdDisplay = isSentByCurrentUser ? 'You' : `User: ${message.senderId ? message.senderId.substring(0, 8) + '...' : 'Unknown'}`;
+            const senderElement = document.createElement('div');
+            senderElement.classList.add('message-sender');
+            senderElement.textContent = senderIdDisplay;
+            messageElement.appendChild(senderElement);
+
+            // Display message text
+            const textElement = document.createElement('div');
+            textElement.textContent = message.text;
+            messageElement.appendChild(textElement);
+
+            messagesArea.appendChild(messageElement);
+        }
+
+        /**
+         * Sends a new message to Firestore.
+         */
+        async function sendMessage() {
+            if (!isAuthReady || !currentUserId || !messageInput) {
+                console.warn("Firebase not ready, user not authenticated, or message input not found to send message.");
+                return;
+            }
+
+            const messageText = messageInput.value.trim();
+            if (messageText === '') {
+                return; // Don't send empty messages
+            }
+
+            try {
+                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
+                await addDoc(messagesCollectionRef, {
+                    text: messageText,
+                    senderId: currentUserId,
+                    timestamp: serverTimestamp() // Firestore server timestamp
+                });
+                messageInput.value = ''; // Clear input field
+            } catch (error) {
+                console.error("Error sending message:", error);
+                // In a real app, you'd show a user-friendly error message here
+            }
+        }
+
+        // Event listeners for sending messages, ensuring elements exist
+        if (sendButton) {
+            sendButton.addEventListener('click', sendMessage);
+        }
+        if (messageInput) {
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // Initialize Firebase when the DOM content is fully loaded
+        // This ensures all HTML elements are available before script tries to access them
+        document.addEventListener('DOMContentLoaded', initializeFirebase);
+    </script>
 </head>
 <body>
 
@@ -567,7 +804,7 @@
         <h3 id="current-lesson-title"></h3>
         <div id="current-lesson-content" class="lesson-content"></div>
         <div class="video-placeholder hidden">
-            iframe id="lesson-video" width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <iframe id="lesson-video" width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
         <button id="take-quiz-button">Take Quiz</button>
         <button id="back-to-lessons-list-button">Back to Lessons</button>
@@ -678,7 +915,7 @@
     <section id="lotH-section" class="hidden"> <!-- Renamed from #lotH -->
         <h2>Liturgy of the Hours</h2>
         <p>The Liturgy of the Hours, also known as the Divine Office, is the official prayer of the Catholic Church that sanctifies the day through Psalms, Scripture readings, hymns, and intercessions. It is prayed at fixed times throughout the day, uniting the faithful in continuous praise and petition. Rooted in ancient tradition and emphasized in Vatican II's Sacrosanctum Concilium, it fosters a deeper communion with Christ and the Church. Use the widget below to access today's prayers in English.</p>
-         <!-- <iframe src="https://www.ibreviary.com/m2/breviario.php?lang=en" width="340" height="500" style="border: 1px solid #151515;"></iframe> -->
+        <!--><iframe src="https://www.ibreviary.com/m2/breviario.php?lang=en" width="340" height="500" style="border: 1px solid #151515;"></iframe>
         <button onclick="showSection('spiritual-formation-section')">Back to Spiritual Formation</button>
     </section>
 
@@ -721,6 +958,8 @@
             <div class="chat-header">Catechumen Chat</div>
             <div class="user-status-area">
                 <span id="chat-user-id">User ID: Loading...</span> | 
+                <span id="chat-username-display">Username: Loading...</span> | 
+                <span id="chat-class-display">Class: Loading...</span>
             </div>
             <div class="messages-area" id="messages-area">
                 <div id="loading-indicator" class="loading-message">Loading chat...</div>
@@ -728,7 +967,12 @@
             <div class="input-area">
                 <input type="text" id="user-input" placeholder="Type your message...">
                 <button id="send-button">Send</button>
-            </div>  
+            </div>
+            <div id="username-class-input-area">
+                <input type="text" id="username-input" placeholder="Your Username (e.g., JohnD)">
+                <input type="text" id="class-input" placeholder="Your Class (e.g., RCIA, 10th Grade)">
+                <button id="save-profile-button">Save Profile</button>
+            </div>
         </div>
     </section>
 </div>
@@ -743,196 +987,6 @@
 <footer>
     <button id="quit-nav-button">Quit</button>
 </footer>
-<script>
-   // ...existing code...
-
-// --- Firebase SDKs and Chat Logic ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-// Global variables provided by the Canvas environment
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-// Your web app's Firebase configuration
-let firebaseConfig = {
-    apiKey: "AIzaSyA7B17UFVuvxOUmK81MCkSwwTzXiXeySlk",
-    authDomain: "ocia-application.firebaseapp.com",
-    projectId: "ocia-application",
-    storageBucket: "ocia-application.firebasestorage.app",
-    messagingSenderId: "113168534647",
-    appId: "1:113168534647:web:ac363f4f89185b6ac88a72",
-    measurementId: "G-WRGSXQCY5D"
-};
-
-// Use environment config if provided
-if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-    try {
-        const parsedConfig = JSON.parse(__firebase_config);
-        if (parsedConfig && parsedConfig.projectId) {
-            firebaseConfig = parsedConfig;
-            console.log("Using Firebase config provided by environment.");
-        } else {
-            console.warn("Provided __firebase_config is invalid or missing projectId. Using hardcoded config.");
-        }
-    } catch (e) {
-        console.error("Error parsing __firebase_config:", e);
-        console.warn("Using hardcoded Firebase config due to parsing error.");
-    }
-} else {
-    console.warn("No __firebase_config provided by environment. Using hardcoded config.");
-}
-
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-let app;
-let db;
-let auth;
-let currentUserId = null;
-let isAuthReady = false;
-
-// Get elements within the #chat-section
-const messagesArea = document.getElementById('messages-area');
-const userInput = document.getElementById('user-input');
-const sendButton = document.getElementById('send-button');
-const loadingIndicator = document.getElementById('loading-indicator');
-
-/**
- * Initializes Firebase and sets up authentication.
- */
-async function initializeFirebase() {
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUserId = user.uid;
-                console.log("Firebase authenticated. User ID:", currentUserId);
-                isAuthReady = true;
-                if (loadingIndicator) {
-                    loadingIndicator.remove();
-                }
-                setupRealtimeListener();
-            } else {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Signed in with custom token.");
-                    } else {
-                        await signInAnonymously(auth);
-                        console.log("Signed in anonymously.");
-                    }
-                } catch (error) {
-                    console.error("Error signing in:", error);
-                    if (messagesArea) {
-                        messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Could not sign in. ${error.message}</div>`;
-                    }
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error("Error initializing Firebase:", error);
-        if (messagesArea) {
-            messagesArea.innerHTML = `<div class="loading-message text-red-500">Error: Firebase initialization failed. ${error.message}</div>`;
-        }
-    }
-}
-
-/**
- * Sets up a real-time listener for messages from Firestore.
- */
-function setupRealtimeListener() {
-    if (!db || !currentUserId) {
-        console.warn("Firestore or User ID not ready for listener setup.");
-        return;
-    }
-
-    const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-    const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
-
-    onSnapshot(q, (snapshot) => {
-        if (messagesArea) {
-            messagesArea.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const message = doc.data();
-                displayMessage(message);
-            });
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-    }, (error) => {
-        console.error("Error listening to messages:", error);
-        if (messagesArea) {
-            messagesArea.innerHTML = `<div class="loading-message text-red-500">Error loading messages: ${error.message}</div>`;
-        }
-    });
-}
-
-/**
- * Displays a single message in the chat area.
- */
-function displayMessage(message) {
-    if (!messagesArea) return;
-
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message-bubble');
-
-    const isSentByCurrentUser = message.senderId === currentUserId;
-    messageElement.classList.add(isSentByCurrentUser ? 'sent' : 'received');
-
-    const senderIdDisplay = isSentByCurrentUser ? 'You' : `User: ${message.senderId ? message.senderId.substring(0, 8) + '...' : 'Unknown'}`;
-    const senderElement = document.createElement('div');
-    senderElement.classList.add('message-sender');
-    senderElement.textContent = senderIdDisplay;
-    messageElement.appendChild(senderElement);
-
-    const textElement = document.createElement('div');
-    textElement.textContent = message.text;
-    messageElement.appendChild(textElement);
-
-    messagesArea.appendChild(messageElement);
-}
-
-/**
- * Sends a new message to Firestore.
- */
-
-    const messageText = userInput.value.trim();
-    if (messageText === '') {
-        return;
-    }
-
-    try {
-        const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/messages`);
-        await addDoc(messagesCollectionRef, {
-            text: messageText,
-            senderId: currentUserId,
-            timestamp: serverTimestamp()
-        });
-        userInput.value = '';
-    } catch (error) {
-        console.error("Error sending message:", error);
-    }
-}
-
-// Event listeners for sending messages
-if (sendButton) {
-    sendButton.addEventListener('click', sendMessage);
-}
-if (userInput) {
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-}
-
-// Initialize Firebase when the DOM content is fully loaded
-document.addEventListener('DOMContentLoaded', initializeFirebase);
-
-    </script>
 
 <script type="module" defer>
     // Import Firebase functions directly for use in this script block
@@ -971,8 +1025,12 @@ document.addEventListener('DOMContentLoaded', initializeFirebase);
     const messagesArea = document.getElementById('messages-area');
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
+    const usernameInput = document.getElementById('username-input');
+    const classInput = document.getElementById('class-input');
     const saveProfileButton = document.getElementById('save-profile-button');
     const chatUserIdDisplay = document.getElementById('chat-user-id');
+    const chatUsernameDisplay = document.getElementById('chat-username-display');
+    const chatClassDisplay = document.getElementById('chat-class-display');
     const loadingIndicator = document.getElementById('loading-indicator'); // For chat loading
 
     // Custom Alert Modal elements
@@ -1001,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', initializeFirebase);
 <p>Relevant Questions: 251-294, 428, 534-536</p>
 <p>Excerpt: "Christian initiation is accomplished by means of the sacraments which establish the foundations of Christian life." (Q251)</p>
 <div class="video-placeholder">
-   <iframe width="560" height="315" src="placeholder" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/3vuYCjfO_w4?si=QdqxR9_yz2tyZ98Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div><p>Online resource: <a href="https://www.vatican.va/archive/compendium_ccc/documents/archive_2005_compendium-ccc_en.html" target="_blank">Compendium of the CCC</a></p>`,
                 quiz: [
                     {
@@ -2563,10 +2621,86 @@ document.addEventListener('DOMContentLoaded', initializeFirebase);
         }
     }
 
-  
-
+    // --- Firebase User Profile Functions ---
+    async function loadUserProfile() {
+        if (!window.db || !window.currentUserId) {
+            console.warn("Firestore not initialized or user not authenticated. Cannot load user profile.");
+            return;
+        }
         try {
-            const chatCollectionRef = collection(window.db, `artifacts/${appId}/public/data/messages`);
+            const profileDocRef = doc(window.db, `artifacts/${appId}/users/${window.currentUserId}/profile/user_data`);
+            const profileSnap = await getDoc(profileDocRef);
+            if (profileSnap.exists()) {
+                const data = profileSnap.data();
+                window.currentUsername = data.username || 'Guest';
+                window.currentUserClass = data.userClass || 'N/A';
+                usernameInput.value = window.currentUsername;
+                classInput.value = window.currentUserClass;
+            } else {
+                // If no profile, set default and save it
+                window.currentUsername = 'Guest';
+                window.currentUserClass = 'N/A';
+                usernameInput.value = window.currentUsername;
+                classInput.value = window.currentUserClass;
+                await saveUserProfile(); // Save initial profile
+            }
+            updateChatUserIdDisplay();
+            console.log("User profile loaded:", window.currentUsername, window.currentUserClass);
+        } catch (error) {
+            console.error("Error loading user profile from Firestore:", error);
+            showAlert("Failed to load user profile. Chat functionality might be limited.");
+        }
+    }
+
+    async function saveUserProfile() {
+        if (!window.db || !window.currentUserId) {
+            showAlert("Firebase not initialized or user not authenticated. Cannot save profile.");
+            return;
+        }
+        const username = usernameInput.value.trim();
+        const userClass = classInput.value.trim();
+
+        if (username && userClass) {
+            try {
+                const profileDocRef = doc(window.db, `artifacts/${appId}/users/${window.currentUserId}/profile/user_data`);
+                await setDoc(profileDocRef, {
+                    username: username,
+                    userClass: userClass,
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+                window.currentUsername = username;
+                window.currentUserClass = userClass;
+                updateChatUserIdDisplay();
+                showAlert('Profile saved successfully!');
+            } catch (error) {
+                console.error("Error saving user profile to Firestore:", error);
+                showAlert("Failed to save profile. Error: " + error.message);
+            }
+        } else {
+            showAlert('Please enter both username and class to save your profile.');
+        }
+    }
+
+    function updateChatUserIdDisplay() {
+        if (chatUserIdDisplay) {
+            chatUserIdDisplay.textContent = `User ID: ${window.currentUserId || 'N/A'}`;
+        }
+        if (chatUsernameDisplay) {
+            chatUsernameDisplay.textContent = `Username: ${window.currentUsername || 'Guest'}`;
+        }
+        if (chatClassDisplay) {
+            chatClassDisplay.textContent = `Class: ${window.currentUserClass || 'N/A'}`;
+        }
+    }
+
+    // --- Firebase Chat Functions ---
+    function setupChatListener() {
+        if (!window.db) {
+            console.warn("Firestore not initialized. Cannot set up chat listener.");
+            return;
+        }
+        try {
+            const chatCollectionRef = collection(window.db, `artifacts/${appId}/public/data/chat_messages`);
             const q = query(chatCollectionRef, orderBy('timestamp')); // Order by timestamp for chronological display
 
             onSnapshot(q, (snapshot) => {
@@ -2576,7 +2710,9 @@ document.addEventListener('DOMContentLoaded', initializeFirebase);
                 messagesArea.innerHTML = ''; // Clear existing messages
                 snapshot.forEach((doc) => {
                     const messageData = doc.data();
-                    const messageClass = messageData.senderId === window.currentUserId ? 'sent' : 'received';
+                    const messageClass = messageData.userId === window.currentUserId ? 'sent' : 'received';
+                    const senderName = messageData.username || 'Anonymous';
+                    const senderClass = messageData.userClass ? ` (${messageData.userClass})` : '';
                     const messageHtml = `
                         <div class="message-bubble ${messageClass}">
                             <div class="message-sender">${senderName}${senderClass}</div>
@@ -2608,6 +2744,22 @@ document.addEventListener('DOMContentLoaded', initializeFirebase);
         if (messageText === '') {
             return; // Don't send empty messages
         }
+
+        try {
+            const chatCollectionRef = collection(window.db, `artifacts/${appId}/public/data/chat_messages`);
+            await addDoc(chatCollectionRef, {
+                userId: window.currentUserId,
+                username: window.currentUsername,
+                userClass: window.currentUserClass,
+                text: messageText,
+                timestamp: serverTimestamp() // Use serverTimestamp for consistent timestamps
+            });
+            userInput.value = ''; // Clear input field
+        } catch (error) {
+            console.error("Error sending message:", error);
+            showAlert("Failed to send message. Error: " + error.message);
+        }
+    }
 
 
     // --- Event Listeners ---
@@ -2685,6 +2837,9 @@ document.addEventListener('DOMContentLoaded', initializeFirebase);
             });
         }
 
+        if (saveProfileButton) {
+            saveProfileButton.addEventListener('click', saveUserProfile);
+        }
 
         // Spiritual Section (Rosary and Prayers List buttons)
         document.getElementById('rosary-main-section').querySelectorAll('button').forEach(button => {
