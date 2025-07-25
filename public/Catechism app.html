@@ -612,9 +612,6 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                window.db = db;
-                window.auth = auth;
-                window.appId = appId;
 
                 // Listen for authentication state changes
                 onAuthStateChanged(auth, async (user) => {
@@ -622,9 +619,6 @@
                         currentUserId = user.uid;
                         console.log("Firebase authenticated. User ID:", currentUserId);
                         isAuthReady = true;
-                          await window.loadUserProfile?.();
-                        await window.loadLessonProgress?.();
-                         window.setupChatListener?.();
                         if (loadingIndicator) { // Check if element exists before removing
                             loadingIndicator.remove();
                         }
@@ -2894,6 +2888,21 @@
         backToPrayersListButton.style.display = 'none'; // Ensure it's hidden
     }
 
+</script>
+<script>
+window.addEventListener('load', () => {
+    // If splash screen is hidden or transition fails, show main content anyway
+    setTimeout(() => {
+        const mainContentContainer = document.querySelector('.main-content-container');
+        if (mainContentContainer && mainContentContainer.style.display === 'none') {
+            mainContentContainer.style.display = 'flex';
+            mainContentContainer.classList.add('visible');
+            if (typeof showSection === 'function') {
+                showSection('main-menu-section');
+            }
+        }
+    }, 4500); // 5 seconds fallback
+});
 </script>
 
 </body>
