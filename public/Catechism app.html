@@ -19,6 +19,18 @@
   --transition: all 0.3s ease;
 }
 
+.button-theme {
+  background: var(--primary-color);
+  color: var(--text-color);
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1rem;
+}
+
         body {
             margin: 0;
             padding: 0;
@@ -282,26 +294,6 @@ nav button:focus-visible {
     gap: 10rem;
     padding: 1rem;
 }
-
-/* Category and Lesson Buttons */
-#lessons-list-section button.category-button,
-#lessons-list-section button.lesson-button {
-  width: 100%;
-  max-width: 500px;
-  margin: 2rem 2rem;
-  background: var(--primary-color, #156c4c);
-  color: var(--text-color, #ffffff);
-  border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  font-size: 1.05rem;
-  text-align: center;
-  font-weight: 500;
-}
-
 #lessons-list-section button.category-button:hover,
 #lessons-list-section button.lesson-button:hover {
   transform: translateY(-2px);
@@ -746,12 +738,17 @@ nav button:focus-visible {
         </section>
 
         <!-- Lessons List Section -->
-        <section id="lessons-list-section" class="hidden">
-            <h2>Lessons Categories</h2>
-            <div id="categories-container"></div>
-            <div id="lessons-container" style="display: none;"></div>
-            <button id="back-to-categories-button" style="display: none;">Back to Categories</button>
-        </section>
+      <section id="lessons-list-section" class="hidden">
+    <h2>Lessons Categories</h2>
+    <div id="categories-container">
+        <button class="button-theme category-button">The Profession of Faith</button>
+        <button class="button-theme category-button">The Celebration of the Christian Mysteries</button>
+        <button class="button-theme category-button">Life in Christ</button>
+        <button class="button-theme category-button">Christian Prayer</button>
+    </div>
+    <div id="lessons-container" style="display: none;"></div>
+<button class="button-theme" id="back-to-categories-button" style="display: none;">Back to Categories</button>
+</section>
 
         <!-- Lesson Content Section -->
         <section id="lesson-content-section" class="hidden">
@@ -775,11 +772,11 @@ nav button:focus-visible {
         <!-- Spiritual Formation Section -->
         <section id="spiritual-formation-section" class="hidden">
             <h2>Spiritual Formation</h2>
-            <button id="lectio-divina-button">Lectio Divina</button>
-            <button id="guided-rosary-button">Guided Rosary</button>
-            <button id="common-prayers-button">Common Prayers</button>
-            <button id="liturgy-hours-button">Liturgy of the Hours</button>
-            <button id="spiritual-back-to-main-button">Back to Main Menu</button>
+            <button class="button-theme" id="lectio-divina-button">Lectio Divina</button>
+            <button class="button-theme" id="guided-rosary-button">Guided Rosary</button>
+            <button class="button-theme" id="common-prayers-button">Common Prayers</button>
+            <button class="button-theme" id="liturgy-hours-button">Liturgy of the Hours</button>
+            <button class="button-theme" id="spiritual-back-to-main-button">Back to Main Menu</button>
         </section>
 
         <!-- Rosary Section -->
@@ -797,26 +794,26 @@ nav button:focus-visible {
             <div id="profile-setup" class="hidden"> <!-- Added hidden class by default -->
                 <input id="username-input" type="text" placeholder="Enter Username">
                 <input id="class-input" type="text" placeholder="Enter Class ID (e.g., OCIA 1)">
-                <button id="save-profile-button">Save Profile</button>
+                <button class="button-theme" id="save-profile-button">Save Profile</button>
             </div>
             <h2 id="chat-header">Chat</h2>
             <div id="messages-area"></div>
             <div id="message-input-area">
                 <input id="message-input" type="text" placeholder="Type your message...">
-                <button id="send-button">Send</button>
+                <button class="button-theme" id="send-button">Send</button>
             </div>
-            <button id="close-chat-button">X</button>
+            <button class="button-theme" id="close-chat-button">X</button>
         </section>
 
         <!-- Student Resources Section -->
         <section id="student-resources-section" class="hidden">
             <h2>Student Resources</h2>
             <p>Access helpful resources for your faith journey.</p>
-            <button onclick="window.open('https://bible.usccb.org/', '_blank')">Holy Bible</button>
-            <button onclick="window.open('https://usccb.cld.bz/Catechism-of-the-Catholic-Church/', '_blank')">Catechism of the Catholic Church</button>
-            <button onclick="window.open('https://www.catholic.com/', '_blank')">Catholic Answers</button>
-            <button onclick="window.open('https://www.ibreviary.com/m2/breviario.php/', '_blank')">ibreviary</button>
-            <button onclick="window.open('https://media.ascensionpress.com/category/ascension-podcasts/catechisminayear/', '_blank')">The Catechism in a Year(with Fr. Mike Schmitz)</button>
+            <button class="button-theme" onclick="window.open('https://bible.usccb.org/bible/readings/072525.cfm/', '_blank')">Holy Bible</button>
+            <button class="button-theme" onclick="window.open('https://usccb.cld.bz/Catechism-of-the-Catholic-Church/', '_blank')">Catechism of the Catholic Church</button>
+            <button class="button-theme" onclick="window.open('https://www.catholic.com/', '_blank')">Catholic Answers</button>
+            <button class="button-theme" onclick="window.open('https://www.ibreviary.com/m2/breviario.php/', '_blank')">ibreviary</button>
+            <button class="button-theme" onclick="window.open('https://media.ascensionpress.com/category/ascension-podcasts/catechisminayear/', '_blank')">The Catechism in a Year(with Fr. Mike Schmitz)</button>
 
         </section>
     </div>
@@ -1184,7 +1181,7 @@ nav button:focus-visible {
             const uniqueCategories = [...new Set(lessonsData.map(data => data.category))]; // Extract unique categories
             uniqueCategories.forEach(categoryName => {
                 const btn = document.createElement('button');
-                btn.classList.add('category-button');
+                btn.classList.add('button-theme', 'category-button');
                 btn.textContent = categoryName;
                 btn.onclick = () => loadLessonsForCategory(categoryName); // Pass category name directly
                 container.appendChild(btn);
@@ -1205,7 +1202,7 @@ nav button:focus-visible {
             lessonsContainer.innerHTML = '';
             categoryData.lessons.forEach(lesson => {
                 const btn = document.createElement('button');
-                btn.classList.add('lesson-button');
+                btn.classList.add('button-theme', 'lesson-button');
                 const isCompleted = userProfile && userProfile.completedLessons && userProfile.completedLessons.includes(lesson.id);
                 btn.textContent = `${lesson.title} ${isCompleted ? ' (Completed)' : ''}`;
                 btn.onclick = () => loadLessonContent(lesson);
