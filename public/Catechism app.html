@@ -11,7 +11,7 @@
   --secondary-color: #bf944a;     /* Gold */
   --accent-color: #bf944a;        /* Use gold as your hover/highlight tone */
   --text-color: #f7f7f5;          /* Soft light text for dark background */
-  --background-color: #110f0f;    /* Deep black/brown background */
+  --background-color: transparent;    /* Deep black/brown background */
   --background-gradient: radial-gradient(50% 104%, #6d1718 46%, #110f0f 100%);
   --font-family: 'Georgia', serif;
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -125,15 +125,15 @@ nav button:focus-visible {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 0 1rem;
+    padding: 0; /* Remove horizontal padding */
     max-width: 800px;
     width: 100%;
     margin: 0 auto;
     opacity: 1;
     transition: opacity 0.6s ease-in-out;
-    background-color: var(--background-color, #21412A);
+    background-color: transparent !important; /* Remove background */
     border-radius: 0.75rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: none; /* Remove shadow */
     box-sizing: border-box;
 }
 
@@ -141,9 +141,9 @@ nav button:focus-visible {
 .main-content-container section {
     width: 100%;
     max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: var(--secondary-color, #c9a518); /* fallback color if var is undefined */
+    margin: 0.75rem 0; /* Minimal and equal vertical spacing */
+    padding: 1rem;      /* Minimal padding inside each section */
+    background: var(--secondary-color, #c9a518);
     border-radius: var(--border-radius, 0.75rem);
     box-shadow: var(--shadow, 0 4px 8px rgba(0, 0, 0, 0.1));
     text-align: center;
@@ -247,19 +247,6 @@ nav button:focus-visible {
 #custom-alert-modal.fade-out {
     animation: fadeOut 0.3s ease-out forwards;
 }
-
-/* Optional: Custom Fade Out Animation */
-@keyframes fadeOut {
-
-        @keyframes fadeIn { /* Added fadeIn keyframes */
-            from { opacity: 0; transform: translate(-50%, -60%); }
-            to { opacity: 1; transform: translate(-50%, -50%); }
-        }
-        @keyframes fadeOut { /* Added fadeOut keyframes */
-            from { opacity: 1; transform: translate(-50%, -50%); }
-            to { opacity: 0; transform: translate(-50%, -60%); }
-        }
-
 
         #alert-message {
             margin-bottom: 20px; /* Adjusted margin */
@@ -469,71 +456,80 @@ nav button:focus-visible {
 }
 
 
-/* Container */
+/* Chat Section Container */
 #chat-section {
-  font-family: 'Inter', sans-serif;
-  background-color: #f0f2f5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  box-sizing: border-box;
-  width: 100%;
-  position: relative; /* for close button positioning */
-  z-index: 1;
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 /* Chat Card */
 #chat-section .chat-container {
-  background-color: #ffffff;
-  border-radius: 1rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 42rem;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
-  position: relative;
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 42rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
 }
 
-/* Header */
+/* Chat Header */
 #chat-section .chat-header {
-  background-color: var(--primary-color, #156c4c);
-  color: white;
+  background: var(--primary-color, #6d1718);
+  color: #fff;
   text-align: center;
-  padding: 1rem 1.5rem;
-  font-size: 1.4rem;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
+  border-top-left-radius: 1.25rem;
+  border-top-right-radius: 1.25rem;
   position: relative;
-  z-index: 0;
 }
 
-/* Close Chat Button */
-#close-chat-button {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 1rem;
-  font-weight: bold;
-  line-height: 1;
+/* Messages Area */
+#chat-section .messages-area {
+     flex-grow: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: 28rem;
+    min-height: 10rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Input Area */
+#chat-section .input-area {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  gap: 0.75rem;
+  background: #fff;
+  padding: 1rem 1.5rem;
+  border-bottom-left-radius: 1.25rem;
+  border-bottom-right-radius: 1.25rem;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
 }
 
-#close-chat-button:hover {
-  background-color: #b02a37;
+/* Responsive */
+@media (max-width: 600px) {
+  #chat-section .chat-container {
+    max-width: 98vw;
+    border-radius: 0.75rem;
+  }
+  #chat-section .chat-header,
+  #chat-section .input-area {
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
 }
-
 /* Profile Setup */
 #profile-setup {
   display: flex;
@@ -582,92 +578,62 @@ nav button:focus-visible {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Messages Area */
-#chat-section .messages-area {
-  flex-grow: 1;
-  padding: 1.5rem;
-  overflow-y: auto;
-  max-height: 28rem;
-  min-height: 10rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  background-color: #f9fafb;
-  border-top: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
-}
 
 /* Message Bubbles */
 #chat-section .message-bubble {
-  max-width: 85%;
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  word-wrap: break-word;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  font-size: 0.95rem;
-  line-height: 1.4;
+max-width: 85%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    word-wrap: break-word;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 #chat-section .message-bubble.sent {
-  background-color: #dbeafe;
-  align-self: flex-end;
-  color: #1e40af;
-  border-bottom-right-radius: 0.25rem;
+    background-color: #dbeafe;
+    align-self: flex-end;
+    color: #1e40af;
 }
 
 #chat-section .message-bubble.received {
-  background-color: #f3f4f6;
-  align-self: flex-start;
-  color: #374151;
-  border-bottom-left-radius: 0.25rem;
+   background-color: #f3f4f6;
+    align-self: flex-start;
+    color: #374151;
 }
-
 #chat-section .message-sender {
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  color: #6b7280;
-}
-
-/* Input Area */
-#chat-section .input-area {
-  padding: 1rem 1.5rem;
-  display: flex;
-  gap: 0.75rem;
-  background-color: #ffffff;
+      font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #6b7280;
 }
 
 #chat-section .input-area input {
-  flex-grow: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+   padding: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    background-color: #ffffff;
 }
 
 #chat-section .input-area input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+     border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 /* Send Button */
 #chat-section .input-area button {
-  background-color: var(--secondary-color, #c3a009);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+   background-color: #3b82f6;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #chat-section .input-area button:hover {
-  background-color: #9c7f00;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background-color: #2563eb;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Optional Loading State */
@@ -692,7 +658,7 @@ nav button:focus-visible {
             transition: var(--transition);
             font-size: 1rem;
             min-width: 150px;
-            margin: 0.5rem 0;
+            margin: 0.5rem;
         }
         #student-resources-section button:hover {
             transform: translateY(-2px);
@@ -713,6 +679,32 @@ nav button:focus-visible {
                 padding: 0.5rem;
             }
         }
+
+/* Force chat section and chat card to use white background and dark text */
+.main-content-container section#chat-section {
+  background: transparent !important;
+  color: #222 !important;
+  box-shadow: none !important;
+  padding: 0;
+}
+
+#chat-section .chat-container {
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+  border-radius: 1.25rem !important;
+  border: 1px solid #e0e0e0 !important;
+}
+/* Optional: Custom Fade Out Animation */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -60%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes fadeOut {
+    from { opacity: 1; transform: translate(-50%, -50%); }
+    to { opacity: 0; transform: translate(-50%, -60%); }
+}
     </style>
 </head>
 <body>
@@ -790,20 +782,23 @@ nav button:focus-visible {
         </section>
 
         <!-- Chat Section -->
-        <section id="chat-section" class="hidden">
-            <div id="profile-setup" class="hidden"> <!-- Added hidden class by default -->
-                <input id="username-input" type="text" placeholder="Enter Username">
-                <input id="class-input" type="text" placeholder="Enter Class ID (e.g., OCIA 1)">
-                <button class="button-theme" id="save-profile-button">Save Profile</button>
-            </div>
-            <h2 id="chat-header">Chat</h2>
-            <div id="messages-area"></div>
-            <div id="message-input-area">
-                <input id="message-input" type="text" placeholder="Type your message...">
-                <button class="button-theme" id="send-button">Send</button>
-            </div>
-            <button class="button-theme" id="close-chat-button">X</button>
-        </section>
+<section id="chat-section" class="hidden">
+    <div class="chat-container">
+        <div class="chat-header" id="chat-header">Chat</div>
+        <div class="messages-area" id="messages-area"></div>
+        <div class="input-area" id="message-input-area">
+            <input id="message-input" type="text" placeholder="Type your message...">
+            <button class="button-theme" id="send-button">Send</button>
+        </div>
+        <button class="button-theme" id="close-chat-button">Close</button>
+        <div id="profile-setup" class="hidden">
+            <input id="username-input" type="text" placeholder="Enter Username">
+            <input id="class-input" type="text" placeholder="Enter Class ID (e.g., OCIA 1)">
+            <button class="button-theme" id="save-profile-button">Save Profile</button>
+        </div>
+    </div>
+</section>
+            
 
         <!-- Student Resources Section -->
         <section id="student-resources-section" class="hidden">
@@ -1030,6 +1025,50 @@ nav button:focus-visible {
                 console.error("Section not found:", sectionId);
             }
         }
+        function showSection(sectionId) {
+    const sections = document.querySelectorAll('.main-content-container section');
+    sections.forEach(section => {
+        section.classList.add('hidden');
+        // Remove inline style if present
+        if (section.id === 'chat-section') {
+            section.style.background = '';
+            section.style.color = '';
+        }
+        function showSection(sectionId) {
+    const sections = document.querySelectorAll('.main-content-container section');
+    sections.forEach(section => {
+        section.classList.add('hidden');
+        // Remove inline style if present
+        if (section.id === 'chat-section') {
+            section.style.background = '';
+            section.style.color = '';
+        }
+    });
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+        // Apply inline style ONLY for chat section
+        if (sectionId === 'chat-section') {
+            targetSection.style.background = '#fff';
+            targetSection.style.color = '#222';
+        }
+    } else {
+        console.error("Section not found:", sectionId);
+    }
+}
+    });
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+        // Apply inline style ONLY for chat section
+        if (sectionId === 'chat-section') {
+            targetSection.style.background = '#fff';
+            targetSection.style.color = '#222';
+        }
+    } else {
+        console.error("Section not found:", sectionId);
+    }
+}
 
         // Authentication
         async function initializeAuth() {
@@ -1046,7 +1085,7 @@ nav button:focus-visible {
         }
 
         // Load User Profile
-        async function loadUserProfile() {
+         async function loadUserProfile() {
             try {
                 const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
                 const doc = await userDocRef.get();
@@ -1063,7 +1102,7 @@ nav button:focus-visible {
                     document.getElementById('profile-setup').classList.remove('hidden'); // Show profile setup
                     document.getElementById('message-input').disabled = true; // Disable message input
                     document.getElementById('send-button').disabled = true; // Disable send button
-                    document.getElementById('message-input-area').style.pointerEvents = 'none'; // Disable pointer events for the area
+                    // The problematic line has been removed here.
                 }
             } catch (error) {
                 console.error('Profile load error:', error);
@@ -1105,6 +1144,7 @@ nav button:focus-visible {
 
             // Using compat syntax for collection reference
             db.collection(`artifacts/${appId}/public/data/messages`)
+                .where("classId", "==", userProfile.classId) // <-- ADD THIS LIN
                 .orderBy('timestamp', 'asc')
                 .onSnapshot(snapshot => {
                     const messagesArea = document.getElementById('messages-area');
