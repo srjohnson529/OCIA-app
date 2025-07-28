@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catechumen: Catholic Faith Formation App</title>
+    <title>Illumined: Catholic Faith Formation App</title>
     <style>
         /* Global Styles */
        :root {
-  --primary-color: #6d1718;       /* Deep red */
-  --secondary-color: #bf944a;     /* Gold */
+  --primary-color: white;       /* Deep red */
+  --secondary-color: #f7f7f5;     /* Gold */
   --accent-color: #bf944a;        /* Use gold as your hover/highlight tone */
-  --text-color: #f7f7f5;          /* Soft light text for dark background */
+  --text-color: black;          /* Soft light text for dark background */
   --background-color: transparent;    /* Deep black/brown background */
-  --background-gradient: radial-gradient(50% 104%, #6d1718 46%, #110f0f 100%);
+  --background-gradient: radial-gradient(50% 104%, #f7f7f5	 46%, #110f0f 100%);
   --font-family: 'Georgia', serif;
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   --border-radius: 8px;
@@ -64,27 +64,15 @@
     gap: 1rem 2rem; /* vertical and horizontal gap */
     padding: 1rem 2rem;
     margin-bottom: 2rem;
-    background-color: #8B0000; /* subtle background for visibility */
+    background-color: #3b6fa0	; /* subtle background for visibility */
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 
-        nav button {
-            background: var(--primary-color);
-            color: var(--text-color);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 1rem;
-            min-width: 150px;
-            text-align: center;
-        }
+        
 
-        nav button {
+     nav button {
     background: var(--primary-color);
     color: var(--text-color);
     border: none;
@@ -288,6 +276,15 @@ nav button:focus-visible {
   transform: translateY(-2px);
   background: var(--accent-color, #c3a009);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Style for the container holding the lesson buttons */
+#lessons-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+    justify-content: center; /* Center the buttons */
+    gap: 0.75rem; /* Add space between buttons */
+    padding: 1rem 0; /* Add some vertical padding */
 }
 
 /* Lesson Content Wrapper */
@@ -703,7 +700,7 @@ max-width: 85%;
 <body>
 
     <!-- Header -->
-    <header>Catechumen</header>
+    <header>Illumined</header>
 
     <!-- Navigation Bar -->
     <nav>
@@ -718,7 +715,7 @@ max-width: 85%;
     <div class="main-content-container">
         <!-- Home Section -->
         <section id="main-menu-section">
-            <h2>Welcome to Catechumen!</h2>
+            <h2>Welcome to Illumined!</h2>
             <p>Use the navigation bar to explore lessons, spiritual exercises, and more.</p>
         </section>
 
@@ -742,16 +739,16 @@ max-width: 85%;
             <div class="video-placeholder" id="lesson-video-container" style="display: none;">
                 <iframe id="lesson-video" width="560" height="315" frameborder="0" allowfullscreen></iframe>
             </div>
-            <button id="take-quiz-button">Take Quiz</button>
-            <button id="back-to-lessons-list-button">Back to Lessons</button>
+            <button class="button-theme" id="take-quiz-button">Take Quiz</button>
+            <button class="button-theme" id="back-to-lessons-list-button">Back to Lessons</button>
         </section>
 
         <!-- Quiz Section -->
         <section id="quiz-section" class="hidden">
             <h2 id="quiz-title"></h2>
             <div id="quiz-questions-container"></div>
-            <button id="submit-quiz-button">Submit Quiz</button>
-            <button id="back-to-lesson-from-quiz-button">Back to Lesson</button>
+            <button class="button-theme" id="submit-quiz-button">Submit Quiz</button>
+            <button class="button-theme" id="back-to-lesson-from-quiz-button">Back to Lesson</button>
         </section>
 
         <!-- Spiritual Formation Section -->
@@ -764,7 +761,18 @@ max-width: 85%;
             <button class="button-theme" id="spiritual-back-to-main-button">Back to Main Menu</button>
         </section>
 
+        <!-- Rosary Mysteries Selection Section -->
+        <section id="rosary-mysteries-section" class="hidden">
+            <h2>Choose a Mystery</h2>
+            <button class="button-theme" id="joyful-mysteries-button">Joyful Mysteries</button>
+            <button class="button-theme" id="luminous-mysteries-button">Luminous Mysteries</button>
+            <button class="button-theme" id="sorrowful-mysteries-button">Sorrowful Mysteries</button>
+            <button class="button-theme" id="glorious-mysteries-button">Glorious Mysteries</button>
+            <button class="button-theme" id="mysteries-back-to-spiritual-button">Back to Spiritual Formation</button>
+        </section>
+
         <!-- Rosary Section -->
+        
         <section id="rosary-section" class="hidden">
             <h2 id="current-mystery-title"></h2>
             <p id="current-scripture"></p>
@@ -870,6 +878,50 @@ max-width: 85%;
                     },
                     {
                         id: "foundations-2",
+                        title: "Divine Revelation",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                        {
+                        id: "foundations-3",
+                        title: "Sacred Scripture",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                        {
+                        id: "foundations-4",
+                        title: "Sacred Tradition",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-5",
+                        title: "Creeds and Councils",
+                        content: "The Sacraments are outward signs instituted by Christ to give grace. They are powerful encounters with God's saving presence, making visible the invisible reality of His love and mercy.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "How many Sacraments are there in the Catholic Church?",
+                            options: ["Three", "Five", "Seven", "Ten"],
+                            correct: 2
+                        }
+                    },
+                        {
+                        id: "foundations-6",
                         title: "God the Father, Creator",
                         content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
                         videoUrl: null,
@@ -879,14 +931,236 @@ max-width: 85%;
                             correct: 2
                         }
                     },
+                        {
+                        id: "foundations-7",
+                        title: "The Blessed Trinity",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                        {
+                        id: "foundations-8",
+                        title: "God the Son, Jesus Christ",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                        {
+                        id: "foundations-9",
+                        title: "The Incarnation",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-10",
+                        title: "Life, Death, & Resurrection of Jesus Christ",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-11",
+                        title: "Ascension of Jesus Christ",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-12",
+                        title: "God the Holy Spirit",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-13",
+                        title: "Creation",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-14",
+                        title: "Mankind and the Human Person",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-15",
+                        title: "Fall & Sin",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-16",
+                        title: "Savlation History",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-17",
+                        title: "Paschal Mystery",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-18",
+                        title: "The Church: The Body of Christ",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-19",
+                        title: "The Four Marks",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-20",
+                        title: "The Communion of the Saints",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-21",
+                        title: "The Blessed Virgin Mary",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-22",
+                        title: "Angels",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-23",
+                        title: "The Last Four Things",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-24",
+                        title: "The Church Militant, Suffering, & Triumphant",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundations-25",
+                        title: "The Second Coming",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "foundation-26",
+                        title: "Eternal Life",
+                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "Who is the ultimate Creator of heaven and earth?",
+                            options: ["Humanity", "Nature", "God the Father", "The universe itself"],
+                            correct: 2
+                        }
+                    },
+                    
                 ]
             },
             {
                 category: "The Celebration of the Christian Mysteries",
                 lessons: [
+                
                     {
-                        id: "trinity-1",
-                        title: "Jesus Christ, Our Savior",
+                        id: "sacraments-1",
+                        title: "Baptism",
                         content: "In this lesson, we turn our hearts and minds to Jesus Christ, the Son of God, and our Savior. He is the central figure of our faith, through whom God revealed Himself most fully to humanity.",
                         videoUrl: "https://www.youtube.com/embed/3vuYCjfO_w4",
                         quiz: {
@@ -896,8 +1170,107 @@ max-width: 85%;
                         }
                     },
                     {
-                        id: "trinity-2",
-                        title: "The Holy Spirit",
+                        id: "sacraments-2",
+                        title: "Confirmation",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-3",
+                        title: "The Holy Eucharist",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-4",
+                        title: "Holy Orders",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-5",
+                        title: "Holy Matrimony",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-6",
+                        title: "Reconcilation",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-7",
+                        title: "Anointing of the Sick",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-8",
+                        title: "Liturgy",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-9",
+                        title: "The Mass",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-10",
+                        title: "Sacramental Economy",
+                        content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What event marked the descent of the Holy Spirit upon the Apostles?",
+                            options: ["The Annunciation", "The Nativity", "Pentecost", "The Ascension"],
+                            correct: 2
+                        }
+                    },
+                                        {
+                        id: "sacraments-11",
+                        title: "Sacramentals",
                         content: "The Holy Spirit, the third Person of the Holy Trinity, is God's active presence in the world and in our lives. He is the Giver of Life, inspiring the prophets, empowering Jesus, and guiding the Church.",
                         videoUrl: null,
                         quiz: {
@@ -912,8 +1285,195 @@ max-width: 85%;
                 category: "Life in Christ",
                 lessons: [
                     {
-                        id: "church-1",
-                        title: "The Holy Catholic Church",
+                        id: "morals-1",
+                        title: "What is Morality",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-2",
+                        title: "Human Dignity",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-3",
+                        title: "Freedom and Choice",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-4",
+                        title: "Natural Law",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-5",
+                        title: "The Ten Commandments",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-6",
+                        title: "Commandments 1-3",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-7",
+                        title: "Commandments 4-10",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-8",
+                        title: "Freedom in Christ",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-9",
+                        title: "Grace, Justification, & Merit",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-10",
+                        title: "Virtue & Vice",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-11",
+                        title: "Habit",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-12",
+                        title: "Faith",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-13",
+                        title: "Hope",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-14",
+                        title: "Charity",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-15",
+                        title: "The Cardinal Virtues",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-16",
+                        title: "Mortal and Venial Sin (Capital and Lesser Sins)",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-17",
+                        title: "Catholic Social Teaching",
+                        content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "What does 'catholic' mean in reference to the Church?",
+                            options: ["Strict and rigid", "Universal", "Small and exclusive", "Ancient and traditional"],
+                            correct: 1
+                        }
+                    },
+                      {
+                        id: "morals-18",
+                        title: "Mercy and Justice",
                         content: "The Church is the Body of Christ, a community of believers called by God to continue His mission on earth. It is 'catholic,' meaning universal, embracing all people in all times and places.",
                         videoUrl: null,
                         quiz: {
@@ -928,8 +1488,52 @@ max-width: 85%;
                 category: "Christian Prayer",
                 lessons: [
                     {
-                        id: "sacraments-1",
-                        title: "The Sacraments",
+                        id: "prayer-1",
+                        title: "Introduction to Prayer",
+                        content: "The Sacraments are outward signs instituted by Christ to give grace. They are powerful encounters with God's saving presence, making visible the invisible reality of His love and mercy.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "How many Sacraments are there in the Catholic Church?",
+                            options: ["Three", "Five", "Seven", "Ten"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "prayer-2",
+                        title: "The Lord's Prayer - Our Model",
+                        content: "The Sacraments are outward signs instituted by Christ to give grace. They are powerful encounters with God's saving presence, making visible the invisible reality of His love and mercy.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "How many Sacraments are there in the Catholic Church?",
+                            options: ["Three", "Five", "Seven", "Ten"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "prayer-3",
+                        title: "Traditions and Types of Prayer",
+                        content: "The Sacraments are outward signs instituted by Christ to give grace. They are powerful encounters with God's saving presence, making visible the invisible reality of His love and mercy.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "How many Sacraments are there in the Catholic Church?",
+                            options: ["Three", "Five", "Seven", "Ten"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "prayer-4",
+                        title: "The Prayer of the Mass",
+                        content: "The Sacraments are outward signs instituted by Christ to give grace. They are powerful encounters with God's saving presence, making visible the invisible reality of His love and mercy.",
+                        videoUrl: null,
+                        quiz: {
+                            question: "How many Sacraments are there in the Catholic Church?",
+                            options: ["Three", "Five", "Seven", "Ten"],
+                            correct: 2
+                        }
+                    },
+                    {
+                        id: "prayer-5",
+                        title: "Prayer Without Ceasing",
                         content: "The Sacraments are outward signs instituted by Christ to give grace. They are powerful encounters with God's saving presence, making visible the invisible reality of His love and mercy.",
                         videoUrl: null,
                         quiz: {
@@ -970,9 +1574,36 @@ max-width: 85%;
                 title: "The Finding in the Temple",
                 scripture: "Luke 2:41-52\n\nNow his parents went to Jerusalem every year at the feast of the Passover. And when he was twelve years old, they went up according to custom; and when the feast was ended, as they were returning, the boy Jesus stayed behind in Jerusalem. His parents did not know it, but supposing him to be in the company they traveled a day's journey, and then sought him among their kinsfolk and acquaintances; and when they did not find him, they returned to Jerusalem, seeking him. After three days they found him in the temple, sitting among the teachers, listening to them and asking them questions; and all who heard him were amazed at his understanding and his answers. And when they saw him they were astonished; and his mother said to him, “Son, why have you treated us so? Behold, your father and I and I have been looking for you anxiously.” And he said to them, “How is it that you sought me? Did you not know that I must be in my Father's house?” And they did not understand the saying which he spoke to them. He went down with them and came to Nazareth, and was obedient to them; and his mother kept all these things in her heart. And Jesus increased in wisdom and in stature, and in favor with God and man."}
         ];
+         // Luminous Mysteries
+        const luminousMysteries = [
+            { title: "The Baptism in the Jordan", scripture: "Matthew 3:13-17" },
+            { title: "The Wedding at Cana", scripture: "John 2:1-11" },
+            { title: "The Proclamation of the Kingdom", scripture: "Mark 1:14-15" },
+            { title: "The Transfiguration", scripture: "Matthew 17:1-8" },
+            { title: "The Institution of the Eucharist", scripture: "Matthew 26:26-30" }
+        ];
+
+        // Sorrowful Mysteries
+        const sorrowfulMysteries = [
+            { title: "The Agony in the Garden", scripture: "Matthew 26:36-46" },
+            { title: "The Scourging at the Pillar", scripture: "John 19:1" },
+            { title: "The Crowning with Thorns", scripture: "Matthew 27:27-31" },
+            { title: "The Carrying of the Cross", scripture: "John 19:17" },
+            { title: "The Crucifixion and Death", scripture: "John 19:18-30" }
+        ];
+
+        // Glorious Mysteries
+        const gloriousMysteries = [
+            { title: "The Resurrection", scripture: "John 20:1-9" },
+            { title: "The Ascension", scripture: "Luke 24:50-53" },
+            { title: "The Descent of the Holy Spirit", scripture: "Acts 2:1-4" },
+            { title: "The Assumption of Mary", scripture: "Revelation 12:1" },
+            { title: "The Coronation of Mary", scripture: "Revelation 12:1" }
+        ];
 
         // Rosary State
-        let rosaryState = {
+           let rosaryState = {
+            currentMysteries: [], // Will hold the selected set of mysteries
             currentMysteryIndex: 0,
             currentPrayerIndex: 0,
             prayers: [] // Will be populated per mystery
@@ -1009,7 +1640,6 @@ max-width: 85%;
             alertOverlay.style.pointerEvents = 'none'; 
         }
 
-       // ...existing code...
         alertOkButton.addEventListener('click', hideCustomAlert);
                 alertOverlay.addEventListener('click', hideCustomAlert); // Add this listener
 
@@ -1289,18 +1919,21 @@ max-width: 85%;
             }
         }
 
+
         // Rosary Logic
-        function initializeRosary() {
+        function startRosary(mysteries) {
+            rosaryState.currentMysteries = mysteries;
             rosaryState.currentMysteryIndex = 0;
             rosaryState.currentPrayerIndex = 0;
-            rosaryState.prayers = getPrayersForMystery(); // Populate prayers for the first mystery
+            rosaryState.prayers = getPrayersForMystery();
             displayCurrentRosaryPrayer();
             document.getElementById('rosary-next-button').style.display = 'block';
             document.getElementById('rosary-reset-button').style.display = 'block';
+            showSection('rosary-section');
         }
 
         function displayCurrentRosaryPrayer() {
-            if (rosaryState.currentMysteryIndex >= joyfulMysteries.length) {
+            if (rosaryState.currentMysteryIndex >= rosaryState.currentMysteries.length) {
                 document.getElementById('current-mystery-title').textContent = "Rosary Completed!";
                 document.getElementById('current-scripture').textContent = "";
                 document.getElementById('current-prayer-text').textContent = "Praise be to God! You have completed the Rosary.";
@@ -1309,7 +1942,7 @@ max-width: 85%;
                 return;
             }
 
-            const mystery = joyfulMysteries[rosaryState.currentMysteryIndex];
+            const mystery = rosaryState.currentMysteries[rosaryState.currentMysteryIndex];
             document.getElementById('current-mystery-title').textContent = `${rosaryState.currentMysteryIndex + 1}. ${mystery.title}`;
             document.getElementById('current-scripture').textContent = mystery.scripture;
 
@@ -1331,12 +1964,22 @@ max-width: 85%;
         }
 
         function resetRosary() {
-            initializeRosary();
+            startRosary(rosaryState.currentMysteries);
             showCustomAlert("Rosary has been reset.");
         }
 
-
         // Event Listeners Initialization
+            document.getElementById('lectio-divina-button').addEventListener('click', () => {
+                showCustomAlert("Lectio Divina functionality coming soon!");
+            });
+            document.getElementById('guided-rosary-button').addEventListener('click', () => {
+                showSection('rosary-mysteries-section');
+            });
+            document.getElementById('common-prayers-button').addEventListener('click', () => {
+                showCustomAlert("Common Prayers functionality coming soon!");
+            })
+
+       // Event Listeners Initialization
         function initNavListeners() {
             document.getElementById('home-nav-button').addEventListener('click', () => {
                 showSection('main-menu-section');
@@ -1355,11 +1998,10 @@ max-width: 85%;
                 showSection('student-resources-section');
             });
             document.getElementById('quit-nav-button').addEventListener('click', () => {
-                showCustomAlert("Thank you for using Catechumen! You can close this window.");
+                showCustomAlert("Thank you for using Illumined! You can close this window.");
             });
 
             // Lessons & Quiz Buttons
-
             document.getElementById('take-quiz-button').addEventListener('click', startQuiz);
             document.getElementById('back-to-lessons-list-button').addEventListener('click', () => {
                 loadLessonsForCategory(currentCategory); // Use the stored category
@@ -1367,7 +2009,6 @@ max-width: 85%;
             });
             document.getElementById('submit-quiz-button').addEventListener('click', submitQuiz);
             document.getElementById('back-to-lesson-from-quiz-button').addEventListener('click', () => {
-// ...existing code...
                 loadLessonContent(currentLesson); // Go back to the current lesson content
             });
             document.getElementById('back-to-categories-button').addEventListener('click', loadCategories);
@@ -1378,8 +2019,7 @@ max-width: 85%;
                 showCustomAlert("Lectio Divina functionality coming soon!");
             });
             document.getElementById('guided-rosary-button').addEventListener('click', () => {
-                showSection('rosary-section');
-                initializeRosary();
+                showSection('rosary-mysteries-section');
             });
             document.getElementById('common-prayers-button').addEventListener('click', () => {
                 showCustomAlert("Common Prayers functionality coming soon!");
@@ -1392,10 +2032,17 @@ max-width: 85%;
             });
 
             // Rosary Buttons
+            document.getElementById('joyful-mysteries-button').addEventListener('click', () => startRosary(joyfulMysteries));
+            document.getElementById('luminous-mysteries-button').addEventListener('click', () => startRosary(luminousMysteries));
+            document.getElementById('sorrowful-mysteries-button').addEventListener('click', () => startRosary(sorrowfulMysteries));
+            document.getElementById('glorious-mysteries-button').addEventListener('click', () => startRosary(gloriousMysteries));
+            document.getElementById('mysteries-back-to-spiritual-button').addEventListener('click', () => {
+                showSection('spiritual-formation-section');
+            });
             document.getElementById('rosary-next-button').addEventListener('click', nextRosaryPrayer);
             document.getElementById('rosary-reset-button').addEventListener('click', resetRosary);
             document.getElementById('rosary-back-to-spiritual-button').addEventListener('click', () => {
-                showSection('spiritual-formation-section');
+                showSection('rosary-mysteries-section');
             });
 
             // Chat Buttons/Inputs
@@ -1410,7 +2057,6 @@ max-width: 85%;
                 showSection('main-menu-section');
             });
         }
-
         // Initialize on DOMContentLoaded
         window.addEventListener('DOMContentLoaded', () => {
             // Main content container is now immediately visible
