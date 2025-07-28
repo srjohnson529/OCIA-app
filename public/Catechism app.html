@@ -278,23 +278,14 @@ nav button:focus-visible {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10rem;
-    padding: 1rem;
+    gap: 0.75rem;
+    padding: 1.5rem;
 }
 #lessons-list-section button.category-button:hover,
 #lessons-list-section button.lesson-button:hover {
   transform: translateY(-2px);
   background: var(--accent-color, #c3a009);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-/* Lessons List Section */
-#lessons-list-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.5rem;
 }
 
 /* Lesson Content Wrapper */
@@ -782,22 +773,25 @@ max-width: 85%;
         </section>
 
         <!-- Chat Section -->
-<section id="chat-section" class="hidden">
-    <div class="chat-container">
-        <div class="chat-header" id="chat-header">Chat</div>
-        <div class="messages-area" id="messages-area"></div>
-        <div class="input-area" id="message-input-area">
-            <input id="message-input" type="text" placeholder="Type your message...">
-            <button class="button-theme" id="send-button">Send</button>
-        </div>
-        <button class="button-theme" id="close-chat-button">Close</button>
-        <div id="profile-setup" class="hidden">
+ <section id="chat-section" class="hidden">
+            <div class="chat-container">
+                <div class="chat-header" id="chat-header">Chat</div>
+                <div class="messages-area" id="messages-area"></div>
+                <div class="input-area" id="message-input-area">
+                    <input id="message-input" type="text" placeholder="Type your message...">
+                    <button class="button-theme" id="send-button">Send</button>
+                </div>
+                <button class="button-theme" id="close-chat-button">Close</button>
+            </div>
+        </section>
+
+        <!-- Profile Setup Section (Moved from Chat) -->
+        <section id="profile-setup" class="hidden">
+            <p>Please create a profile to use the chat and track your progress.</p>
             <input id="username-input" type="text" placeholder="Enter Username">
             <input id="class-input" type="text" placeholder="Enter Class ID (e.g., OCIA 1)">
             <button class="button-theme" id="save-profile-button">Save Profile</button>
-        </div>
-    </div>
-</section>
+        </section>
             
 
         <!-- Student Resources Section -->
@@ -1012,12 +1006,15 @@ max-width: 85%;
             }, { once: true });
         }
 
+       // ...existing code...
         alertOkButton.addEventListener('click', hideCustomAlert);
 
         // Show Section Function
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.main-content-container section');
-            sections.forEach(section => section.classList.add('hidden'));
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
             const targetSection = document.getElementById(sectionId);
             if (targetSection) {
                 targetSection.classList.remove('hidden');
@@ -1025,50 +1022,6 @@ max-width: 85%;
                 console.error("Section not found:", sectionId);
             }
         }
-        function showSection(sectionId) {
-    const sections = document.querySelectorAll('.main-content-container section');
-    sections.forEach(section => {
-        section.classList.add('hidden');
-        // Remove inline style if present
-        if (section.id === 'chat-section') {
-            section.style.background = '';
-            section.style.color = '';
-        }
-        function showSection(sectionId) {
-    const sections = document.querySelectorAll('.main-content-container section');
-    sections.forEach(section => {
-        section.classList.add('hidden');
-        // Remove inline style if present
-        if (section.id === 'chat-section') {
-            section.style.background = '';
-            section.style.color = '';
-        }
-    });
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.remove('hidden');
-        // Apply inline style ONLY for chat section
-        if (sectionId === 'chat-section') {
-            targetSection.style.background = '#fff';
-            targetSection.style.color = '#222';
-        }
-    } else {
-        console.error("Section not found:", sectionId);
-    }
-}
-    });
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.remove('hidden');
-        // Apply inline style ONLY for chat section
-        if (sectionId === 'chat-section') {
-            targetSection.style.background = '#fff';
-            targetSection.style.color = '#222';
-        }
-    } else {
-        console.error("Section not found:", sectionId);
-    }
-}
 
         // Authentication
         async function initializeAuth() {
@@ -1089,23 +1042,24 @@ max-width: 85%;
             try {
                 const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
                 const doc = await userDocRef.get();
+               // ...existing code...
                 if (doc.exists) {
                     userProfile = doc.data();
                     document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
-                    document.getElementById('profile-setup').classList.add('hidden'); // Hide profile setup
+                    // No need to hide profile-setup here, showSection handles it.
                     document.getElementById('message-input').disabled = false; // Enable message input
                     document.getElementById('send-button').disabled = false; // Enable send button
-                    // Re-enable pointer events for the message input area if it was disabled
                     document.getElementById('message-input-area').style.pointerEvents = 'auto';
-                    setupChatListener(); // Start listening for messages after profile is loaded
+                    setupChatListener(); 
                 } else {
-                    document.getElementById('profile-setup').classList.remove('hidden'); // Show profile setup
-                    document.getElementById('message-input').disabled = true; // Disable message input
-                    document.getElementById('send-button').disabled = true; // Disable send button
-                    // The problematic line has been removed here.
+                    // If no profile, show the profile setup SECTION
+                    showSection('profile-setup'); 
+                    document.getElementById('message-input').disabled = true; 
+                    document.getElementById('send-button').disabled = true; 
                 }
             } catch (error) {
                 console.error('Profile load error:', error);
+// ...existing code...
                 showCustomAlert('Failed to load profile.');
             }
         }
@@ -1232,6 +1186,7 @@ max-width: 85%;
         }
 
         function loadLessonsForCategory(categoryName) {
+            currentCategory = categoryName; // <-- ADD THIS LINE to store the current category
             const categoryData = lessonsData.find(data => data.category === categoryName);
             if (!categoryData) {
                 console.error("Category not found:", categoryName);
@@ -1323,7 +1278,7 @@ max-width: 85%;
                         completedLessons: userProfile.completedLessons
                     });
                 }
-                loadLessonsForCategory(currentLesson.category); // Refresh lessons list
+                loadLessonsForCategory(currentCategory); // Refresh lessons list for the current category
                 showSection('lessons-list-section');
             } else {
                 showCustomAlert("Incorrect. Please try again.");
@@ -1400,13 +1355,15 @@ max-width: 85%;
             });
 
             // Lessons & Quiz Buttons
+
             document.getElementById('take-quiz-button').addEventListener('click', startQuiz);
             document.getElementById('back-to-lessons-list-button').addEventListener('click', () => {
-                loadLessonsForCategory(currentLesson.category); // Go back to the specific category list
+                loadLessonsForCategory(currentCategory); // Use the stored category
                 showSection('lessons-list-section');
             });
             document.getElementById('submit-quiz-button').addEventListener('click', submitQuiz);
             document.getElementById('back-to-lesson-from-quiz-button').addEventListener('click', () => {
+// ...existing code...
                 loadLessonContent(currentLesson); // Go back to the current lesson content
             });
             document.getElementById('back-to-categories-button').addEventListener('click', loadCategories);
@@ -1464,8 +1421,8 @@ max-width: 85%;
                 } else {
                     currentUser = null;
                     userProfile = null;
-                    // Handle unauthenticated state, e.g., show profile setup if chat is entered
-                    document.getElementById('profile-setup').classList.remove('hidden');
+                    // When not authenticated, if user tries to go to chat, they will see the profile setup.
+                    // We don't need to force it visible here anymore.
                     document.getElementById('message-input').disabled = true;
                     document.getElementById('send-button').disabled = true;
                     document.getElementById('messages-area').innerHTML = '<div class="loading-message">Please sign in to use chat.</div>';
