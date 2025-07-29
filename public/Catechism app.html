@@ -243,8 +243,8 @@ nav button:focus-visible {
         }
 
         #alert-ok-button {
-            background: var(--primary-color, #6d1718); /* Use theme color */
-            color: white;
+            background: #bf944a; /* Use theme color */
+            color: blue;
             border: none;
             padding: 0.75rem 1.5rem; /* Adjusted padding */
             border-radius: 0.5rem; /* Adjusted border-radius */
@@ -254,7 +254,7 @@ nav button:focus-visible {
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
         #alert-ok-button:hover {
-            background: #531112; /* Darker red on hover */
+            background: gold; /* Darker red on hover */
             transform: translateY(-1px);
         }
 
@@ -868,7 +868,8 @@ max-width: 85%;
                     {
                         id: "foundations-1",
                         title: "What is Faith?",
-                        content: "Faith is the assurance of things hoped for, the conviction of things not seen.",
+                        verse: "Faith is the assurance of things hoped for, the conviction of things not seen.",
+                        content:"",
                         videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Example video
                         quiz: {
                             question: "What is faith?",
@@ -879,7 +880,7 @@ max-width: 85%;
                     {
                         id: "foundations-2",
                         title: "Divine Revelation",
-                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        content: "By faith we believe that God, the Creator of heaven and earth has made Himself known to man",
                         videoUrl: null,
                         quiz: {
                             question: "Who is the ultimate Creator of heaven and earth?",
@@ -890,7 +891,7 @@ max-width: 85%;
                         {
                         id: "foundations-3",
                         title: "Sacred Scripture",
-                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        content: "The Holy Bible is the inspired Word of God. It contains the innerent testament of God's dealing with man and reveals to man his ultimate purpose and destiny.",
                         videoUrl: null,
                         quiz: {
                             question: "Who is the ultimate Creator of heaven and earth?",
@@ -901,7 +902,7 @@ max-width: 85%;
                         {
                         id: "foundations-4",
                         title: "Sacred Tradition",
-                        content: "Our journey continues by focusing on God the Father, the Almighty Creator of heaven and earth. He is the source of all that exists, visible and invisible.",
+                        content: "God has entrusted the authentic intrepretation of His revelation to his Church. This authentic and true intrepretation of Sacred Scripture is what we call Sacred Tradition. It was taught to the Apostles by Jesus Christ and is preserved by the Bishops.",
                         videoUrl: null,
                         quiz: {
                             question: "Who is the ultimate Creator of heaven and earth?",
@@ -912,7 +913,7 @@ max-width: 85%;
                     {
                         id: "foundations-5",
                         title: "Creeds and Councils",
-                        content: "The Sacraments are outward signs instituted by Christ to give grace. They are powerful encounters with God's saving presence, making visible the invisible reality of His love and mercy.",
+                        content: "The Creed summarizes the Christian faith. It serves as a indespensible tool ",
                         videoUrl: null,
                         quiz: {
                             question: "How many Sacraments are there in the Catholic Church?",
@@ -1676,7 +1677,6 @@ max-width: 85%;
             try {
                 const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
                 const doc = await userDocRef.get();
-               // ...existing code...
                 if (doc.exists) {
                     userProfile = doc.data();
                     document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
@@ -1697,7 +1697,6 @@ max-width: 85%;
                 showCustomAlert('Failed to load profile.');
             }
         }
-
         // Save Profile
         async function saveProfile() {
             const username = document.getElementById('username-input').value.trim();
@@ -1707,15 +1706,26 @@ max-width: 85%;
                 return;
             }
             try {
-                const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
-                await userDocRef.set({
+                const profileData = {
                     username,
                     classId,
                     completedLessons: [],
                     currentLessonIndex: 0
-                });
-                userProfile = { username, classId, completedLessons: [], currentLessonIndex: 0 };
-                loadUserProfile(); // Reload profile to update UI and enable chat
+                };
+                const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
+                await userDocRef.set(profileData);
+
+                // Update state and UI directly instead of re-fetching
+                userProfile = profileData;
+                document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
+                document.getElementById('message-input').disabled = false;
+                document.getElementById('send-button').disabled = false;
+                document.getElementById('message-input-area').style.pointerEvents = 'auto';
+                
+                setupChatListener(); // Initialize chat with the new profile
+
+                showCustomAlert('Profile saved successfully!');
+                showSection('main-menu-section'); // Navigate to the main menu
             } catch (error) {
                 console.error('Save profile error:', error);
                 showCustomAlert('Failed to save profile.');
@@ -1968,17 +1978,6 @@ max-width: 85%;
             showCustomAlert("Rosary has been reset.");
         }
 
-        // Event Listeners Initialization
-            document.getElementById('lectio-divina-button').addEventListener('click', () => {
-                showCustomAlert("Lectio Divina functionality coming soon!");
-            });
-            document.getElementById('guided-rosary-button').addEventListener('click', () => {
-                showSection('rosary-mysteries-section');
-            });
-            document.getElementById('common-prayers-button').addEventListener('click', () => {
-                showCustomAlert("Common Prayers functionality coming soon!");
-            })
-
        // Event Listeners Initialization
         function initNavListeners() {
             document.getElementById('home-nav-button').addEventListener('click', () => {
@@ -1991,8 +1990,14 @@ max-width: 85%;
             document.getElementById('spiritual-nav-button').addEventListener('click', () => {
                 showSection('spiritual-formation-section');
             });
-            document.getElementById('chat-menu-button').addEventListener('click', () => {
-                showSection('chat-section');
+             document.getElementById('chat-menu-button').addEventListener('click', () => {
+                // Check if a profile exists before showing the chat section
+                if (userProfile) {
+                    showSection('chat-section');
+                } else {
+                    showCustomAlert("Please create a profile to use the chat feature.");
+                    showSection('profile-setup');
+                }
             });
             document.getElementById('resources-nav-button').addEventListener('click', () => {
                 showSection('student-resources-section');
