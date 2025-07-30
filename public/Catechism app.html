@@ -129,8 +129,8 @@ nav button:focus-visible {
 .main-content-container section {
     width: 100%;
     max-width: 800px;
-    margin: 0.75rem 0; /* Minimal and equal vertical spacing */
-    padding: 1rem;      /* Minimal padding inside each section */
+    margin: 1rem auto; /* Standardized vertical margin */
+    padding: 1.5rem;   /* Standardized padding */
     background: var(--secondary-color, #c9a518);
     border-radius: var(--border-radius, 0.75rem);
     box-shadow: var(--shadow, 0 4px 8px rgba(0, 0, 0, 0.1));
@@ -147,7 +147,7 @@ nav button:focus-visible {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    height: 0;
+    display: none !important; /* This is the key change */
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -292,7 +292,6 @@ nav button:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem;
   width: 100%;
   background-color: #ffffff;
   border-radius: 1rem;
@@ -336,7 +335,6 @@ nav button:focus-visible {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1rem;
     width: 100%;
 }
 
@@ -350,7 +348,6 @@ nav button:focus-visible {
 #quiz-questions-container label {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
     margin: 0.5rem 0;
     border-radius: 8px;
     background: #f5f5f5;
@@ -372,7 +369,6 @@ nav button:focus-visible {
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    padding: 1rem;
     width: 100%;
     max-width: 700px;
     margin: 0 auto;
@@ -430,7 +426,6 @@ nav button:focus-visible {
 #rosary-section button {
     background: #8B4513;
     color: white;
-    padding: 0.75rem 1.5rem;
     font-size: 1.1rem;
     border: none;
     border-radius: 8px;
@@ -449,11 +444,10 @@ nav button:focus-visible {
 /* Chat Section Container */
 #chat-section {
     font-family: 'Inter', sans-serif;
-    background-color: #f0f2f5;
+    background-color: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 1rem;
     box-sizing: border-box;
     width: 100%;
 }
@@ -525,14 +519,11 @@ nav button:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 1rem 1rem;
-  padding: 1rem;
-  background-color: #e2e8f0;
   border-radius: 0.5rem;
   text-align: center;
-  font-size: 0.9rem;
-  color: #4a5568;
-  border: 1px solid #cbd5e0;
+  font-size: 1.1rem;
+  color: var(--text-color);
+  border: none;
 }
 
 #profile-setup.hidden {
@@ -551,16 +542,16 @@ nav button:focus-visible {
 }
 
 #profile-setup button {
-  background: var(--secondary-color, #c3a009);
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
+  background: var(--primary-color);
+  color: var(--text-color);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.var(--border-radius);
   cursor: pointer;
   border: none;
   font-weight: 600;
-  margin-top: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s, box-shadow 0.2s;
+  margin-top: 1rem;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
 }
 
 #profile-setup button:hover {
@@ -1642,21 +1633,20 @@ max-width: 85%;
         }
 
         alertOkButton.addEventListener('click', hideCustomAlert);
-                alertOverlay.addEventListener('click', hideCustomAlert); // Add this listener
+                alertOverlay.addEventListener('click', hideCustomAlert); 
 
         // Show Section Function
-        function showSection(sectionId) {
-            const sections = document.querySelectorAll('.main-content-container section');
+      function showSection(sectionId) {
+            const sections = document.querySelectorAll('.main-content-container > section');
             sections.forEach(section => {
-                section.classList.add('hidden');
+                if (section.id === sectionId) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
             });
-            const targetSection = document.getElementById(sectionId);
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-            } else {
-                console.error("Section not found:", sectionId);
-            }
         }
+
 
         // Authentication
         async function initializeAuth() {
