@@ -46,32 +46,27 @@
         
         /* Header */
         header {
-            background: var(--secondary-color);
+            background: var(--secondary-color-gradient);
             padding: 1rem;
             text-align: center;
-            font-size: 2rem;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            font-size: 3rem;
+            text-shadow: 5px 5px 2px rgba(0, 0, 0, 0.3);
             border-radius: var(--border-radius); /* Added back from previous working code */
             margin-bottom: 1rem; /* Added back from previous working code */
         }
 
         /* Navigation Bar */
-        nav {
+         nav {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 1rem 2rem; /* vertical and horizontal gap */
     padding: 1rem 2rem;
-    margin-bottom: 2rem;
     background-color: #3b6fa0	; /* subtle background for visibility */
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
-
-        
-
      nav button {
     background: var(--primary-color);
     color: var(--text-color);
@@ -116,7 +111,7 @@ nav button:focus-visible {
     padding: 0; /* Remove horizontal padding */
     max-width: 800px;
     width: 100%;
-    margin: 0 auto;
+    margin: 2rem auto 0 auto; /* ADD margin-top and set others */
     opacity: 1;
     transition: opacity 0.6s ease-in-out;
     background-color: transparent !important; /* Remove background */
@@ -137,7 +132,8 @@ nav button:focus-visible {
     text-align: center;
     font-size: 1.1rem;
     line-height: 1.6;
-    color: white;
+    color: black;
+    text-shadow: none;
     box-sizing: border-box;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
@@ -153,44 +149,9 @@ nav button:focus-visible {
     padding: 0;
 }
 
-
-        /* Footer */
-        footer {
-            background: var(--primary-color); /* Adjusted to match previous working code */
-            padding: 1rem;
-            text-align: center;
-            width: 100%; /* Added from previous working code */
-            max-width: 900px; /* Added from previous working code */
-            margin: 20px auto 0 auto; /* Adjusted margin from previous working code */
-            border-radius: var(--border-radius); /* Added from previous working code */
-            display: flex; /* Added from previous working code */
-            justify-content: center; /* Added from previous working code */
-            align-items: center; /* Added from previous working code */
-        }
-
-        footer nav {
-            margin-bottom: 0; /* Ensure no extra margin */
-        }
-
-        footer button {
-            background: var(--accent-color);
-            color: var(--text-color);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        footer button:hover {
-            transform: translateY(-2px);
-            background: var(--secondary-color); /* Adjusted hover color */
-        }
-
        /* Overlay Behind the Modal */
 #alert-overlay {
-    position: fixed;
+    position: flex;
     top: 0;
     left: 0;
     width: 100%;
@@ -207,7 +168,7 @@ nav button:focus-visible {
 /* Modal Box */
 #custom-alert-modal {
     position: fixed;
-    top: 50%;
+    top: 70%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.95);
     background: #ffffff; /* Solid white background */
@@ -221,7 +182,8 @@ nav button:focus-visible {
     max-width: 400px;
     width: 90%;
     color: #343a40; /* Darker text for readability */
-    pointer-events: auto;
+    pointer-events: none; /* Change default to none */
+    visibility: hidden; /* Add this */
     border: 1px solid #dee2e6; /* Subtle border */
 }
 /* Visible Modal */
@@ -229,6 +191,8 @@ nav button:focus-visible {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
     animation: fadeIn 0.3s ease-out forwards;
+    pointer-events: auto; /* Re-enable pointer events when visible */
+    visibility: visible; /* Add this */
 }
 
 #custom-alert-modal.fade-out {
@@ -257,6 +221,9 @@ nav button:focus-visible {
             background: gold; /* Darker red on hover */
             transform: translateY(-1px);
         }
+          #custom-alert-modal.hidden {
+            display: none;
+        }
 
         /* Section Specific Styles */
         #main-menu-section {
@@ -271,6 +238,19 @@ nav button:focus-visible {
     gap: 0.75rem;
     padding: 1.5rem;
 }
+#lessons-list-section button {
+      background: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-width: 150px;
+            margin: 0.5rem;
+        }
 #lessons-list-section button.category-button:hover,
 #lessons-list-section button.lesson-button:hover {
   transform: translateY(-2px);
@@ -375,20 +355,18 @@ nav button:focus-visible {
 }
 
 #spiritual-formation-section button {
-    background: var(--primary-color);
-    color: var(--text-color);
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease;
-    font-size: 1rem;
-    min-width: 160px;
-    width: 80%;
-    max-width: 300px;
-    text-align: center;
-}
+      background: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-width: 150px;
+            margin: 0.5rem;
+        }
 
 #spiritual-formation-section button:hover {
     transform: translateY(-2px);
@@ -522,7 +500,7 @@ nav button:focus-visible {
   border-radius: 0.5rem;
   text-align: center;
   font-size: 1.1rem;
-  color: var(--text-color);
+  color: #333;
   border: none;
 }
 
@@ -539,13 +517,19 @@ nav button:focus-visible {
   border: 1px solid #cbd5e0;
   font-size: 1rem;
   box-sizing: border-box;
+  color: #333
+}
+
+* Style for placeholder text */
+#profile-setup input::placeholder {
+  color: #9ca3af;
 }
 
 #profile-setup button {
   background: var(--primary-color);
   color: var(--text-color);
   padding: 0.75rem 1.5rem;
-  border-radius: 0.var(--border-radius);
+  border-radius: var(--border-radius);
   cursor: pointer;
   border: none;
   font-weight: 600;
@@ -588,9 +572,7 @@ max-width: 85%;
 }
 
 #chat-section .input-area input {
-   padding: 1.5rem;
-    display: flex;
-    gap: 0.75rem;
+  padding: 1.5rem;
     background-color: #ffffff;
 }
 
@@ -691,7 +673,7 @@ max-width: 85%;
 <body>
 
     <!-- Header -->
-    <header>Illumined</header>
+    <header>ILLUMINED</header>
 
     <!-- Navigation Bar -->
     <nav>
@@ -700,6 +682,7 @@ max-width: 85%;
         <button id="spiritual-nav-button">Spiritual Formation</button>
         <button id="chat-menu-button">Chat</button>
         <button id="resources-nav-button">Student Resources</button>
+        <button id="quit-nav-button">Quit</button>
     </nav>
 
     <!-- Main Content Container -->
@@ -742,9 +725,19 @@ max-width: 85%;
             <button class="button-theme" id="back-to-lesson-from-quiz-button">Back to Lesson</button>
         </section>
 
-        <!-- Spiritual Formation Section -->
+<!-- Spiritual Formation Section -->
         <section id="spiritual-formation-section" class="hidden">
             <h2>Spiritual Formation</h2>
+                <div id="spiritual-container">
+            <button class="button-theme spiritual-formation-category-button">Prayers</button>
+            <button class="button-theme spiritual-formation-category-button">Examination of Conscience</button>
+            <button class="button-theme spiritual-formation-category-button">Spiritual Practices</button>
+            <button class="button-theme spiritual-formation-category-button">Back to Main Menu</button>
+        </section>
+
+        <!-- Prayers Section -->
+        <section id="prayer-section" class="hidden">
+            <h2>Prayers</h2>
             <button class="button-theme" id="lectio-divina-button">Lectio Divina</button>
             <button class="button-theme" id="guided-rosary-button">Guided Rosary</button>
             <button class="button-theme" id="common-prayers-button">Common Prayers</button>
@@ -808,17 +801,13 @@ max-width: 85%;
         </section>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <button id="quit-nav-button">Quit</button>
-    </footer>
-
     <!-- Custom Alert Modal -->
     <div id="alert-overlay"></div>
     <div id="custom-alert-modal">
         <p id="alert-message"></p>
         <button id="alert-ok-button">OK</button>
     </div>
+    <div id="alert-overlay" class="hidden"></div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
@@ -859,8 +848,7 @@ max-width: 85%;
                     {
                         id: "foundations-1",
                         title: "What is Faith?",
-                        verse: "Faith is the assurance of things hoped for, the conviction of things not seen.",
-                        content:"",
+                        content: "",
                         videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Example video
                         quiz: {
                             question: "What is faith?",
@@ -871,7 +859,7 @@ max-width: 85%;
                     {
                         id: "foundations-2",
                         title: "Divine Revelation",
-                        content: "By faith we believe that God, the Creator of heaven and earth has made Himself known to man",
+                        content: "Christianity rests upon the conviction that we can come to know the mystery of God. God invites us to encounter him personally by the grace of faith. He has revealed himself in Jesus Christ, as Father, Son and Holy Spirit, the one God and Creator of all that is. In revealing himself, God also communicates to human beings the offer of life with him. “That which was from the beginning, which we have heard, which we have seen with our eyes, which we have looked upon and touched with our hands, concerning the word of life—the life was made manifest, and we saw it, and testify to it, and proclaim to you the eternal life which was with the Father and was made manifest to us” (1 Jn 1:1–2). A dimension of this is intellectual. God’s activity of self-manifestation occurs through the prophetic and apostolic teaching of the Old and New Testaments, all of which culminates in the person of Jesus Christ, the Incarnate God. ",
                         videoUrl: null,
                         quiz: {
                             question: "Who is the ultimate Creator of heaven and earth?",
@@ -1663,27 +1651,26 @@ max-width: 85%;
         }
 
         // Load User Profile
-         async function loadUserProfile() {
-            try {
+                 async function loadUserProfile() {
+             try {
                 const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
                 const doc = await userDocRef.get();
                 if (doc.exists) {
                     userProfile = doc.data();
                     document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
-                    // No need to hide profile-setup here, showSection handles it.
-                    document.getElementById('message-input').disabled = false; // Enable message input
-                    document.getElementById('send-button').disabled = false; // Enable send button
+                    document.getElementById('message-input').disabled = false;
+                    document.getElementById('send-button').disabled = false;
                     document.getElementById('message-input-area').style.pointerEvents = 'auto';
                     setupChatListener(); 
                 } else {
-                    // If no profile, show the profile setup SECTION
-                    showSection('profile-setup'); 
+                    // If no profile, do nothing on load.
+                    // The check will be handled by the chat button's event listener.
+                    userProfile = null;
                     document.getElementById('message-input').disabled = true; 
                     document.getElementById('send-button').disabled = true; 
                 }
             } catch (error) {
                 console.error('Profile load error:', error);
-// ...existing code...
                 showCustomAlert('Failed to load profile.');
             }
         }
@@ -2053,7 +2040,7 @@ max-width: 85%;
             });
         }
         // Initialize on DOMContentLoaded
-        window.addEventListener('DOMContentLoaded', () => {
+      window.addEventListener('DOMContentLoaded', () => {
             // Main content container is now immediately visible
             document.querySelector('.main-content-container').style.display = 'flex';
             document.querySelector('.main-content-container').style.opacity = '1';
@@ -2067,7 +2054,6 @@ max-width: 85%;
                     currentUser = null;
                     userProfile = null;
                     // When not authenticated, if user tries to go to chat, they will see the profile setup.
-                    // We don't need to force it visible here anymore.
                     document.getElementById('message-input').disabled = true;
                     document.getElementById('send-button').disabled = true;
                     document.getElementById('messages-area').innerHTML = '<div class="loading-message">Please sign in to use chat.</div>';
