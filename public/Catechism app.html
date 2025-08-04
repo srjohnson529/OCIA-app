@@ -343,6 +343,73 @@ nav button:focus-visible {
     margin-right: 0.75rem;
 }
 
+/* Content Page Styling (for Examination, Works of Mercy, etc.) */
+.content-page {
+    text-align: left; /* Align text to the left for readability */
+    background: #f9f9f9; /* A slightly off-white background */
+    color: #333;
+    line-height: 1.7;
+}
+
+.content-page .content-wrapper {
+    padding: 0 1rem; /* Add some horizontal padding */
+}
+
+.content-page h3 {
+    font-size: 1.5rem;
+    color: #6A0505; /* A deep red for main headings */
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 0.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.content-page h4 {
+    font-size: 1.25rem;
+    color: #333;
+    margin-top: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.content-page h5 {
+    font-size: 1.1rem;
+    color: #6A0505;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.content-page p {
+    margin-bottom: 1rem;
+}
+
+.content-page ul, .content-page ol {
+    padding-left: 25px; /* Proper indentation for lists */
+    margin-bottom: 1rem;
+}
+
+.content-page li {
+    margin-bottom: 0.5rem;
+}
+
+.content-page li strong {
+    color: #3b6fa0; /* Use a theme color for emphasis */
+}
+
+.content-page blockquote {
+    border-left: 4px solid var(--accent-color, #bf944a);
+    margin: 1.5rem 0;
+    padding: 0.5rem 1rem;
+    background-color: #ffffff;
+    font-style: italic;
+    color: #555;
+    border-radius: 0 4px 4px 0;
+}
+
+.content-page em {
+    color: #555;
+    font-style: italic;
+}
 
         #spiritual-formation-section {
     display: flex;
@@ -728,21 +795,193 @@ max-width: 85%;
 <!-- Spiritual Formation Section -->
         <section id="spiritual-formation-section" class="hidden">
             <h2>Spiritual Formation</h2>
-                <div id="spiritual-container">
-            <button class="button-theme spiritual-formation-category-button">Prayers</button>
-            <button class="button-theme spiritual-formation-category-button">Examination of Conscience</button>
-            <button class="button-theme spiritual-formation-category-button">Spiritual Practices</button>
-            <button class="button-theme spiritual-formation-category-button">Back to Main Menu</button>
+            <div id="spiritual-container">
+                <button class="button-theme" id="prayers-menu-button">Prayers</button>
+                <button class="button-theme" id="examination-menu-button">Examination of Conscience</button>
+                <button class="button-theme" id="practices-menu-button">Spiritual Practices</button>
+                <button class="button-theme" id="spiritual-main-menu-button">Back to Main Menu</button>
+            </div>
         </section>
 
         <!-- Prayers Section -->
         <section id="prayer-section" class="hidden">
-            <h2>Prayers</h2>
-            <button class="button-theme" id="lectio-divina-button">Lectio Divina</button>
-            <button class="button-theme" id="guided-rosary-button">Guided Rosary</button>
             <button class="button-theme" id="common-prayers-button">Common Prayers</button>
+            <button class="button-theme" id="guided-rosary-button">Guided Rosary</button>
+            <button class="button-theme" id="lectio-divina-button">Lectio Divina</button>
             <button class="button-theme" id="liturgy-hours-button">Liturgy of the Hours</button>
-            <button class="button-theme" id="spiritual-back-to-main-button">Back to Main Menu</button>
+            <button class="button-theme" id="prayers-back-to-spiritual-button">Back to Spiritual Formation</button>
+        </section>
+
+        <!-- Examination of Conscience Section (Placeholder) -->
+   <section id="examination-section" class="hidden content-page">
+            <h2>Examination of Conscience</h2>
+            <div class="content-wrapper">
+                <p>This section will guide you through a prayerful review of your day.</p>
+                <h3>I. What is an Examination of Conscience?</h3>
+                <p>An <strong>examination of conscience</strong> is a prayerful self-reflection on our thoughts, words, deeds, and omissions, measured against God’s commandments and the teaching of the Church. Its purpose is to:</p>
+                <ul>
+            <li><strong>Recognize</strong> sins and faults honestly.</li>
+            <li><strong>Acknowledge</strong> God’s mercy and our need for repentance.</li>
+            <li><strong>Prepare</strong> the soul to make a good Confession.</li>
+            <li><strong>Form</strong> the conscience over time to be more sensitive to sin and more responsive to grace.</li>
+        </ul>
+        <blockquote>
+            “Examine yourselves, to see whether you are holding to your faith. Test yourselves.” — 2 Corinthians 13:5<br>
+            “Search me, O God, and know my heart! Try me and know my thoughts!” — Psalm 139:23
+        </blockquote>
+
+        <h3>II. Why is it Important?</h3>
+        <ul>
+            <li><strong>For Confession</strong> — A good confession requires that we know and confess our mortal sins by kind and number, and it is helped by remembering venial sins as well.</li>
+            <li><strong>For Growth in Holiness</strong> — Even outside of Confession, regular examination fosters humility, self-awareness, and a desire for virtue.</li>
+            <li><strong>To Form the Conscience</strong> — By examining our lives in light of the Gospel, our conscience becomes better aligned with God’s will.</li>
+        </ul>
+
+        <h3>III. When and How Often?</h3>
+        <ul>
+            <li><strong>Before Confession</strong> — A thorough examination should be done before every sacramental confession.</li>
+            <li><strong>Daily (Brief)</strong> — A short version at the end of the day, sometimes called an <em>examen</em>.</li>
+            <li><strong>Retreats or Spiritual Checkpoints</strong> — A deeper examination before retreats, spiritual direction, or big life decisions.</li>
+        </ul>
+
+        <h3>IV. Dispositions for a Good Examination</h3>
+        <ul>
+            <li><strong>Prayerful Attitude</strong> — Begin with prayer, asking the Holy Spirit for light and honesty.</li>
+            <li><strong>Honesty</strong> — Avoid self-justification. Call sins what they are.</li>
+            <li><strong>Hope in God’s Mercy</strong> — Avoid despair; focus on Christ’s saving love.</li>
+            <li><strong>Resolve to Amend</strong> — A sincere desire to avoid sin and its occasions.</li>
+        </ul>
+
+        <h3>V. Step-by-Step Guide</h3>
+        <h4>Step 1: Pray for Light</h4>
+        <p>Ask the Holy Spirit to help you see yourself as God sees you.<br>
+        <em>"Lord, help me to see my sins clearly and to know Your infinite mercy."</em></p>
+
+        <h4>Step 2: Review Your Life</h4>
+        <p>Use a framework such as:</p>
+        <ul>
+            <li>The Ten Commandments</li>
+            <li>The Precepts of the Church</li>
+            <li>The Beatitudes</li>
+            <li>The Seven Deadly Sins</li>
+            <li>Your State in Life Duties</li>
+        </ul>
+
+        <h4>Examination by the Ten Commandments</h4>
+
+        <h5>1. I am the Lord your God; you shall not have strange gods before Me.</h5>
+        <ul>
+            <li>Have I loved God above all things?</li>
+            <li>Have I trusted in superstition, astrology, occult practices?</li>
+            <li>Have I been faithful in prayer?</li>
+            <li>Have I made idols of money, pleasure, or success?</li>
+        </ul>
+
+        <h5>2. You shall not take the name of the Lord your God in vain.</h5>
+        <ul>
+            <li>Have I used God’s name disrespectfully or in anger?</li>
+            <li>Have I spoken irreverently of holy things?</li>
+            <li>Have I broken vows or promises made to God?</li>
+        </ul>
+
+        <h5>3. Remember to keep holy the Lord’s Day.</h5>
+        <ul>
+            <li>Have I missed Mass on Sundays or Holy Days without serious reason?</li>
+            <li>Have I been inattentive or distracted at Mass?</li>
+            <li>Have I done unnecessary work instead of resting in God?</li>
+        </ul>
+
+        <h5>4. Honor your father and your mother.</h5>
+        <ul>
+            <li>Have I disrespected or disobeyed my parents?</li>
+            <li>As a parent, have I failed to guide my children toward God?</li>
+            <li>Have I failed in obedience to lawful authority?</li>
+        </ul>
+
+        <h5>5. You shall not kill.</h5>
+        <ul>
+            <li>Have I harbored hatred, resentment, or revenge?</li>
+            <li>Have I injured someone physically or spiritually?</li>
+            <li>Have I been reckless with my health or others’?</li>
+            <li>Have I supported abortion, euthanasia, or assisted suicide?</li>
+            <li>Have I engaged in gossip or detraction?</li>
+        </ul>
+
+        <h5>6. You shall not commit adultery.</h5>
+        <ul>
+            <li>Have I engaged in sexual activity outside marriage?</li>
+            <li>Have I viewed pornography or entertained lustful thoughts?</li>
+            <li>Have I been faithful to my spouse in thought and action?</li>
+            <li>Have I respected the dignity of my own body and others’?</li>
+        </ul>
+
+        <h5>7. You shall not steal.</h5>
+        <ul>
+            <li>Have I taken what is not mine?</li>
+            <li>Have I cheated in business, school, or games?</li>
+            <li>Have I wasted time or resources?</li>
+            <li>Have I failed in generosity?</li>
+        </ul>
+
+        <h5>8. You shall not bear false witness.</h5>
+        <ul>
+            <li>Have I lied or been deceitful?</li>
+            <li>Have I spoken falsely about others?</li>
+            <li>Have I withheld the truth when obligated to speak?</li>
+        </ul>
+
+        <h5>9. You shall not covet your neighbor’s wife.</h5>
+        <ul>
+            <li>Have I been envious of another’s spouse or relationship?</li>
+            <li>Have I entertained impure desires?</li>
+        </ul>
+
+        <h5>10. You shall not covet your neighbor’s goods.</h5>
+        <ul>
+            <li>Have I been jealous of what others have?</li>
+            <li>Have I been greedy or discontent?</li>
+            <li>Have I trusted in possessions rather than God?</li>
+        </ul>
+
+        <h4>Step 3: Acknowledge Sins and Their Gravity</h4>
+        <p><strong>Mortal Sin</strong> — Grave matter, full knowledge, and deliberate consent (CCC 1857–1859). Must be confessed in kind and number.<br>
+        <strong>Venial Sin</strong> — Lesser matter or without full consent. Still worth confessing for spiritual growth.</p>
+
+        <h4>Step 4: Make an Act of Contrition</h4>
+        <p><em>O my God, I am heartily sorry for having offended You, and I detest all my sins because of Your just punishments, but most of all because they offend You, my God, who are all-good and deserving of all my love. I firmly resolve, with the help of Your grace, to sin no more and to avoid the near occasions of sin. Amen.</em></p>
+
+        <h3>VI. Tips for a Fruitful Examination</h3>
+        <ul>
+            <li>Keep a spiritual journal to note recurring sins and patterns.</li>
+            <li>Regularly read Scripture and the Catechism to form your conscience.</li>
+            <li>Ask a trusted confessor for guidance.</li>
+            <li>Let the examination lead to gratitude for God’s mercy, not scrupulosity.</li>
+        </ul>
+
+        <h3>VII. Quick Daily Mini-Examen (5 minutes)</h3>
+        <ol>
+            <li>Place yourself in God’s presence.</li>
+            <li>Thank Him for the day’s blessings.</li>
+            <li>Ask the Holy Spirit for light.</li>
+            <li>Review the day briefly — thoughts, words, deeds, omissions.</li>
+            <li>Express sorrow, make a resolution, and pray an Act of Contrition.</li>
+        </ol>
+    </div>
+    <button class="button-theme" id="examination-back-to-spiritual-button">Back to Spiritual Formation</button>
+</section>
+
+
+          <!-- Spiritual Practices Section (Placeholder) -->
+        <section id="practices-section" class="hidden">
+            <h2>Spiritual Practices</h2>
+            <p>Discover various spiritual practices to deepen your faith life.</p>
+            <button class="button-theme" id="works-of-mercy-button">Works of Mercy</button>
+            <button class="button-theme" id="precepts-of-church-button">Precepts of the Church</button>
+            <button class="button-theme" id="penitential-practices-button">Penitential Practices</button>
+            <button class="button-theme" id="habit-building-button">Habit Building</button>
+            <button class="button-theme" id="social-teachings-button">Social Teachings in Action</button>
+            <button class="button-theme" id="liturgical-living-button">Liturgical & Sacramental Living</button>
+            <button class="button-theme" id="practices-back-to-spiritual-button">Back to Spiritual Formation</button>
         </section>
 
         <!-- Rosary Mysteries Selection Section -->
@@ -756,16 +995,146 @@ max-width: 85%;
         </section>
 
         <!-- Rosary Section -->
-        
         <section id="rosary-section" class="hidden">
             <h2 id="current-mystery-title"></h2>
             <p id="current-scripture"></p>
             <p id="current-prayer-text"></p>
-            <button id="rosary-next-button">Next Prayer</button>
-            <button id="rosary-reset-button">Reset Rosary</button>
-            <button id="rosary-back-to-spiritual-button">Back to Spiritual Formation</button>
+            <button class="button-theme" id="rosary-next-button">Next Prayer</button>
+            <button class="button-theme" id="rosary-reset-button">Reset Rosary</button>
+            <button class="button-theme" id="rosary-back-to-mysteries-button">Back to Mysteries</button>
         </section>
 
+        <!-- Works of Mercy Section -->
+        <section id="works-of-mercy-section" class="hidden content-page">
+            <h2>The Works of Mercy</h2>
+            <div class="content-wrapper">
+                <p>The Works of Mercy are charitable actions by which we come to the aid of our neighbor in their bodily and spiritual needs. Rooted in Scripture and Tradition, they are concrete ways to live out Christ’s command to love God and love our neighbor (cf. Matthew 25:31–46, Galatians 6:1–2).</p>
+                <h3>Corporal Works of Mercy</h3>
+                <ul>
+                    <li>Feed the hungry</li>
+                    <li>Give drink to the thirsty</li>
+                    <li>Clothe the naked</li>
+                    <li>Shelter the homeless</li>
+                    <li>Visit the sick</li>
+                    <li>Visit the imprisoned</li>
+                    <li>Bury the dead</li>
+                </ul>
+                <h3>Spiritual Works of Mercy</h3>
+                <ul>
+                    <li>Instruct the ignorant</li>
+                    <li>Counsel the doubtful</li>
+                    <li>Admonish the sinner</li>
+                    <li>Bear wrongs patiently</li>
+                    <li>Forgive offenses willingly</li>
+                    <li>Comfort the afflicted</li>
+                    <li>Pray for the living and the dead</li>
+                </ul>
+            </div>
+            <button class="button-theme" id="mercy-back-to-practices-button">Back to Spiritual Practices</button>
+        </section>
+
+
+        <!-- Precepts of the Church Section -->
+        <section id="precepts-of-church-section" class="hidden content-page">
+    <h2>The Precepts of the Catholic Church</h2>
+    <p>The five precepts of the Catholic Church are guidelines that outline the minimum requirements for Catholics to remain in good standing with God and the Church. They help ensure that the faithful grow in love for God, neighbor, and the Body of Christ (cf. Catechism of the Catholic Church 2041–2043).</p>
+                
+    <div class="content-wrapper">
+        <ol>
+            <li><strong>Attend Mass on Sundays and Holy Days of Obligation</strong> – Participate in the Eucharist and refrain from unnecessary servile work on these days.</li>
+            <li><strong>Confess your sins at least once a year</strong> – Receive the Sacrament of Reconciliation to be reconciled with God and the Church.</li>
+            <li><strong>Receive the Eucharist at least during the Easter season</strong> – Share in the Paschal mystery by receiving Christ’s Body and Blood.</li>
+            <li><strong>Observe the days of fasting and abstinence established by the Church</strong> – Unite yourself with Christ’s sacrifice through penance and self-denial.</li>
+            <li><strong>Help to provide for the needs of the Church</strong> – Support the Church’s mission through your time, talents, and financial contributions.</li>
+        </ol>
+    </div>
+
+    <button class="button-theme" id="precepts-back-to-practices-button">Back to Spiritual Practices</button>
+</section>
+
+
+        <!-- Penitential Practices Section -->
+      <section id="penitential-practices-section" class="hidden content-page">
+    <h2>Penitential Practices</h2>
+    <p>Penitential practices are voluntary acts of self-denial, prayer, and charity that help us grow in holiness, unite ourselves to the sufferings of Christ, and repair the damage caused by sin. They express conversion of heart and deepen our love for God and neighbor (cf. Catechism of the Catholic Church 1434–1439).</p>
+                
+    <div class="content-wrapper">
+        <ol>
+            <li><strong>Fasting</strong> – Reducing the amount of food consumed as a form of prayer and sacrifice, especially on days appointed by the Church.</li>
+            <li><strong>Abstinence</strong> – Refraining from certain foods (traditionally meat) as an act of penance and solidarity with the poor.</li>
+            <li><strong>Almsgiving</strong> – Giving to those in need, supporting charitable causes, and practicing generosity as a remedy for selfishness.</li>
+            <li><strong>Prayer</strong> – Setting aside extra time for prayer, devotions, or meditation to draw closer to God.</li>
+            <li><strong>Acts of Self-Denial</strong> – Voluntarily giving up comforts, pleasures, or entertainment to grow in virtue and discipline.</li>
+            <li><strong>Reconciliation</strong> – Regularly receiving the Sacrament of Penance to be cleansed from sin and strengthened against temptation.</li>
+            <li><strong>Works of Mercy</strong> – Performing corporal and spiritual acts of service as a concrete expression of repentance and love.</li>
+        </ol>
+    </div>
+
+    <button class="button-theme" id="penitential-back-to-practices-button">Back to Spiritual Practices</button>
+</section>
+
+
+        <!-- Habit Building Section -->
+        <section id="habit-building-section" class="hidden content-page">
+            <h2>Virtue-Building Habits</h2>
+    <p>Virtue-building habits are intentional daily practices that help form the mind, heart, and will to live in greater conformity with Christ. By cultivating these habits, we grow in the theological and moral virtues, resist sin, and bear witness to the Gospel in our daily lives.</p>
+                
+    <div class="content-wrapper">
+        <ol>
+            <li><strong>Daily Prayer</strong> – Setting aside dedicated time each day for personal and communal prayer to deepen one’s relationship with God.</li>
+            <li><strong>Daily Scripture Reading</strong> – Reading and meditating on the Word of God to be nourished by truth and guided by divine wisdom.</li>
+            <li><strong>Frequent Reception of the Sacraments</strong> – Regular participation in the Eucharist and Reconciliation to receive grace and spiritual strength.</li>
+            <li><strong>Acts of Kindness</strong> – Performing intentional good deeds for others to grow in charity and compassion.</li>
+            <li><strong>Fasting from Distractions</strong> – Limiting entertainment, technology, or other distractions to create more space for God.</li>
+            <li><strong>Silence and Reflection</strong> – Setting aside quiet time to listen to God, examine one’s conscience, and discern His will.</li>
+            <li><strong>Spiritual Reading</strong> – Studying the lives of saints, Church teaching, and theological works to inspire and form the soul.</li>
+        </ol>
+    </div>
+
+    <button class="button-theme" id="virtue-back-to-practices-button">Back to Spiritual Practices</button>
+</section>
+
+
+        <!-- Social Teachings Section -->
+        <section id="social-teachings-section" class="hidden content-page">
+            <h2>Catholic Social Teaching in Action</h2>
+    <p>Catholic Social Teaching applies the Gospel to the social, political, and economic realities of our time. These principles guide us to respect human dignity, promote the common good, and work for justice and peace in the world (cf. Compendium of the Social Doctrine of the Church).</p>
+                
+    <div class="content-wrapper">
+        <ol>
+            <li><strong>Respect for Human Life</strong> – Defending the dignity of every person from conception to natural death through pro-life witness and advocacy.</li>
+            <li><strong>Care for Creation</strong> – Practicing environmental stewardship and using resources responsibly in light of God’s creation mandate.</li>
+            <li><strong>Preferential Option for the Poor</strong> – Serving and advocating for those in poverty or marginalized in society.</li>
+            <li><strong>Solidarity</strong> – Standing with others, especially the vulnerable, in a spirit of unity and shared responsibility.</li>
+            <li><strong>Promotion of Peace</strong> – Working to resolve conflicts, promote reconciliation, and foster harmony between peoples.</li>
+            <li><strong>Economic Justice</strong> – Supporting fair wages, ethical business practices, and economic systems that respect human dignity.</li>
+            <li><strong>Participation in Public Life</strong> – Engaging in civic duties, informed voting, and community service in light of Catholic values.</li>
+        </ol>
+    </div>
+
+    <button class="button-theme" id="social-back-to-practices-button">Back to Spiritual Practices</button>
+</section>
+
+        <!-- Liturgical Living Section -->
+        <section id="liturgical-living-section" class="hidden content-page">
+         <h2>Liturgical Living</h2>
+    <p>Liturgical living is the practice of ordering daily life around the rhythms and seasons of the Church’s liturgy. By observing feasts, fasts, and devotions, Catholics allow the worship of God to shape their time, habits, and home life, making the liturgical year a living expression of faith.</p>
+                
+    <div class="content-wrapper">
+        <ol>
+            <li><strong>Observing the Liturgical Year</strong> – Celebrating seasons like Advent, Christmas, Lent, Easter, and Ordinary Time with their unique prayers and traditions.</li>
+            <li><strong>Honoring Feast Days</strong> – Marking solemnities and memorials of Christ, Our Lady, and the saints through prayer, special meals, or devotions.</li>
+            <li><strong>Keeping Days of Fasting and Abstinence</strong> – Participating in the Church’s penitential days to unite with Christ’s sacrifice.</li>
+            <li><strong>Using Sacramentals</strong> – Incorporating blessed objects such as holy water, medals, scapulars, and crucifixes into daily life as reminders of God’s grace.</li>
+            <li><strong>Praying the Liturgy of the Hours</strong> – Joining the universal prayer of the Church throughout the day.</li>
+            <li><strong>Family and Home Devotions</strong> – Creating a domestic church with practices like a home altar, family rosary, and seasonal decorations.</li>
+            <li><strong>Blessing Meals and Milestones</strong> – Offering prayers of gratitude before eating and marking life events with the Church’s blessings.</li>
+        </ol>
+    </div>
+
+    <button class="button-theme" id="liturgical-back-to-practices-button">Back to Spiritual Practices</button>
+</section>
+                 
         <!-- Chat Section -->
  <section id="chat-section" class="hidden">
             <div class="chat-container">
@@ -1995,8 +2364,59 @@ max-width: 85%;
             });
             document.getElementById('back-to-categories-button').addEventListener('click', loadCategories);
 
-
             // Spiritual Formation Buttons
+            document.getElementById('prayers-menu-button').addEventListener('click', () => {
+                showSection('prayer-section');
+            });
+            document.getElementById('examination-menu-button').addEventListener('click', () => {
+                showSection('examination-section');
+            });
+            document.getElementById('practices-menu-button').addEventListener('click', () => {
+                showSection('practices-section');
+            });
+            document.getElementById('spiritual-main-menu-button').addEventListener('click', () => {
+                showSection('main-menu-section');
+            });
+
+            // Back buttons for new spiritual sections
+            document.getElementById('prayers-back-to-spiritual-button').addEventListener('click', () => {
+                showSection('spiritual-formation-section');
+            });
+            document.getElementById('examination-back-to-spiritual-button').addEventListener('click', () => {
+                showSection('spiritual-formation-section');
+            });
+            document.getElementById('practices-back-to-spiritual-button').addEventListener('click', () => {
+                showSection('spiritual-formation-section');
+            });
+
+            // Spiritual Practices Sub-Menu Buttons
+            document.getElementById('works-of-mercy-button').addEventListener('click', () => {
+                showSection("works-of-mercy-section");
+            });
+            document.getElementById('precepts-of-church-button').addEventListener('click', () => {
+                showSection("precepts-of-church-section");
+            });
+            document.getElementById('penitential-practices-button').addEventListener('click', () => {
+                showSection("penitential-practices-section");
+            });
+            document.getElementById('habit-building-button').addEventListener('click', () => {
+                showSection("habit-building-section");
+            });
+            document.getElementById('social-teachings-button').addEventListener('click', () => {
+                showSection("social-teachings-section");
+            });
+            document.getElementById('liturgical-living-button').addEventListener('click', () => {
+                showSection("liturgical-living-section");
+            });
+
+            // Back buttons for Spiritual Practices placeholders
+             document.getElementById('mercy-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
+            document.getElementById('precepts-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
+            document.getElementById('penitential-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
+            document.getElementById('virtue-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
+            document.getElementById('social-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
+            document.getElementById('liturgical-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
+       // Prayer Sub-Menu Buttons
             document.getElementById('lectio-divina-button').addEventListener('click', () => {
                 showCustomAlert("Lectio Divina functionality coming soon!");
             });
@@ -2009,9 +2429,6 @@ max-width: 85%;
             document.getElementById('liturgy-hours-button').addEventListener('click', () => {
                 showCustomAlert("Liturgy of the Hours functionality coming soon!");
             });
-            document.getElementById('spiritual-back-to-main-button').addEventListener('click', () => {
-                showSection('main-menu-section');
-            });
 
             // Rosary Buttons
             document.getElementById('joyful-mysteries-button').addEventListener('click', () => startRosary(joyfulMysteries));
@@ -2019,11 +2436,11 @@ max-width: 85%;
             document.getElementById('sorrowful-mysteries-button').addEventListener('click', () => startRosary(sorrowfulMysteries));
             document.getElementById('glorious-mysteries-button').addEventListener('click', () => startRosary(gloriousMysteries));
             document.getElementById('mysteries-back-to-spiritual-button').addEventListener('click', () => {
-                showSection('spiritual-formation-section');
+                showSection('prayer-section');
             });
             document.getElementById('rosary-next-button').addEventListener('click', nextRosaryPrayer);
             document.getElementById('rosary-reset-button').addEventListener('click', resetRosary);
-            document.getElementById('rosary-back-to-spiritual-button').addEventListener('click', () => {
+            document.getElementById('rosary-back-to-mysteries-button').addEventListener('click', () => {
                 showSection('rosary-mysteries-section');
             });
 
