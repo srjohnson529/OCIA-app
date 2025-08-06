@@ -267,9 +267,18 @@ nav button:focus-visible {
     box-shadow: var(--shadow) !important;
 }
 
+#categories-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers the buttons horizontally */
+    gap: 0.75rem;      /* Adds space between the buttons */
+    width: 100%;
+}
+
 /* Style for the container holding the lesson buttons */
 #lessons-container {
     display: flex;
+    
     flex-wrap: wrap; /* Allow buttons to wrap to the next line */
     justify-content: center; /* Center the buttons */
     gap: 0.75rem; /* Add space between buttons */
@@ -279,7 +288,7 @@ nav button:focus-visible {
 /* Lesson Content Wrapper */
 #lesson-content-section {
   display: flex;
-  flex-direction: column;
+
   align-items: center;
   width: 100%;
   background-color: #ffffff;
