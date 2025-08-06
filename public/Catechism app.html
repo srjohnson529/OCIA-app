@@ -835,6 +835,7 @@ footer button#quit-button:hover {
 <button class="button-theme" id="back-to-categories-button" style="display: none;">Back to Categories</button>
 </section>
 
+
         <!-- Lesson Content Section -->
         <section id="lesson-content-section" class="hidden">
             <h2 id="current-lesson-title"></h2>
@@ -881,6 +882,12 @@ footer button#quit-button:hover {
             </div>
             <button class="button-theme" id="common-prayers-back-button">Back to Prayers Menu</button>
         </section>
+        <div id="common-prayers-container"></div>
+        <section id="prayer-display-section" class="hidden">
+    <h2 id="prayer-display-title"></h2>
+    <div id="prayer-display-text"></div>
+    <button class="button-theme" id="back-to-common-prayers-button">Back to Common Prayers</button>
+</section>
 
          <!-- Lectio Divina Section -->
         <section id="lectio-divina-section" class="hidden content-page">
@@ -1280,7 +1287,7 @@ footer button#quit-button:hover {
             <button class="button-theme" onclick="window.open('https://www.catholic.com/', '_blank')">Catholic Answers</button>
             <button class="button-theme" onclick="window.open('https://www.ibreviary.com/m2/breviario.php/', '_blank')">ibreviary</button>
             <button class="button-theme" onclick="window.open('https://media.ascensionpress.com/category/ascension-podcasts/catechisminayear/', '_blank')">The Catechism in a Year(with Fr. Mike Schmitz)</button>
-
+            <button class="button-theme" onclick="window.open('https://www.singthehours.org/', '_blank')">Sing the Hours</button>
         </section>
     </div>
 
@@ -1327,7 +1334,7 @@ footer button#quit-button:hover {
         let currentLesson = null;
         let currentQuiz = null;
 
-        // Sample Lessons Data (Dynamically generated categories)
+        //Lessons Data (Dynamically generated categories)
         const lessonsData = [
             {
                 category: "The Profession of Faith",
@@ -10521,21 +10528,21 @@ lessons: [
 
         // Populate Common Prayers
         function populateCommonPrayers() {
-            const container = document.getElementById('common-prayers-container');
-            container.innerHTML = ''; // Clear existing buttons
-            commonPrayers.forEach(prayer => {
-                const btn = document.createElement('button');
-                btn.classList.add('button-theme', 'lesson-button');
-                btn.textContent = prayer.name;
-                // Use an anonymous function to pass the prayer text correctly
-                btn.onclick = () => {
-                    // Replace newline characters with <br> for HTML display
-                    const formattedPrayer = prayer.text.replace(/\n/g, '<br>');
-                    showCustomAlert(formattedPrayer);
-                };
-                container.appendChild(btn);
-            });
-        }
+    const container = document.getElementById('common-prayers-container');
+    container.innerHTML = '';
+    commonPrayers.forEach(prayer => {
+        const btn = document.createElement('button');
+        btn.classList.add('button-theme', 'lesson-button');
+        btn.textContent = prayer.name;
+        btn.onclick = () => {
+            // Show the prayer in the new section
+            document.getElementById('prayer-display-title').textContent = prayer.name;
+            document.getElementById('prayer-display-text').innerHTML = prayer.text.replace(/\n/g, '<br>');
+            showSection('prayer-display-section');
+        };
+        container.appendChild(btn);
+    });
+}
 
 
         // Authentication
@@ -11149,6 +11156,10 @@ lessons: [
             initNavListeners(); // Initialize all event listeners
             showSection('main-menu-section'); // Show initial section immediately
         });
+        // Add event listener for the back button
+document.getElementById('back-to-common-prayers-button').addEventListener('click', () => {
+    showSection('common-prayers-section');
+});
     </script>
 </body>
 </html>
