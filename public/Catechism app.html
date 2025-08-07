@@ -108,7 +108,7 @@ nav button:focus-visible {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 20px 15px; /* Remove horizontal padding */
+    padding: 0; /* Remove horizontal padding */
     max-width: 800px;
     width: 100%;
     margin: 2rem auto 0 auto; /* ADD margin-top and set others */
@@ -278,7 +278,6 @@ nav button:focus-visible {
 /* Style for the container holding the lesson buttons */
 #lessons-container {
     display: flex;
-    
     flex-wrap: wrap; /* Allow buttons to wrap to the next line */
     justify-content: center; /* Center the buttons */
     gap: 0.75rem; /* Add space between buttons */
@@ -326,6 +325,66 @@ nav button:focus-visible {
     width: 100%;
     height: 100%;
     border: none;
+}
+// ...existing code...
+.quiz-completed {
+    background-color: #4CAF50; /* Green for completed */
+    border-color: #4CAF50;
+}
+
+/* Lesson Content Section */
+#lesson-content-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    text-align: left;
+    max-width: 800px;
+    margin: auto;
+}
+
+.lesson-text-container {
+    width: 100%;
+    line-height: 1.8;
+}
+
+.lesson-text-container h3 {
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.lesson-text-container p, .lesson-text-container li {
+    margin-bottom: 1rem;
+}
+
+.lesson-text-container blockquote {
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+    color: #555;
+}
+
+#lesson-video-container {
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 16 / 9;
+}
+
+#lesson-video {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.lesson-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
 /* Quiz Section */
@@ -1260,7 +1319,7 @@ lessons: [
         id: "foundations-1",
         title: "What is Faith?",
         content: `
-            <h3>Succinct Definition</h3>
+            <h3>Definition</h3>
             <p>Faith is the theological virtue by which we believe in God and all that He has revealed, and that Holy Church proposes for our belief, because He is truth itself (CCC 1814).</p>
 
             <h3>Scriptural References</h3>
@@ -1284,7 +1343,7 @@ lessons: [
                 "Without faith, it is impossible to please God" (Hebrews 11:6). Faith is the foundation of the Christian life, the key by which we open the door to grace. Through faith, we say 'yes' to God’s invitation and enter into a relationship of trust, obedience, and love.
             </blockquote>
 
-            <h3>Thorough Explanation</h3>
+            <h3>Explanation</h3>
             <p>Faith is both a gift from God and a human act. As a gift, faith is infused into the soul at Baptism by the Holy Spirit, enabling us to believe in divine truth beyond the capacity of reason alone. As a human act, faith is our free response to God’s self-revelation, expressed in trust, obedience, and worship.</p>
             <p>Faith is not a blind leap, but a reasoned trust in the One who is Truth itself. It engages both intellect and will: the intellect assents to God’s revealed truth, and the will commits to living according to that truth. Faith is strengthened by prayer, the sacraments, and living in communion with the Church. It must be lived out through works of love (cf. James 2:14–17), for faith without works is dead.</p>
             <p>The Church, guided by the Holy Spirit, safeguards and transmits the faith through Scripture and Tradition. In professing the Creed, we publicly affirm our faith, uniting ourselves to the Body of Christ throughout the world and across history.</p>
@@ -1417,7 +1476,7 @@ lessons: [
     id: "foundations-2",
     title: "Divine Revelation",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Divine Revelation is God’s free and loving act of making Himself and His plan of salvation known to humanity, culminating in the person and mission of Jesus Christ (CCC 50).</p>
 
         <h3>Scriptural References</h3>
@@ -1441,7 +1500,7 @@ lessons: [
             "In Jesus Christ, the eternal Son of God made man, God has fully and definitively revealed Himself. There is no greater message, no deeper truth, and no more perfect love than the Word made flesh dwelling among us."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Divine Revelation is God’s initiative to make Himself known to us, not because He needed to, but because He desired to share His divine life and love. While human reason can discover certain truths about God through creation, only Revelation unveils the fullness of who God is and His plan for salvation.</p>
         <p>This Revelation took place gradually. In the Old Testament, God revealed Himself through creation, covenants, the Law, and the prophets. In the New Testament, He revealed Himself fully and perfectly in His Son, Jesus Christ, who is the visible image of the invisible God (Colossians 1:15). In Christ, God’s word is definitive and complete.</p>
         <p>The content of Divine Revelation is preserved and transmitted through Sacred Scripture and Sacred Tradition, interpreted authentically by the Magisterium of the Church. This ensures that the faith we profess today is the same faith handed down from the apostles. Revelation is not merely information about God—it is a personal invitation into communion with Him, calling for a response of faith and obedience.</p>
@@ -1580,7 +1639,7 @@ lessons: [
     id: "foundations-3",
     title: "Sacred Scripture",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Sacred Scripture, or the Holy Bible, is the inspired Word of God, written under the guidance of the Holy Spirit and faithfully preserved by the Church. It reveals God’s plan for salvation and teaches truth without error for the sake of our salvation (cf. CCC 107).</p>
 
         <h3>Scriptural References</h3>
@@ -1604,7 +1663,7 @@ lessons: [
             "The Bible is not merely a record of ancient events; it is the living Word of God, through which the Lord Himself speaks to His people today."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Sacred Scripture is one of the two modes through which Divine Revelation is transmitted, the other being Sacred Tradition. Composed of the Old and New Testaments, it records God’s progressive self-revelation, culminating in the life, death, and resurrection of Jesus Christ. Though written by human authors, every book of Scripture is inspired by the Holy Spirit, making God the true author.</p>
         <p>The Scriptures are “without error” (inerrant) in what they teach for the sake of salvation. This does not mean they are a scientific or historical textbook, but that they faithfully convey divine truth. The Old Testament prepares for the New, and the New fulfills the Old, together forming a unified whole (cf. CCC 128–130).</p>
         <p>The Church has the responsibility and authority to authentically interpret Scripture, ensuring the faithful understand it as intended by God. Catholics are encouraged to read and meditate on the Bible regularly, allowing it to guide their faith, morals, and daily living.</p>
@@ -1743,7 +1802,7 @@ lessons: [
     id: "foundations-4",
     title: "Sacred Tradition",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Sacred Tradition is the living transmission of the message of the Gospel in the Church. It was handed on from Christ to the Apostles and their successors, guided by the Holy Spirit, and preserved through the teaching, life, and worship of the Church (CCC 78).</p>
 
         <h3>Scriptural References</h3>
@@ -1768,7 +1827,7 @@ lessons: [
             "The same Holy Spirit who inspired the Scriptures guides the living Tradition of the Church, ensuring that the Gospel is faithfully handed on until the end of time."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Sacred Tradition is not merely human customs or church practices; it is the divinely guided transmission of God’s Revelation, entrusted by Christ to His Apostles. Along with Sacred Scripture, it forms a single sacred deposit of the Word of God, which the Church guards and interprets.</p>
         <p>This Tradition includes teachings and practices that may not be explicitly found in Scripture but are rooted in the life and mission of Christ and the Apostles. It is passed on through liturgy, preaching, writings of the Fathers, ecumenical councils, and the lived faith of the Church.</p>
         <p>The Magisterium — the Pope and bishops in communion with him — has the responsibility of authentically interpreting both Scripture and Tradition. This ensures the faithful receive the same Gospel truth handed down from the beginning, safeguarded from error by the Holy Spirit.</p>
@@ -1912,7 +1971,7 @@ lessons: [
     id: "foundations-5",
     title: "Creeds and Councils",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Creeds are concise, authoritative summaries of the Christian faith, professed by the Church and rooted in Sacred Scripture and Tradition. Ecumenical Councils are official gatherings of the bishops of the world, in communion with the Pope, that clarify and define matters of faith and morals under the guidance of the Holy Spirit.</p>
 
         <h3>Scriptural References</h3>
@@ -1936,7 +1995,7 @@ lessons: [
             "The Creeds unite us in the one faith of the Church, while the Councils safeguard that faith against error and proclaim it with clarity for every generation."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Creeds, such as the Apostles’ Creed and the Nicene Creed, are concise statements of the essential truths of Christianity. They developed in the Church’s early centuries as a way to instruct believers, guard against false teachings, and provide a common profession of faith during liturgy. The Creeds are not human inventions but authoritative formulations of the faith handed down from the Apostles and rooted in Scripture.</p>
         <p>Ecumenical Councils are solemn assemblies of bishops, in communion with the Pope, convened to address doctrinal, moral, or disciplinary issues affecting the universal Church. Guided by the Holy Spirit, they clarify teachings, condemn heresies, and promote unity. Historic examples include the Council of Nicaea (A.D. 325), which affirmed Christ’s divinity and produced the original Nicene Creed, and the Council of Trent (1545–1563), which addressed the challenges of the Protestant Reformation.</p>
         <p>Creeds and Councils together serve as instruments through which the Church preserves, explains, and hands on the one faith, ensuring that all believers share in the same truth proclaimed by Christ and His Apostles.</p>
@@ -2070,7 +2129,7 @@ lessons: [
     id: "foundations-6",
     title: "God the Father, Creator",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>God the Father is the first Person of the Holy Trinity, the Almighty Creator of heaven and earth, of all things visible and invisible. He is the source of all life, the origin of creation, and the loving Father who sustains and governs all that exists (CCC 198–199).</p>
 
         <h3>Scriptural References</h3>
@@ -2095,7 +2154,7 @@ lessons: [
             "God the Father is not a distant architect of the universe, but the loving Creator and sustainer of all that exists, who calls each of us into a relationship of trust, obedience, and love."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Creed begins with the confession of faith in God the Father Almighty, Creator of heaven and earth. This affirms that all things—both visible (material creation) and invisible (spiritual realities like angels)—come from Him. As the first Person of the Trinity, the Father is the eternal source, from whom the Son is begotten and the Holy Spirit proceeds.</p>
         <p>God creates freely and out of love, not from necessity or pre-existing matter. His creation is ordered, good, and purposeful, revealing His wisdom and glory. Far from abandoning His creation, the Father continues to sustain and guide it toward its ultimate fulfillment in Christ.</p>
         <p>To call God "Father" is to acknowledge Him as both the Creator of all and the One who adopts us as His children in Christ. Through Baptism, we become sons and daughters of the Father, destined to share eternal life with Him.</p>
@@ -2208,7 +2267,7 @@ lessons: [
     id: "foundations-7",
     title: "The Blessed Trinity",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Blessed Trinity is the central mystery of the Christian faith and life: one God in three divine Persons — Father, Son, and Holy Spirit — who are distinct from one another yet equal in divinity, sharing the same nature, essence, and will (CCC 253–255).</p>
 
         <h3>Scriptural References</h3>
@@ -2233,7 +2292,7 @@ lessons: [
             "The mystery of the Most Holy Trinity is the source of all the other mysteries of faith, the light that illuminates them all."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The doctrine of the Blessed Trinity teaches that there is one God in three divine Persons: the Father, the Son, and the Holy Spirit. They are distinct in relation to one another — the Father is not the Son, the Son is not the Spirit, and the Spirit is not the Father — yet each is fully God, co-eternal and co-equal, possessing the fullness of the divine essence.</p>
         <p>The Father eternally begets the Son; the Son is eternally begotten of the Father; and the Holy Spirit proceeds eternally from the Father and the Son. This mystery, revealed by Jesus Christ and understood in faith, is beyond human reason but not contrary to it.</p>
         <p>The Trinity is reflected in the Church’s prayer and life: in baptism, in the Eucharistic liturgy, and in every blessing. To live the Christian life is to enter into the communion of love that exists eternally between the Father, Son, and Holy Spirit, a communion we are invited to share through grace.</p>
@@ -2357,7 +2416,7 @@ lessons: [
     id: "foundations-8",
     title: "God the Son, Jesus Christ",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Jesus Christ is the eternal Son of God, the second Person of the Holy Trinity, who became man for our salvation. True God and true man, He is the one Mediator between God and humanity, fully revealing the Father and accomplishing our redemption through His life, death, and resurrection (CCC 430–432, 464–469).</p>
 
         <h3>Scriptural References</h3>
@@ -2382,7 +2441,7 @@ lessons: [
             "In Jesus Christ, the eternal Son of God made flesh, we see the face of the Father and receive the fullness of God’s love and mercy."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Jesus Christ is the eternal Son of God who became man for our salvation. Conceived by the Holy Spirit and born of the Virgin Mary, He entered into human history to reveal the fullness of God’s truth and to reconcile humanity with the Father. His incarnation unites the divine and human natures in one Person, without confusion or separation.</p>
         <p>Through His preaching, miracles, and example, Jesus revealed the Kingdom of God and invited all people to repentance and faith. His passion and death on the cross were the ultimate act of love, offered for the forgiveness of sins. By rising from the dead, He conquered sin and death, opening the way to eternal life for all who believe.</p>
         <p>Jesus Christ is not merely a great teacher or prophet; He is God in the flesh, the Lord and Savior of the world. To confess Jesus as Lord is to commit one’s life to Him in faith, obedience, and love, and to proclaim Him to the world.</p>
@@ -2526,7 +2585,7 @@ lessons: [
     id: "foundations-9",
     title: "The Incarnation",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Incarnation is the mystery by which the eternal Son of God, without ceasing to be God, took on a human nature and became man in the person of Jesus Christ. He is true God and true man, fully united in one divine Person (CCC 461–463, 464).</p>
 
         <h3>Scriptural References</h3>
@@ -2551,7 +2610,7 @@ lessons: [
             "In the Incarnation, the eternal God entered human history, so that by becoming what we are, He might make us share in what He is."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Incarnation is the central event of salvation history: God became man in Jesus Christ. Without ceasing to be fully divine, the Son of God assumed a complete human nature — body and soul — in order to redeem us from sin and bring us into union with God.</p>
         <p>Jesus was conceived by the Holy Spirit in the womb of the Virgin Mary and was born into the human family, experiencing hunger, fatigue, joy, sorrow, and even death. His divinity and humanity are perfectly united in the hypostatic union, meaning that in the one Person of Christ, the divine and human natures exist without confusion, change, division, or separation.</p>
         <p>The Incarnation reveals God’s profound love: He comes to us not as a distant ruler, but as Emmanuel — "God with us." Through His humanity, Jesus becomes the perfect mediator, bridging the gap between God and man, and showing us the fullness of truth and love.</p>
@@ -2690,7 +2749,7 @@ lessons: [
     id: "foundations-10",
     title: "Life, Death, & Resurrection of Jesus Christ",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The life, death, and resurrection of Jesus Christ — known as the Paschal Mystery — is the central event of salvation history. Through His earthly life and ministry, His sacrificial death on the cross, and His glorious resurrection, Jesus accomplished our redemption and opened the way to eternal life (CCC 571–655).</p>
 
         <h3>Scriptural References</h3>
@@ -2715,7 +2774,7 @@ lessons: [
             "By His life, Christ reveals the Father; by His death, He redeems us; and by His resurrection, He opens the way to eternal life."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Jesus’ earthly life reveals the Father’s love and truth. Through His teachings, miracles, and compassion for the poor and sinners, He proclaimed the Kingdom of God and invited all to repentance and faith.</p>
         <p>His death on the cross was the supreme act of love, offered for the forgiveness of our sins. Far from being a tragic accident, it was the fulfillment of God’s plan for salvation, foretold in Scripture and freely embraced by Jesus in obedience to the Father’s will.</p>
         <p>The resurrection of Jesus on the third day is the definitive proof of His divinity and the victory over sin and death. It confirms all that He taught and accomplished, and it guarantees our own future resurrection if we remain united to Him.</p>
@@ -2845,7 +2904,7 @@ lessons: [
     id: "foundations-11",
     title: "Ascension of Jesus Christ",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Ascension of Jesus Christ is the event, forty days after His resurrection, when He was taken up body and soul into heaven and seated at the right hand of the Father. It marks the completion of His earthly mission and the beginning of His reign as Lord of heaven and earth (CCC 659–667).</p>
 
         <h3>Scriptural References</h3>
@@ -2870,7 +2929,7 @@ lessons: [
             "The Ascension is not Christ’s departure from us, but His exaltation to the Father’s glory, where He reigns as Lord and intercedes for His Church."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Ascension took place forty days after the resurrection, witnessed by the apostles. Jesus, in His glorified body, was taken into heaven and seated at the right hand of the Father. This is not merely a change of location but the completion of His mission on earth and the beginning of His reign in glory.</p>
         <p>Seated at the Father’s right hand, Jesus exercises His kingship over heaven and earth, and serves as our eternal High Priest, interceding for us before the Father. The Ascension also prepared the way for the coming of the Holy Spirit at Pentecost, empowering the Church for its mission.</p>
         <p>The Ascension assures believers that Christ has gone ahead to prepare a place for us and that we too are called to share in His glory. It also reminds us of His promise to return at the end of time to judge the living and the dead.</p>
@@ -2989,7 +3048,7 @@ lessons: [
     id: "foundations-12",
     title: "God the Holy Spirit",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Holy Spirit is the third Person of the Blessed Trinity, the eternal Love between the Father and the Son. He is consubstantial with them, fully God, and is the Lord and Giver of life, who spoke through the prophets and continues to sanctify, guide, and empower the Church (CCC 243–248, 687–747).</p>
 
         <h3>Scriptural References</h3>
@@ -3015,7 +3074,7 @@ lessons: [
             "The Holy Spirit is the soul of the Church, guiding her into all truth, empowering her mission, and making us sharers in the divine life."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Holy Spirit is the third Person of the Blessed Trinity, eternally proceeding from the Father and the Son. He is equal in divinity and glory with the Father and the Son. In creation, He brought order and life; in the Old Testament, He spoke through the prophets; and in the fullness of time, He was sent by the Father and the Son to dwell in the hearts of believers.</p>
         <p>At Pentecost, the Holy Spirit descended upon the apostles, filling them with power and courage to proclaim the Gospel. Since then, He continues to be present in the Church — in her sacraments, her teaching, her prayer, and the spiritual gifts given to believers for the building up of the Body of Christ.</p>
         <p>The Holy Spirit sanctifies the faithful, convicts the world of sin, and leads the Church into all truth. By His indwelling, Christians become temples of the Holy Spirit and are empowered to live holy lives and carry out the mission of Christ.</p>
@@ -3149,7 +3208,7 @@ lessons: [
     id: "foundations-13",
     title: "Creation",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Creation is the free act by which God brought everything that exists—both visible and invisible—into being from nothing, out of His wisdom and love, for His glory and our good (CCC 279–324).</p>
 
         <h3>Scriptural References</h3>
@@ -3174,7 +3233,7 @@ lessons: [
             "Creation is the first sign of God’s love, the stage upon which the drama of salvation unfolds, and the gift in which we discover our Creator."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The doctrine of creation teaches that God alone is the source of all that exists. He brought the universe into being freely, out of nothing (ex nihilo), motivated by His wisdom and love, not by necessity. Creation includes both the material world and the spiritual realm of angels and souls.</p>
         <p>Everything God created is good and ordered toward its proper purpose. Humanity, made in God’s image and likeness, holds a unique place in creation as stewards of the earth and as beings capable of knowing and loving the Creator.</p>
         <p>God’s creative work did not end in the beginning; He continually sustains and governs all things. Creation is the foundation for our relationship with God, as it reveals His majesty, power, and love, calling forth our worship and gratitude.</p>
@@ -3299,7 +3358,7 @@ lessons: [
     id: "foundations-14",
     title: "Mankind and the Human Person",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Mankind is the summit of God’s visible creation, made in His image and likeness. The human person is a unity of body and soul, endowed with reason, free will, and an immortal destiny, called to share in God’s life and love (CCC 355–373).</p>
 
         <h3>Scriptural References</h3>
@@ -3324,7 +3383,7 @@ lessons: [
             "Created in the image of God, every human person has inherent dignity, a rational soul, and an eternal destiny in communion with the Creator."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The human person is the only creature on earth that God willed for its own sake. Made in His image and likeness, man reflects God’s own nature through intellect, will, and the capacity for love. This likeness is not merely physical but spiritual, rooted in our rational soul and our call to live in communion with God.</p>
         <p>Man is a unity of body and soul. The body shares in the dignity of the image of God, and the soul, created directly by God, is spiritual and immortal. At death, the soul is separated from the body, but will be reunited with it in the resurrection at the end of time.</p>
         <p>Human dignity comes from our origin (created by God), our nature (rational and free), and our destiny (eternal life with God). This dignity demands that every person be treated with respect and love, regardless of age, ability, or condition.</p>
@@ -3458,7 +3517,7 @@ lessons: [
     id: "foundations-15",
     title: "Fall & Sin",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Fall refers to the first sin of Adam and Eve, by which they disobeyed God’s command and lost the original holiness and justice in which they were created. Sin is an offense against God, a rupture of communion with Him, and a wound to human nature (CCC 396–412, 1849–1851).</p>
 
         <h3>Scriptural References</h3>
@@ -3483,7 +3542,7 @@ lessons: [
             "Through the disobedience of one man, sin entered the world, but through the obedience of Jesus Christ, grace and life abound for all."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Fall occurred when Adam and Eve, tempted by Satan in the form of a serpent, chose to disobey God’s direct command not to eat from the tree of the knowledge of good and evil. This act was rooted in pride, distrust of God, and a desire to be “like God” apart from Him.</p>
         <p>As a result, they lost the original holiness and justice in which they were created, bringing suffering, death, and a wounded human nature into the world. This first sin, known as Original Sin, is transmitted to all human beings, except the Blessed Virgin Mary, who was preserved from it by a singular grace.</p>
         <p>Sin is more than breaking a rule; it is a rupture of relationship with God, others, and oneself. All personal sins weaken our communion with God, but mortal sin destroys it entirely, requiring repentance and reconciliation.</p>
@@ -3608,7 +3667,7 @@ lessons: [
     id: "foundations-16",
     title: "Salvation History",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Salvation History is the unfolding of God’s plan to save humanity from sin and bring us into eternal communion with Him. It is the story of God’s saving deeds throughout human history, revealed in Sacred Scripture and fulfilled in Jesus Christ (CCC 50–73, 2809–2821).</p>
 
         <h3>Scriptural References</h3>
@@ -3633,7 +3692,7 @@ lessons: [
             "The history of the world is the history of God’s love at work, drawing His people from sin into the fullness of life in Christ."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Salvation History begins with creation, where God made humanity to live in communion with Him. After the Fall, God promised redemption and began unfolding His plan through covenants, prophets, and saving acts in history.</p>
         <p>This plan includes key moments: the covenant with Noah, the calling of Abraham, the liberation of Israel from Egypt under Moses, the giving of the Law, the kingdom established under David, and the messages of the prophets who called Israel back to faithfulness.</p>
         <p>All these events point toward and are fulfilled in Jesus Christ, the eternal Son of God. In His life, death, and resurrection, the fullness of God’s saving plan is revealed and accomplished. The Church, empowered by the Holy Spirit, now carries this message to the world until Christ returns in glory.</p>
@@ -3753,7 +3812,7 @@ lessons: [
     id: "foundations-17",
     title: "Paschal Mystery",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Paschal Mystery is Christ’s work of redemption accomplished through His passion, death, resurrection, and ascension. It is the central mystery of the Christian faith, making present the saving grace of Jesus in the liturgy, especially the Eucharist (CCC 571–573, 1067–1068).</p>
 
         <h3>Scriptural References</h3>
@@ -3778,7 +3837,7 @@ lessons: [
             "By His cross and resurrection, Jesus Christ has destroyed death and restored life — the Paschal Mystery is the heart of our salvation."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The term “Paschal” comes from the Hebrew word “Pesach” (Passover). Just as the blood of the lamb saved the Israelites in Egypt, so the blood of Christ, the true Lamb of God, saves us from sin and eternal death.</p>
         <p>The Paschal Mystery includes four inseparable events: Christ’s passion (His suffering for our sins), His death on the cross (the perfect sacrifice for redemption), His resurrection (the victory over sin and death), and His ascension (His glorification at the right hand of the Father).</p>
         <p>This mystery is not only a past event — it is made present in the liturgy, especially the Eucharist, where we participate in the one sacrifice of Christ. Through baptism, we are united to Christ’s death and resurrection, called to die to sin and live for God.</p>
@@ -3913,7 +3972,7 @@ lessons: [
     id: "foundations-18",
     title: "The Church: The Body of Christ",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Church is the People of God, the Body of Christ, and the Temple of the Holy Spirit. As the Body of Christ, the Church is united to Him as its Head, and her members are joined together in one faith, one baptism, and one mission (CCC 787–796).</p>
 
         <h3>Scriptural References</h3>
@@ -3938,7 +3997,7 @@ lessons: [
             "The Church is not merely an institution but the living Body of Christ, in which every member is joined to Him and to one another in love."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The image of the Church as the Body of Christ emphasizes the deep unity between Christ and the faithful. Jesus is the Head, guiding, nourishing, and giving life to His members through the Holy Spirit. Through baptism, we are incorporated into this Body and made part of God’s family.</p>
         <p>Each member of the Body has unique gifts and roles, yet all work together for the building up of the Church and the mission of evangelization. When one member suffers, all suffer; when one rejoices, all share in the joy.</p>
         <p>The unity of the Body transcends all divisions of race, culture, and social status. In the Eucharist, the members are most fully united to Christ and to each other, forming one spiritual body.</p>
@@ -4058,7 +4117,7 @@ lessons: [
     id: "foundations-19",
     title: "The Four Marks",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Four Marks of the Church — One, Holy, Catholic, and Apostolic — are the essential and visible characteristics of Christ’s Church, professed in the Nicene Creed. They identify the true Church founded by Jesus and continue to distinguish her throughout history (CCC 811–870).</p>
 
         <h3>Scriptural References</h3>
@@ -4083,7 +4142,7 @@ lessons: [
             "The Church Christ founded is one, holy, catholic, and apostolic — marks that reveal her true identity and mission in the world."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Church is <strong>One</strong> because she has one Lord, one faith, one baptism, and is united in charity under the authority of the successors of the Apostles, especially the Pope as the successor of Peter.</p>
         <p>The Church is <strong>Holy</strong> because her founder, Jesus Christ, is holy; her purpose is to make people holy; and the Holy Spirit dwells within her, guiding and sanctifying her members, even though they are sinners.</p>
         <p>The Church is <strong>Catholic</strong> ("universal") because she possesses the fullness of Christ’s truth and means of salvation, and she is sent to all peoples, places, and cultures.</p>
@@ -4219,7 +4278,7 @@ lessons: [
     id: "foundations-20",
     title: "The Communion of the Saints",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Communion of Saints is the spiritual union of all members of the Church — those on earth, the souls in purgatory, and the saints in heaven — united in Christ and sharing in the spiritual goods of the Church (CCC 946–962).</p>
 
         <h3>Scriptural References</h3>
@@ -4244,7 +4303,7 @@ lessons: [
             "In Christ, the faithful on earth, the souls in purgatory, and the saints in heaven are united in one family of God, interceding for one another and sharing in God’s grace."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Communion of Saints refers to the deep spiritual bond that unites all members of the Church across time and space. It includes the Church militant (those living on earth), the Church suffering (souls in purgatory being purified), and the Church triumphant (the saints in heaven).</p>
         <p>This communion means we share in the spiritual goods of the Church: the sacraments, faith, the gifts of the Spirit, and the benefits of prayer. The saints in heaven intercede for us, the faithful on earth pray for one another and for the souls in purgatory, and those in purgatory can be helped by our prayers and sacrifices.</p>
         <p>Because we are all members of the one Body of Christ, the holiness of one benefits all, and the prayers of one strengthen the whole Church. This unity reflects the eternal communion we are called to share fully in heaven.</p>
@@ -4358,7 +4417,7 @@ lessons: [
     id: "foundations-21",
     title: "The Blessed Virgin Mary",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Blessed Virgin Mary is the Mother of God (Theotokos), conceived without Original Sin, ever-virgin, and assumed body and soul into heavenly glory. She is the first disciple of Christ, the model of faith and obedience, and the spiritual mother of all Christians (CCC 487–507, 963–975).</p>
 
         <h3>Scriptural References</h3>
@@ -4383,7 +4442,7 @@ lessons: [
             "Mary is the first and perfect disciple of Christ, whose 'yes' brought the Savior into the world, and who now intercedes for us as our spiritual mother."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Mary’s role in salvation history is unique. Chosen from all eternity to be the Mother of the Redeemer, she freely consented to God’s plan at the Annunciation, making her the model of faith and obedience for all believers.</p>
         <p>By a singular grace (the Immaculate Conception), Mary was preserved from Original Sin from the first moment of her existence, preparing her to bear the Son of God. She is truly the Mother of God because the child she bore is the eternal Son made man.</p>
         <p>Mary remained ever-virgin — before, during, and after the birth of Jesus — a sign of her total dedication to God. At the end of her life, she was assumed body and soul into heaven, where she now shares fully in her Son’s glory and intercedes for us as our advocate.</p>
@@ -4498,7 +4557,7 @@ lessons: [
     id: "foundations-22",
     title: "Angels",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Angels are spiritual, non-corporeal beings created by God to glorify Him and serve as His messengers. They possess intelligence and will, are personal and immortal, and act as protectors and guides for humanity (CCC 328–336).</p>
 
         <h3>Scriptural References</h3>
@@ -4523,7 +4582,7 @@ lessons: [
             "The angels, servants and messengers of God, protect us, guide us, and lead us toward eternal life."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Angels are purely spiritual beings created by God before the visible world. They are immortal and possess superior intelligence and will compared to humans. Their primary role is to worship and glorify God, serve as His messengers, and assist in carrying out His divine will.</p>
         <p>Some angels, led by Lucifer, freely chose to reject God, becoming demons. The good angels remained faithful and now assist in God’s plan of salvation. They guard individuals, guide nations, protect the Church, and act as instruments of God’s justice and mercy.</p>
         <p>Each person is assigned a guardian angel to protect and intercede for them. Angels are present in Scripture from Genesis to Revelation, appearing at key moments in salvation history, from the announcement of Christ’s birth to the final judgment.</p>
@@ -4633,7 +4692,7 @@ lessons: [
     id: "foundations-23",
     title: "The Last Four Things",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Last Four Things are the final realities each person will face: Death, Judgment, Heaven, and Hell. They remind us of the ultimate purpose of life — to live in union with God forever — and call us to conversion, holiness, and perseverance in faith (CCC 1020–1060).</p>
 
         <h3>Scriptural References</h3>
@@ -4658,7 +4717,7 @@ lessons: [
             "Remember your last end, and you will never sin. The Last Four Things remind us to live each day in light of eternity."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p><strong>Death:</strong> The separation of the soul from the body, marking the end of our earthly journey. Death entered the world through sin, but in Christ it becomes a passage to eternal life for those who believe.</p>
         <p><strong>Judgment:</strong> At death, each person undergoes the Particular Judgment, receiving their eternal destiny based on their faith and deeds. At the end of time, the General (Last) Judgment will reveal all deeds publicly and unite soul and body for eternity.</p>
         <p><strong>Heaven:</strong> Eternal communion with God, the angels, and saints, where we see God "face to face" and share in His life, joy, and love forever.</p>
@@ -4774,7 +4833,7 @@ lessons: [
     id: "foundations-24",
     title: "The Church Militant, Suffering, & Triumphant",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Church exists in three states: the Church Militant (faithful on earth), the Church Suffering (souls in purgatory being purified), and the Church Triumphant (saints in heaven). Together, they form one communion in Christ, united in prayer and love (CCC 954–959).</p>
 
         <h3>Scriptural References</h3>
@@ -4798,7 +4857,7 @@ lessons: [
             "Whether in battle on earth, in purification after death, or in glory before God, all members of the Church remain united in Christ and in love."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Church Militant refers to the faithful on earth who are still on their pilgrimage toward heaven, engaged in the spiritual battle against sin, the world, and the devil. They grow in holiness through prayer, the sacraments, and works of charity.</p>
         <p>The Church Suffering refers to the souls in purgatory, undergoing purification to achieve the holiness necessary to enter heaven. They cannot help themselves but rely on the prayers, sacrifices, and Masses offered by the faithful on earth.</p>
         <p>The Church Triumphant consists of the saints in heaven, who enjoy eternal union with God and intercede for the faithful on earth and in purgatory.</p>
@@ -4913,7 +4972,7 @@ lessons: [
     id: "foundations-25",
     title: "The Second Coming",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Second Coming, also called the Parousia, is the future return of Jesus Christ in glory to judge the living and the dead and to establish the fullness of His Kingdom. It will bring the history of the world to its completion and usher in the new heavens and the new earth (CCC 668–682).</p>
 
         <h3>Scriptural References</h3>
@@ -4938,7 +4997,7 @@ lessons: [
             "Christ will come again in glory to judge the living and the dead, and His Kingdom will have no end."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Second Coming of Christ will be the glorious and definitive fulfillment of God’s plan for the world. Unlike His first coming in humility at Bethlehem, the Second Coming will be marked by majesty and power, visible to all people.</p>
         <p>When Christ returns, He will raise the dead, judge all humanity, and bring about the renewal of the heavens and the earth. The righteous will enter eternal life in the fullness of God’s Kingdom, while those who have rejected God will face eternal separation from Him.</p>
         <p>The time of the Second Coming is unknown, and Jesus warns us to "stay awake" and live in readiness, for it will come suddenly, like a thief in the night. In the meantime, the Church continues Christ’s mission, proclaiming the Gospel so that all may be prepared for His return.</p>
@@ -5053,7 +5112,7 @@ lessons: [
     id: "foundation-26",
     title: "Eternal Life",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Eternal life is the blessed communion with the Holy Trinity, the angels, and all the saints, in which we share God's own divine life forever. It begins at baptism, grows through grace in this life, and is perfected in heaven (CCC 1023–1029, 260).</p>
 
         <h3>Scriptural References</h3>
@@ -5078,7 +5137,7 @@ lessons: [
             "Eternal life is to know and love God forever, sharing in His divine life and joy without end."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Eternal life is not merely endless existence but a life of perfect love, joy, and communion with God. It is the fulfillment of the promise of salvation, where we see God "face to face" and participate in His divine nature.</p>
         <p>This life begins here on earth when we are united to Christ through baptism and grows as we live in His grace. Sin separates us from eternal life, but repentance and God’s mercy restore us to the path of salvation.</p>
         <p>In heaven, there will be no more suffering, death, or separation from God. The blessed will rejoice forever in the beatific vision — the direct contemplation of God in His glory — and will share in the eternal praise of the Trinity.</p>
@@ -5200,7 +5259,7 @@ lessons: [
     id: "sacraments-1",
     title: "Baptism",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Baptism is the first of the seven sacraments and the gateway to the Christian life. It cleanses us from Original Sin, makes us children of God, incorporates us into the Body of Christ, and gives us a share in the divine life (CCC 1213–1284).</p>
 
         <h3>Scriptural References</h3>
@@ -5225,7 +5284,7 @@ lessons: [
             "Through Baptism we die to sin, are reborn as children of God, and begin our journey of faith in the Body of Christ."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Baptism is the foundational sacrament of Christian initiation. Through it, a person is freed from sin, reborn as a child of God, and incorporated into the Church. This sacrament leaves a permanent spiritual mark, or character, on the soul and cannot be repeated.</p>
         <p>Baptism is ordinarily conferred by pouring water over the head or by immersion, accompanied by the Trinitarian formula: "I baptize you in the name of the Father, and of the Son, and of the Holy Spirit."</p>
         <p>In Baptism, we are united to Christ’s death and resurrection, becoming members of His Body. It is the beginning of a life of grace that is nourished through the other sacraments, especially the Eucharist.</p>
@@ -5340,7 +5399,7 @@ lessons: [
     id: "sacraments-2",
     title: "Confirmation",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Confirmation is the sacrament of Christian initiation that perfects the grace of Baptism, strengthens the gifts of the Holy Spirit, and binds the faithful more perfectly to the Church, empowering them to witness to Christ in word and deed (CCC 1285–1321).</p>
 
         <h3>Scriptural References</h3>
@@ -5365,7 +5424,7 @@ lessons: [
             "In Confirmation, the Holy Spirit strengthens us to live our faith boldly and to be witnesses of Christ to the world."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Confirmation deepens the grace first received at Baptism. Through the anointing with sacred chrism and the laying on of hands by a bishop (or delegated priest), the Holy Spirit strengthens the faithful with His gifts, enabling them to live as mature disciples of Christ.</p>
         <p>The sacrament confers the seven gifts of the Holy Spirit — wisdom, understanding, counsel, fortitude, knowledge, piety, and fear of the Lord — equipping the Christian for a life of holiness and mission. It also increases the fruits of the Holy Spirit in one’s life.</p>
         <p>Confirmation unites the recipient more closely to Christ and to the Church, strengthens them in the battle against sin, and empowers them to proclaim the Gospel without fear.</p>
@@ -5475,7 +5534,7 @@ lessons: [
     id: "sacraments-3",
     title: "The Holy Eucharist",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Holy Eucharist is the sacrament in which Jesus Christ gives us His Body and Blood under the appearances of bread and wine. It is the source and summit of the Christian life, making present the sacrifice of the Cross and uniting us to Christ (CCC 1322–1419).</p>
 
         <h3>Scriptural References</h3>
@@ -5500,7 +5559,7 @@ lessons: [
             "In the Eucharist, we receive Jesus Himself — the Bread of Life — who nourishes our souls and unites us in His Body."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Eucharist is both a sacrament and a sacrifice. Instituted by Christ at the Last Supper, it is the memorial of His passion, death, and resurrection. Through the consecration at Mass, the bread and wine truly become the Body and Blood of Christ — a change called transubstantiation.</p>
         <p>Receiving the Eucharist strengthens our union with Christ, forgives venial sins, and helps us grow in love for God and neighbor. It deepens our incorporation into the Church and commits us to the poor.</p>
         <p>Because the Eucharist is the source and summit of Christian life, the Church obliges the faithful to participate in Mass every Sunday and holy day of obligation, and to receive Holy Communion at least once a year, during the Easter season.</p>
@@ -5615,7 +5674,7 @@ lessons: [
     id: "sacraments-4",
     title: "Holy Orders",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Holy Orders is the sacrament through which the mission entrusted by Christ to His Apostles continues in the Church until the end of time. It confers a special outpouring of the Holy Spirit to enable the ordained to serve the People of God as bishops, priests, or deacons (CCC 1536–1600).</p>
 
         <h3>Scriptural References</h3>
@@ -5640,7 +5699,7 @@ lessons: [
             "Through Holy Orders, Christ continues to shepherd His people through the ministry of bishops, priests, and deacons."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Holy Orders was instituted by Christ to ensure that His saving mission would continue throughout history. This sacrament has three degrees: episcopate (bishop), presbyterate (priest), and diaconate (deacon).</p>
         <p>Bishops are successors to the Apostles, entrusted with teaching, sanctifying, and governing the Church. Priests share in the bishop’s ministry, primarily through celebrating the sacraments, preaching, and pastoral care. Deacons assist in service, proclaim the Gospel, and perform works of charity.</p>
         <p>Holy Orders is conferred by the laying on of hands by a validly ordained bishop, along with a consecratory prayer. This confers an indelible spiritual character, meaning the sacrament cannot be repeated.</p>
@@ -5755,7 +5814,7 @@ lessons: [
     id: "sacraments-5",
     title: "Holy Matrimony",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Holy Matrimony is the sacrament in which a baptized man and a baptized woman freely enter into a lifelong covenant of love and fidelity, ordered toward the good of the spouses and the procreation and education of children. Christ raised marriage to the dignity of a sacrament (CCC 1601–1666).</p>
 
         <h3>Scriptural References</h3>
@@ -5780,7 +5839,7 @@ lessons: [
             "In Holy Matrimony, the love of husband and wife becomes a living sign of Christ’s love for His Church."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Marriage was part of God’s plan from the beginning, established as a permanent and faithful union between man and woman. In the New Covenant, Christ elevated marriage to a sacrament, giving spouses the grace to love each other with the love with which He loves His Church.</p>
         <p>The essential elements of Christian marriage are unity, indissolubility, and openness to life. The mutual consent of the spouses, expressed freely, is what makes a marriage valid. The sacrament strengthens couples to live out their vows through good times and trials, and to raise their children in the faith.</p>
         <p>Married love mirrors Christ’s love — faithful, fruitful, and self-giving. It is a vocation, a calling to holiness, in which spouses help each other grow in virtue and lead one another toward eternal life.</p>
@@ -5894,7 +5953,7 @@ lessons: [
     id: "sacraments-6",
     title: "Reconciliation",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Sacrament of Reconciliation, also called Confession or Penance, is the sacrament in which Christ, through the ministry of the priest, forgives sins committed after Baptism and reconciles the sinner with God and the Church (CCC 1422–1498).</p>
 
         <h3>Scriptural References</h3>
@@ -5919,7 +5978,7 @@ lessons: [
             "In the Sacrament of Reconciliation, the mercy of Christ meets our repentance, and we are restored to grace and peace."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Reconciliation is the ordinary means by which serious sins committed after Baptism are forgiven. It requires contrition (sorrow for sin), confession (telling sins to a priest), absolution (the priest’s prayer of forgiveness), and satisfaction (penance to repair the harm caused by sin).</p>
         <p>This sacrament reconciles us not only with God but also with the Church, because sin damages the Body of Christ. It strengthens us to resist future temptations and heals spiritual wounds.</p>
         <p>The Church encourages frequent confession, even of venial sins, as a way to grow in holiness. Mortal sin must be confessed before receiving Holy Communion.</p>
@@ -6034,7 +6093,7 @@ lessons: [
     id: "sacraments-7",
     title: "Anointing of the Sick",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Anointing of the Sick is the sacrament in which the Church, through the ministry of the priest, confers special grace on those who are seriously ill, elderly, or near death. It unites the sick person more closely to Christ’s Passion, offers forgiveness of sins, and can restore health if it is God’s will (CCC 1499–1532).</p>
 
         <h3>Scriptural References</h3>
@@ -6059,7 +6118,7 @@ lessons: [
             "In the Anointing of the Sick, Christ the Divine Physician brings healing, peace, and strength to those who suffer."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>This sacrament is for those in serious illness, the elderly whose frailty is increasing, or anyone preparing for major surgery. It can be received more than once if the person’s condition changes or worsens.</p>
         <p>The priest anoints the sick person with oil blessed by the bishop, usually on the forehead and hands, while praying for healing and strength. The sacrament forgives sins if the person is unable to go to confession, strengthens them to face suffering with faith, and unites their trials to Christ’s saving Passion.</p>
         <p>While it may bring physical healing, its primary purpose is spiritual — to prepare the soul for eternal life, restore peace, and deepen trust in God’s will.</p>
@@ -6174,7 +6233,7 @@ lessons: [
     id: "sacraments-8",
     title: "Liturgy",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The liturgy is the public worship of the Church, in which the faithful participate in the work of God. It is the exercise of the priestly office of Jesus Christ, especially in the celebration of the sacraments, with the Eucharist at its center (CCC 1066–1209).</p>
 
         <h3>Scriptural References</h3>
@@ -6199,7 +6258,7 @@ lessons: [
             "In the liturgy, heaven and earth meet, and the faithful are drawn into the saving work of Christ."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The liturgy is the heart of the Church’s life. It is the official, public worship offered to God by the Church, through which the faithful share in Christ’s priesthood and the mysteries of salvation.</p>
         <p>The liturgy includes the Mass, the celebration of the sacraments, the Liturgy of the Hours, and other rites and blessings. It is not merely a human action but the work of Christ Himself, made present in the Church by the power of the Holy Spirit.</p>
         <p>In the liturgy, we encounter Christ in multiple ways: in the Eucharist, in the proclamation of the Word, in the person of the minister, and in the gathered assembly. The liturgy is a foretaste of the heavenly worship described in Revelation.</p>
@@ -6314,7 +6373,7 @@ lessons: [
     id: "sacraments-9",
     title: "The Mass",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Mass is the central act of Catholic worship, the re-presentation of Christ’s one sacrifice on Calvary, and the sacred banquet in which the faithful receive the Body and Blood of the Lord. It is the source and summit of the Christian life (CCC 1324, 1346–1389).</p>
 
         <h3>Scriptural References</h3>
@@ -6339,7 +6398,7 @@ lessons: [
             "At the Mass, heaven touches earth, and Christ’s saving sacrifice is made present for our salvation."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Mass is the heart of the Church’s life and worship. It is at once a memorial, a sacrifice, and a sacred meal. In it, the Church obeys Christ’s command at the Last Supper: "Do this in remembrance of me."</p>
         <p>The Mass has two principal parts: the Liturgy of the Word, in which God speaks to His people through Scripture, and the Liturgy of the Eucharist, in which bread and wine become the Body and Blood of Christ through the prayer of the priest and the power of the Holy Spirit.</p>
         <p>By participating in the Mass, the faithful unite themselves with Christ’s offering to the Father, receive spiritual nourishment, and are strengthened for the mission of the Gospel. Attendance at Mass on Sundays and holy days of obligation is a serious duty for Catholics.</p>
@@ -6454,7 +6513,7 @@ lessons: [
     id: "sacraments-10",
     title: "Sacramental Economy",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The sacramental economy is the communication of the fruits of Christ’s Paschal Mystery through the Church’s liturgy and sacraments. It is the way God dispenses His grace in the New Covenant, uniting us to Christ and sharing in His divine life (CCC 1076–1209).</p>
 
         <h3>Scriptural References</h3>
@@ -6479,7 +6538,7 @@ lessons: [
             "Through the sacramental economy, God pours out the grace of Christ’s saving work, making us sharers in His divine life."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The sacramental economy refers to the way in which the salvation won by Jesus Christ is made present and effective in the world today. It is the divine plan for dispensing grace through the liturgy and sacraments of the Church.</p>
         <p>Rooted in the Paschal Mystery — Christ’s Passion, Death, Resurrection, and Ascension — the sacramental economy ensures that every generation can personally encounter and receive the fruits of redemption.</p>
         <p>In this economy, Christ acts through the Church by the power of the Holy Spirit. The sacraments are not mere symbols but real channels of divine grace, transforming and sanctifying those who receive them with faith.</p>
@@ -6594,7 +6653,7 @@ lessons: [
     id: "sacraments-11",
     title: "Sacramentals",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Sacramentals are sacred signs instituted by the Church to prepare us to receive grace and to sanctify different circumstances of life. They are not sacraments themselves but help dispose us to receive the grace of the sacraments and grow in holiness (CCC 1667–1679).</p>
 
         <h3>Scriptural References</h3>
@@ -6619,7 +6678,7 @@ lessons: [
             "Through sacramentals, the Church blesses our lives, setting apart persons, places, and things for God’s glory."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Sacramentals are instituted by the Church to sanctify various aspects of daily life. Unlike the sacraments, which were instituted by Christ and confer grace ex opere operato (by the very act of the sacrament being performed), sacramentals work ex opere operantis — according to the disposition of the person receiving them and the prayers of the Church.</p>
         <p>Examples of sacramentals include blessings (of people, meals, or objects), holy water, crucifixes, medals, scapulars, the sign of the cross, and devotional practices such as the Rosary. They also include exorcisms and consecrations.</p>
         <p>The purpose of sacramentals is to help the faithful grow in faith, turn their minds to God, and live in continual awareness of His presence. They prepare us to better receive the sacraments and to live our baptismal calling in everyday life.</p>
@@ -6739,7 +6798,7 @@ lessons: [
     id: "morals-1",
     title: "What is Morality",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Morality refers to the principles and standards by which we determine whether actions are good or evil, right or wrong, in light of God’s truth and human dignity. Christian morality is rooted in God’s law, revealed in Scripture, and fulfilled in Christ (CCC 1749–1802).</p>
 
         <h3>Scriptural References</h3>
@@ -6764,7 +6823,7 @@ lessons: [
             "True morality is not about rules alone, but about living in loving relationship with God and neighbor."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Morality is the standard by which we measure human acts in light of God’s will. For Christians, morality flows from our identity as children of God, made in His image and redeemed by Christ.</p>
         <p>Christian morality is based on divine law: the moral law given in the Ten Commandments, perfected by the New Law of the Gospel. It is not arbitrary, but rooted in the truth of who God is and who we are called to be.</p>
         <p>Every human action has a moral dimension, determined by the object (what is done), the intention (why it is done), and the circumstances (the context). An action is morally good only if all three elements are good.</p>
@@ -6879,7 +6938,7 @@ lessons: [
     id: "morals-2",
     title: "Human Dignity",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Human dignity is the intrinsic worth of every person, rooted in the fact that we are created in the image and likeness of God and called to share in His divine life. This dignity is inherent, inalienable, and the foundation for all moral teaching (CCC 1700–1715).</p>
 
         <h3>Scriptural References</h3>
@@ -6904,7 +6963,7 @@ lessons: [
             "Every human life, from conception to natural death, is sacred and possesses an inviolable dignity given by God."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Human dignity is not earned by achievements, status, or abilities — it is given by God at the moment of creation. Because we are made in His image, every human being, without exception, has equal worth and is worthy of respect.</p>
         <p>This dignity forms the basis of Catholic moral teaching on life issues, justice, and charity. It demands that we treat others not as objects or means to an end but as persons with inherent value.</p>
         <p>Human dignity is fully realized when we live according to God’s plan, choosing what is good and rejecting what is evil. Sin wounds human dignity, but Christ restores it through His grace and redemption.</p>
@@ -7019,7 +7078,7 @@ lessons: [
     id: "morals-3",
     title: "Freedom and Choice",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Freedom is the God-given power to act or not to act, to choose good or evil, and to shape one’s own life. True freedom is ordered toward the good and finds its fulfillment in choosing what is right according to God’s will (CCC 1730–1748).</p>
 
         <h3>Scriptural References</h3>
@@ -7044,7 +7103,7 @@ lessons: [
             "Freedom is not the license to do whatever we want, but the power to do what we ought."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Freedom is one of God’s greatest gifts to humanity, allowing us to choose and to love. However, freedom is not absolute independence from all authority — it is meant to be exercised within the moral order given by God.</p>
         <p>Every choice we make shapes our character and directs our lives either toward God or away from Him. Choosing what is good, true, and loving increases our freedom, while choosing evil leads to sin and slavery to vice.</p>
         <p>True freedom is not found in rejecting God’s law but in living it fully. By knowing the truth revealed by God, we can make choices that lead to lasting joy and fulfillment.</p>
@@ -7159,7 +7218,7 @@ lessons: [
     id: "morals-4",
     title: "Natural Law",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Natural law is the moral law written on the human heart by God, knowable by reason, and binding on all people. It directs us to do good and avoid evil and forms the basis for human rights and moral duties (CCC 1954–1960).</p>
 
         <h3>Scriptural References</h3>
@@ -7184,7 +7243,7 @@ lessons: [
             "Natural law is God’s moral compass placed in every human heart, guiding us toward the good."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Natural law is part of God’s eternal law and is imprinted on the nature of every human being. It is accessible to human reason and does not depend on religious belief to be understood. This is why it serves as the foundation for universal moral principles and human rights.</p>
         <p>Through natural law, every person is capable of recognizing fundamental moral truths, such as the obligation to do good, avoid evil, respect life, and honor commitments. These principles are present in the conscience of every human being.</p>
         <p>While sin and cultural influences can obscure our understanding of natural law, it remains binding on all people. Revelation in Scripture and the teaching of the Church help clarify its meaning and application in complex situations.</p>
@@ -7299,7 +7358,7 @@ lessons: [
     id: "morals-5",
     title: "Conscience",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Conscience is the inner voice of a human person, a judgment of reason, by which we recognize the moral quality of an act to be performed, in the process of being performed, or already completed. It is the law of God written on the heart, guiding us to do good and avoid evil (CCC 1776–1802).</p>
 
         <h3>Scriptural References</h3>
@@ -7324,7 +7383,7 @@ lessons: [
             "Conscience is God’s voice echoing in the human heart, calling us to choose the good and reject evil."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Conscience is not merely personal opinion or feeling — it is a judgment of reason that evaluates whether a chosen action is good or evil. It reflects the natural law written by God in our hearts, confirmed by divine revelation.</p>
         <p>Forming a good conscience requires seeking the truth and allowing it to shape our decisions. This involves prayer, studying Scripture and Church teaching, and seeking wise counsel. An uninformed or misinformed conscience can lead us into moral error.</p>
         <p>We have a moral duty to follow our conscience, but also to form it correctly. Obedience to a well-formed conscience leads to freedom and holiness, while ignoring it can lead to sin and moral blindness.</p>
@@ -7439,7 +7498,7 @@ lessons: [
     id: "morals-6",
     title: "The Ten Commandments",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Ten Commandments are God’s moral law given to Moses on Mount Sinai, expressing fundamental obligations toward God and neighbor. They remain a central guide for Christian moral life, fulfilled and deepened in Christ’s New Law of love (CCC 2052–2557).</p>
 
         <h3>Scriptural References</h3>
@@ -7464,7 +7523,7 @@ lessons: [
             "The Ten Commandments reveal God’s will for our lives, guiding us to love Him above all and our neighbor as ourselves."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Ten Commandments, also called the Decalogue, were given by God to Moses as part of the covenant with Israel. They are not merely ancient laws but enduring expressions of the moral law written on every human heart.</p>
         <p>The Commandments are divided into two tablets: the first three direct our relationship with God (no other gods, reverence for His name, keeping the Lord’s Day holy), and the remaining seven govern our relationship with others (honor parents, respect life, uphold chastity, respect property, speak truth, and avoid coveting).</p>
         <p>In the New Testament, Jesus fulfills the Commandments by summarizing them into the law of love: love of God with all our heart, soul, and mind, and love of neighbor as ourselves.</p>
@@ -7579,7 +7638,7 @@ lessons: [
     id: "morals-7",
     title: "Commandments 1–3",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The first three Commandments govern our relationship with God: to worship Him alone, to honor His holy name, and to keep holy the Lord’s Day. They form the foundation of the moral law by directing us to love God with all our heart, soul, and strength (CCC 2084–2195).</p>
 
         <h3>Scriptural References</h3>
@@ -7604,7 +7663,7 @@ lessons: [
             "The first three Commandments lead us into true worship, reverence, and rest in the Lord."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The First Commandment — "You shall have no other gods before Me" — calls us to worship God alone, avoiding idolatry, superstition, or placing anything above God in our lives. It is a command to faith, hope, and love toward God.</p>
         <p>The Second Commandment — "You shall not take the name of the Lord your God in vain" — requires reverence for God’s name and all holy things. This means avoiding blasphemy, false oaths, and using God’s name carelessly.</p>
         <p>The Third Commandment — "Remember to keep holy the Sabbath day" — commands us to set aside one day for rest and worship. For Christians, this is Sunday, the day of the Resurrection, and includes attending Mass, avoiding unnecessary work, and dedicating time to family and charity.</p>
@@ -7719,7 +7778,7 @@ lessons: [
     id: "morals-8",
     title: "Commandments 4–10",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Fourth through Tenth Commandments govern our relationships with other people. They teach us to honor parents, respect life, live chastely, respect property, speak the truth, and guard our hearts from greed and envy. They flow from the love of God and call us to love our neighbor as ourselves (CCC 2196–2557).</p>
 
         <h3>Scriptural References</h3>
@@ -7746,7 +7805,7 @@ lessons: [
             "The last seven Commandments show us how to live in love, justice, and truth with our neighbor."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Fourth Commandment — "Honor your father and your mother" — calls us to respect and care for parents and legitimate authority, recognizing the family as the foundation of society.</p>
         <p>The Fifth Commandment — "You shall not kill" — upholds the sanctity of life, forbidding murder, abortion, euthanasia, and all unjust harm to human life, while promoting peace and respect for all persons.</p>
         <p>The Sixth Commandment — "You shall not commit adultery" — calls for chastity, fidelity in marriage, and purity of heart, respecting the dignity of human sexuality.</p>
@@ -7865,7 +7924,7 @@ lessons: [
     id: "morals-9",
     title: "Freedom in Christ",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Freedom in Christ is the liberation from the slavery of sin and the ability to live fully as children of God, guided by the Holy Spirit. It is not the license to do whatever we want, but the grace-filled power to choose the good, live in truth, and love as Christ loves (CCC 1730–1748, 1748–1756).</p>
 
         <h3>Scriptural References</h3>
@@ -7890,7 +7949,7 @@ lessons: [
             "True freedom is found not in doing whatever we please, but in living as God created us to live — in truth, love, and holiness."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Freedom in Christ is a transformation of the will and heart. Before Christ, humanity was enslaved by sin and unable to live fully according to God’s plan. Through His death and resurrection, Christ breaks the chains of sin and gives us the grace to live in righteousness.</p>
         <p>This freedom is not independence from God but dependence on Him in love. It is freedom for virtue, service, and love of neighbor. When guided by the Holy Spirit, our choices lead to holiness and eternal life.</p>
         <p>Christian freedom includes both rights and responsibilities: the right to live in the truth of the Gospel and the responsibility to use our freedom for good, not for selfish purposes. As St. Paul teaches, freedom must be exercised in service to others.</p>
@@ -8005,7 +8064,7 @@ lessons: [
     id: "morals-10",
     title: "Grace, Justification, & Merit",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Grace is God’s free and undeserved gift of His own life, given to help us respond to His call and live as His children. Justification is God’s merciful action of cleansing us from sin and making us righteous through the grace of Christ. Merit refers to the reward God promises for our cooperation with His grace in doing good (CCC 1987–2029).</p>
 
         <h3>Scriptural References</h3>
@@ -8030,7 +8089,7 @@ lessons: [
             "We are saved by God’s grace, justified in Christ, and called to bear fruit worthy of eternal life."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p><strong>Grace</strong> is the divine life of God shared with us. It comes in two main forms: sanctifying grace (which makes us holy and a child of God) and actual grace (God’s help in particular situations). Grace is always God’s initiative — we cannot earn it — but we can accept or reject it.</p>
         <p><strong>Justification</strong> is God’s work of forgiving our sins, making us righteous, and restoring us to friendship with Him. It is accomplished by Christ’s sacrifice and received through faith and the sacraments, especially Baptism.</p>
         <p><strong>Merit</strong> refers to the reward God promises for good works done in grace. While we cannot earn salvation itself, God in His goodness allows our cooperation with grace to have eternal value.</p>
@@ -8145,7 +8204,7 @@ lessons: [
     id: "morals-11",
     title: "The Beatitudes",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Beatitudes are the teachings of Jesus in the Sermon on the Mount that reveal the attitudes and virtues of those who are blessed in the Kingdom of God. They are both promises of eternal happiness and guides for living a life conformed to Christ (CCC 1716–1729).</p>
 
         <h3>Scriptural References</h3>
@@ -8170,7 +8229,7 @@ lessons: [
             "The Beatitudes show us the face of Christ and the path to the joy of His Kingdom."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Beatitudes, found in Matthew 5:3–12, are eight blessings that describe the heart and life of a true disciple. Each Beatitude presents a paradox: what seems like weakness or loss in the world’s eyes is actually a path to true happiness in God’s Kingdom.</p>
         <p>They are not merely commands but invitations to share in the very life and mission of Christ. Living the Beatitudes shapes us into the likeness of Jesus, who embodies each one perfectly.</p>
         <p>The Beatitudes also reveal that holiness is more than keeping rules — it is a transformation of the heart. They reorient our values from earthly success to heavenly reward.</p>
@@ -8298,7 +8357,7 @@ lessons: [
     id: "morals-11",
     title: "Virtue & Vice",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Virtues are habitual and firm dispositions to do the good. They enable us to live morally and grow in holiness. Vices are habitual dispositions to do evil, weakening our moral character and leading us away from God (CCC 1803–1869).</p>
 
         <h3>Scriptural References</h3>
@@ -8323,7 +8382,7 @@ lessons: [
             "Virtue strengthens the soul to choose the good; vice enslaves the soul to evil."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Virtues are good habits that shape our character toward moral excellence. They are either human virtues (developed through practice and grace) or theological virtues (faith, hope, and charity, given directly by God).</p>
         <p>The four cardinal virtues — prudence, justice, fortitude, and temperance — are foundational for living a good moral life. The theological virtues — faith, hope, and charity — orient us directly toward God.</p>
         <p>Vices are the opposite: bad habits or dispositions that incline us to sin. They can be personal sins that become ingrained or capital vices such as pride, greed, lust, envy, gluttony, wrath, and sloth.</p>
@@ -8438,7 +8497,7 @@ lessons: [
     id: "morals-12",
     title: "Habit",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>A habit is a stable quality of mind and will that inclines a person to act in a certain way. Good habits (virtues) make it easier to do what is right, while bad habits (vices) make it easier to do what is wrong. Habits are formed through repeated actions and can be strengthened or weakened over time (CCC 1803–1869).</p>
 
         <h3>Scriptural References</h3>
@@ -8462,7 +8521,7 @@ lessons: [
             "We become what we repeatedly do; therefore, let our habits be rooted in love, truth, and virtue."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Habits shape our character and influence our future choices. Good habits, or virtues, are developed by consistently choosing what is good and right. Over time, these choices become second nature, making it easier to live in harmony with God’s will.</p>
         <p>Bad habits, or vices, are formed when we repeatedly choose sin. These habits weaken the will, distort judgment, and make it harder to choose the good. They can be broken through God’s grace, repentance, and the cultivation of opposite virtues.</p>
         <p>Habits are not formed overnight. They require patience, self-discipline, and intentional practice. Prayer, the sacraments, and living the moral law strengthen good habits and help us persevere.</p>
@@ -8577,7 +8636,7 @@ lessons: [
     id: "morals-13",
     title: "Faith",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Faith is the theological virtue by which we believe in God and all that He has revealed, and which the Church proposes for belief. It is both a gift from God and a human act of trust, obedience, and commitment to Him (CCC 153–165, 1814–1816).</p>
 
         <h3>Scriptural References</h3>
@@ -8602,7 +8661,7 @@ lessons: [
             "Faith is both God’s gift and our response — a living relationship of trust and obedience to Him."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Faith is more than simply agreeing with religious truths; it is a personal relationship with God built on trust in His love and promises. It begins as a gift from God through grace, but it must be freely accepted and lived out in daily life.</p>
         <p>Faith involves the whole person — mind, will, and heart. We believe because God is truth itself and cannot deceive. Faith opens the door to understanding God’s plan and shapes how we live, leading us to love and serve Him and our neighbor.</p>
         <p>The Church teaches that faith must be nourished through prayer, the sacraments, Scripture, and the teaching of the Church. Faith grows stronger when it is lived in works of charity and witness to the Gospel.</p>
@@ -8717,7 +8776,7 @@ lessons: [
     id: "morals-14",
     title: "Hope",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Hope is the theological virtue by which we desire the kingdom of heaven and eternal life as our ultimate happiness, placing our trust in Christ’s promises and relying on the grace of the Holy Spirit to persevere to the end (CCC 1817–1821).</p>
 
         <h3>Scriptural References</h3>
@@ -8742,7 +8801,7 @@ lessons: [
             "Hope anchors our soul in Christ and keeps our eyes fixed on the eternal joy of heaven."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Hope is more than wishful thinking — it is confident trust in God’s faithfulness to His promises. Rooted in Christ’s resurrection, it sustains us through trials, strengthens perseverance, and keeps our hearts oriented toward eternal life.</p>
         <p>Hope enables us to face suffering and uncertainty with courage, knowing that God works all things for the good of those who love Him. It also prevents despair (losing trust in God’s mercy) and presumption (assuming salvation without conversion).</p>
         <p>Christian hope is lived in prayer, the sacraments, acts of charity, and patient endurance in doing good. It transforms the way we live now, giving us joy and confidence as we journey toward our heavenly home.</p>
@@ -8856,7 +8915,7 @@ lessons: [
     id: "morals-15",
     title: "Charity",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Charity, or love, is the theological virtue by which we love God above all things for His own sake, and our neighbor as ourselves for the love of God. It is the greatest of all virtues and the bond of perfection (CCC 1822–1829).</p>
 
         <h3>Scriptural References</h3>
@@ -8881,7 +8940,7 @@ lessons: [
             "Charity is the heart of the Christian life — the love of God poured into our hearts and flowing out to others."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Charity is the highest virtue because it unites us directly to God, who is Love itself. It is more than feelings of affection; it is a deliberate choice to will the good of another for God’s sake. Charity begins with loving God above all else and extends to loving others as God loves them.</p>
         <p>This virtue is infused into the soul by God and is nourished through prayer, the sacraments, and acts of service. Charity shapes all other virtues, giving them life and purpose.</p>
         <p>Charity is expressed in self-giving, forgiveness, and sacrifice. It imitates Christ’s own love, especially in His passion and death. Without charity, even the most impressive works are empty (cf. 1 Corinthians 13).</p>
@@ -8996,7 +9055,7 @@ lessons: [
     id: "morals-16",
     title: "The Cardinal Virtues",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The cardinal virtues — prudence, justice, fortitude, and temperance — are the four principal moral virtues that all other human virtues hinge upon. They guide our actions, govern our passions, and direct our conduct according to reason and faith (CCC 1805–1809).</p>
 
         <h3>Scriptural References</h3>
@@ -9021,7 +9080,7 @@ lessons: [
             "The cardinal virtues are the foundation of the moral life, enabling us to live with wisdom, integrity, courage, and self-control."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The cardinal virtues are called "cardinal" (from the Latin <em>cardo</em>, meaning "hinge") because they are the hinges upon which the moral life turns. All other human virtues depend on these four.</p>
         <ul>
             <li><strong>Prudence</strong> – The "charioteer" of the virtues, guiding our decisions by reason and moral truth.</li>
@@ -9141,7 +9200,7 @@ lessons: [
     id: "morals-17",
     title: "Mortal and Venial Sin (Capital and Lesser Sins)",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Sin is an offense against God and a rejection of His love. Mortal sin destroys the life of grace in the soul, while venial sin wounds it. Capital sins are the root vices from which other sins arise. Lesser sins are those that do not break our relationship with God but still damage it (CCC 1846–1876).</p>
 
         <h3>Scriptural References</h3>
@@ -9166,7 +9225,7 @@ lessons: [
             "Sin divides us from God, but His mercy is greater — through repentance and grace we are restored to life."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p><strong>Mortal sin</strong> is a grave violation of God’s law that destroys the divine life (sanctifying grace) in the soul. For a sin to be mortal, three conditions must be met: the act must be of grave matter, committed with full knowledge, and with deliberate consent. Mortal sin, if unrepented, leads to eternal separation from God.</p>
         <p><strong>Venial sin</strong> is a lesser offense against God’s law that wounds charity but does not break our relationship with God. Venial sins dispose us little by little toward greater sin if left unchecked.</p>
         <p><strong>Capital sins</strong> are the root causes of many other sins and inclinations to sin. These include: pride, greed, envy, wrath, lust, gluttony, and sloth. They are called "capital" because they give rise to other sins and vices.</p>
@@ -9282,7 +9341,7 @@ lessons: [
     id: "morals-17",
     title: "Catholic Social Teaching",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Catholic Social Teaching (CST) is the Church’s body of doctrine on human dignity, solidarity, and the common good, rooted in Scripture and Tradition. It offers moral principles for building a just society and living a life of holiness in our relationships with others and the world (Compendium of the Social Doctrine of the Church, CCC 2419–2463).</p>
 
         <h3>Scriptural References</h3>
@@ -9307,7 +9366,7 @@ lessons: [
             "Catholic Social Teaching calls us to see Christ in every person and to work for a world where human dignity is upheld and the common good is served."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Catholic Social Teaching emerges from the Church’s reflection on the Gospel in light of human experience. It is a call to live the love of Christ in public life and to transform society in justice and charity.</p>
         <p>The key principles of CST include:</p>
         <ul>
@@ -9430,7 +9489,7 @@ lessons: [
     id: "morals-18",
     title: "Mercy and Justice",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Justice is the moral virtue that gives God and neighbor their due. Mercy is the loving compassion that goes beyond justice, offering forgiveness, relief, and help even when it is not strictly owed (CCC 1807, 2447).</p>
 
         <h3>Scriptural References</h3>
@@ -9455,7 +9514,7 @@ lessons: [
             "Justice gives each their due; mercy gives beyond what is due — for God’s mercy overflows where justice ends."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Justice and mercy are not opposed but work together in God’s plan. Justice ensures fairness, order, and the right relationships between persons and with God. Mercy perfects justice by offering love, forgiveness, and help to those in need.</p>
         <p>In human society, justice sets the standard for what is owed; mercy moves us to go beyond that standard in love. Jesus embodies both perfectly — fulfilling the demands of justice through His sacrifice while pouring out mercy on sinners.</p>
         <p>The Christian is called to live both virtues: to uphold justice in all dealings and to practice mercy in forgiving offenses, aiding the suffering, and showing compassion without discrimination.</p>
@@ -9575,7 +9634,7 @@ lessons: [
     id: "prayer-1",
     title: "Introduction to Prayer",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Prayer is the raising of one’s mind and heart to God or the requesting of good things from Him. It is the living relationship of the children of God with their Father, with His Son Jesus Christ, and with the Holy Spirit (CCC 2559–2565).</p>
 
         <h3>Scriptural References</h3>
@@ -9600,7 +9659,7 @@ lessons: [
             "Prayer is the heartbeat of the Christian life — our continual conversation with the God who loves us."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Prayer is more than speaking words to God; it is communion with Him. It is an expression of love, trust, and dependence on our Creator. Through prayer, we adore God, confess our sins, express gratitude, and bring our needs before Him.</p>
         <p>Christian prayer takes many forms: vocal prayer, meditation, and contemplation. Each deepens our relationship with God in a unique way.</p>
         <p>Prayer is both a personal and communal act. Personally, it is our one-on-one time with the Lord; communally, it unites us with the Church in worship, especially in the liturgy.</p>
@@ -9715,7 +9774,7 @@ lessons: [
     id: "prayer-2",
     title: "The Lord's Prayer - Our Model",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Lord’s Prayer, taught by Jesus Himself, is the perfect model of Christian prayer. It sums up the Gospel, expresses our relationship with God, and teaches us how to pray with trust, humility, and love (CCC 2759–2865).</p>
 
         <h3>Scriptural References</h3>
@@ -9740,7 +9799,7 @@ lessons: [
             "When we pray the Lord’s Prayer, we speak with the very words of Jesus, uniting our hearts to His."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Lord’s Prayer is unique because it comes directly from Jesus, who commands, “Pray then like this.” It begins with adoration, calling God our Father, acknowledging His holiness, and desiring His Kingdom.</p>
         <p>It then turns to petitions: for God’s will to be done, for our daily bread, for forgiveness of sins, and for deliverance from evil. These petitions teach us dependence on God for both spiritual and material needs.</p>
         <p>Each phrase is rich in meaning:
@@ -9866,7 +9925,7 @@ lessons: [
     id: "prayer-3",
     title: "Traditions and Types of Prayer",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Church’s tradition recognizes various forms and expressions of prayer, all inspired by the Holy Spirit, which draw us into deeper communion with God. These include vocal prayer, meditation, and contemplation, as well as the traditional categories of adoration, contrition, thanksgiving, and supplication (CCC 2626–2643, 2700–2724).</p>
 
         <h3>Scriptural References</h3>
@@ -9891,7 +9950,7 @@ lessons: [
             "Prayer takes many forms, but all true prayer leads us into the heart of God."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Prayer in the Catholic tradition is rich and diverse. It can be expressed in different ways:</p>
         <ul>
             <li><strong>Vocal Prayer</strong> – Spoken aloud or silently, using set prayers or spontaneous words.</li>
@@ -10017,7 +10076,7 @@ lessons: [
     id: "prayer-4",
     title: "The Prayer of the Mass",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>The Mass is the highest form of prayer in the Catholic Church, the source and summit of the Christian life. In it, the faithful unite themselves with Christ’s perfect offering to the Father through the power of the Holy Spirit (CCC 1324, 1325, 1348–1355).</p>
 
         <h3>Scriptural References</h3>
@@ -10042,7 +10101,7 @@ lessons: [
             "In the Mass, heaven touches earth, and we are drawn into the eternal prayer of Christ to the Father."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>The Mass is the Church’s greatest prayer because it is Christ’s own sacrifice made present for us. It is both a memorial of His passion, death, and resurrection, and a real participation in that sacrifice.</p>
         <p>The structure of the Mass includes:
             <ul>
@@ -10165,7 +10224,7 @@ lessons: [
     id: "prayer-5",
     title: "Prayer Without Ceasing",
     content: `
-        <h3>Succinct Definition</h3>
+        <h3>Definition</h3>
         <p>Prayer without ceasing is the continual orientation of our hearts toward God, living in His presence at all times, and offering every moment as an act of love and communion with Him (CCC 2565, 2742–2745).</p>
 
         <h3>Scriptural References</h3>
@@ -10190,7 +10249,7 @@ lessons: [
             "To pray without ceasing is to live every moment in the awareness of God’s love and to respond with love."
         </blockquote>
 
-        <h3>Thorough Explanation</h3>
+        <h3>Explanation</h3>
         <p>Praying without ceasing does not mean speaking prayers every moment, but living in a constant state of union with God. It is an attitude of the heart that keeps us mindful of His presence in all we do.</p>
         <p>This continuous prayer is nourished by regular times of formal prayer and flows into daily life — in work, rest, relationships, and even struggles. Every action, when offered to God in love, becomes prayer.</p>
         <p>Saints throughout history, such as St. Paul, the Desert Fathers, and St. Thérèse of Lisieux, lived this way, showing that every moment can be sanctified.</p>
