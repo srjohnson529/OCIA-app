@@ -199,6 +199,39 @@ nav button:focus-visible {
 #custom-alert-modal.fade-out {
     animation: fadeOut 0.3s ease-out forwards;
 }
+#fireworks-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none; /* Allows clicking through the container */
+}
+
+.firework {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background-color: #ffd700; /* Gold color */
+    border-radius: 50%;
+    opacity: 1;
+    /* Animation will be set by JavaScript */
+    animation: firework-explode 0.8s ease-out forwards;
+}
+
+@keyframes firework-explode {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--x), var(--y)) scale(0);
+        opacity: 0;
+    }
+}
 
         #alert-message {
             margin-bottom: 1.5rem; /* Adjusted margin */
@@ -859,6 +892,14 @@ max-width: 85%;
         <button id="resources-nav-button">Student Resources</button>
         <button id="quit-nav-button">Quit</button>
     </nav>
+
+      <!-- Custom Alert Modal -->
+    <div id="alert-overlay"></div>
+    <div id="custom-alert-modal">
+        <div id="fireworks-container"></div>
+        <p id="alert-message"></p>
+        <button id="alert-ok-button">OK</button>
+    </div>
 
     <!-- Main Content Container -->
     <div class="main-content-container">
@@ -11018,7 +11059,44 @@ lessons: [
                 }
             });
                         window.scrollTo(0, 0); // Add this line to scroll to the top
+        }
 
+        function triggerFireworks() {
+            const container = document.getElementById('fireworks-container');
+            if (!container) return;
+             container.innerHTML = ''; // Clear previous fireworks
+            const fireworksCount = 150; // More particles for a bigger burst
+            const colors = ['#FFD700', '#FF4500', '#32CD32', '#1E90FF', '#FF1493', '#FFFFFF'];
+
+            for (let i = 0; i < fireworksCount; i++) {
+                const firework = document.createElement('div');
+                firework.classList.add('firework');
+
+                // Randomize explosion direction and color
+                const angle = Math.random() * 360;
+                const radius = Math.random() * 200 + 80; // Increased radius for a wider explosion
+                const x = Math.cos(angle * (Math.PI / 180)) * radius;
+                const y = Math.sin(angle * (Math.PI / 180)) * radius;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                firework.style.setProperty('--x', `${x}px`);
+                firework.style.setProperty('--y', `${y}px`);
+                firework.style.backgroundColor = color;
+                firework.style.setProperty('--glow-color', color); // For the box-shadow glow
+
+                // Randomize animation duration and delay for a more dynamic effect
+                const duration = Math.random() * 0.5 + 0.8; // Duration between 0.8s and 1.3s
+                const delay = Math.random() * 0.2; // Delay up to 0.2s
+                firework.style.animationDuration = `${duration}s`;
+                firework.style.animationDelay = `${delay}s`;
+
+                container.appendChild(firework);
+
+                // Clean up the element after animation
+                setTimeout(() => {
+                    firework.remove();
+                }, (duration + delay) * 1000);
+            }
         }
 
   // Populate Common Prayers Menu
@@ -11323,6 +11401,7 @@ lessons: [
             const passingScore = Math.ceil(totalQuestions * 0.8); // Require 80% to pass
 
             if (score >= passingScore) {
+                triggerFireworks(); // <-- ADD THIS LINE
                 showCustomAlert(`Correct! You scored ${score}/${totalQuestions} and passed this lesson.`);
                 document.getElementById('submit-quiz-button').disabled = true;
 
