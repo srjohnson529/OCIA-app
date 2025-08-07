@@ -881,15 +881,19 @@ max-width: 85%;
             </div>
         </section>
 
-        <!-- Prayers Section -->
+         <!-- Prayers Section -->
         <section id="prayer-section" class="hidden">
-            <button class="button-theme" id="common-prayers-button">Common Prayers</button>
-            <button class="button-theme" id="guided-rosary-button">Guided Rosary</button>
-            <button class="button-theme" id="lectio-divina-button">Lectio Divina</button>
-            <button class="button-theme" id="liturgy-hours-button">Liturgy of the Hours</button>
+            <h3>Prayer Resources</h3>
+            <p>Explore different ways to deepen your prayer life.</p>
+            <div class="menu-container">
+                <button class="button-theme" id="common-prayers-button">Common Prayers</button>
+                <button class="button-theme" id="guided-rosary-button">Guided Rosary</button>
+                <button class="button-theme" id="lectio-divina-button">Lectio Divina</button>
+                <button class="button-theme" id="liturgy-hours-button">Liturgy of the Hours</button>
+            </div>
             <button class="button-theme" id="prayers-back-to-spiritual-button">Back to Spiritual Formation</button>
-       
         </section>
+
          <!-- Common Prayers Menu Section -->
         <section id="common-prayers-menu-section" class="hidden">
             <h2>Common Prayers</h2>
@@ -905,6 +909,47 @@ max-width: 85%;
             <div id="prayer-display-text" class="content-wrapper"></div>
             <button class="button-theme" id="prayer-display-back-button">Back to Common Prayers</button>
         </section>
+        
+      <!-- Lectio Divina Section -->
+<section id="lectio-divina-section" class="hidden content-page">
+    <h2>Lectio Divina</h2>
+    <p>
+        <em>Lectio Divina</em>, meaning "divine reading," is a traditional monastic practice of praying with the Scriptures. 
+        It is a slow, contemplative way of reading God's Word, allowing it to speak to our hearts and transform our lives.
+    </p>
+    
+    <div class="content-wrapper">
+        <h3>The Four Steps of Lectio Divina</h3>
+        <ol>
+            <li>
+                <strong>Lectio (Reading):</strong> Read a short passage of Scripture slowly and attentively. 
+                Listen for a word or phrase that stands out to you.
+            </li>
+            <li>
+                <strong>Meditatio (Meditation):</strong> Reflect on the word or phrase. 
+                What does it mean? How does it connect to your life? Ponder it in your heart.
+            </li>
+            <li>
+                <strong>Oratio (Prayer):</strong> Respond to God in prayer. 
+                Speak to Him from your heart about what you have read and meditated on. 
+                This can be a prayer of praise, thanksgiving, repentance, or petition.
+            </li>
+            <li>
+                <strong>Contemplatio (Contemplation):</strong> Rest silently in God's presence. 
+                Let go of your own thoughts and simply be with Him, allowing Him to work in your soul.
+            </li>
+        </ol>
+    </div>
+
+    <div class="content-wrapper">
+        <h3>Recommendation: Pray with one of the daily readings</h3>
+        <div class="cg_mrc_widget"></div>
+        <script src="https://cdn1.catholicgallery.org/wp-content/uploads/widgets/rich-card/cg_mrc_widget.js" async></script>
+    </div>
+
+    <button class="button-theme" id="lectio-back-to-prayer-button">Back to Prayers Menu</button>
+</section>
+
 
         <!-- Examination of Conscience Section (Placeholder) -->
    <section id="examination-section" class="hidden content-page">
@@ -7637,7 +7682,7 @@ lessons: [
 
                      {
     id: "morals-7",
-    title: "Commandments 1–3",
+    title: "Loving God Above All: The First Three Commandments",
     content: `
         <h3>Definition</h3>
         <p>The first three Commandments govern our relationship with God: to worship Him alone, to honor His holy name, and to keep holy the Lord’s Day. They form the foundation of the moral law by directing us to love God with all our heart, soul, and strength (CCC 2084–2195).</p>
@@ -7776,150 +7821,590 @@ lessons: [
 },
 
                       {
-    id: "morals-8",
-    title: "Commandments 4–10",
+    id: "morals-4",
+    title: "The Fourth Commandment: Honor Your Father and Mother",
     content: `
         <h3>Definition</h3>
-        <p>The Fourth through Tenth Commandments govern our relationships with other people. They teach us to honor parents, respect life, live chastely, respect property, speak the truth, and guard our hearts from greed and envy. They flow from the love of God and call us to love our neighbor as ourselves (CCC 2196–2557).</p>
+        <p>The Fourth Commandment—"Honor your father and your mother" (Exodus 20:12)—calls us to respect, love, and obey our parents and those in legitimate authority. It is the foundation for the moral life in society, teaching us the proper relationship between individuals and communities, and the importance of family as the domestic Church (CCC 2197–2257).</p>
 
         <h3>Scriptural References</h3>
         <ul>
-            <li><strong>Exodus 20:12–17</strong> – The Fourth through Tenth Commandments.</li>
-            <li><strong>Matthew 22:39</strong> – "You shall love your neighbor as yourself."</li>
-            <li><strong>Romans 13:9</strong> – "The commandments… are summed up in this word: 'You shall love your neighbor as yourself.'"</li>
-            <li><strong>Colossians 3:9</strong> – "Do not lie to one another."</li>
+            <li><strong>Exodus 20:12</strong> – "Honor your father and your mother, that your days may be long in the land."</li>
+            <li><strong>Sirach 3:1–16</strong> – A beautiful reflection on the blessings of honoring one's parents.</li>
+            <li><strong>Luke 2:51</strong> – Jesus was obedient to Mary and Joseph.</li>
+            <li><strong>Ephesians 6:1–4</strong> – "Children, obey your parents in the Lord, for this is right."</li>
         </ul>
 
         <h3>Catechism References</h3>
         <ul>
-            <li><strong>CCC 2197</strong> – The Fourth Commandment opens the second table of the Decalogue, showing the order of charity.</li>
-            <li><strong>CCC 2214</strong> – The family is the original cell of social life.</li>
-            <li><strong>CCC 2258</strong> – Human life is sacred because it comes from God.</li>
-            <li><strong>CCC 2337</strong> – Chastity means the successful integration of sexuality within the person.</li>
-            <li><strong>CCC 2401</strong> – The Seventh Commandment forbids theft and upholds justice in economic life.</li>
-            <li><strong>CCC 2464</strong> – The Eighth Commandment forbids misrepresenting the truth.</li>
-            <li><strong>CCC 2534</strong> – The Tenth Commandment warns against coveting what belongs to another.</li>
+            <li><strong>CCC 2197</strong> – The Fourth Commandment opens the second table of the Decalogue.</li>
+            <li><strong>CCC 2204</strong> – The Christian family is the domestic Church.</li>
+            <li><strong>CCC 2214–2220</strong> – Duties of children toward parents.</li>
+            <li><strong>CCC 2234–2243</strong> – Duties of citizens toward civil authority.</li>
         </ul>
 
         <h3>Proclamation</h3>
         <blockquote>
-            "The last seven Commandments show us how to live in love, justice, and truth with our neighbor."
+            "The family is the original cell of social life. Authority, stability, and a life of relationships within the family constitute the foundations for freedom, security, and fraternity within society." (CCC 2207)
         </blockquote>
 
         <h3>Explanation</h3>
-        <p>The Fourth Commandment — "Honor your father and your mother" — calls us to respect and care for parents and legitimate authority, recognizing the family as the foundation of society.</p>
-        <p>The Fifth Commandment — "You shall not kill" — upholds the sanctity of life, forbidding murder, abortion, euthanasia, and all unjust harm to human life, while promoting peace and respect for all persons.</p>
-        <p>The Sixth Commandment — "You shall not commit adultery" — calls for chastity, fidelity in marriage, and purity of heart, respecting the dignity of human sexuality.</p>
-        <p>The Seventh Commandment — "You shall not steal" — requires respect for others’ property, justice in economic life, and care for the goods of creation.</p>
-        <p>The Eighth Commandment — "You shall not bear false witness" — commands truthfulness, forbidding lies, gossip, and slander, and calling us to live in integrity.</p>
-        <p>The Ninth Commandment — "You shall not covet your neighbor’s wife" — calls us to purity of intention and freedom from lustful desires.</p>
-        <p>The Tenth Commandment — "You shall not covet your neighbor’s goods" — calls us to detach from material possessions and cultivate contentment and generosity.</p>
-        <p>Together, these commandments shape our moral life with others, guarding justice, peace, and the dignity of every person.</p>
+        <p>The Fourth Commandment teaches us to recognize and respect the God-given authority of parents and others entrusted with care and governance. This includes not only obedience in childhood but also honor, gratitude, and care throughout life.</p>
+        <p>It affirms the value of the family as the foundational community of society, and as the place where faith, love, and human dignity are nurtured.</p>
+        <p>Beyond the family, this commandment extends to respect for legitimate civil and ecclesial authorities, provided their commands do not violate God’s law. Obedience to authority is a form of obedience to God, unless that authority becomes unjust or immoral.</p>
+        <p>Parents, too, have duties: to love, educate, and form their children morally and spiritually. The mutual relationship of respect, care, and responsibility makes the family a true reflection of God’s love and order.</p>
     `,
     videoUrl: null,
     quiz: [
         {
-            question: "What do Commandments 4–10 primarily address?",
+            question: "What does the Fourth Commandment call us to do?",
             options: [
-                "Our relationship with God",
-                "Our relationship with other people",
-                "Religious rituals",
-                "Church governance"
+                "Honor the Sabbath",
+                "Respect all forms of property",
+                "Honor and obey our parents and legitimate authority",
+                "Avoid bearing false witness"
             ],
-            correct: 1
+            correct: 2
         },
         {
-            question: "Which commandment calls us to honor our parents?",
+            question: "Where in Scripture is the Fourth Commandment found?",
             options: [
-                "Fourth",
-                "Fifth",
-                "Sixth",
-                "Seventh"
+                "Exodus 20:12",
+                "Matthew 22:37",
+                "Romans 13:1",
+                "Genesis 1:27"
             ],
             correct: 0
         },
         {
-            question: "What does the Fifth Commandment uphold?",
+            question: "What term does the Church use to describe the family?",
             options: [
-                "Purity in marriage",
-                "Truthfulness",
-                "The sanctity of life",
-                "Detachment from goods"
+                "Social unit",
+                "Moral community",
+                "Domestic Church",
+                "Civil institution"
+            ],
+            correct: 2
+        },
+        {
+            question: "According to CCC 2214–2220, what are children’s duties toward parents?",
+            options: [
+                "Independence and distance",
+                "Honor, obedience, gratitude, and assistance",
+                "Worship and sacrifice",
+                "None—they owe nothing"
+            ],
+            correct: 1
+        },
+        {
+            question: "What does the Fourth Commandment teach about authority?",
+            options: [
+                "All authority is to be resisted",
+                "Only Church authority matters",
+                "Legitimate authority deserves respect and obedience",
+                "Authority exists only in ancient cultures"
+            ],
+            correct: 2
+        },
+        {
+            question: "What does CCC 2207 emphasize about the family?",
+            options: [
+                "It should be governed by the state",
+                "It is the original cell of social life",
+                "It is merely a cultural construct",
+                "It replaces the need for society"
+            ],
+            correct: 1
+        },
+        {
+            question: "Which New Testament passage highlights Jesus’ obedience to His earthly parents?",
+            options: [
+                "Luke 2:51",
+                "John 3:16",
+                "Mark 12:30",
+                "Matthew 28:19"
+            ],
+            correct: 0
+        },
+        {
+            question: "What is a parent's primary moral duty to their children?",
+            options: [
+                "To give them wealth",
+                "To ensure they are popular",
+                "To raise and educate them in love and the faith",
+                "To let them live without rules"
+            ],
+            correct: 2
+        },
+        {
+            question: "How should citizens respond to legitimate civil authority?",
+            options: [
+                "Obey it only when convenient",
+                "Respect it and follow just laws",
+                "Rebel against all government",
+                "Follow Church law only"
+            ],
+            correct: 1
+        },
+        {
+            question: "What virtue is especially fostered by the Fourth Commandment?",
+            options: [
+                "Temperance",
+                "Gratitude",
+                "Courage",
+                "Curiosity"
+            ],
+            correct: 1
+        }
+    ]
+},
+
+{
+    id: "morals-5-7",
+    title: "The Fifth and Seventh Commandments: Respect for Life and Property",
+    content: `
+        <h3>Definition</h3>
+        <p>
+            The Fifth Commandment ("You shall not kill") and the Seventh Commandment ("You shall not steal") uphold the dignity of the human person by protecting life and promoting justice. They teach us to value every human life as sacred and to respect the rightful possessions and goods of others. These commandments call us to love our neighbor by preserving life, promoting peace, acting with honesty, and seeking the common good (CCC 2258–2330; 2401–2463).
+        </p>
+
+        <h3>Scriptural References</h3>
+        <ul>
+            <li><strong>Exodus 20:13, 15</strong> – "You shall not kill"; "You shall not steal."</li>
+            <li><strong>Matthew 5:21–22</strong> – Jesus teaches that anger and hatred are violations of the Fifth Commandment.</li>
+            <li><strong>Luke 10:29–37</strong> – The Good Samaritan: respecting and protecting life.</li>
+            <li><strong>Luke 19:8–9</strong> – Zacchaeus restores stolen goods in repentance and justice.</li>
+        </ul>
+
+        <h3>Catechism References</h3>
+        <ul>
+            <li><strong>CCC 2258</strong> – Human life is sacred because it is created by God.</li>
+            <li><strong>CCC 2261</strong> – Murder is gravely contrary to human dignity.</li>
+            <li><strong>CCC 2302</strong> – Christ calls us to avoid anger and hatred, which are spiritual forms of murder.</li>
+            <li><strong>CCC 2401</strong> – The Seventh Commandment upholds justice and respect for the goods of others.</li>
+            <li><strong>CCC 2409</strong> – Theft, fraud, and unjust wages are offenses against this commandment.</li>
+            <li><strong>CCC 2443</strong> – God blesses those who care for the poor and vulnerable.</li>
+        </ul>
+
+        <h3>Proclamation</h3>
+        <blockquote>
+            "You shall love your neighbor as yourself." – Matthew 22:39
+        </blockquote>
+
+        <h3>Explanation</h3>
+        <p>
+            The Fifth Commandment teaches that every human life is sacred and must be protected from conception until natural death. It forbids murder, abortion, euthanasia, and other direct attacks on life. But it also calls us to a broader respect for life: avoiding hatred, violence, anger, and revenge. We are called to be peacemakers, care for our health, and protect others.
+        </p>
+        <p>
+            The Seventh Commandment protects the right to private property and demands justice in our dealings. It forbids stealing, cheating, unjust business practices, vandalism, and withholding just wages. More positively, it calls us to practice generosity, stewardship of creation, and concern for the poor.
+        </p>
+        <p>
+            These commandments teach us to build a culture of life and justice. They remind us that love of neighbor involves both protecting life and promoting fairness in material goods and economic relationships.
+        </p>
+    `,
+    videoUrl: null,
+    quiz: [
+        {
+            question: "What do the Fifth and Seventh Commandments primarily protect?",
+            options: [
+                "Worship and rest",
+                "Speech and thought",
+                "Life and property",
+                "Church governance"
+            ],
+            correct: 2
+        },
+        {
+            question: "According to the Fifth Commandment, when is human life sacred?",
+            options: [
+                "Only after birth",
+                "Only in old age",
+                "From conception to natural death",
+                "Only for Christians"
+            ],
+            correct: 2
+        },
+        {
+            question: "What does Jesus teach in Matthew 5:21–22 about the Fifth Commandment?",
+            options: [
+                "It only forbids physical murder",
+                "Anger and hatred also violate it",
+                "It no longer applies",
+                "It only applies to legal justice"
+            ],
+            correct: 1
+        },
+        {
+            question: "Which of the following violates the Seventh Commandment?",
+            options: [
+                "Paying fair wages",
+                "Donating to the poor",
+                "Stealing or committing fraud",
+                "Tithing to the Church"
+            ],
+            correct: 2
+        },
+        {
+            question: "What does CCC 2409 list as offenses against the Seventh Commandment?",
+            options: [
+                "Fasting and almsgiving",
+                "Laziness and gluttony",
+                "Fraud, unjust wages, and theft",
+                "Lying and gossip"
+            ],
+            correct: 2
+        },
+        {
+            question: "Which parable best illustrates the spirit of the Fifth Commandment?",
+            options: [
+                "The Prodigal Son",
+                "The Sower",
+                "The Good Samaritan",
+                "The Lost Coin"
+            ],
+            correct: 2
+        },
+        {
+            question: "What is the positive call of the Seventh Commandment?",
+            options: [
+                "Avoidance of taxes",
+                "Practicing generosity and justice",
+                "Worship on Sundays",
+                "Refraining from gossip"
+            ],
+            correct: 1
+        },
+        {
+            question: "Who is a model of repentance and restitution in regard to stolen goods?",
+            options: [
+                "Peter",
+                "Paul",
+                "Zacchaeus",
+                "Thomas"
+            ],
+            correct: 2
+        },
+        {
+            question: "What does the Fifth Commandment say about caring for our own health?",
+            options: [
+                "It's not important",
+                "It's only for doctors",
+                "It's part of respecting life",
+                "It's a civic duty only"
+            ],
+            correct: 2
+        },
+        {
+            question: "What virtue is especially supported by both Commandments 5 and 7?",
+            options: [
+                "Temperance",
+                "Justice",
+                "Fortitude",
+                "Curiosity"
+            ],
+            correct: 1
+        }
+    ]
+},
+
+{
+    id: "morals-6-9",
+    title: "The Sixth and Ninth Commandments: Chastity and Purity of Heart",
+    content: `
+        <h3>Definition</h3>
+        <p>
+            The Sixth Commandment ("You shall not commit adultery") and the Ninth Commandment ("You shall not covet your neighbor’s wife") uphold the sacredness of human sexuality and the call to chastity and purity of heart. They teach us to honor the dignity of the human person, the sanctity of marriage, and the integrity of body and soul (CCC 2331–2391; 2514–2533).
+        </p>
+
+        <h3>Scriptural References</h3>
+        <ul>
+            <li><strong>Exodus 20:14, 17</strong> – "You shall not commit adultery"; "You shall not covet your neighbor’s wife."</li>
+            <li><strong>Matthew 5:27–28</strong> – Jesus teaches that even lustful thoughts are violations of purity.</li>
+            <li><strong>Genesis 2:24–25</strong> – "The two shall become one flesh... and they were both naked and were not ashamed."</li>
+            <li><strong>1 Thessalonians 4:3–5</strong> – "This is the will of God, your sanctification: that you abstain from unchastity."</li>
+        </ul>
+
+        <h3>Catechism References</h3>
+        <ul>
+            <li><strong>CCC 2337</strong> – Chastity is the successful integration of sexuality within the person.</li>
+            <li><strong>CCC 2349</strong> – Chastity blossoms in friendship and fosters spiritual growth.</li>
+            <li><strong>CCC 2353</strong> – Fornication is gravely contrary to the dignity of persons and sexuality.</li>
+            <li><strong>CCC 2360–2365</strong> – The dignity of marriage and the conjugal act.</li>
+            <li><strong>CCC 2514–2519</strong> – Purity of heart and the inner battle for holiness.</li>
+            <li><strong>CCC 2520</strong> – The means to achieve purity: modesty, discipline, and grace.</li>
+        </ul>
+
+        <h3>Proclamation</h3>
+        <blockquote>
+            "Blessed are the pure in heart, for they shall see God." – Matthew 5:8
+        </blockquote>
+
+        <h3>Explanation</h3>
+        <p>
+            The Sixth Commandment calls us to live out the truth of love and the dignity of our sexuality according to God’s design. It forbids adultery, fornication, pornography, and any misuse of the sexual gift. It affirms the goodness of sexuality within the context of marriage, where it becomes a sign of total, faithful, fruitful love.
+        </p>
+        <p>
+            The Ninth Commandment focuses on interior purity and the ordering of our desires. While the Sixth Commandment governs external actions, the Ninth addresses the internal struggle against lust and covetousness of another’s spouse. It calls for purity of heart, modesty, and vigilance over our imagination and emotions.
+        </p>
+        <p>
+            Together, these commandments protect the sacredness of marriage and the integrity of our personhood. Chastity is not merely abstinence—it is a positive virtue that frees us to love rightly, in truth and self-gift. Everyone is called to chastity, whether single, married, celibate, or consecrated.
+        </p>
+        <p>
+            By God’s grace, prayer, the sacraments, and the practice of modesty and self-control, we grow in the virtue of chastity and are made capable of truly loving as Christ loves.
+        </p>
+    `,
+    videoUrl: null,
+    quiz: [
+        {
+            question: "What do the Sixth and Ninth Commandments protect?",
+            options: [
+                "Material possessions",
+                "Religious freedom",
+                "Human sexuality and purity of heart",
+                "Public reputation"
+            ],
+            correct: 2
+        },
+        {
+            question: "Which of the following is forbidden by the Sixth Commandment?",
+            options: [
+                "False witness",
+                "Fornication and adultery",
+                "Anger and hatred",
+                "Theft and fraud"
+            ],
+            correct: 1
+        },
+        {
+            question: "What does the Ninth Commandment warn against?",
+            options: [
+                "Coveting material goods",
+                "Lying under oath",
+                "Desiring another’s spouse with lust",
+                "Violating the Sabbath"
             ],
             correct: 2
         },
         {
             question: "According to CCC 2337, chastity is:",
             options: [
-                "Avoiding all relationships",
+                "Avoiding all romantic relationships",
+                "The suppression of desire",
                 "The integration of sexuality within the person",
-                "Refraining from marriage",
-                "Obeying parents"
-            ],
-            correct: 1
-        },
-        {
-            question: "Which commandment forbids theft?",
-            options: [
-                "Sixth",
-                "Seventh",
-                "Eighth",
-                "Tenth"
-            ],
-            correct: 1
-        },
-        {
-            question: "What does the Eighth Commandment forbid?",
-            options: [
-                "Murder",
-                "Coveting goods",
-                "Bearing false witness",
-                "Idolatry"
+                "A rule for only religious people"
             ],
             correct: 2
         },
         {
-            question: "What is the focus of the Ninth Commandment?",
+            question: "What does Matthew 5:27–28 teach about purity?",
             options: [
-                "Purity of intention and freedom from lustful desires",
-                "Respecting others’ property",
-                "Truthfulness",
-                "Caring for parents"
+                "Only physical actions matter",
+                "Marriage is not important",
+                "Lustful thoughts also violate God’s law",
+                "Only women are called to modesty"
             ],
-            correct: 0
+            correct: 2
         },
         {
-            question: "The Tenth Commandment warns against:",
+            question: "Who is called to the virtue of chastity?",
             options: [
-                "Murder",
-                "Coveting what belongs to another",
-                "False oaths",
-                "Dishonoring parents"
+                "Only unmarried people",
+                "Only priests and nuns",
+                "Everyone, in their state in life",
+                "No one—it's an outdated idea"
             ],
-            correct: 1
+            correct: 2
         },
         {
-            question: "Which verse sums up the commandments as 'love your neighbor as yourself'?",
+            question: "Which of the following helps grow purity of heart?",
             options: [
-                "Matthew 22:39",
-                "Exodus 20:12–17",
-                "Romans 13:9",
-                "Colossians 3:9"
+                "Material wealth",
+                "Worldly experience",
+                "Prayer, modesty, and self-discipline",
+                "Suppressing emotions entirely"
             ],
-            correct: 0
+            correct: 2
         },
         {
-            question: "What do Commandments 4–10 protect?",
+            question: "What does CCC 2353 say about fornication?",
             options: [
-                "Only family life",
-                "Justice, peace, and the dignity of every person",
-                "Religious authority",
-                "Cultural traditions"
+                "It’s a minor issue",
+                "It is acceptable if consensual",
+                "It is gravely contrary to human dignity",
+                "It’s not discussed by the Church"
             ],
-            correct: 1
+            correct: 2
+        },
+        {
+            question: "What is the purpose of sexual intimacy in marriage?",
+            options: [
+                "Pleasure only",
+                "Manipulation",
+                "A sign of total, faithful, fruitful love",
+                "Control of the spouse"
+            ],
+            correct: 2
+        },
+        {
+            question: "What virtue frees us to love rightly and fully?",
+            options: [
+                "Temperance",
+                "Obedience",
+                "Chastity",
+                "Detachment"
+            ],
+            correct: 2
         }
     ]
 },
+{
+    id: "morals-8-10",
+    title: "The Eighth and Tenth Commandments: Truth and Contentment",
+    content: `
+        <h3>Definition</h3>
+        <p>
+            The Eighth Commandment ("You shall not bear false witness") and the Tenth Commandment ("You shall not covet your neighbor’s goods") guide our interior disposition and speech. They call us to live in the truth, avoid envy, and be content with what we have. These commandments protect the integrity of communication and foster gratitude rather than greed (CCC 2464–2513; 2534–2557).
+        </p>
+
+        <h3>Scriptural References</h3>
+        <ul>
+            <li><strong>Exodus 20:16–17</strong> – "You shall not bear false witness"; "You shall not covet your neighbor’s goods."</li>
+            <li><strong>Proverbs 12:22</strong> – "Lying lips are an abomination to the Lord."</li>
+            <li><strong>Luke 12:15</strong> – "Guard against all covetousness; for one’s life does not consist in the abundance of possessions."</li>
+            <li><strong>Philippians 4:11–13</strong> – Paul speaks of contentment in all circumstances.</li>
+        </ul>
+
+        <h3>Catechism References</h3>
+        <ul>
+            <li><strong>CCC 2464</strong> – The Eighth Commandment forbids misrepresenting the truth.</li>
+            <li><strong>CCC 2475–2487</strong> – Forms of lying, detraction, calumny, and the importance of truth in love.</li>
+            <li><strong>CCC 2507–2513</strong> – The importance of respect for reputation and secrecy.</li>
+            <li><strong>CCC 2534</strong> – The Tenth Commandment addresses disordered desire for another's possessions.</li>
+            <li><strong>CCC 2544</strong> – Detachment from riches is necessary for entering the Kingdom of God.</li>
+            <li><strong>CCC 2551–2557</strong> – The struggle against envy and cultivating a spirit of poverty and generosity.</li>
+        </ul>
+
+        <h3>Proclamation</h3>
+        <blockquote>
+            "Truth and contentment guard the heart and build a just society. To live honestly and desire rightly is to reflect the freedom of the children of God."
+        </blockquote>
+
+        <h3>Explanation</h3>
+        <p>
+            The Eighth Commandment calls us to speak and live in the truth. It forbids lying, gossip, slander, perjury, and rash judgment. Truthfulness builds trust, community, and justice. This commandment also requires us to protect others' reputations, maintain appropriate confidentiality, and speak with charity.
+        </p>
+        <p>
+            The Tenth Commandment turns inward, addressing our desires. It forbids coveting what belongs to another—whether their possessions, success, or status. This commandment highlights the danger of envy and greed, which can lead to other sins like theft and dishonesty. Instead, it calls us to cultivate gratitude, simplicity, and trust in God's providence.
+        </p>
+        <p>
+            Together, the Eighth and Tenth Commandments guide both speech and desire. They remind us that holiness begins in the heart and is expressed in how we speak and what we value. Living in truth and contentment frees us to love God and neighbor more fully.
+        </p>
+    `,
+    videoUrl: null,
+    quiz: [
+        {
+            question: "What does the Eighth Commandment forbid?",
+            options: [
+                "Taking another's goods",
+                "Coveting another’s spouse",
+                "Misrepresenting the truth",
+                "Working on the Sabbath"
+            ],
+            correct: 2
+        },
+        {
+            question: "What does the Tenth Commandment teach?",
+            options: [
+                "To guard our speech",
+                "To avoid anger",
+                "To be content and avoid envy",
+                "To honor parents"
+            ],
+            correct: 2
+        },
+        {
+            question: "Which passage teaches that 'lying lips are an abomination to the Lord'?",
+            options: [
+                "Luke 12:15",
+                "Philippians 4:13",
+                "Proverbs 12:22",
+                "Exodus 20:17"
+            ],
+            correct: 2
+        },
+        {
+            question: "According to CCC 2464, what does the Eighth Commandment require?",
+            options: [
+                "Worship of God alone",
+                "Sabbath observance",
+                "Truthfulness in speech and action",
+                "Generosity to the poor"
+            ],
+            correct: 2
+        },
+        {
+            question: "Which of the following violates the Eighth Commandment?",
+            options: [
+                "Giving to charity",
+                "Honoring parents",
+                "Detraction or gossip",
+                "Prayer and fasting"
+            ],
+            correct: 2
+        },
+        {
+            question: "The Tenth Commandment addresses which interior disposition?",
+            options: [
+                "Hatred",
+                "Covetousness",
+                "Anger",
+                "Impatience"
+            ],
+            correct: 1
+        },
+        {
+            question: "What virtue counters the sin of envy?",
+            options: [
+                "Ambition",
+                "Justice",
+                "Gratitude",
+                "Zeal"
+            ],
+            correct: 2
+        },
+        {
+            question: "Which New Testament passage encourages contentment in all circumstances?",
+            options: [
+                "Luke 6:36",
+                "Romans 12:2",
+                "Philippians 4:11–13",
+                "Matthew 5:8"
+            ],
+            correct: 2
+        },
+        {
+            question: "What does CCC 2544 say about riches?",
+            options: [
+                "They are always a blessing",
+                "They are a sign of holiness",
+                "Detachment from riches is necessary for the Kingdom",
+                "They must be sought diligently"
+            ],
+            correct: 2
+        },
+        {
+            question: "What is the positive call of the Eighth and Tenth Commandments?",
+            options: [
+                "Truthfulness and detachment from materialism",
+                "Prayer and penance",
+                "Faith and hope",
+                "Missionary zeal and fasting"
+            ],
+            correct: 0
+        }
+    ]
+},
+
 
                      {
     id: "morals-9",
@@ -10995,6 +11480,8 @@ lessons: [
             document.getElementById('spiritual-main-menu-button').addEventListener('click', () => {
                 showSection('main-menu-section');
             });
+            
+            
 
             // Back buttons for new spiritual sections
             document.getElementById('prayers-back-to-spiritual-button').addEventListener('click', () => {
@@ -11006,6 +11493,10 @@ lessons: [
             document.getElementById('practices-back-to-spiritual-button').addEventListener('click', () => {
                 showSection('spiritual-formation-section');
             });
+            
+           document.getElementById('lectio-divina-button').addEventListener('click', () => showSection('lectio-divina-section'));
+            document.getElementById('lectio-back-to-prayer-button').addEventListener('click', () => showSection('prayer-section'));
+
 
             // Spiritual Practices Sub-Menu Buttons
             document.getElementById('works-of-mercy-button').addEventListener('click', () => {
@@ -11036,9 +11527,7 @@ lessons: [
             document.getElementById('liturgical-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
       
             // Prayer Sub-Menu Buttons
-            document.getElementById('lectio-divina-button').addEventListener('click', () => {
-                showCustomAlert("Lectio Divina functionality coming soon!");
-            });
+          
             document.getElementById('guided-rosary-button').addEventListener('click', () => {
                 showSection('rosary-mysteries-section');
                 
