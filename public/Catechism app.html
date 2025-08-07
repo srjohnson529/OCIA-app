@@ -563,6 +563,36 @@ nav button:focus-visible {
     transform: translateY(-2px);
 }
 
+#rosary-explanation-content {
+    font-family: 'Georgia', serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #111;
+    padding: 1rem;
+}
+
+#rosary-explanation-content p {
+    margin-bottom: 1.2rem;
+}
+
+#rosary-explanation-content ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#rosary-explanation-content li {
+    margin-bottom: 1rem;
+}
+
+#rosary-explanation-content strong {
+    font-weight: 600;
+}
+
+#rosary-explanation-content em {
+    font-style: italic;
+    color: #444;
+}
+
 
 /* Chat Section Container */
 #chat-section {
@@ -11306,33 +11336,130 @@ lessons: [
                 showCustomAlert(`You scored ${score}/${totalQuestions}. Please review the material and try again.`);
             }
         }
+        
 
 
    // Rosary Logic
         const ROSARY_PRAYER = "O God, whose only-begotten Son, by His life, death, and resurrection, has purchased for us the rewards of eternal life; grant, we beseech Thee, that, meditating upon these mysteries of the Most Holy Rosary of the Blessed Virgin Mary, we may imitate what they contain and obtain what they promise, through the same Christ our Lord. Amen.";
 
         const mysteryInfo = {
-            joyful: {
-                name: "The Joyful Mysteries",
-                description: "The Joyful Mysteries focus on the joyful events of Jesus's childhood, from the Annunciation to the Finding in the Temple. They are traditionally prayed on Mondays and Saturdays.",
-                mysteries: joyfulMysteries
-            },
-            luminous: {
-                name: "The Luminous Mysteries",
-                description: "The Luminous Mysteries, or Mysteries of Light, focus on the public ministry of Jesus. They are traditionally prayed on Thursdays.",
-                mysteries: luminousMysteries
-            },
-            sorrowful: {
-                name: "The Sorrowful Mysteries",
-                description: "The Sorrowful Mysteries focus on the events of Jesus's Passion and Death. They are traditionally prayed on Tuesdays and Fridays.",
-                mysteries: sorrowfulMysteries
-            },
-            glorious: {
-                name: "The Glorious Mysteries",
-                description: "The Glorious Mysteries focus on the events following Jesus's Resurrection, culminating in the Coronation of Mary. They are traditionally prayed on Wednesdays and Sundays.",
-                mysteries: gloriousMysteries
-            }
-        };
+    joyful: {
+        name: "The Joyful Mysteries",
+        description: `
+            <p>The <strong>Joyful Mysteries</strong> invite us to reflect on the Incarnation and the early life of Jesus. They are traditionally prayed on <strong>Mondays</strong> and <strong>Saturdays</strong>, as well as Sundays during Advent.</p>
+            <ol>
+                <li>
+                    <strong>The Annunciation</strong> – The angel Gabriel announces to Mary that she will conceive the Son of God by the Holy Spirit.<br>
+                    <em>Fruit:</em> Humility
+                </li>
+                <li>
+                    <strong>The Visitation</strong> – Mary visits her cousin Elizabeth, who is pregnant with John the Baptist. Elizabeth is filled with the Holy Spirit.<br>
+                    <em>Fruit:</em> Charity
+                </li>
+                <li>
+                    <strong>The Nativity</strong> – Jesus is born in Bethlehem and laid in a manger. The Word becomes flesh and dwells among us.<br>
+                    <em>Fruit:</em> Poverty of Spirit
+                </li>
+                <li>
+                    <strong>The Presentation</strong> – Mary and Joseph present Jesus in the Temple. Simeon and Anna recognize Him as the Messiah.<br>
+                    <em>Fruit:</em> Obedience
+                </li>
+                <li>
+                    <strong>The Finding in the Temple</strong> – Jesus is found in the Temple, teaching the elders. He reveals His mission to do the Father’s will.<br>
+                    <em>Fruit:</em> Zeal for God
+                </li>
+            </ol>
+        `,
+        mysteries: joyfulMysteries
+    },
+    luminous: {
+        name: "The Luminous Mysteries",
+        description: `
+            <p>The <strong>Luminous Mysteries</strong> (Mysteries of Light) were introduced by Pope St. John Paul II and focus on the public ministry of Jesus. They are traditionally prayed on <strong>Thursdays</strong>.</p>
+            <ol>
+                <li>
+                    <strong>The Baptism in the Jordan</strong> – Jesus is baptized by John, and the Spirit descends upon Him.<br>
+                    <em>Fruit:</em> Openness to the Holy Spirit
+                </li>
+                <li>
+                    <strong>The Wedding at Cana</strong> – Jesus turns water into wine at His mother’s request—the first public sign of His glory.<br>
+                    <em>Fruit:</em> Trust in Mary’s Intercession
+                </li>
+                <li>
+                    <strong>The Proclamation of the Kingdom</strong> – Jesus proclaims the Kingdom of God and calls for repentance.<br>
+                    <em>Fruit:</em> Conversion of Heart
+                </li>
+                <li>
+                    <strong>The Transfiguration</strong> – Jesus is transfigured before Peter, James, and John on Mount Tabor.<br>
+                    <em>Fruit:</em> Desire for Holiness
+                </li>
+                <li>
+                    <strong>The Institution of the Eucharist</strong> – Jesus gives us His Body and Blood at the Last Supper.<br>
+                    <em>Fruit:</em> Love for the Eucharist
+                </li>
+            </ol>
+        `,
+        mysteries: luminousMysteries
+    },
+    sorrowful: {
+        name: "The Sorrowful Mysteries",
+        description: `
+            <p>The <strong>Sorrowful Mysteries</strong> focus on Christ’s Passion and Death. They are traditionally prayed on <strong>Tuesdays</strong> and <strong>Fridays</strong>, as well as Sundays during Lent.</p>
+            <ol>
+                <li>
+                    <strong>The Agony in the Garden</strong> – Jesus prays in Gethsemane and submits to the Father’s will.<br>
+                    <em>Fruit:</em> Surrender to God’s Will
+                </li>
+                <li>
+                    <strong>The Scourging at the Pillar</strong> – Jesus is brutally whipped before His Crucifixion.<br>
+                    <em>Fruit:</em> Purity and Mortification
+                </li>
+                <li>
+                    <strong>The Crowning with Thorns</strong> – Jesus is mocked and crowned with thorns.<br>
+                    <em>Fruit:</em> Courage and Humility
+                </li>
+                <li>
+                    <strong>The Carrying of the Cross</strong> – Jesus carries His Cross to Calvary, falling under its weight.<br>
+                    <em>Fruit:</em> Patience in Suffering
+                </li>
+                <li>
+                    <strong>The Crucifixion</strong> – Jesus is nailed to the Cross and dies for our sins.<br>
+                    <em>Fruit:</em> Love and Forgiveness
+                </li>
+            </ol>
+        `,
+        mysteries: sorrowfulMysteries
+    },
+    glorious: {
+        name: "The Glorious Mysteries",
+        description: `
+            <p>The <strong>Glorious Mysteries</strong> celebrate the Resurrection and the glory of Jesus and Mary. They are traditionally prayed on <strong>Wednesdays</strong> and <strong>Sundays</strong> outside of Advent and Lent.</p>
+            <ol>
+                <li>
+                    <strong>The Resurrection</strong> – Jesus rises from the dead, conquering sin and death.<br>
+                    <em>Fruit:</em> Faith and Joy
+                </li>
+                <li>
+                    <strong>The Ascension</strong> – Jesus ascends into heaven to sit at the right hand of the Father.<br>
+                    <em>Fruit:</em> Hope and Desire for Heaven
+                </li>
+                <li>
+                    <strong>The Descent of the Holy Spirit</strong> – The Spirit comes upon the Apostles at Pentecost.<br>
+                    <em>Fruit:</em> Zeal and Guidance of the Holy Spirit
+                </li>
+                <li>
+                    <strong>The Assumption of Mary</strong> – Mary is taken body and soul into heaven.<br>
+                    <em>Fruit:</em> Devotion to Mary and the Hope of Resurrection
+                </li>
+                <li>
+                    <strong>The Coronation of Mary</strong> – Mary is crowned Queen of Heaven and Earth.<br>
+                    <em>Fruit:</em> Trust in Mary’s Intercession
+                </li>
+            </ol>
+        `,
+        mysteries: gloriousMysteries
+    }
+};
 
         function buildRosarySequence(mysteries) {
             const sequence = [
@@ -11363,15 +11490,16 @@ lessons: [
             return sequence;
         }
 
+        
         function showRosaryExplanation(mysteryKey) {
-            const info = mysteryInfo[mysteryKey];
-            rosaryState.fullSequence = buildRosarySequence(info.mysteries);
-            
-            document.getElementById('rosary-explanation-title').textContent = info.name;
-            document.getElementById('rosary-explanation-content').textContent = info.description;
-            
-            showSection('rosary-explanation-section');
-        }
+    const info = mysteryInfo[mysteryKey];
+    rosaryState.fullSequence = buildRosarySequence(info.mysteries);
+
+    document.getElementById("rosary-explanation-title").innerHTML = info.name;
+    document.getElementById("rosary-explanation-content").innerHTML = info.description;
+
+    showSection('rosary-explanation-section');
+}
 
         function startGuidedRosary() {
             rosaryState.currentStep = 0;
