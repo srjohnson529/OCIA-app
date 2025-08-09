@@ -55,6 +55,25 @@
             border-radius: var(--border-radius); /* Added back from previous working code */
             margin-bottom: 1rem; /* Added back from previous working code */
         }
+        #user-info-display {
+    position: absolute;
+    top: 8px;
+    right: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 5px 10px;
+    border-radius: 12px;
+    color: #f0f0f0;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#user-info-display.hidden {
+    display: none;
+}
 
         /* Navigation Bar */
          nav {
@@ -881,7 +900,10 @@ max-width: 85%;
 <body>
 
     <!-- Header -->
-    <header>ILLUMINED</header>
+    <header>
+        ILLUMINED
+        <div id="user-info-display" class="hidden"></div>
+    </header>
 
     <!-- Navigation Bar -->
     <nav>
@@ -1433,7 +1455,187 @@ max-width: 85%;
             {
                 category: "The Profession of Faith",
 lessons: [
-    {
+  {
+    id: "foundations-ocia",
+    title: "The Order of Christian Initiation of Adults (OCIA) and the Catechumenate",
+    content: `
+        <h3>Definition</h3>
+        <p>
+            The <strong>Order of Christian Initiation of Adults (OCIA)</strong> is the normative process by which non-baptized adults (called <em>catechumens</em>) are gradually initiated into the Catholic Church through a journey of faith, culminating in the reception of the Sacraments of Baptism, Confirmation, and the Eucharist at the Easter Vigil. The OCIA also includes provisions for baptized Christians seeking full communion with the Church and for uncatechized Catholics completing their initiation.
+        </p>
+
+        <h3>Historical Background</h3>
+        <p>
+            In the early Church, adult initiation was the common path into Christianity. Converts went through a rigorous period of formation, spiritual preparation, and moral conversion, typically lasting several years. This structure, called the <strong>catechumenate</strong>, included public rites, doctrinal instruction, and periods of discernment. After the legalization of Christianity, infant baptism became more common, and adult initiation declined in visibility.
+        </p>
+        <p>
+            The Second Vatican Council called for the restoration of the ancient catechumenate in the document <em>Ad Gentes</em> (1965), and the modern rite was promulgated as the <strong>Rite of Christian Initiation of Adults (RCIA)</strong> in 1972. In 2021, the Church revised the English translation to <strong>Order of Christian Initiation of Adults (OCIA)</strong>, emphasizing its liturgical and structured nature.
+        </p>
+
+        <h3>The Stages of the OCIA Process</h3>
+        <ol>
+            <li>
+                <strong>Pre-Catechumenate (Evangelization and Inquiry)</strong> – A period of initial openness where seekers are introduced to the Gospel and ask foundational questions about faith.
+            </li>
+            <li>
+                <strong>Catechumenate</strong> – A longer period of structured formation in Scripture, doctrine, prayer, and community life. Those enrolled in this stage are formally called <em>catechumens</em>.
+            </li>
+            <li>
+                <strong>Purification and Enlightenment</strong> – A more intense spiritual preparation during Lent, focused on conversion and interior renewal, including the Scrutinies and Presentations.
+            </li>
+            <li>
+                <strong>Sacraments of Initiation</strong> – At the Easter Vigil, catechumens are baptized, confirmed, and receive the Eucharist for the first time, becoming fully initiated Catholics.
+            </li>
+            <li>
+                <strong>Mystagogy</strong> – A post-baptismal period of reflection and integration into the Church’s sacramental life and mission. The neophytes (newly baptized) deepen their understanding of the mysteries they’ve received.
+            </li>
+        </ol>
+
+        <h3>Key Terms</h3>
+        <ul>
+            <li><strong>Catechumen</strong> – An unbaptized person preparing for Christian initiation through the OCIA process.</li>
+            <li><strong>Candidate</strong> – A baptized Christian (non-Catholic) preparing to be received into full communion with the Catholic Church.</li>
+            <li><strong>Elect</strong> – The name given to catechumens after the Rite of Election, as they prepare to receive the Sacraments at Easter.</li>
+            <li><strong>Neophyte</strong> – A newly baptized Catholic, especially during the period of mystagogy.</li>
+        </ul>
+
+        <h3>Scriptural Foundations</h3>
+        <ul>
+            <li><strong>Matthew 28:19–20</strong> – "Go therefore and make disciples of all nations... teaching them to observe all I have commanded you."</li>
+            <li><strong>Acts 2:41–42</strong> – Early Christians "devoted themselves to the apostles' teaching and fellowship, to the breaking of the bread and the prayers."</li>
+            <li><strong>Romans 6:3–4</strong> – Baptism unites us to Christ’s death and resurrection.</li>
+        </ul>
+
+        <h3>Catechism References</h3>
+        <ul>
+            <li><strong>CCC 1212</strong> – The Sacraments of Initiation lay the foundations of the Christian life.</li>
+            <li><strong>CCC 1247–1249</strong> – The catechumenate as a period of formation and grace.</li>
+            <li><strong>CCC 1253</strong> – Preparation for Baptism includes both instruction and conversion.</li>
+            <li><strong>CCC 1229</strong> – From the time of the apostles, becoming a Christian has been accomplished through a journey of faith and initiation.</li>
+        </ul>
+
+        <h3>Proclamation</h3>
+        <blockquote>
+            "The OCIA is not merely a program but a journey of conversion—personal, communal, and sacramental—into the life of Christ and His Church."
+        </blockquote>
+
+        <h3>Explanation</h3>
+        <p>
+            The OCIA process is deeply pastoral and liturgical. It recognizes that conversion is gradual and that people come to faith from different places. The Church walks with inquirers, catechumens, and candidates as they are evangelized, catechized, and sacramentally incorporated into the Mystical Body of Christ.
+        </p>
+        <p>
+            The catechumenate phase, in particular, is central: it is a time of sustained formation in the faith, supported by sponsors, catechists, and the entire parish community. Through prayer, Scripture, sacramental preparation, and liturgical rites, the catechumen is formed not only in knowledge, but in discipleship.
+        </p>
+        <p>
+            The OCIA is a gift to the whole Church. It renews parish life by calling the faithful to accompany others, deepens the understanding of the sacraments, and enlivens the Easter Vigil as the high point of the liturgical year. Through the OCIA, the Church continues to fulfill Christ’s Great Commission to go and make disciples.
+        </p>
+    `,
+    videoUrl: null,
+    quiz: [
+        {
+            question: "What does OCIA stand for?",
+            options: [
+                "Office of Catholic Instructional Apostolates",
+                "Order of Christian Initiation of Adults",
+                "Organization for Catechumenal Integration and Apostasy",
+                "Orthodox Catholic Initiation Association"
+            ],
+            correct: 1
+        },
+        {
+            question: "What is a catechumen?",
+            options: [
+                "A baptized Christian converting to Catholicism",
+                "A Catholic preparing for Confirmation",
+                "An unbaptized person preparing for full initiation",
+                "A member of a monastic order"
+            ],
+            correct: 2
+        },
+        {
+            question: "What are the three Sacraments of Initiation?",
+            options: [
+                "Baptism, Eucharist, Reconciliation",
+                "Confirmation, Marriage, Eucharist",
+                "Baptism, Confirmation, Eucharist",
+                "Eucharist, Anointing of the Sick, Holy Orders"
+            ],
+            correct: 2
+        },
+        {
+            question: "Which Vatican II document called for the restoration of the catechumenate?",
+            options: [
+                "Lumen Gentium",
+                "Ad Gentes",
+                "Dei Verbum",
+                "Sacrosanctum Concilium"
+            ],
+            correct: 1
+        },
+        {
+            question: "What is the final stage of the OCIA process after receiving the sacraments?",
+            options: [
+                "Catechumenate",
+                "Purification and Enlightenment",
+                "Mystagogy",
+                "Election"
+            ],
+            correct: 2
+        },
+        {
+            question: "What title is given to catechumens after the Rite of Election?",
+            options: [
+                "Neophytes",
+                "Elect",
+                "Candidates",
+                "Seekers"
+            ],
+            correct: 1
+        },
+        {
+            question: "Which Scripture verse is most associated with Christ’s Great Commission?",
+            options: [
+                "John 3:16",
+                "Romans 6:3",
+                "Matthew 28:19–20",
+                "Acts 2:38"
+            ],
+            correct: 2
+        },
+        {
+            question: "What distinguishes a 'candidate' from a 'catechumen'?",
+            options: [
+                "A candidate is younger than a catechumen",
+                "Candidates are baptized; catechumens are not",
+                "Candidates prepare longer",
+                "Candidates are only in RCIA for the Eucharist"
+            ],
+            correct: 1
+        },
+        {
+            question: "What is the purpose of the 'Purification and Enlightenment' phase?",
+            options: [
+                "To study the Catechism in depth",
+                "To examine different religions",
+                "To intensify prayer and conversion before initiation",
+                "To practice spiritual gifts"
+            ],
+            correct: 2
+        },
+        {
+            question: "What name is given to the newly baptized after the Easter Vigil?",
+            options: [
+                "Apostles",
+                "Catechists",
+                "Mystagogues",
+                "Neophytes"
+            ],
+            correct: 3
+        }
+    ]
+},
+
+      {
         id: "foundations-1",
         title: "What is Faith?",
         content: `
@@ -11135,6 +11337,8 @@ lessons: [
 
         // Load User Profile
                  async function loadUserProfile() {
+                                 const userInfoDisplay = document.getElementById('user-info-display');
+
              try {
                 const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
                 const doc = await userDocRef.get();
@@ -11144,17 +11348,22 @@ lessons: [
                     document.getElementById('message-input').disabled = false;
                     document.getElementById('send-button').disabled = false;
                     document.getElementById('message-input-area').style.pointerEvents = 'auto';
+
+                     userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
+                    userInfoDisplay.classList.remove('hidden');
                     setupChatListener(); 
                 } else {
                     // If no profile, do nothing on load.
                     // The check will be handled by the chat button's event listener.
                     userProfile = null;
-                    document.getElementById('message-input').disabled = true; 
+                            document.getElementById('message-input').disabled = true; 
                     document.getElementById('send-button').disabled = true; 
+                    userInfoDisplay.classList.add('hidden');
                 }
             } catch (error) {
                 console.error('Profile load error:', error);
                 showCustomAlert('Failed to load profile.');
+                userInfoDisplay.classList.add('hidden');
             }
         }
         // Save Profile
@@ -11182,6 +11391,10 @@ lessons: [
                 document.getElementById('send-button').disabled = false;
                 document.getElementById('message-input-area').style.pointerEvents = 'auto';
                 
+                 const userInfoDisplay = document.getElementById('user-info-display');
+                userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
+                userInfoDisplay.classList.remove('hidden');
+
                 setupChatListener(); // Initialize chat with the new profile
 
                 showCustomAlert('Profile saved successfully!');
@@ -11779,6 +11992,7 @@ lessons: [
                 } else {
                     currentUser = null;
                     userProfile = null;
+                     document.getElementById('user-info-display').classList.add('hidden');
                     // When not authenticated, if user tries to go to chat, they will see the profile setup.
                     document.getElementById('message-input').disabled = true;
                     document.getElementById('send-button').disabled = true;
