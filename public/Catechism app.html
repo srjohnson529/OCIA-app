@@ -973,7 +973,6 @@ max-width: 85%;
     <!-- Header -->
     <header>
         ILLUMINED
-        <div id="user-info-display" class="hidden"></div>
     </header>
 
     <!-- Navigation Bar -->
@@ -998,8 +997,10 @@ max-width: 85%;
  <div class="main-content-container">
         <!-- Main Menu Section -->
         <section id="main-menu-section" class="hidden">
-            <h2>Welcome to Illumined</h2>
-            <p>Your guide to the Catechism of the Catholic Church.</p>
+                  <div id="dashboard-user-welcome" class="hidden" style="text-align: center; margin: 20px 0; font-size: 1.1em;"></div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-item">
             
             <div id="dashboard-container">
                 <div class="dashboard-item">
@@ -12689,6 +12690,8 @@ lessons: [
         // Load User Profile
                  async function loadUserProfile() {
                                  const userInfoDisplay = document.getElementById('user-info-display');
+                                const dashboardWelcome = document.getElementById('dashboard-user-welcome'); // Get the new element
+
 
              try {
                 const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
@@ -12699,6 +12702,11 @@ lessons: [
                     document.getElementById('message-input').disabled = false;
                     document.getElementById('send-button').disabled = false;
                     document.getElementById('message-input-area').style.pointerEvents = 'auto';
+                    // Hide old display and show new one
+                    if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
+
+                    dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
+                    dashboardWelcome.classList.remove('hidden');  
 
                      userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
                     userInfoDisplay.classList.remove('hidden');
@@ -12712,13 +12720,14 @@ lessons: [
                             document.getElementById('message-input').disabled = true; 
                     document.getElementById('send-button').disabled = true; 
                     userInfoDisplay.classList.add('hidden');
+                    dashboardWelcome.classList.add('hidden'); // Hide welcome message if no profile
                      updateDashboard(); // Update dashboard with no profile data
 
                 }
             } catch (error) {
                 console.error('Profile load error:', error);
-                showCustomAlert('Failed to load profile.');
-                userInfoDisplay.classList.add('hidden');
+          if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
+                dashboardWelcome.classList.add('hidden');
                 updateDashboard(); // Update dashboard on error
 
             }
@@ -12747,10 +12756,15 @@ lessons: [
                 document.getElementById('message-input').disabled = false;
                 document.getElementById('send-button').disabled = false;
                 document.getElementById('message-input-area').style.pointerEvents = 'auto';
+
                 
-                 const userInfoDisplay = document.getElementById('user-info-display');
-                userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
-                userInfoDisplay.classList.remove('hidden');
+                
+                const userInfoDisplay = document.getElementById('user-info-display');
+                if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
+
+                const dashboardWelcome = document.getElementById('dashboard-user-welcome');
+                dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
+                dashboardWelcome.classList.remove('hidden');
 
                 setupChatListener(); // Initialize chat with the new profile
 
@@ -13351,6 +13365,10 @@ lessons: [
                 } else {
                     currentUser = null;
                     userProfile = null;
+                     const userInfoDisplay = document.getElementById('user-info-display');
+                    if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
+                    document.getElementById('dashboard-user-welcome').classList.add('hidden');
+                    
                      document.getElementById('user-info-display').classList.add('hidden');
                     // When not authenticated, if user tries to go to chat, they will see the profile setup.
                     document.getElementById('message-input').disabled = true;
