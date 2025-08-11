@@ -7,12 +7,12 @@
     <style>
         /* Global Styles */
        :root {
-  --primary-color: white;       /* Deep red */
+  --primary-color: white;   
   --secondary-color: #f7f7f5;     /* Gold */
   --accent-color: #bf944a;        /* Use gold as your hover/highlight tone */
   --text-color: black;          /* Soft light text for dark background */
   --background-color: transparent;    /* Deep black/brown background */
-  --background-gradient: radial-gradient(50% 104%, #f7f7f5	 46%, #110f0f 100%);
+  --background-gradient: radial-gradient(60% 100%, #E3E3DA	 46%, black 100%);
   --font-family: 'Georgia', serif;
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   --border-radius: 8px;
@@ -51,7 +51,7 @@
             padding: 1rem;
             text-align: center;
             font-size: 3rem;
-            text-shadow: 5px 5px 2px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 1px rgba(0, 0, 0, 0.3);
             border-radius: var(--border-radius); /* Added back from previous working code */
             margin-bottom: 1rem; /* Added back from previous working code */
         }
@@ -911,7 +911,7 @@ max-width: 85%;
         <button id="lessons-nav-button">Lessons & Quizzes</button>
         <button id="spiritual-nav-button">Spiritual Formation</button>
         <button id="chat-menu-button">Chat</button>
-        <button id="resources-nav-button">Student Resources</button>
+        <button id="resources-nav-button">Resources</button>
         <button id="quit-nav-button">Quit</button>
     </nav>
 
@@ -1455,6 +1455,171 @@ max-width: 85%;
             {
                 category: "The Profession of Faith",
 lessons: [
+ {
+    id: "foundations-kerygma",
+    title: "The Kerygma — The First Proclamation of the Gospel",
+    content: `
+        <h3>Definition</h3>
+        <p>
+            The <em>kerygma</em> (from the Greek <em>kērygma</em>, meaning “proclamation” or “heralding”) is the <strong>core message of the Gospel</strong>—the basic proclamation of what God has done for our salvation in Jesus Christ.
+        </p>
+        <p>
+            It is not the entire catechism or all the moral teachings of the Church; rather, it is the <strong>essential “Good News” announcement</strong> that calls for conversion and faith. In the New Testament—especially in Acts—the kerygma is what the apostles first proclaimed to unbelievers to bring them to initial faith.
+        </p>
+
+        <h3>Key Points of the Kerygma</h3>
+        <ol>
+            <li><strong>God created us for relationship with Him</strong> — He loves us and has a plan for our lives.</li>
+            <li><strong>Sin has broken that relationship</strong> — We have turned away from God and cannot save ourselves.</li>
+            <li><strong>Jesus Christ is the answer</strong> — The Father sent His Son, who died for our sins and rose to restore us to life with Him.</li>
+            <li><strong>We are called to respond</strong> — Repent, believe the Gospel, receive baptism, and follow Jesus in the life of His Church.</li>
+            <li><strong>The Holy Spirit empowers us</strong> — God gives His Spirit to transform our hearts and make us witnesses.</li>
+            <li><strong>We have the hope of eternal life</strong> — God’s Kingdom is present in seed and will be fulfilled in the new heaven and new earth.</li>
+        </ol>
+
+        <h3>Scriptural References</h3>
+        <ul>
+            <li><strong>Acts 2:14–41</strong> — Peter at Pentecost.</li>
+            <li><strong>Acts 3:12–26</strong> — Peter after healing the lame man.</li>
+            <li><strong>1 Corinthians 15:1–8</strong> — Paul’s summary of the Gospel.</li>
+            <li><strong>Romans 10:9–10</strong> — Confessing Jesus as Lord and believing in His resurrection.</li>
+        </ul>
+
+        <h3>Catechism References</h3>
+        <ul>
+            <li><strong>CCC 425</strong> — Transmission of faith begins by proclaiming Jesus Christ.</li>
+            <li><strong>CCC 26–27</strong> — God calls every person to seek, know, and love Him.</li>
+            <li><strong>CCC 142–144</strong> — Faith as our response to God who reveals Himself.</li>
+            <li><strong>CCC 849</strong> — The Church’s missionary mandate to proclaim the Gospel.</li>
+            <li><strong>CCC 1229</strong> — The first proclamation leads to conversion, brought to completion in Baptism.</li>
+        </ul>
+
+        <h3>Proclamation</h3>
+        <blockquote>
+            The <strong>kerygma</strong> is the first and central proclamation of the Christian faith:
+            <em>Jesus Christ loves you, He gave His life to save you, and He is alive today and desires a relationship with you.</em>
+        </blockquote>
+
+        <h3>Explanation</h3>
+        <p>
+            The kerygma is the joyful, saving announcement that awakens faith and invites a decisive response. It summarizes God’s plan of love, our need for redemption, Christ’s death and resurrection, the call to repentance and faith expressed sacramentally in Baptism, life in the Church, the gift of the Holy Spirit, and the hope of eternal life. In Acts, this proclamation is what the apostles preach first to bring listeners to initial faith; catechesis then deepens and forms that faith.
+        </p>
+    `,
+    videoUrl: null,
+    quiz: [
+        {
+            question: "What does the word 'kerygma' mean?",
+            options: ["Teaching", "Proclamation", "Meditation"],
+            correct: 1
+        },
+        {
+            question: "What is the primary focus of the kerygma?",
+            options: [
+                "A summary of canon law",
+                "The core Good News of what God has done in Christ",
+                "All moral teachings of the Church"
+            ],
+            correct: 1
+        },
+        {
+            question: "In the New Testament, where do we especially see the apostles' first proclamation to bring initial faith?",
+            options: ["Revelation", "Acts of the Apostles", "Hebrews"],
+            correct: 1
+        },
+        {
+            question: "Which passage provides Paul’s concise summary of the Gospel (death, burial, resurrection, appearances)?",
+            options: ["1 Corinthians 15:1–8", "Romans 5:1–5", "John 1:1–5"],
+            correct: 0
+        },
+        {
+            question: "According to Romans 10:9–10, which two actions are linked to salvation?",
+            options: [
+                "Fasting and almsgiving",
+                "Confessing Jesus as Lord and believing in His resurrection",
+                "Keeping dietary laws"
+            ],
+            correct: 1
+        },
+        {
+            question: "Which of the following is NOT true of the kerygma?",
+            options: [
+                "It is the essential Good News calling for conversion and faith",
+                "It is the entire catechism and all moral teachings",
+                "It proclaims what God has done in Jesus for our salvation"
+            ],
+            correct: 1
+        },
+        {
+            question: "Which RCIA dynamic best describes the role of the kerygma?",
+            options: [
+                "It is the first proclamation that awakens initial faith",
+                "It replaces all later catechesis",
+                "It is optional for evangelization"
+            ],
+            correct: 0
+        },
+        {
+            question: "Which is a key point of the kerygma?",
+            options: [
+                "Humans can save themselves by effort alone",
+                "Sin has broken our relationship with God",
+                "The Old Covenant makes Christ unnecessary"
+            ],
+            correct: 1
+        },
+        {
+            question: "What response does the kerygma explicitly call for?",
+            options: [
+                "Repentance, faith, baptism, and discipleship",
+                "Only private prayer",
+                "Political reform"
+            ],
+            correct: 0
+        },
+        {
+            question: "What is the role of the Holy Spirit in the kerygma?",
+            options: [
+                "To transform our hearts and empower witness",
+                "To abolish the sacraments",
+                "To guarantee earthly prosperity"
+            ],
+            correct: 0
+        },
+        {
+            question: "Which hope does the kerygma hold out to believers?",
+            options: [
+                "Reincarnation",
+                "Annihilation after death",
+                "Eternal life and the fulfillment of God’s Kingdom"
+            ],
+            correct: 2
+        },
+        {
+            question: "Which Scripture scene is part of the kerygma’s scriptural examples?",
+            options: [
+                "Peter’s preaching at Pentecost (Acts 2:14–41)",
+                "Moses at the burning bush (Exodus 3)",
+                "Daniel in the lions’ den (Daniel 6)"
+            ],
+            correct: 0
+        },
+        {
+            question: "Which CCC paragraph teaches that transmitting the faith begins with proclaiming Jesus Christ?",
+            options: ["CCC 425", "CCC 849", "CCC 1229"],
+            correct: 0
+        },
+        {
+            question: "Which statement best captures a one-sentence kerygmatic proclamation?",
+            options: [
+                "Jesus gives moral guidelines to improve society.",
+                "Jesus loves you, died and rose to save you, and desires a relationship with you.",
+                "Religious practices alone make us righteous."
+            ],
+            correct: 1
+        }
+    ]
+},
+ 
   {
     id: "foundations-ocia",
     title: "The Order of Christian Initiation of Adults (OCIA) and the Catechumenate",
@@ -4126,7 +4291,163 @@ lessons: [
         }
     ]
 },
+{
+    id: "foundations-covenant-theology",
+    title: "Covenantal Economy and Theology",
+    content: `
+        <h3>Definition</h3>
+        <p>
+            A <strong>covenant</strong> is a sacred kinship bond between persons, sealed by an oath, through which God brings us into His divine family. In Scripture, covenants are the framework of salvation history, by which God reveals Himself, makes promises, and calls forth human response. This is the <em>covenantal economy</em>: the divine plan of salvation unfolding through a series of covenants, culminating in the New and Eternal Covenant in Christ.
+        </p>
 
+        <h3>Scriptural Overview</h3>
+        <p>
+            In the Old Testament, God made covenants with His people through mediators, each expanding the scope of His family:
+        </p>
+        <ul>
+            <li><strong>Adam</strong> — Covenant of creation (Genesis 1–2): God establishes man and woman as His children, sharing in His life.</li>
+            <li><strong>Noah</strong> — Covenant with a family (Genesis 9): Preservation of creation after the flood.</li>
+            <li><strong>Abraham</strong> — Covenant with a tribe (Genesis 15, 17, 22): Promise of land, descendants, and blessing to the nations.</li>
+            <li><strong>Moses</strong> — Covenant with a nation (Exodus 19–24): Israel receives the Law and is set apart as God's people.</li>
+            <li><strong>David</strong> — Covenant with a kingdom (2 Samuel 7): Promise of an everlasting dynasty, fulfilled in the Messiah.</li>
+        </ul>
+
+        <h3>Foreshadowing of Christ</h3>
+        <p>
+            Each covenant mediator points to Christ, the final and perfect mediator:
+        </p>
+        <ul>
+            <li>Adam — Christ is the New Adam, restoring communion with God lost in the Fall.</li>
+            <li>Noah — The flood prefigures Baptism; Christ brings a new creation.</li>
+            <li>Abraham — Christ is the promised Seed through whom all nations are blessed.</li>
+            <li>Moses — Christ is the New Lawgiver and liberator from slavery to sin.</li>
+            <li>David — Christ is the Son of David whose Kingdom will have no end.</li>
+        </ul>
+
+        <h3>The New and Eternal Covenant</h3>
+        <p>
+            In the <strong>Paschal Mystery</strong>—Christ’s passion, death, resurrection, and ascension—God fulfills all previous covenants and establishes the New and Eternal Covenant in His blood (Luke 22:20). In this covenant, Jesus unites us to the Father through the gift of the Holy Spirit, making us true sons and daughters in the divine household (Galatians 4:4–7). The Church, as the Bride of Christ, lives in this covenant until it reaches its perfection in the heavenly wedding feast of the Lamb (Revelation 19:6–9).
+        </p>
+
+        <h3>Catechism References</h3>
+        <ul>
+            <li><strong>CCC 51–53</strong> — God reveals Himself in deeds and words through His plan of salvation.</li>
+            <li><strong>CCC 56–73</strong> — The covenants with Noah, Abraham, and Israel as stages of God's plan.</li>
+            <li><strong>CCC 129</strong> — The Old Testament prepares for the New, and the New fulfills the Old.</li>
+            <li><strong>CCC 1965–1974</strong> — The New Law of Christ as the fulfillment of the Law of Moses.</li>
+            <li><strong>CCC 1996–1997</strong> — Grace makes us partakers in the divine nature.</li>
+        </ul>
+
+        <h3>Proclamation</h3>
+        <blockquote>
+            In Jesus Christ, God has fulfilled His plan to make us His children. Through the New and Eternal Covenant in His blood, we are adopted into God’s family, freed from sin, and given eternal life in the household of the Father.
+        </blockquote>
+
+        <h3>Explanation</h3>
+        <p>
+            Covenants are more than agreements; they make family. In salvation history, God used covenants to draw humanity into deeper relationship with Himself, expanding His family from one couple to all nations. Every covenant in the Old Testament points to and finds its fulfillment in Christ, the perfect mediator.
+        </p>
+        <p>
+            The Paschal Mystery is the climactic moment where all covenants converge. In Christ’s sacrifice, God swears an eternal oath of love, sealed with the blood of His Son. In Baptism, we are brought into this covenant family; in the Eucharist, we renew and deepen our covenant communion; and in eternal life, we will share forever in the divine household.
+        </p>
+    `,
+    videoUrl: null,
+    quiz: [
+        {
+            question: "What is a covenant in biblical theology?",
+            options: [
+                "A legal contract between strangers",
+                "A sacred kinship bond making family",
+                "A political alliance between nations"
+            ],
+            correct: 1
+        },
+        {
+            question: "Which best describes the 'covenantal economy'?",
+            options: [
+                "God's plan of salvation unfolding through a series of covenants",
+                "Israel's trading practices",
+                "The Church's financial stewardship"
+            ],
+            correct: 0
+        },
+        {
+            question: "Who was the mediator of the covenant of creation?",
+            options: ["Adam", "Moses", "Abraham"],
+            correct: 0
+        },
+        {
+            question: "Which covenant involved a promise to bless all nations?",
+            options: ["Noahic", "Abrahamic", "Davidic"],
+            correct: 1
+        },
+        {
+            question: "Which covenant established Israel as a nation set apart with God's Law?",
+            options: ["Mosaic", "Noahic", "Adamic"],
+            correct: 0
+        },
+        {
+            question: "The Davidic covenant promised:",
+            options: [
+                "Freedom from Egypt",
+                "An everlasting dynasty fulfilled in the Messiah",
+                "A worldwide flood"
+            ],
+            correct: 1
+        },
+        {
+            question: "Christ is the New ______, restoring communion lost at the Fall.",
+            options: ["Moses", "Adam", "David"],
+            correct: 1
+        },
+        {
+            question: "The flood in Noah’s covenant prefigures:",
+            options: ["The Eucharist", "Baptism", "Confirmation"],
+            correct: 1
+        },
+        {
+            question: "In which event did Jesus establish the New and Eternal Covenant?",
+            options: [
+                "The Sermon on the Mount",
+                "The Paschal Mystery",
+                "The Transfiguration"
+            ],
+            correct: 1
+        },
+        {
+            question: "In the New Covenant, what is our relationship to God?",
+            options: [
+                "Servants in His court",
+                "Adopted sons and daughters in His family",
+                "Hired workers in His vineyard"
+            ],
+            correct: 1
+        },
+        {
+            question: "Which sacrament first brings us into the New Covenant?",
+            options: ["Confirmation", "Baptism", "Eucharist"],
+            correct: 1
+        },
+        {
+            question: "What does CCC 129 teach about the relationship between the Old and New Testaments?",
+            options: [
+                "They are unrelated",
+                "The Old prepares for the New, and the New fulfills the Old",
+                "The New replaces and abolishes the Old"
+            ],
+            correct: 1
+        },
+        {
+            question: "What image in Revelation describes the perfection of the New Covenant?",
+            options: [
+                "The heavenly wedding feast of the Lamb",
+                "The rebuilding of Jerusalem’s walls",
+                "The river of Babylon"
+            ],
+            correct: 0
+        }
+    ]
+},
                     {
     id: "foundations-17",
     title: "Paschal Mystery",
