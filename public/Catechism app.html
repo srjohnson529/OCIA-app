@@ -741,6 +741,7 @@ nav button:focus-visible {
     border: 1px solid #e0e0e0;
 }
 
+
 /* Chat Header */
 #chat-section .chat-header {
   background: var(--primary-color, #6d1718);
@@ -956,8 +957,55 @@ max-width: 85%;
   border-radius: 1.25rem !important;
   border: 1px solid #e0e0e0 !important;
 }
-/* Optional: Custom Fade Out Animation */
 
+/* Badge System Styles - NEW */
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.badge-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.badge-card.earned {
+    opacity: 1;
+}
+
+.badge-card.locked {
+    opacity: 0.4;
+    filter: grayscale(80%);
+}
+
+.badge-card img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.badge-card h3 {
+    font-size: 1rem;
+    margin: 5px 0;
+    color: #333;
+}
+
+.badge-card p {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Optional: Custom Fade Out Animation */
 @keyframes fadeIn {
     from { opacity: 0; transform: translate(-50%, -60%); }
     to { opacity: 1; transform: translate(-50%, -50%); }
@@ -982,6 +1030,7 @@ max-width: 85%;
         <button id="spiritual-nav-button">Spiritual Formation</button>
         <button id="chat-menu-button">Chat</button>
         <button id="resources-nav-button">Resources</button>
+        <button id="achievements-nav-button">Achievements</button>
         <button id="quit-nav-button">Quit</button>
     </nav>
 
@@ -995,12 +1044,9 @@ max-width: 85%;
 
     <!-- Main Content Container -->
  <div class="main-content-container">
-        <!-- Main Menu Section -->
+   <!-- Main Menu Section -->
         <section id="main-menu-section" class="hidden">
-                  <div id="dashboard-user-welcome" class="hidden" style="text-align: center; margin: 20px 0; font-size: 1.1em;"></div>
-
-        <div class="dashboard-grid">
-            <div class="dashboard-item">
+            <div id="dashboard-user-welcome" class="hidden" style="text-align: center; margin: 20px 0; font-size: 1.1em;"></div>
             
             <div id="dashboard-container">
                 <div class="dashboard-item">
@@ -1014,6 +1060,10 @@ max-width: 85%;
                 <div class="dashboard-item">
                     <span id="upcoming-topic-stat">Loading...</span>
                     <p>Next Class Topic</p>
+                </div>
+                <div class="dashboard-item">
+                    <span id="badges-earned-stat">0</span>
+                    <p>Badges Earned</p>
                 </div>
             </div>
         </section>
@@ -1483,6 +1533,14 @@ max-width: 85%;
             <button class="button-theme" id="save-profile-button">Save Profile</button>
         </section>
             
+           <section id="achievements-section" class="hidden">
+            <h2>Your Achievements</h2>
+            <div id="badges-container" class="badges-grid">
+                <!-- Badges will be dynamically inserted here -->
+            </div>
+            <button class="button-theme" id="achievements-back-button">Back to Main Menu</button>
+        </section>
+
 
         <!-- Student Resources Section -->
         <section id="student-resources-section" class="hidden">
@@ -12397,6 +12455,45 @@ lessons: [
             },
             ];
 
+        // Badge Data - NEW
+        const badgesData = [
+            {
+                id: "foundations-complete",
+                name: "Foundations Master",
+                description: "Complete all lessons in 'The Profession of Faith' category.",
+                imageUrl: "images/badge_foundations.png", // You will need to create this image
+                requiredCategory: "The Profession of Faith"
+            },
+            {
+                id: "celebration-complete",
+                name: "Liturgical Expert",
+                description: "Complete all lessons in 'The Celebration of the Christian Mysteries' category.",
+                imageUrl: "images/badge_celebration.png", // You will need to create this image
+                requiredCategory: "The Celebration of the Christian Mysteries"
+            },
+            {
+                id: "life-in-christ-complete",
+                name: "Moral Champion",
+                description: "Complete all lessons in the 'Life in Christ' category.",
+                imageUrl: "images/badge_morality.png", // You will need to create this image
+                requiredCategory: "Life in Christ"
+            },
+           {
+                id: "prayer-complete",
+                name: "Prayer Warrior",
+                description: "Complete all lessons in the 'Christian Prayer' category.",
+                imageUrl: "images/prayer_badge.png", // You will need to create this image
+                requiredCategory: "Christian Prayer"
+            },
+            {
+                id: "illumined-graduate",
+                name: "Illumined Graduate",
+                description: "Complete all lessons in the app.",
+                imageUrl: "images/badge_graduate.png", // You will need to create this image
+                requiredCategory: "all" // Special case
+            }
+        ];
+
                 const classSchedule = [
     { date: "2025-08-11", topic: "Introduction & The Kerygma" },
     { date: "2025-08-18", topic: "Revelation - Scripture & Tradition" },
@@ -12620,9 +12717,11 @@ lessons: [
             const totalLessons = lessonsData.reduce((sum, category) => sum + category.lessons.length, 0);
             const completedCount = (userProfile && userProfile.completedLessons) ? userProfile.completedLessons.length : 0;
             const lessonsLeft = totalLessons - completedCount;
+            const badgesEarned = (userProfile && userProfile.earnedBadges) ? userProfile.earnedBadges.length : 0; // FIX: Add this line
 
             document.getElementById('lessons-completed-stat').textContent = completedCount;
             document.getElementById('lessons-left-stat').textContent = lessonsLeft;
+            document.getElementById('badges-earned-stat').textContent = badgesEarned; // ADD THIS LINE
 
             // Find upcoming topic
             const now = new Date();
@@ -12731,6 +12830,7 @@ lessons: [
                     username,
                     classId,
                     completedLessons: [],
+                    earnedBadges: [], 
                     currentLessonIndex: 0
                 };
                 const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
@@ -12771,9 +12871,10 @@ lessons: [
             }
 
             // Using compat syntax for collection reference
-            db.collection(`artifacts/${appId}/public/data/messages`)
-                .where("classId", "==", userProfile.classId) // <-- ADD THIS LIN
-                .orderBy('timestamp', 'asc')
+             db.collection(`artifacts/${appId}/public/data/messages`)
+                .where("classId", "==", userProfile.classId)
+                .orderBy('timestamp', 'desc') // Sort by newest first
+                .limit(50) // Only get the last 50 messages
                 .onSnapshot(snapshot => {
                     const messagesArea = document.getElementById('messages-area');
                     messagesArea.innerHTML = ''; // Clear existing messages
@@ -12971,7 +13072,7 @@ lessons: [
             const passingScore = Math.ceil(totalQuestions * 0.8); // Require 80% to pass
 
             if (score >= passingScore) {
-                triggerFireworks(); // <-- ADD THIS LINE
+                triggerFireworks(); 
                 showCustomAlert(`Correct! You scored ${score}/${totalQuestions} and passed this lesson.`);
                 document.getElementById('submit-quiz-button').disabled = true;
 
@@ -12980,6 +13081,7 @@ lessons: [
                     await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
                         completedLessons: userProfile.completedLessons
                     });
+                        await checkAndAwardBadges(); 
                 }
                 updateDashboard(); // Update dashboard after passing a quiz
                 loadLessonsForCategory(currentCategory);
@@ -12989,7 +13091,75 @@ lessons: [
             }
         }
         
+        // Badge Logic - NEW
+        async function checkAndAwardBadges() {
+            if (!userProfile || !userProfile.completedLessons) return;
 
+            const newlyEarnedBadges = [];
+
+            for (const badge of badgesData) {
+                // Skip if already earned
+                if (userProfile.earnedBadges && userProfile.earnedBadges.includes(badge.id)) {
+                    continue;
+                }
+
+                let hasEarned = false;
+                if (badge.requiredCategory === "all") {
+                    // Check for "Illumined Graduate" badge
+                    const totalLessons = lessonsData.reduce((sum, cat) => sum + cat.lessons.length, 0);
+                    if (userProfile.completedLessons.length >= totalLessons) {
+                        hasEarned = true;
+                    }
+                } else {
+                    // Check for category-specific badges
+                    const categoryLessons = lessonsData.find(cat => cat.category === badge.requiredCategory)?.lessons.map(l => l.id) || [];
+                    if (categoryLessons.length > 0 && categoryLessons.every(lessonId => userProfile.completedLessons.includes(lessonId))) {
+                        hasEarned = true;
+                    }
+                }
+
+                if (hasEarned) {
+                    newlyEarnedBadges.push(badge);
+                    if (!userProfile.earnedBadges) {
+                        userProfile.earnedBadges = [];
+                    }
+                    userProfile.earnedBadges.push(badge.id);
+                }
+            }
+
+            if (newlyEarnedBadges.length > 0) {
+                // Update Firestore
+                await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
+                    earnedBadges: userProfile.earnedBadges
+                });
+
+                // Notify user
+                newlyEarnedBadges.forEach(badge => {
+                    triggerFireworks();
+                    showCustomAlert(`Congratulations! You've earned the "${badge.name}" badge!`);
+                });
+                updateDashboard(); // Refresh dashboard stats
+            }
+        }
+
+        function displayBadges() {
+            const container = document.getElementById('badges-container');
+            container.innerHTML = '';
+
+            badgesData.forEach(badge => {
+                const isEarned = userProfile && userProfile.earnedBadges && userProfile.earnedBadges.includes(badge.id);
+                const card = document.createElement('div');
+                card.className = `badge-card ${isEarned ? 'earned' : 'locked'}`;
+                
+                card.innerHTML = `
+                    <img src="${badge.imageUrl}" alt="${badge.name}">
+                    <h3>${badge.name}</h3>
+                    <p>${badge.description}</p>
+                `;
+                container.appendChild(card);
+            });
+            showSection('achievements-section');
+        }
 
    // Rosary Logic
         const ROSARY_PRAYER = "O God, whose only-begotten Son, by His life, death, and resurrection, has purchased for us the rewards of eternal life; grant, we beseech Thee, that, meditating upon these mysteries of the Most Holy Rosary of the Blessed Virgin Mary, we may imitate what they contain and obtain what they promise, through the same Christ our Lord. Amen.";
@@ -13228,6 +13398,7 @@ lessons: [
                     showSection('profile-setup');
                 }
             });
+            document.getElementById('achievements-nav-button').addEventListener('click', displayBadges); // ADD THIS 
             document.getElementById('resources-nav-button').addEventListener('click', () => {
                 showSection('student-resources-section');
             });
@@ -13299,13 +13470,14 @@ lessons: [
             });
 
             // Back buttons for Spiritual Practices placeholders
-             document.getElementById('mercy-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
+            document.getElementById('mercy-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
             document.getElementById('precepts-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
             document.getElementById('penitential-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
             document.getElementById('virtue-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
             document.getElementById('social-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
             document.getElementById('liturgical-back-to-practices-button').addEventListener('click', () => showSection('practices-section'));
-      
+            document.getElementById('achievements-back-button').addEventListener('click', () => showSection('main-menu-section')); // ADD THIS
+
             // Prayer Sub-Menu Buttons
           
             document.getElementById('guided-rosary-button').addEventListener('click', () => {
