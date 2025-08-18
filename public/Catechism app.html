@@ -12723,18 +12723,23 @@ lessons: [
             document.getElementById('lessons-left-stat').textContent = lessonsLeft;
             document.getElementById('badges-earned-stat').textContent = badgesEarned; // ADD THIS LINE
 
-            // Find upcoming topic
+                  // Find upcoming topic
             const now = new Date();
-            now.setHours(0,0,0,0); // Normalize to start of day
-            const upcoming = classSchedule
-                .filter(item => new Date(item.date) >= now)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            now.setHours(0, 0, 0, 0); // Normalize to start of day
+
+            // Find the last class that has started or is today
+            const currentOrLastClass = classSchedule
+                .slice() // Create a copy to avoid modifying the original
+                .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort descending
+                .find(item => new Date(item.date) <= now);
 
             const upcomingTopicEl = document.getElementById('upcoming-topic-stat');
-            if (upcoming.length > 0) {
-                upcomingTopicEl.textContent = upcoming[0].topic;
+            if (currentOrLastClass) {
+                upcomingTopicEl.textContent = currentOrLastClass.topic;
             } else {
-                upcomingTopicEl.textContent = "TBD";
+                // If no class has started yet, show the very first one
+                const firstClass = classSchedule.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+                upcomingTopicEl.textContent = firstClass ? firstClass.topic : "TBD";
             }
         }
 
