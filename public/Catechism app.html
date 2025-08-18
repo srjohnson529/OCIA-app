@@ -13055,6 +13055,7 @@ lessons: [
         async function submitQuiz() {
             let score = 0;
             let allAnswered = true;
+            const incorrectQuestions = []; // Array to store the indices of incorrect questions
 
             currentQuiz.forEach((questionData, questionIndex) => {
                 const selectedOption = document.querySelector(`input[name="quiz-answer-${questionIndex}"]:checked`);
@@ -13065,6 +13066,9 @@ lessons: [
                 const userAnswer = parseInt(selectedOption.value);
                 if (userAnswer === questionData.correct) {
                     score++;
+                } else {
+                    // If the answer is incorrect, add the question number to the list
+                    incorrectQuestions.push(questionIndex + 1);
                 }
             });
 
@@ -13092,7 +13096,11 @@ lessons: [
                 loadLessonsForCategory(currentCategory);
                 showSection('lessons-list-section');
             } else {
-                showCustomAlert(`You scored ${score}/${totalQuestions}. Please review the material and try again.`);
+                let failureMessage = `You scored ${score}/${totalQuestions}. Please review the material and try again.`;
+                if (incorrectQuestions.length > 0) {
+                    failureMessage += `\n\nYou answered the following questions incorrectly: ${incorrectQuestions.join(', ')}.`;
+                }
+                showCustomAlert(failureMessage);
             }
         }
         
