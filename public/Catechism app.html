@@ -1378,6 +1378,7 @@ max-width: 85%;
             <p id="rosary-prayer-text" style="white-space: pre-wrap;"></p>
             <div id="hail-mary-counter" style="font-size: 1.5rem; font-weight: bold; margin: 1rem 0; display: none;"></div>
             <button class="button-theme" id="rosary-next-button">Next</button>
+            <button class="button-theme" id="rosary-finish-button" style="display: none;">Finish</button>
             <button class="button-theme" id="rosary-back-to-mysteries-button">Back to Mysteries</button>
         </section>
 
@@ -12491,6 +12492,34 @@ lessons: [
                 description: "Complete all lessons in the app.",
                 imageUrl: "images/badge_graduate.png", // You will need to create this image
                 requiredCategory: "all" // Special case
+            },
+                {
+                id: "rosary-joyful",
+                name: "Joyful Mysteries",
+                description: "Complete a guided prayer of the Joyful Mysteries.",
+                imageUrl: "images/badge_joyful.png",
+                requiredMystery: "joyful"
+            },
+            {
+                id: "rosary-luminous",
+                name: "Luminous Mysteries",
+                description: "Complete a guided prayer of the Luminous Mysteries.",
+                imageUrl: "images/badge_luminous.png",
+                requiredMystery: "luminous"
+            },
+            {
+                id: "rosary-sorrowful",
+                name: "Sorrowful Mysteries",
+                description: "Complete a guided prayer of the Sorrowful Mysteries.",
+                imageUrl: "images/badge_sorrowful.png",
+                requiredMystery: "sorrowful"
+            },
+            {
+                id: "rosary-glorious",
+                name: "Glorious Mysteries",
+                description: "Complete a guided prayer of the Glorious Mysteries.",
+                imageUrl: "images/badge_glorious.png",
+                requiredMystery: "glorious"
             }
         ];
 
@@ -13154,6 +13183,41 @@ lessons: [
                 updateDashboard(); // Refresh dashboard stats
             }
         }
+        async function checkAndAwardRosaryBadge(mysteryType) {
+            if (!userProfile) return;
+
+            const badgeToAward = badgesData.find(b => b.requiredMystery === mysteryType);
+            if (!badgeToAward) return; // No badge for this mystery type
+
+            // Initialize arrays if they don't exist
+            if (!userProfile.earnedBadges) {
+                userProfile.earnedBadges = [];
+            }
+            if (!userProfile.completedMysteries) {
+                userProfile.completedMysteries = [];
+            }
+
+            // Check if badge is already earned
+            if (userProfile.earnedBadges.includes(badgeToAward.id)) {
+                return; // Already have this badge
+            }
+
+            // Award the badge
+            userProfile.earnedBadges.push(badgeToAward.id);
+            if (!userProfile.completedMysteries.includes(mysteryType)) {
+                userProfile.completedMysteries.push(mysteryType);
+            }
+
+            // Update Firestore
+            await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
+                earnedBadges: userProfile.earnedBadges,
+                completedMysteries: userProfile.completedMysteries
+            });
+            // Notify user
+            triggerFireworks();
+            showCustomAlert(`Congratulations! You've earned the "${badgeToAward.name}" badge!`);
+            updateDashboard(); // Refresh dashboard stats
+        }
 
         function displayBadges() {
             const container = document.getElementById('badges-container');
@@ -13329,6 +13393,7 @@ lessons: [
         function showRosaryExplanation(mysteryKey) {
     const info = mysteryInfo[mysteryKey];
     rosaryState.fullSequence = buildRosarySequence(info.mysteries);
+    rosaryState.mysteryType = mysteryKey; // Store the type of mystery being prayed
 
     document.getElementById("rosary-explanation-title").innerHTML = info.name;
     document.getElementById("rosary-explanation-content").innerHTML = info.description;
@@ -13348,21 +13413,26 @@ lessons: [
             const textEl = document.getElementById('rosary-prayer-text');
             const counterEl = document.getElementById('hail-mary-counter');
             const nextButton = document.getElementById('rosary-next-button');
+            const finishButton = document.getElementById('rosary-finish-button');
+
 
             titleEl.textContent = step.title;
-            textEl.textContent = step.text;
+            textEl.innerHTML = step.text.replace(/\n/g, '<br>'); // Use innerHTML to render line breaks
 
             if (step.isDecade) {
                 counterEl.textContent = `${step.decadeCount} / 10`;
                 counterEl.style.display = 'block';
             } else {
                 counterEl.style.display = 'none';
-            }
+           }
 
             if (rosaryState.currentStep >= rosaryState.fullSequence.length - 1) {
                 nextButton.style.display = 'none';
+                finishButton.style.display = 'inline-block'; // Show the finish button
             } else {
                 nextButton.style.display = 'inline-block';
+                finishButton.style.display = 'none'; // Hide finish button
+
             }
         }
 
@@ -13371,6 +13441,14 @@ lessons: [
                 rosaryState.currentStep++;
                 displayCurrentRosaryStep();
             }
+        }
+          function finishRosary() {
+            // Award badge for the completed mystery
+            if (rosaryState.mysteryType) {
+                checkAndAwardRosaryBadge(rosaryState.mysteryType);
+            }
+            // Return to the mysteries menu
+            showSection('rosary-mysteries-section');
         }
 
 
@@ -13386,6 +13464,7 @@ lessons: [
             document.getElementById('start-rosary-button').addEventListener('click', startGuidedRosary);
 
             document.getElementById('rosary-next-button').addEventListener('click', nextRosaryStep);
+            document.getElementById('rosary-finish-button').addEventListener('click', finishRosary);
             document.getElementById('rosary-back-to-mysteries-button').addEventListener('click', () => showSection('rosary-mysteries-section'));
 
 
