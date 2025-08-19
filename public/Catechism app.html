@@ -12896,86 +12896,127 @@ lessons: [
             }
         }
 
-        // Chat Listener
-        function setupChatListener() {
-            if (!userProfile || !userProfile.classId) {
-                console.warn("User profile or class ID not set. Cannot set up chat listener.");
-                document.getElementById('messages-area').innerHTML = '<div class="loading-message">Please set your username and class to view chat messages.</div>';
-                return;
-            }
+       // Chat Listener
+function setupChatListener() {
+    if (!userProfile || !userProfile.classId) {
+        console.warn("User profile or class ID not set. Cannot set up chat listener.");
+        document.getElementById('messages-area').innerHTML = '<div class="loading-message">Please set your username and class to view chat messages.</div>';
+        return;
+    }
 
-            // Using compat syntax for collection reference
-             db.collection(`artifacts/${appId}/public/data/messages`)
-                .where("classId", "==", userProfile.classId)
-                .orderBy('timestamp', 'desc') // Sort by newest first
-                .limit(50) // Only get the last 50 messages
-                .onSnapshot(snapshot => {
-                    const messagesArea = document.getElementById('messages-area');
-                    messagesArea.innerHTML = ''; // Clear existing messages
-                    if (snapshot.empty) {
-                        messagesArea.innerHTML = '<div class="loading-message">No messages in this chat yet. Be the first to say hello!</div>';
-                    }
-                    snapshot.forEach(doc => {
-                        const message = doc.data();
-                        displayMessage(message);
-                    });
-                    messagesArea.scrollTop = messagesArea.scrollHeight; // Scroll to bottom
-                }, error => {
-                    console.error("Error listening to messages:", error);
-                    messagesArea.innerHTML = `<div class="loading-message" style="color: red;">Error loading messages: ${error.message}</div>`;
-                });
-        }
-
-        // Display Message
-        function displayMessage(message) {
+    // Using compat syntax for collection reference - ORDER BY ASCENDING for proper chronological order
+    db.collection(`artifacts/${appId}/public/data/messages`)
+        .where("classId", "==", userProfile.classId)
+        .orderBy('timestamp', 'asc') // Change to ascending order
+        .limit(50) // Only get the last 50 messages
+        .onSnapshot(snapshot => {
             const messagesArea = document.getElementById('messages-area');
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message-bubble');
-
-            const isSentByCurrentUser = currentUser && message.senderId === currentUser.uid;
-            if (isSentByCurrentUser) {
-                messageElement.classList.add('sent');
-            } else {
-                messageElement.classList.add('received');
-            }
-
-            const senderDisplayName = message.username || 'Anonymous';
-            const senderElement = document.createElement('div');
-            senderElement.classList.add('message-sender');
-            senderElement.textContent = senderDisplayName;
-            messageElement.appendChild(senderElement);
-
-            const textElement = document.createElement('div');
-            textElement.textContent = message.text;
-            messageElement.appendChild(textElement);
-
-            messagesArea.appendChild(messageElement);
-        }
-
-        // Send Message
-        async function sendMessage() {
-            const messageInput = document.getElementById('message-input');
-            const messageText = messageInput.value.trim();
-
-            if (messageText === '' || !currentUser || !userProfile || !userProfile.username || !userProfile.classId) {
-                showCustomAlert("Please set your username and class before sending messages.");
+            messagesArea.innerHTML = ''; // Clear existing messages
+            
+            if (snapshot.empty) {
+                messagesArea.innerHTML = '<div class="loading-message">No messages in this chat yet. Be the first to say hello!</div>';
                 return;
             }
+            
+            // Process messages in chronological order
+            const messages = [];
+            snapshot.forEach(doc => {
+                const messageData = doc.data();
+                // Only add messages with valid timestamps
+                if (messageData.timestamp) {
+                    messages.push(messageData);
+                }
+            });
+            
+            // Display all messages
+            messages.forEach(message => {
+                displayMessage(message);
+            });
+            
+            // Scroll to bottom after all messages are displayed
+            setTimeout(() => {
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }, 100);
+            
+        }, error => {
+            console.error("Error listening to messages:", error);
+            const messagesArea = document.getElementById('messages-area');
+            messagesArea.innerHTML = `<div class="loading-message" style="color: red;">Error loading messages: ${error.message}</div>`;
+        });
+}
 
-            try {
-                await db.collection(`artifacts/${appId}/public/data/messages`).add({
-                    text: messageText,
-                    senderId: currentUser.uid,
-                    username: userProfile.username,
-                    classId: userProfile.classId,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                messageInput.value = '';
-            } catch (error) {
-                console.error("Error sending message:", error);
-                showCustomAlert("Failed to send message. Please try again.");
-            }
+// Display Message - improved version
+function displayMessage(message) {
+    const messagesArea = document.getElementById('messages-area');
+    
+    // Check if message already exists to prevent duplicates
+    const existingMessages = messagesArea.querySelectorAll('.message-bubble');
+    for (let existing of existingMessages) {
+        const existingText = existing.querySelector('div:last-child')?.textContent;
+        const existingSender = existing.querySelector('.message-sender')?.textContent;
+        if (existingText === message.text && existingSender === (message.username || 'Anonymous')) {
+            return; // Message already displayed
         }
+    }
+    
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message-bubble');
+
+    const isSentByCurrentUser = currentUser && message.senderId === currentUser.uid;
+    if (isSentByCurrentUser) {
+        messageElement.classList.add('sent');
+    } else {
+        messageElement.classList.add('received');
+    }
+
+    const senderDisplayName = message.username || 'Anonymous';
+    const senderElement = document.createElement('div');
+    senderElement.classList.add('message-sender');
+    senderElement.textContent = senderDisplayName;
+    messageElement.appendChild(senderElement);
+
+    const textElement = document.createElement('div');
+    textElement.textContent = message.text;
+    messageElement.appendChild(textElement);
+
+    messagesArea.appendChild(messageElement);
+}
+
+// Send Message - improved version
+async function sendMessage() {
+    const messageInput = document.getElementById('message-input');
+    const messageText = messageInput.value.trim();
+
+    if (messageText === '' || !currentUser || !userProfile || !userProfile.username || !userProfile.classId) {
+        showCustomAlert("Please set your username and class before sending messages.");
+        return;
+    }
+
+    try {
+        // Disable input while sending
+        messageInput.disabled = true;
+        document.getElementById('send-button').disabled = true;
+        
+        await db.collection(`artifacts/${appId}/public/data/messages`).add({
+            text: messageText,
+            senderId: currentUser.uid,
+            username: userProfile.username,
+            classId: userProfile.classId,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        messageInput.value = '';
+        
+    } catch (error) {
+        console.error("Error sending message:", error);
+        showCustomAlert("Failed to send message. Please try again.");
+    } finally {
+        // Re-enable input
+        messageInput.disabled = false;
+        document.getElementById('send-button').disabled = false;
+        messageInput.focus();
+    }
+}
 
         // Lessons Logic
         function loadCategories() {
