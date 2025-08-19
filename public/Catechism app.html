@@ -8,10 +8,10 @@
         /* Global Styles */
        :root {
   --primary-color: white;   
-  --secondary-color: #f7f7f5;     /* Gold */
-  --accent-color: #bf944a;        /* Use gold as your hover/highlight tone */
-  --text-color: black;          /* Soft light text for dark background */
-  --background-color: transparent;    /* Deep black/brown background */
+  --secondary-color: #f7f7f5;     
+  --accent-color: #bf944a;        
+  --text-color: black;          
+  --background-color: transparent;    
   --background-gradient: radial-gradient(60% 100%, #E3E3DA	 46%, black 100%);
   --font-family: 'Georgia', serif;
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -450,7 +450,6 @@ nav button:focus-visible {
     height: 100%;
     border: none;
 }
-// ...existing code...
 .quiz-completed {
     background-color: #4CAF50; /* Green for completed */
     border-color: #4CAF50;
@@ -1017,6 +1016,7 @@ max-width: 85%;
     </style>
 </head>
 <body>
+    <div id="user-info-display" class="hidden"></div>
 
     <!-- Header -->
     <header>
@@ -12827,8 +12827,10 @@ lessons: [
                     dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
                     dashboardWelcome.classList.remove('hidden');  
 
-                     userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
-                    userInfoDisplay.classList.remove('hidden');
+                  if (userInfoDisplay) {
+                  userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
+                 userInfoDisplay.classList.remove('hidden');
+}
                                         
                     updateDashboard(); // Update dashboard with profile data
                     setupChatListener(); 
