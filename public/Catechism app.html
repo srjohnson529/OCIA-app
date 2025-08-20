@@ -13155,7 +13155,7 @@ async function sendMessage() {
             }
 
             const totalQuestions = currentQuiz.length;
-            const passingScore = Math.ceil(totalQuestions * 0.8); // Require 80% to pass
+    		const passingScore = totalQuestions; // Require 100% to pass
 
             if (score >= passingScore) {
                 triggerFireworks(); 
