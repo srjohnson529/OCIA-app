@@ -1527,12 +1527,17 @@ max-width: 85%;
         </section>
 
         <!-- Profile Setup Section (Moved from Chat) -->
-        <section id="profile-setup" class="hidden">
-            <p>Please create a profile to use the chat and track your progress.</p>
-            <input id="username-input" type="text" placeholder="Enter Username">
-            <input id="class-input" type="text" placeholder="Enter Class ID (e.g., OCIA 1)">
-            <button class="button-theme" id="save-profile-button">Save Profile</button>
-        </section>
+       <section id="profile-setup" class="hidden">
+    <p>Please create an account or log in to use chat and track your progress across devices.</p>
+    <input id="auth-email" type="email" placeholder="Enter Email">
+    <input id="auth-password" type="password" placeholder="Enter Password">
+    <button class="button-theme" id="signup-button">Sign Up</button>
+    <button class="button-theme" id="login-button">Log In</button>
+    <hr>
+    <input id="username-input" type="text" placeholder="Enter Username">
+    <input id="class-input" type="text" placeholder="Enter Class ID (e.g., OCIA 1)">
+    <button class="button-theme" id="save-profile-button">Save Profile</button>
+</section>
             
            <section id="achievements-section" class="hidden">
             <h2>Badges</h2>
@@ -13671,6 +13676,27 @@ async function sendMessage() {
             });
             initNavListeners(); // Initialize all event listeners
             showSection('main-menu-section'); // Show initial section immediately
+             document.getElementById('signup-button').addEventListener('click', async () => {
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password').value;
+        try {
+            await auth.createUserWithEmailAndPassword(email, password);
+            showCustomAlert('Account created! You are now signed in.');
+        } catch (error) {
+            showCustomAlert(error.message);
+        }
+    });
+
+    document.getElementById('login-button').addEventListener('click', async () => {
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password').value;
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            showCustomAlert('Logged in successfully!');
+        } catch (error) {
+            showCustomAlert(error.message);
+        }
+    });
         });
     </script>
 </body>
