@@ -12531,8 +12531,9 @@ lessons: [
                 const classSchedule = [
     { date: "2025-08-11", topic: "Introduction & The Kerygma" },
     { date: "2025-08-18", topic: "Revelation - Scripture & Tradition" },
+    { date: "2025-08-25", topic: "The Creed & Councils" },
     { date: "2025-09-01", topic: "No Class - Happy Labor Day" },
-    { date: "2025-09-09", topic: "God & the Blessed Trinity" },
+    { date: "2025-09-08", topic: "God & the Blessed Trinity" },
     { date: "2025-09-15", topic: "Creation & Humanity" },
     { date: "2025-09-22", topic: "Jesus Christ, Incarnation & Public Ministry" },
     { date: "2025-09-29", topic: "The Paschal Mystery" },
@@ -12548,7 +12549,7 @@ lessons: [
     { date: "2025-12-01", topic: "Confirmation" },
     { date: "2025-12-08", topic: "Holy Eucharist" },
     { date: "2025-12-15", topic: "Reconciliation & Anointing" },
-    { date: "2025-12-22", topic: "Christmas Week: No Class" },
+    { date: "2025-12-22", topic: "Christmas Week - No Class" },
     { date: "2025-12-29", topic: "Holy Orders" },
     { date: "2026-01-05", topic: "Marriage" },
     { date: "2026-01-12", topic: "Sacred Liturgy & Walking Through the Mass" },
@@ -12761,16 +12762,16 @@ lessons: [
             const now = new Date();
             now.setHours(0, 0, 0, 0); // Normalize to start of day
 
-            // Find the last class that has started or is today
-            const currentOrLastClass = classSchedule
-                .slice() // Create a copy to avoid modifying the original
-                .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort descending
-                .find(item => new Date(item.date) <= now);
+     // Find the next class after today
+const nextClass = classSchedule
+    .slice()
+    .sort((a, b) => new Date(a.date) - new Date(b.date)) // Sort ascending
+    .find(item => new Date(item.date) > now);
 
-            const upcomingTopicEl = document.getElementById('upcoming-topic-stat');
-            if (currentOrLastClass) {
-                upcomingTopicEl.textContent = currentOrLastClass.topic;
-            } else {
+const upcomingTopicEl = document.getElementById('upcoming-topic-stat');
+if (nextClass) {
+    upcomingTopicEl.textContent = nextClass.topic;
+} else {
                 // If no class has started yet, show the very first one
                 const firstClass = classSchedule.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
                 upcomingTopicEl.textContent = firstClass ? firstClass.topic : "TBD";
@@ -13155,7 +13156,7 @@ async function sendMessage() {
             }
 
             const totalQuestions = currentQuiz.length;
-    		const passingScore = totalQuestions; // Require 100% to pass
+            const passingScore = totalQuestions; // Require 100% to pass
 
             if (score >= passingScore) {
                 triggerFireworks(); 
