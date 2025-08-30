@@ -12798,19 +12798,185 @@ if (nextClass) {
             showSection('prayer-display-section');
         }
 
-        // Authentication
-        async function initializeAuth() {
-            try {
-                if (initialAuthToken) {
-                    await auth.signInWithCustomToken(initialAuthToken);
-                } else {
-                    await auth.signInAnonymously();
+      // Replace the authentication section in your JavaScript
+
+// Authentication Functions
+async function initializeAuth() {
+    try {
+        // Don't sign in anonymously by default
+        console.log('Auth initialized, waiting for user action');
+    } catch (error) {
+        console.error('Auth initialization error:', error);
+        showCustomAlert('Authentication initialization failed. Please refresh the page.');
+    }
+}
+
+// Updated Auth State Changed Handler
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        console.log('User authenticated:', user.uid);
+        
+        // Try to load existing profile
+        try {
+            const userDocRef = db.collection(`artifacts/${appId}/users`).doc(user.uid);
+            const doc = await userDocRef.get();
+            
+            if (doc.exists) {
+                userProfile = doc.data();
+                console.log('Profile loaded:', userProfile);
+                updateDashboard();
+                setupChatListener();
+                
+                // Update UI for authenticated user
+                const userInfoDisplay = document.getElementById('user-info-display');
+                if (userInfoDisplay && userProfile.username) {
+                    userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
+                    userInfoDisplay.classList.remove('hidden');
                 }
-            } catch (error) {
-                console.error('Auth error:', error);
-                showCustomAlert('Authentication failed. Please try again.');
+                
+                const dashboardWelcome = document.getElementById('dashboard-user-welcome');
+                if (dashboardWelcome && userProfile.username) {
+                    dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
+                    dashboardWelcome.classList.remove('hidden');
+                }
+                
+                // Enable chat
+                document.getElementById('message-input').disabled = false;
+                document.getElementById('send-button').disabled = false;
+                document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
+                
+            } else {
+                // User authenticated but no profile - show profile setup
+                console.log('User authenticated but no profile found');
+                userProfile = null;
+                showSection('profile-setup');
             }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+            showCustomAlert('Error loading profile. Please try again.');
+            userProfile = null;
         }
+    } else {
+        // User not authenticated
+        currentUser = null;
+        userProfile = null;
+        console.log('User not authenticated');
+        
+        // Hide user info
+        const userInfoDisplay = document.getElementById('user-info-display');
+        if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
+        
+        const dashboardWelcome = document.getElementById('dashboard-user-welcome');
+        if (dashboardWelcome) dashboardWelcome.classList.add('hidden');
+        
+        // Disable chat
+        document.getElementById('message-input').disabled = true;
+        document.getElementById('send-button').disabled = true;
+        document.getElementById('messages-area').innerHTML = '<div class="loading-message">Please sign in to use chat.</div>';
+        
+        // Show profile setup for authentication
+        showSection('profile-setup');
+    }
+});
+
+// Sign Up Function
+async function signUp() {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    
+    if (!email || !password) {
+        showCustomAlert('Please enter both email and password.');
+        return;
+    }
+    
+    try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        console.log('User created:', userCredential.user.uid);
+        showCustomAlert('Account created! Please set up your profile.');
+        // Don't redirect here - the auth state change will handle it
+    } catch (error) {
+        console.error('Sign up error:', error);
+        showCustomAlert(`Sign up failed: ${error.message}`);
+    }
+}
+
+// Sign In Function
+async function signIn() {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    
+    if (!email || !password) {
+        showCustomAlert('Please enter both email and password.');
+        return;
+    }
+    
+    try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        console.log('User signed in:', userCredential.user.uid);
+        showCustomAlert('Signed in successfully!');
+        // Don't redirect here - the auth state change will handle it
+    } catch (error) {
+        console.error('Sign in error:', error);
+        showCustomAlert(`Sign in failed: ${error.message}`);
+    }
+}
+
+// Updated Save Profile Function
+async function saveProfile() {
+    const username = document.getElementById('username-input').value.trim();
+    const classId = document.getElementById('class-input').value.trim();
+    
+    if (!username || !classId) {
+        showCustomAlert('Please enter both username and class ID.');
+        return;
+    }
+    
+    if (!currentUser) {
+        showCustomAlert('Please sign in first.');
+        return;
+    }
+    
+    try {
+        const profileData = {
+            username,
+            classId,
+            completedLessons: [],
+            earnedBadges: [],
+            completedMysteries: [],
+            currentLessonIndex: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
+        await userDocRef.set(profileData);
+        
+        // Update local state
+        userProfile = profileData;
+        
+        showCustomAlert('Profile saved successfully!');
+        showSection('main-menu-section'); // Go to main menu after profile setup
+        
+        // Trigger the auth state change handler to update UI
+        // This will be handled automatically by the auth state change
+        
+    } catch (error) {
+        console.error('Save profile error:', error);
+        showCustomAlert(`Failed to save profile: ${error.message}`);
+    }
+}
+
+// Sign Out Function
+async function signOut() {
+    try {
+        await auth.signOut();
+        showCustomAlert('Signed out successfully.');
+    } catch (error) {
+        console.error('Sign out error:', error);
+        showCustomAlert(`Sign out failed: ${error.message}`);
+    }
+}
 
         // Load User Profile
                  async function loadUserProfile() {
@@ -13677,27 +13843,8 @@ async function sendMessage() {
             });
             initNavListeners(); // Initialize all event listeners
             showSection('main-menu-section'); // Show initial section immediately
-             document.getElementById('signup-button').addEventListener('click', async () => {
-        const email = document.getElementById('auth-email').value.trim();
-        const password = document.getElementById('auth-password').value;
-        try {
-            await auth.createUserWithEmailAndPassword(email, password);
-            showCustomAlert('Account created! You are now signed in.');
-        } catch (error) {
-            showCustomAlert(error.message);
-        }
-    });
-
-    document.getElementById('login-button').addEventListener('click', async () => {
-        const email = document.getElementById('auth-email').value.trim();
-        const password = document.getElementById('auth-password').value;
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            showCustomAlert('Logged in successfully!');
-        } catch (error) {
-            showCustomAlert(error.message);
-        }
-    });
+document.getElementById('signup-button').addEventListener('click', signUp);
+document.getElementById('login-button').addEventListener('click', signIn);
         });
     </script>
 </body>
