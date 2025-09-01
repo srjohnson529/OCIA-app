@@ -740,156 +740,162 @@ nav button:focus-visible {
     border: 1px solid #e0e0e0;
 }
 
-
 /* Chat Header */
 #chat-section .chat-header {
-  background: var(--primary-color, #6d1718);
-  color: #fff;
-  text-align: center;
-  padding: 1.25rem 1.5rem;
-  font-size: 1.3rem;
-  font-weight: bold;
-  border-top-left-radius: 1.25rem;
-  border-top-right-radius: 1.25rem;
-  position: relative;
+    background: var(--primary-color, #6d1718);
+    color: #fff;
+    text-align: center;
+    padding: 1.25rem 1.5rem;
+    font-size: 1.3rem;
+    font-weight: bold;
+    border-top-left-radius: 1.25rem;
+    border-top-right-radius: 1.25rem;
+    position: relative;
 }
 
-/* Messages Area */
+/* Messages Area - Modern Chat Background */
 #chat-section .messages-area {
-     flex-grow: 1;
-    padding: 1.5rem;
+    flex-grow: 1;
+    padding: 20px;
     overflow-y: auto;
     max-height: 28rem;
     min-height: 10rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    background-color: #f9fafb;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     border-bottom: 1px solid #e0e0e0;
+}
+
+/* Modern Message Styling */
+.message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    max-width: 75%;
+    animation: slideInMessage 0.4s ease-out;
+}
+
+.message.current-user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.message:not(.current-user) {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.message-bubble {
+    padding: 12px 16px;
+    border-radius: 20px;
+    position: relative;
+    word-wrap: break-word;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
+}
+
+.message.current-user .message-bubble {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom-right-radius: 6px;
+}
+
+.message:not(.current-user) .message-bubble {
+    background-color: #ffffff;
+    color: #333;
+    border-bottom-left-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.message-header {
+    font-size: 11px;
+    margin-bottom: 2px;
+    opacity: 0.8;
+}
+
+.message.current-user .message-header {
+    color: #667eea;
+    text-align: right;
+}
+
+.message:not(.current-user) .message-header {
+    color: #6c757d;
+    text-align: left;
+}
+
+.message-sender {
+    font-weight: 600;
+}
+
+.message-time {
+    margin-left: 6px;
+    font-weight: 400;
+}
+
+.message-content {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+@keyframes slideInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Loading Message */
+.loading-message {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px;
 }
 
 /* Input Area */
 #chat-section .input-area {
-  display: flex;
-  gap: 0.75rem;
-  background: #fff;
-  padding: 1rem 1.5rem;
-  border-bottom-left-radius: 1.25rem;
-  border-bottom-right-radius: 1.25rem;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  #chat-section .chat-container {
-    max-width: 98vw;
-    border-radius: 0.75rem;
-  }
-  #chat-section .chat-header,
-  #chat-section .input-area {
-    border-radius: 0.75rem 0.75rem 0 0;
-  }
-}
-/* Profile Setup */
-#profile-setup {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0.5rem;
-  text-align: center;
-  font-size: 1.1rem;
-  color: #333;
-  border: none;
-}
-
-#profile-setup.hidden {
-  display: none;
-}
-
-#profile-setup input {
-  margin: 0.5rem 0;
-  padding: 0.6rem;
-  width: 100%;
-  max-width: 300px;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e0;
-  font-size: 1rem;
-  box-sizing: border-box;
-  color: #333
-}
-
-* Style for placeholder text */
-#profile-setup input::placeholder {
-  color: #9ca3af;
-}
-
-#profile-setup button {
-  background: var(--primary-color);
-  color: var(--text-color);
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  border: none;
-  font-weight: 600;
-  margin-top: 1rem;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-}
-
-#profile-setup button:hover {
-  background: #5f5429;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-
-/* Message Bubbles */
-#chat-section .message-bubble {
-max-width: 85%;
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
-    word-wrap: break-word;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-#chat-section .message-bubble.sent {
-    background-color: #dbeafe;
-    align-self: flex-end;
-    color: #1e40af;
-}
-
-#chat-section .message-bubble.received {
-   background-color: #f3f4f6;
-    align-self: flex-start;
-    color: #374151;
-}
-#chat-section .message-sender {
-      font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: #6b7280;
+    display: flex;
+    gap: 0.75rem;
+    background: #fff;
+    padding: 1rem 1.5rem;
+    border-bottom-left-radius: 1.25rem;
+    border-bottom-right-radius: 1.25rem;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
 }
 
 #chat-section .input-area input {
-  padding: 1.5rem;
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e1e5e9;
+    border-radius: 20px;
     background-color: #ffffff;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
 }
 
 #chat-section .input-area input:focus {
-     border-color: #3b82f6;
+    border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 /* Send Button */
 #chat-section .input-area button {
-   background-color: #3b82f6;
+    background-color: #3b82f6;
     color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
+    padding: 12px 20px;
+    border-radius: 20px;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s, box-shadow 0.2s;
     border: none;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 80px;
 }
 
 #chat-section .input-area button:hover {
@@ -897,11 +903,70 @@ max-width: 85%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Optional Loading State */
-#chat-section .loading-message {
-  text-align: center;
-  padding: 2rem;
-  color: #6b7280;
+/* Profile Setup */
+#profile-setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #333;
+    border: none;
+}
+
+#profile-setup.hidden {
+    display: none;
+}
+
+#profile-setup input {
+    margin: 0.5rem 0;
+    padding: 0.6rem;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 0.5rem;
+    border: 1px solid #cbd5e0;
+    font-size: 1rem;
+    box-sizing: border-box;
+    color: #333;
+}
+
+#profile-setup input::placeholder {
+    color: #9ca3af;
+}
+
+#profile-setup button {
+    background: var(--primary-color);
+    color: var(--text-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+    margin-top: 1rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+#profile-setup button:hover {
+    background: #5f5429;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    #chat-section .chat-container {
+        max-width: 98vw;
+        border-radius: 0.75rem;
+    }
+    #chat-section .chat-header,
+    #chat-section .input-area {
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    
+    .message {
+        max-width: 85%;
+    }
 }
 
 
@@ -1526,17 +1591,29 @@ max-width: 85%;
             </div>
         </section>
 
-        <!-- Profile Setup Section (Moved from Chat) -->
-       <section id="profile-setup" class="hidden">
-    <p>Please create an account or log in to use chat and track your progress across devices.</p>
-    <input id="auth-email" type="email" placeholder="Enter Email">
-    <input id="auth-password" type="password" placeholder="Enter Password">
-    <button class="button-theme" id="signup-button">Sign Up</button>
-    <button class="button-theme" id="login-button">Log In</button>
-    <hr>
-    <input id="username-input" type="text" placeholder="Enter Username">
-    <input id="class-input" type="text" placeholder="Enter Class ID (e.g., OCIA 1)">
-    <button class="button-theme" id="save-profile-button">Save Profile</button>
+<!-- Update the profile setup section in your HTML -->
+<section id="profile-setup" class="hidden">
+    <h2>Create Your Profile</h2>
+    
+    <!-- Authentication Section -->
+    <div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+        <h3>Sign In or Create Account</h3>
+        <input type="email" id="auth-email" placeholder="Email" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
+        <input type="password" id="auth-password" placeholder="Password" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
+        <div>
+            <button id="login-button" class="button-theme" style="margin: 0.5rem;">Sign In</button>
+            <button id="signup-button" class="button-theme" style="margin: 0.5rem;">Create Account</button>
+        </div>
+    </div>
+    
+    <!-- Profile Setup Section -->
+    <div style="padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+        <h3>Profile Information</h3>
+        <p>Please enter your display name and class ID:</p>
+        <input type="text" id="username-input" placeholder="Your Name (e.g., John Smith)" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
+        <input type="text" id="class-input" placeholder="Class ID (e.g., OCIA-2025)" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
+        <button id="save-profile-button" class="button-theme">Save Profile</button>
+    </div>
 </section>
             
            <section id="achievements-section" class="hidden">
@@ -12818,45 +12895,8 @@ auth.onAuthStateChanged(async (user) => {
         console.log('User authenticated:', user.uid);
         
         // Try to load existing profile
-        try {
-            const userDocRef = db.collection(`artifacts/${appId}/users`).doc(user.uid);
-            const doc = await userDocRef.get();
-            
-            if (doc.exists) {
-                userProfile = doc.data();
-                console.log('Profile loaded:', userProfile);
-                updateDashboard();
-                setupChatListener();
-                
-                // Update UI for authenticated user
-                const userInfoDisplay = document.getElementById('user-info-display');
-                if (userInfoDisplay && userProfile.username) {
-                    userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
-                    userInfoDisplay.classList.remove('hidden');
-                }
-                
-                const dashboardWelcome = document.getElementById('dashboard-user-welcome');
-                if (dashboardWelcome && userProfile.username) {
-                    dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
-                    dashboardWelcome.classList.remove('hidden');
-                }
-                
-                // Enable chat
-                document.getElementById('message-input').disabled = false;
-                document.getElementById('send-button').disabled = false;
-                document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
-                
-            } else {
-                // User authenticated but no profile - show profile setup
-                console.log('User authenticated but no profile found');
-                userProfile = null;
-                showSection('profile-setup');
-            }
-        } catch (error) {
-            console.error('Error loading user profile:', error);
-            showCustomAlert('Error loading profile. Please try again.');
-            userProfile = null;
-        }
+        await loadUserProfile(); // This will handle UI updates
+        
     } else {
         // User not authenticated
         currentUser = null;
@@ -12879,6 +12919,33 @@ auth.onAuthStateChanged(async (user) => {
         showSection('profile-setup');
     }
 });
+
+// Helper function to update UI for authenticated users
+function updateUIForAuthenticatedUser() {
+    if (!userProfile) return;
+    
+    const userInfoDisplay = document.getElementById('user-info-display');
+    if (userInfoDisplay) {
+        userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
+        userInfoDisplay.classList.remove('hidden');
+    }
+    
+    const dashboardWelcome = document.getElementById('dashboard-user-welcome');
+    if (dashboardWelcome) {
+        dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
+        dashboardWelcome.classList.remove('hidden');
+    }
+    
+    // Update chat header
+    const chatHeader = document.getElementById('chat-header');
+    if (chatHeader) {
+        chatHeader.textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
+    }
+    
+    // Enable chat
+    document.getElementById('message-input').disabled = false;
+    document.getElementById('send-button').disabled = false;
+}
 
 // Sign Up Function
 async function signUp() {
@@ -12922,7 +12989,7 @@ async function signIn() {
     }
 }
 
-// Updated Save Profile Function
+// Save Profile - Updated to properly set displayName
 async function saveProfile() {
     const username = document.getElementById('username-input').value.trim();
     const classId = document.getElementById('class-input').value.trim();
@@ -12938,28 +13005,45 @@ async function saveProfile() {
     }
     
     try {
+        // Structure to match SwiftUI UserProfile model
         const profileData = {
-            username,
-            classId,
+            userId: currentUser.uid,
+            email: currentUser.email || '',
+            displayName: username, // This should be the user's chosen name, not email
+            isInstructor: false,
+            classIds: [classId], // Array to match SwiftUI structure
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            // Keep web app specific fields for backward compatibility
+            completedLessons: [],
+            earnedBadges: [], 
+            completedMysteries: [],
+            currentLessonIndex: 0,
+            // Also store username separately for web app compatibility
+            username: username,
+            classId: classId
+        };
+        
+        // Use userProfiles collection to match SwiftUI app
+        const userDocRef = db.collection('userProfiles').doc(currentUser.uid);
+        await userDocRef.set(profileData, { merge: true });
+
+        // Update local userProfile to match web app structure
+        userProfile = {
+            username: username, // This will be the display name
+            classId: classId,
             completedLessons: [],
             earnedBadges: [],
             completedMysteries: [],
             currentLessonIndex: 0,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            email: currentUser.email || '',
+            isInstructor: false
         };
-        
-        const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
-        await userDocRef.set(profileData);
-        
-        // Update local state
-        userProfile = profileData;
         
         showCustomAlert('Profile saved successfully!');
         showSection('main-menu-section'); // Go to main menu after profile setup
         
-        // Trigger the auth state change handler to update UI
-        // This will be handled automatically by the auth state change
+        // Update UI immediately
+        updateUIForAuthenticatedUser();
         
     } catch (error) {
         console.error('Save profile error:', error);
@@ -12978,99 +13062,97 @@ async function signOut() {
     }
 }
 
-        // Load User Profile
-                 async function loadUserProfile() {
-                                 const userInfoDisplay = document.getElementById('user-info-display');
-                                const dashboardWelcome = document.getElementById('dashboard-user-welcome'); // Get the new element
-
-
-             try {
-                const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
-                const doc = await userDocRef.get();
-                if (doc.exists) {
-                    userProfile = doc.data();
-                    document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
-                    document.getElementById('message-input').disabled = false;
-                    document.getElementById('send-button').disabled = false;
-                    document.getElementById('message-input-area').style.pointerEvents = 'auto';
-                    // Hide old display and show new one
-                    if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
-
-                    dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
-                    dashboardWelcome.classList.remove('hidden');  
-
-                  if (userInfoDisplay) {
-                  userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
-                 userInfoDisplay.classList.remove('hidden');
+// Load User Profile - Updated to properly map displayName
+async function loadUserProfile() {
+    try {
+        const userDocRef = db.collection('userProfiles').doc(currentUser.uid);
+        const doc = await userDocRef.get();
+        
+        if (doc.exists) {
+            const profileData = doc.data();
+            
+            // Map SwiftUI profile structure to web app structure
+            userProfile = {
+                username: profileData.displayName || profileData.username || 'User', // Use displayName first, then username
+                classId: profileData.classIds && profileData.classIds.length > 0 ? profileData.classIds[0] : profileData.classId || '',
+                completedLessons: profileData.completedLessons || [],
+                earnedBadges: profileData.earnedBadges || [],
+                completedMysteries: profileData.completedMysteries || [],
+                currentLessonIndex: profileData.currentLessonIndex || 0,
+                email: profileData.email,
+                isInstructor: profileData.isInstructor || false
+            };
+            
+            console.log('Profile loaded:', userProfile);
+            updateUIForAuthenticatedUser();
+            updateDashboard();
+            setupChatListener();
+            
+        } else {
+            // Profile doesn't exist, show setup
+            console.log('User authenticated but no profile found');
+            userProfile = null;
+            showSection('profile-setup');
+        }
+    } catch (error) {
+        console.error('Profile load error:', error);
+        showCustomAlert('Failed to load user profile.');
+    }
 }
-                                        
-                    updateDashboard(); // Update dashboard with profile data
-                    setupChatListener(); 
-                } else {
-                    // If no profile, do nothing on load.
-                    // The check will be handled by the chat button's event listener.
-                    userProfile = null;
-                            document.getElementById('message-input').disabled = true; 
-                    document.getElementById('send-button').disabled = true; 
-                    userInfoDisplay.classList.add('hidden');
-                    dashboardWelcome.classList.add('hidden'); // Hide welcome message if no profile
-                     updateDashboard(); // Update dashboard with no profile data
 
-                }
-            } catch (error) {
-                console.error('Profile load error:', error);
-          if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
-                dashboardWelcome.classList.add('hidden');
-                updateDashboard(); // Update dashboard on error
+// Save Profile - Updated to match SwiftUI userProfiles structure
+async function saveProfile() {
+    const username = document.getElementById('username-input').value.trim();
+    const classId = document.getElementById('class-input').value.trim();
+    
+    if (!username || !classId) {
+        showCustomAlert('Please enter both username and class ID.');
+        return;
+    }
+    
+    try {
+        // Structure to match SwiftUI UserProfile model
+        const profileData = {
+            userId: currentUser.uid,
+            email: currentUser.email || '',
+            displayName: username,
+            isInstructor: false,
+            classIds: [classId], // Array to match SwiftUI structure
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            // Keep web app specific fields for backward compatibility
+            completedLessons: [],
+            earnedBadges: [], 
+            completedMysteries: [],
+            currentLessonIndex: 0
+        };
+        
+        // Updated path to match SwiftUI app: userProfiles collection
+        const userDocRef = db.collection('userProfiles').doc(currentUser.uid);
+        await userDocRef.set(profileData, { merge: true });
 
-            }
-        }
-        // Save Profile
-        async function saveProfile() {
-            const username = document.getElementById('username-input').value.trim();
-            const classId = document.getElementById('class-input').value.trim();
-            if (!username || !classId) {
-                showCustomAlert('Please enter both username and class ID.');
-                return;
-            }
-            try {
-                const profileData = {
-                    username,
-                    classId,
-                    completedLessons: [],
-                    earnedBadges: [], 
-                    currentLessonIndex: 0
-                };
-                const userDocRef = db.collection(`artifacts/${appId}/users`).doc(currentUser.uid);
-                await userDocRef.set(profileData);
+        // Update local userProfile to match web app structure
+        userProfile = {
+            username: username,
+            classId: classId,
+            completedLessons: [],
+            earnedBadges: [],
+            completedMysteries: [],
+            currentLessonIndex: 0,
+            email: currentUser.email || '',
+            isInstructor: false
+        };
+        
+        showCustomAlert('Profile saved successfully!');
+        showView('dashboard');
+        setupChatListener();
+        
+    } catch (error) {
+        console.error('Save profile error:', error);
+        showCustomAlert('Failed to save profile.');
+    }
+}
 
-                // Update state and UI directly instead of re-fetching
-                userProfile = profileData;
-                document.getElementById('chat-header').textContent = `Welcome, ${userProfile.username}! (Class: ${userProfile.classId})`;
-                document.getElementById('message-input').disabled = false;
-                document.getElementById('send-button').disabled = false;
-                document.getElementById('message-input-area').style.pointerEvents = 'auto';
-
-                
-                
-                const userInfoDisplay = document.getElementById('user-info-display');
-                if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
-
-                const dashboardWelcome = document.getElementById('dashboard-user-welcome');
-                dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
-                dashboardWelcome.classList.remove('hidden');
-
-                setupChatListener(); // Initialize chat with the new profile
-
-                showCustomAlert('Profile saved successfully!');
-                showSection('chat-section'); // Navigate to the main menu
-            } catch (error) {
-                console.error('Save profile error:', error);
-                showCustomAlert('Failed to save profile.');
-            }
-        }
-
-       // Chat Listener
+// Chat Listener - Updated to match SwiftUI app paths
 function setupChatListener() {
     if (!userProfile || !userProfile.classId) {
         console.warn("User profile or class ID not set. Cannot set up chat listener.");
@@ -13078,36 +13160,40 @@ function setupChatListener() {
         return;
     }
 
-    // Using compat syntax for collection reference - ORDER BY ASCENDING for proper chronological order
-    db.collection(`artifacts/${appId}/public/data/messages`)
+    // Updated path to match SwiftUI app: chatMessages collection
+    db.collection('chatMessages')
         .where("classId", "==", userProfile.classId)
-        .orderBy('timestamp', 'asc') // Change to ascending order
-        .limit(50) // Only get the last 50 messages
+        .orderBy('timestamp', 'asc')
+        .limit(50)
         .onSnapshot(snapshot => {
             const messagesArea = document.getElementById('messages-area');
-            messagesArea.innerHTML = ''; // Clear existing messages
+            messagesArea.innerHTML = '';
             
             if (snapshot.empty) {
                 messagesArea.innerHTML = '<div class="loading-message">No messages in this chat yet. Be the first to say hello!</div>';
                 return;
             }
             
-            // Process messages in chronological order
             const messages = [];
             snapshot.forEach(doc => {
                 const messageData = doc.data();
-                // Only add messages with valid timestamps
                 if (messageData.timestamp) {
                     messages.push(messageData);
                 }
             });
             
-            // Display all messages
+            // Sort by timestamp to match SwiftUI app behavior
+            messages.sort((a, b) => {
+                if (a.timestamp && b.timestamp) {
+                    return a.timestamp.toDate() - b.timestamp.toDate();
+                }
+                return 0;
+            });
+            
             messages.forEach(message => {
                 displayMessage(message);
             });
             
-            // Scroll to bottom after all messages are displayed
             setTimeout(() => {
                 messagesArea.scrollTop = messagesArea.scrollHeight;
             }, 100);
@@ -13119,44 +13205,42 @@ function setupChatListener() {
         });
 }
 
-// Display Message - improved version
-function displayMessage(message) {
+// Display Message - Updated to match SwiftUI ChatMessage structure
+// Display Message - Updated with bubble styling
+function displayMessage(messageData) {
     const messagesArea = document.getElementById('messages-area');
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
     
-    // Check if message already exists to prevent duplicates
-    const existingMessages = messagesArea.querySelectorAll('.message-bubble');
-    for (let existing of existingMessages) {
-        const existingText = existing.querySelector('div:last-child')?.textContent;
-        const existingSender = existing.querySelector('.message-sender')?.textContent;
-        if (existingText === message.text && existingSender === (message.username || 'Anonymous')) {
-            return; // Message already displayed
-        }
+    const isCurrentUser = messageData.senderId === currentUser.uid;
+    if (isCurrentUser) {
+        messageDiv.classList.add('current-user');
     }
     
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message-bubble');
-
-    const isSentByCurrentUser = currentUser && message.senderId === currentUser.uid;
-    if (isSentByCurrentUser) {
-        messageElement.classList.add('sent');
-    } else {
-        messageElement.classList.add('received');
-    }
-
-    const senderDisplayName = message.username || 'Anonymous';
-    const senderElement = document.createElement('div');
-    senderElement.classList.add('message-sender');
-    senderElement.textContent = senderDisplayName;
-    messageElement.appendChild(senderElement);
-
-    const textElement = document.createElement('div');
-    textElement.textContent = message.text;
-    messageElement.appendChild(textElement);
-
-    messagesArea.appendChild(messageElement);
+    // Use senderName field to match SwiftUI app
+    const senderName = messageData.senderName || messageData.username || 'Unknown User';
+    
+    // Use message field to match SwiftUI app
+    const messageText = messageData.message || messageData.text || '';
+    
+    const timestamp = messageData.timestamp ? 
+        messageData.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 
+        'Unknown time';
+    
+    messageDiv.innerHTML = `
+        <div class="message-header">
+            <span class="message-sender">${senderName}</span>
+            <span class="message-time">${timestamp}</span>
+        </div>
+        <div class="message-bubble">
+            <div class="message-content">${messageText}</div>
+        </div>
+    `;
+    
+    messagesArea.appendChild(messageDiv);
 }
 
-// Send Message - improved version
+// Send Message - Updated to match SwiftUI app structure
 async function sendMessage() {
     const messageInput = document.getElementById('message-input');
     const messageText = messageInput.value.trim();
@@ -13167,14 +13251,15 @@ async function sendMessage() {
     }
 
     try {
-        // Disable input while sending
         messageInput.disabled = true;
         document.getElementById('send-button').disabled = true;
         
-        await db.collection(`artifacts/${appId}/public/data/messages`).add({
-            text: messageText,
+        // Updated to match SwiftUI ChatMessage structure
+        await db.collection('chatMessages').add({
             senderId: currentUser.uid,
-            username: userProfile.username,
+            senderName: userProfile.username, // matches SwiftUI senderName field
+            senderEmail: currentUser.email || '',
+            message: messageText, // matches SwiftUI message field
             classId: userProfile.classId,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -13185,7 +13270,6 @@ async function sendMessage() {
         console.error("Error sending message:", error);
         showCustomAlert("Failed to send message. Please try again.");
     } finally {
-        // Re-enable input
         messageInput.disabled = false;
         document.getElementById('send-button').disabled = false;
         messageInput.focus();
@@ -13331,9 +13415,9 @@ async function sendMessage() {
 
                 if (userProfile && userProfile.completedLessons && !userProfile.completedLessons.includes(currentLesson.id)) {
                     userProfile.completedLessons.push(currentLesson.id);
-                    await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
-                        completedLessons: userProfile.completedLessons
-                    });
+                  await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
+    completedLessons: userProfile.completedLessons
+});
                         await checkAndAwardBadges(); 
                 }
                 updateDashboard(); // Update dashboard after passing a quiz
@@ -13386,8 +13470,8 @@ async function sendMessage() {
 
             if (newlyEarnedBadges.length > 0) {
                 // Update Firestore
-                await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
-                    earnedBadges: userProfile.earnedBadges
+        await db.collection('userProfiles').doc(currentUser.uid).update({
+                 earnedBadges: userProfile.earnedBadges
                 });
 
                 // Notify user
@@ -13424,10 +13508,10 @@ async function sendMessage() {
             }
 
             // Update Firestore
-            await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
-                earnedBadges: userProfile.earnedBadges,
-                completedMysteries: userProfile.completedMysteries
-            });
+         await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
+          earnedBadges: userProfile.earnedBadges,
+          completedMysteries: userProfile.completedMysteries
+        });
             // Notify user
             triggerFireworks();
             showCustomAlert(`Congratulations! You've earned the "${badgeToAward.name}" badge!`);
