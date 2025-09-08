@@ -1677,6 +1677,7 @@ nav button:focus-visible {
         let currentCategory = null;
         let currentLesson = null;
         let currentQuiz = null;
+        let userProfileListener = null; // Store the listener reference for cleanup
 
         // Sample Lessons Data (Dynamically generated categories)
         const lessonsData = [
@@ -12898,9 +12899,16 @@ auth.onAuthStateChanged(async (user) => {
         await loadUserProfile(); // This will handle UI updates
         
     } else {
-        // User not authenticated
+        // User not authenticated - cleanup listeners
         currentUser = null;
         userProfile = null;
+        
+        // Clean up the user profile listener
+        if (userProfileListener) {
+            userProfileListener();
+            userProfileListener = null;
+        }
+        
         console.log('User not authenticated');
         
         // Hide user info
@@ -13054,6 +13062,12 @@ async function saveProfile() {
 // Sign Out Function
 async function signOut() {
     try {
+        // Clean up the user profile listener
+        if (userProfileListener) {
+            userProfileListener();
+            userProfileListener = null;
+        }
+        
         await auth.signOut();
         showCustomAlert('Signed out successfully.');
     } catch (error) {
@@ -13066,34 +13080,46 @@ async function signOut() {
 async function loadUserProfile() {
     try {
         const userDocRef = db.collection('userProfiles').doc(currentUser.uid);
-        const doc = await userDocRef.get();
         
-        if (doc.exists) {
-            const profileData = doc.data();
-            
-            // Map SwiftUI profile structure to web app structure
-            userProfile = {
-                username: profileData.displayName || profileData.username || 'User', // Use displayName first, then username
-                classId: profileData.classIds && profileData.classIds.length > 0 ? profileData.classIds[0] : profileData.classId || '',
-                completedLessons: profileData.completedLessons || [],
-                earnedBadges: profileData.earnedBadges || [],
-                completedMysteries: profileData.completedMysteries || [],
-                currentLessonIndex: profileData.currentLessonIndex || 0,
-                email: profileData.email,
-                isInstructor: profileData.isInstructor || false
-            };
-            
-            console.log('Profile loaded:', userProfile);
-            updateUIForAuthenticatedUser();
-            updateDashboard();
-            setupChatListener();
-            
-        } else {
-            // Profile doesn't exist, show setup
-            console.log('User authenticated but no profile found');
-            userProfile = null;
-            showSection('profile-setup');
+        // Clean up any existing listener
+        if (userProfileListener) {
+            userProfileListener();
+            userProfileListener = null;
         }
+        
+        // Set up real-time listener for cross-device synchronization
+        userProfileListener = userDocRef.onSnapshot((doc) => {
+            if (doc.exists) {
+                const profileData = doc.data();
+                
+                // Map SwiftUI profile structure to web app structure
+                userProfile = {
+                    username: profileData.displayName || profileData.username || 'User', // Use displayName first, then username
+                    classId: profileData.classIds && profileData.classIds.length > 0 ? profileData.classIds[0] : profileData.classId || '',
+                    completedLessons: profileData.completedLessons || [],
+                    earnedBadges: profileData.earnedBadges || [],
+                    completedMysteries: profileData.completedMysteries || [],
+                    currentLessonIndex: profileData.currentLessonIndex || 0,
+                    email: profileData.email,
+                    isInstructor: profileData.isInstructor || false
+                };
+                
+                console.log('Profile updated:', userProfile);
+                updateUIForAuthenticatedUser();
+                updateDashboard();
+                setupChatListener();
+                
+            } else {
+                // Profile doesn't exist, show setup
+                console.log('User authenticated but no profile found');
+                userProfile = null;
+                showSection('profile-setup');
+            }
+        }, (error) => {
+            console.error('Profile listener error:', error);
+            showCustomAlert('Failed to sync user profile.');
+        });
+        
     } catch (error) {
         console.error('Profile load error:', error);
         showCustomAlert('Failed to load user profile.');
@@ -13415,10 +13441,10 @@ async function sendMessage() {
 
                 if (userProfile && userProfile.completedLessons && !userProfile.completedLessons.includes(currentLesson.id)) {
                     userProfile.completedLessons.push(currentLesson.id);
-                  await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
-    completedLessons: userProfile.completedLessons
-});
-                        await checkAndAwardBadges(); 
+                    await db.collection('userProfiles').doc(currentUser.uid).update({
+                        completedLessons: userProfile.completedLessons
+                    });
+                    await checkAndAwardBadges(); 
                 }
                 updateDashboard(); // Update dashboard after passing a quiz
                 loadLessonsForCategory(currentCategory);
@@ -13508,10 +13534,10 @@ async function sendMessage() {
             }
 
             // Update Firestore
-         await db.collection(`artifacts/${appId}/users`).doc(currentUser.uid).update({
-          earnedBadges: userProfile.earnedBadges,
-          completedMysteries: userProfile.completedMysteries
-        });
+            await db.collection('userProfiles').doc(currentUser.uid).update({
+                earnedBadges: userProfile.earnedBadges,
+                completedMysteries: userProfile.completedMysteries
+            });
             // Notify user
             triggerFireworks();
             showCustomAlert(`Congratulations! You've earned the "${badgeToAward.name}" badge!`);
