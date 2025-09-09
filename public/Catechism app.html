@@ -12968,7 +12968,7 @@ async function signUp() {
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         console.log('User created:', userCredential.user.uid);
-        showCustomAlert('Account created! Please set up your profile.');
+        showCustomAlert('Account created successfully! Please fill in your profile below.');
         // Don't redirect here - the auth state change will handle it
     } catch (error) {
         console.error('Sign up error:', error);
@@ -12989,7 +12989,7 @@ async function signIn() {
     try {
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         console.log('User signed in:', userCredential.user.uid);
-        showCustomAlert('Signed in successfully!');
+        showCustomAlert('Signed in successfully! You can now fill in your profile below.');
         // Don't redirect here - the auth state change will handle it
     } catch (error) {
         console.error('Sign in error:', error);
@@ -13002,17 +13002,22 @@ async function saveProfile() {
     const username = document.getElementById('username-input').value.trim();
     const classId = document.getElementById('class-input').value.trim();
     
+    console.log('SaveProfile called - currentUser:', currentUser);
+    console.log('SaveProfile called - username:', username, 'classId:', classId);
+    
     if (!username || !classId) {
         showCustomAlert('Please enter both username and class ID.');
         return;
     }
     
     if (!currentUser) {
-        showCustomAlert('Please sign in first.');
+        showCustomAlert('Please sign in first before saving your profile.');
         return;
     }
     
     try {
+        console.log('Starting profile save process...');
+        
         // Structure to match SwiftUI UserProfile model
         const profileData = {
             userId: currentUser.uid,
@@ -13031,9 +13036,13 @@ async function saveProfile() {
             classId: classId
         };
         
+        console.log('Profile data to save:', profileData);
+        
         // Use userProfiles collection to match SwiftUI app
         const userDocRef = db.collection('userProfiles').doc(currentUser.uid);
         await userDocRef.set(profileData, { merge: true });
+        
+        console.log('Profile saved to Firestore successfully');
 
         // Update local userProfile to match web app structure
         userProfile = {
@@ -13046,6 +13055,8 @@ async function saveProfile() {
             email: currentUser.email || '',
             isInstructor: false
         };
+        
+        console.log('Local userProfile updated:', userProfile);
         
         showCustomAlert('Profile saved successfully!');
         showSection('main-menu-section'); // Go to main menu after profile setup
@@ -13123,58 +13134,6 @@ async function loadUserProfile() {
     } catch (error) {
         console.error('Profile load error:', error);
         showCustomAlert('Failed to load user profile.');
-    }
-}
-
-// Save Profile - Updated to match SwiftUI userProfiles structure
-async function saveProfile() {
-    const username = document.getElementById('username-input').value.trim();
-    const classId = document.getElementById('class-input').value.trim();
-    
-    if (!username || !classId) {
-        showCustomAlert('Please enter both username and class ID.');
-        return;
-    }
-    
-    try {
-        // Structure to match SwiftUI UserProfile model
-        const profileData = {
-            userId: currentUser.uid,
-            email: currentUser.email || '',
-            displayName: username,
-            isInstructor: false,
-            classIds: [classId], // Array to match SwiftUI structure
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            // Keep web app specific fields for backward compatibility
-            completedLessons: [],
-            earnedBadges: [], 
-            completedMysteries: [],
-            currentLessonIndex: 0
-        };
-        
-        // Updated path to match SwiftUI app: userProfiles collection
-        const userDocRef = db.collection('userProfiles').doc(currentUser.uid);
-        await userDocRef.set(profileData, { merge: true });
-
-        // Update local userProfile to match web app structure
-        userProfile = {
-            username: username,
-            classId: classId,
-            completedLessons: [],
-            earnedBadges: [],
-            completedMysteries: [],
-            currentLessonIndex: 0,
-            email: currentUser.email || '',
-            isInstructor: false
-        };
-        
-        showCustomAlert('Profile saved successfully!');
-        showView('dashboard');
-        setupChatListener();
-        
-    } catch (error) {
-        console.error('Save profile error:', error);
-        showCustomAlert('Failed to save profile.');
     }
 }
 
