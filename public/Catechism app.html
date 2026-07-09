@@ -1698,9 +1698,21 @@ nav button:focus-visible {
                     'Life in Christ',
                     'Christian Prayer'
                 ];
+                const normalizedLessons = (catalog.lessons || []).map(lesson => ({
+                    ...lesson,
+                    content: lesson.content || lesson.contentHTML || '',
+                    videoUrl: lesson.videoUrl || null,
+                    quiz: Array.isArray(lesson.quiz)
+                        ? lesson.quiz
+                        : (lesson.quiz?.questions || []).map(question => ({
+                            ...question,
+                            correct: question.correct ?? question.correctAnswerIndex
+                        }))
+                }));
+
                 lessonsData = categoryOrder.map(category => ({
                     category,
-                    lessons: (catalog.lessons || []).filter(lesson => lesson.category === category)
+                    lessons: normalizedLessons.filter(lesson => lesson.category === category)
                 })).filter(category => category.lessons.length > 0);
             } catch (error) {
                 console.error('Failed to load shared lessons:', error);
