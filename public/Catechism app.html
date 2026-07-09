@@ -1639,14 +1639,6 @@ nav button:focus-visible {
 		</section>
     </div>
 
-    <!-- Custom Alert Modal -->
-    <div id="alert-overlay"></div>
-    <div id="custom-alert-modal">
-        <p id="alert-message"></p>
-        <button id="alert-ok-button">OK</button>
-    </div>
-    <div id="alert-overlay" class="hidden"></div>
-
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
@@ -1678,6 +1670,17 @@ nav button:focus-visible {
         let currentLesson = null;
         let currentQuiz = null;
         let userProfileListener = null; // Store the listener reference for cleanup
+        let chatMessagesListener = null; // Store the chat listener reference for cleanup
+
+        function appendTextWithLineBreaks(parent, text) {
+            const lines = String(text || '').split('\n');
+            lines.forEach((line, index) => {
+                if (index > 0) {
+                    parent.appendChild(document.createElement('br'));
+                }
+                parent.appendChild(document.createTextNode(line));
+            });
+        }
 
         // Sample Lessons Data (Dynamically generated categories)
         const lessonsData = [
@@ -12881,7 +12884,11 @@ if (nextClass) {
         // Display a Single Prayer
         function displayPrayer(prayer) {
             document.getElementById('prayer-display-title').textContent = prayer.name;
-            document.getElementById('prayer-display-text').innerHTML = `<p>${prayer.text.replace(/\n/g, '<br>')}</p>`;
+            const prayerText = document.getElementById('prayer-display-text');
+            prayerText.textContent = '';
+            const paragraph = document.createElement('p');
+            appendTextWithLineBreaks(paragraph, prayer.text);
+            prayerText.appendChild(paragraph);
             showSection('prayer-display-section');
         }
 
@@ -12917,6 +12924,11 @@ auth.onAuthStateChanged(async (user) => {
             userProfileListener();
             userProfileListener = null;
         }
+
+        if (chatMessagesListener) {
+            chatMessagesListener();
+            chatMessagesListener = null;
+        }
         
         console.log('User not authenticated');
         
@@ -12949,7 +12961,12 @@ function updateUIForAuthenticatedUser() {
     
     const dashboardWelcome = document.getElementById('dashboard-user-welcome');
     if (dashboardWelcome) {
-        dashboardWelcome.innerHTML = `Welcome, <strong>${userProfile.username}</strong>! (Class: ${userProfile.classId})`;
+        dashboardWelcome.textContent = '';
+        dashboardWelcome.appendChild(document.createTextNode('Welcome, '));
+        const userName = document.createElement('strong');
+        userName.textContent = userProfile.username;
+        dashboardWelcome.appendChild(userName);
+        dashboardWelcome.appendChild(document.createTextNode(`! (Class: ${userProfile.classId})`));
         dashboardWelcome.classList.remove('hidden');
     }
     
@@ -13087,6 +13104,11 @@ async function signOut() {
             userProfileListener();
             userProfileListener = null;
         }
+
+        if (chatMessagesListener) {
+            chatMessagesListener();
+            chatMessagesListener = null;
+        }
         
         await auth.signOut();
         showCustomAlert('Signed out successfully.');
@@ -13148,6 +13170,11 @@ async function loadUserProfile() {
 
 // Chat Listener - Updated to match SwiftUI app paths
 function setupChatListener() {
+    if (chatMessagesListener) {
+        chatMessagesListener();
+        chatMessagesListener = null;
+    }
+
     if (!userProfile || !userProfile.classId) {
         console.warn("User profile or class ID not set. Cannot set up chat listener.");
         document.getElementById('messages-area').innerHTML = '<div class="loading-message">Please set your username and class to view chat messages.</div>';
@@ -13155,7 +13182,7 @@ function setupChatListener() {
     }
 
     // Updated path to match SwiftUI app: chatMessages collection
-    db.collection('chatMessages')
+    chatMessagesListener = db.collection('chatMessages')
         .where("classId", "==", userProfile.classId)
         .orderBy('timestamp', 'asc')
         .limit(50)
@@ -13195,7 +13222,12 @@ function setupChatListener() {
         }, error => {
             console.error("Error listening to messages:", error);
             const messagesArea = document.getElementById('messages-area');
-            messagesArea.innerHTML = `<div class="loading-message" style="color: red;">Error loading messages: ${error.message}</div>`;
+            messagesArea.textContent = '';
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'loading-message';
+            errorMessage.style.color = 'red';
+            errorMessage.textContent = `Error loading messages: ${error.message}`;
+            messagesArea.appendChild(errorMessage);
         });
 }
 
@@ -13221,15 +13253,30 @@ function displayMessage(messageData) {
         messageData.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 
         'Unknown time';
     
-    messageDiv.innerHTML = `
-        <div class="message-header">
-            <span class="message-sender">${senderName}</span>
-            <span class="message-time">${timestamp}</span>
-        </div>
-        <div class="message-bubble">
-            <div class="message-content">${messageText}</div>
-        </div>
-    `;
+    const header = document.createElement('div');
+    header.className = 'message-header';
+
+    const sender = document.createElement('span');
+    sender.className = 'message-sender';
+    sender.textContent = senderName;
+
+    const time = document.createElement('span');
+    time.className = 'message-time';
+    time.textContent = timestamp;
+
+    header.appendChild(sender);
+    header.appendChild(time);
+
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    appendTextWithLineBreaks(content, messageText);
+
+    bubble.appendChild(content);
+    messageDiv.appendChild(header);
+    messageDiv.appendChild(bubble);
     
     messagesArea.appendChild(messageDiv);
 }
@@ -13901,24 +13948,6 @@ async function sendMessage() {
             document.querySelector('.main-content-container').style.opacity = '1';
 
             initializeAuth(); // Start Firebase auth process
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    loadUserProfile(); // Load user profile once authenticated
-                } else {
-                    currentUser = null;
-                    userProfile = null;
-                     const userInfoDisplay = document.getElementById('user-info-display');
-                    if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
-                    document.getElementById('dashboard-user-welcome').classList.add('hidden');
-                    
-                     document.getElementById('user-info-display').classList.add('hidden');
-                    // When not authenticated, if user tries to go to chat, they will see the profile setup.
-                    document.getElementById('message-input').disabled = true;
-                    document.getElementById('send-button').disabled = true;
-                    document.getElementById('messages-area').innerHTML = '<div class="loading-message">Please sign in to use chat.</div>';
-                }
-            });
             initNavListeners(); // Initialize all event listeners
             showSection('main-menu-section'); // Show initial section immediately
 document.getElementById('signup-button').addEventListener('click', signUp);
