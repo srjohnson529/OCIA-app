@@ -1273,6 +1273,129 @@ nav button:focus-visible {
     color: #5b5955;
 }
 
+#main-menu-section {
+    max-width: 980px;
+    background: rgba(247,247,245,.95);
+    border: 1px solid rgba(191,148,74,.18);
+    border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.12);
+    padding: 1.5rem;
+}
+
+#dashboard-user-welcome {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto 1rem !important;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(191,148,74,.22);
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+    color: #1e1c1a;
+    text-shadow: none;
+    font-size: 1.05rem !important;
+}
+
+#dashboard-container {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 980px;
+    margin: 0 auto 1rem;
+    padding: 0;
+}
+
+.dashboard-item,
+.student-firestore-board,
+.prayer-request-board {
+    width: 100%;
+    max-width: 980px;
+    box-sizing: border-box;
+    margin: 1rem auto 0;
+    padding: 1.25rem;
+    border-radius: 18px;
+    background: rgba(255,255,255,.94);
+    border: 1px solid rgba(191,148,74,.22);
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+    color: #1e1c1a;
+    text-shadow: none;
+}
+
+.dashboard-item {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.dashboard-item:hover {
+    transform: none;
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+}
+
+.dashboard-item span {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.05;
+    margin-bottom: .65rem;
+    color: #1e1c1a;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-item p {
+    font-size: 1rem;
+    color: #5b5955;
+}
+
+.dashboard-item::after {
+    left: 1.25rem;
+    right: 1.25rem;
+    bottom: 1rem;
+}
+
+.student-firestore-header,
+.prayer-request-header {
+    align-items: flex-start;
+    padding-bottom: .9rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(59,111,160,.14);
+}
+
+.student-firestore-kicker,
+.prayer-request-kicker {
+    color: #3b6fa0;
+    font-weight: 800;
+}
+
+.student-firestore-header h3,
+.prayer-request-header h3 {
+    font-size: 1.5rem;
+    color: #1e1c1a;
+}
+
+.student-firestore-header p,
+.prayer-request-header p {
+    color: #5b5955;
+}
+
+.student-firestore-item,
+.prayer-request-item {
+    border-radius: 14px;
+    border: 1px solid rgba(59,111,160,.12);
+    box-shadow: none;
+    background: rgba(247,247,245,.72);
+}
+
+@media (max-width: 620px) {
+    #main-menu-section {
+        padding: 1rem;
+    }
+
+    #dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 620px) {
     .student-firestore-header,
     .prayer-request-header {
