@@ -1120,11 +1120,50 @@ nav button:focus-visible {
     font-size: 0.95rem;
 }
 
+.student-firestore-board {
+    margin: 1.5rem auto;
+    max-width: 980px;
+    padding: 1.25rem;
+    border-radius: 18px;
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(191,148,74,.22);
+    box-shadow: 0 8px 24px rgba(0,0,0,.10);
+}
+
+.student-firestore-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.student-firestore-kicker {
+    color: #3b6fa0;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-size: .76rem;
+}
+
+.student-firestore-header h3 {
+    margin: .15rem 0 .25rem;
+    font-size: 1.45rem;
+}
+
+.student-firestore-header p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.student-firestore-list,
 .prayer-request-list {
     display: grid;
     gap: 0.85rem;
 }
 
+.student-firestore-item,
 .prayer-request-item {
     width: 100%;
     border: 1px solid rgba(59, 111, 160, 0.12);
@@ -1138,12 +1177,36 @@ nav button:focus-visible {
     transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
+.student-firestore-item {
+    cursor: default;
+}
+
 .prayer-request-item:hover,
 .prayer-request-item:focus-visible {
     transform: translateY(-1px);
     border-color: rgba(191, 148, 74, 0.55);
     box-shadow: 0 8px 20px rgba(0,0,0,.11);
     outline: none;
+}
+
+.student-firestore-title {
+    color: #3b6fa0;
+    font-weight: 700;
+    margin-bottom: .25rem;
+    font-size: 1.05rem;
+}
+
+.student-firestore-meta {
+    color: #8b6b32;
+    font-weight: 700;
+    font-size: .84rem;
+    margin-bottom: .35rem;
+}
+
+.student-firestore-details {
+    color: #555;
+    font-size: .95rem;
+    line-height: 1.4;
 }
 
 .prayer-request-detail {
@@ -1202,6 +1265,7 @@ nav button:focus-visible {
     flex-wrap: wrap;
 }
 
+.student-firestore-empty,
 .prayer-request-empty {
     padding: 1rem;
     border-radius: 14px;
@@ -1210,6 +1274,7 @@ nav button:focus-visible {
 }
 
 @media (max-width: 620px) {
+    .student-firestore-header,
     .prayer-request-header {
         align-items: stretch;
         flex-direction: column;
@@ -1280,6 +1345,32 @@ nav button:focus-visible {
                 <div class="dashboard-item">
                     <span id="badges-earned-stat">0</span>
                     <p>Badges Earned</p>
+                </div>
+            </div>
+
+            <div class="student-firestore-board" id="announcement-board">
+                <div class="student-firestore-header">
+                    <div>
+                        <div class="student-firestore-kicker">Instructor Updates</div>
+                        <h3>Announcements</h3>
+                        <p>Class updates posted from the instructor side of Illumined.</p>
+                    </div>
+                </div>
+                <div id="announcement-list" class="student-firestore-list">
+                    <p class="student-firestore-empty">No announcements yet.</p>
+                </div>
+            </div>
+
+            <div class="student-firestore-board" id="assignment-board">
+                <div class="student-firestore-header">
+                    <div>
+                        <div class="student-firestore-kicker">Class Work</div>
+                        <h3>Assignments</h3>
+                        <p>Upcoming assignments posted by your instructor.</p>
+                    </div>
+                </div>
+                <div id="assignment-list" class="student-firestore-list">
+                    <p class="student-firestore-empty">No active assignments yet.</p>
                 </div>
             </div>
 
@@ -1378,6 +1469,7 @@ nav button:focus-visible {
         <!-- Prayer Display Section -->
         <section id="prayer-display-section" class="hidden content-page">
             <h2 id="prayer-display-title"></h2>
+            <div id="prayer-memorized-control" class="student-firestore-board"></div>
             <div id="prayer-display-text" class="content-wrapper"></div>
             <button class="button-theme" id="prayer-display-back-button">Back to Common Prayers</button>
         </section>
@@ -1804,6 +1896,7 @@ nav button:focus-visible {
             
            <section id="achievements-section" class="hidden">
             <h2>Badges</h2>
+            <div id="memorized-prayers-achievements" class="student-firestore-board"></div>
             <div id="badges-container" class="badges-grid">
                 <!-- Badges will be dynamically inserted here -->
             </div>
@@ -1858,6 +1951,10 @@ nav button:focus-visible {
         let userProfileListener = null; // Store the listener reference for cleanup
         let chatMessagesListener = null; // Store the chat listener reference for cleanup
         let prayerRequestsListener = null; // Store the prayer request listener reference for cleanup
+        let announcementsListener = null;
+        let assignmentsListener = null;
+        let classScheduleListener = null;
+        let firestoreClassSchedule = [];
 
         function appendTextWithLineBreaks(parent, text) {
             const lines = String(text || '').split('\n');
@@ -2214,24 +2311,219 @@ nav button:focus-visible {
             document.getElementById('lessons-left-stat').textContent = lessonsLeft;
             document.getElementById('badges-earned-stat').textContent = badgesEarned; // ADD THIS LINE
 
-                  // Find upcoming topic
+            updateNextClassTopic();
+        }
+
+        function updateNextClassTopic() {
             const now = new Date();
             now.setHours(0, 0, 0, 0); // Normalize to start of day
 
-     // Find the next class after today
-const nextClass = classSchedule
-    .slice()
-    .sort((a, b) => new Date(a.date) - new Date(b.date)) // Sort ascending
-    .find(item => new Date(item.date) > now);
+            const firestoreSchedule = firestoreClassSchedule
+                .map(item => ({
+                    topic: item.topic,
+                    date: item.date && item.date.toDate ? item.date.toDate() : null
+                }))
+                .filter(item => item.topic && item.date);
 
-const upcomingTopicEl = document.getElementById('upcoming-topic-stat');
-if (nextClass) {
-    upcomingTopicEl.textContent = nextClass.topic;
-} else {
-                // If no class has started yet, show the very first one
-                const firstClass = classSchedule.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+            const scheduleSource = firestoreSchedule.length
+                ? firestoreSchedule
+                : classSchedule.map(item => ({
+                    topic: item.topic,
+                    date: new Date(item.date)
+                }));
+
+            const sortedSchedule = scheduleSource
+                .slice()
+                .sort((a, b) => a.date - b.date);
+
+            const nextClass = sortedSchedule.find(item => item.date > now);
+
+            const upcomingTopicEl = document.getElementById('upcoming-topic-stat');
+            if (!upcomingTopicEl) return;
+
+            if (nextClass) {
+                upcomingTopicEl.textContent = nextClass.topic;
+            } else {
+                const firstClass = sortedSchedule[0];
                 upcomingTopicEl.textContent = firstClass ? firstClass.topic : "TBD";
             }
+        }
+
+        function stopStudentDashboardListeners() {
+            if (announcementsListener) {
+                announcementsListener();
+                announcementsListener = null;
+            }
+            if (assignmentsListener) {
+                assignmentsListener();
+                assignmentsListener = null;
+            }
+            if (classScheduleListener) {
+                classScheduleListener();
+                classScheduleListener = null;
+            }
+            firestoreClassSchedule.length = 0;
+        }
+
+        function setupStudentDashboardListeners() {
+            stopStudentDashboardListeners();
+
+            if (!userProfile || !userProfile.classId) {
+                renderAnnouncements([]);
+                renderAssignments([]);
+                updateNextClassTopic();
+                return;
+            }
+
+            announcementsListener = db.collection('announcements')
+                .where('classId', '==', userProfile.classId)
+                .onSnapshot(snapshot => {
+                    const announcements = [];
+                    snapshot.forEach(doc => {
+                        announcements.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    announcements.sort((a, b) => {
+                        const aDate = a.updatedAt && a.updatedAt.toDate ? a.updatedAt.toDate() : new Date(0);
+                        const bDate = b.updatedAt && b.updatedAt.toDate ? b.updatedAt.toDate() : new Date(0);
+                        return bDate - aDate;
+                    });
+
+                    renderAnnouncements(announcements.filter(item => item.isActive !== false).slice(0, 3));
+                }, error => {
+                    console.error('Announcements listener error:', error);
+                    renderDashboardBoardError('announcement-list', `Error loading announcements: ${error.message}`);
+                });
+
+            assignmentsListener = db.collection('assignments')
+                .where('classId', '==', userProfile.classId)
+                .onSnapshot(snapshot => {
+                    const assignments = [];
+                    snapshot.forEach(doc => {
+                        assignments.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    assignments.sort((a, b) => {
+                        const aDate = a.dueAt && a.dueAt.toDate ? a.dueAt.toDate() : new Date(8640000000000000);
+                        const bDate = b.dueAt && b.dueAt.toDate ? b.dueAt.toDate() : new Date(8640000000000000);
+                        return aDate - bDate;
+                    });
+
+                    renderAssignments(assignments.filter(item => item.isActive !== false).slice(0, 3));
+                }, error => {
+                    console.error('Assignments listener error:', error);
+                    renderDashboardBoardError('assignment-list', `Error loading assignments: ${error.message}`);
+                });
+
+            classScheduleListener = db.collection('classSchedule')
+                .where('classId', '==', userProfile.classId)
+                .onSnapshot(snapshot => {
+                    firestoreClassSchedule.length = 0;
+                    snapshot.forEach(doc => {
+                        firestoreClassSchedule.push({ id: doc.id, ...doc.data() });
+                    });
+                    updateNextClassTopic();
+                }, error => {
+                    console.error('Class schedule listener error:', error);
+                    firestoreClassSchedule.length = 0;
+                    updateNextClassTopic();
+                });
+        }
+
+        function renderAnnouncements(announcements) {
+            const list = document.getElementById('announcement-list');
+            if (!list) return;
+
+            list.textContent = '';
+
+            if (!announcements.length) {
+                const empty = document.createElement('p');
+                empty.className = 'student-firestore-empty';
+                empty.textContent = 'No announcements yet.';
+                list.appendChild(empty);
+                return;
+            }
+
+            announcements.forEach(announcement => {
+                const item = document.createElement('div');
+                item.className = 'student-firestore-item';
+
+                const title = document.createElement('div');
+                title.className = 'student-firestore-title';
+                title.textContent = announcement.title || 'Announcement';
+
+                const meta = document.createElement('div');
+                meta.className = 'student-firestore-meta';
+                const date = announcement.updatedAt && announcement.updatedAt.toDate
+                    ? announcement.updatedAt.toDate().toLocaleDateString()
+                    : '';
+                meta.textContent = date ? `Updated ${date}` : 'Instructor update';
+
+                const details = document.createElement('div');
+                details.className = 'student-firestore-details';
+                appendTextWithLineBreaks(details, announcement.message || '');
+
+                item.appendChild(title);
+                item.appendChild(meta);
+                item.appendChild(details);
+                list.appendChild(item);
+            });
+        }
+
+        function renderAssignments(assignments) {
+            const list = document.getElementById('assignment-list');
+            if (!list) return;
+
+            list.textContent = '';
+
+            if (!assignments.length) {
+                const empty = document.createElement('p');
+                empty.className = 'student-firestore-empty';
+                empty.textContent = 'No active assignments yet.';
+                list.appendChild(empty);
+                return;
+            }
+
+            assignments.forEach(assignment => {
+                const item = document.createElement('div');
+                item.className = 'student-firestore-item';
+
+                const title = document.createElement('div');
+                title.className = 'student-firestore-title';
+                title.textContent = assignment.title || 'Assignment';
+
+                const meta = document.createElement('div');
+                meta.className = 'student-firestore-meta';
+                const dueDate = assignment.dueAt && assignment.dueAt.toDate
+                    ? assignment.dueAt.toDate().toLocaleDateString()
+                    : '';
+                meta.textContent = dueDate ? `Due ${dueDate}` : 'No due date';
+
+                const details = document.createElement('div');
+                details.className = 'student-firestore-details';
+                const lessonTitle = (assignment.lessonTitle || '').trim();
+                if (lessonTitle) {
+                    const lesson = document.createElement('strong');
+                    lesson.textContent = `${lessonTitle}: `;
+                    details.appendChild(lesson);
+                }
+                appendTextWithLineBreaks(details, assignment.instructions || '');
+
+                item.appendChild(title);
+                item.appendChild(meta);
+                item.appendChild(details);
+                list.appendChild(item);
+            });
+        }
+
+        function renderDashboardBoardError(listId, message) {
+            const list = document.getElementById(listId);
+            if (!list) return;
+            list.textContent = '';
+            const error = document.createElement('p');
+            error.className = 'student-firestore-empty';
+            error.textContent = message;
+            list.appendChild(error);
         }
 
   // Populate Common Prayers Menu
@@ -2241,7 +2533,9 @@ if (nextClass) {
             commonPrayers.forEach(prayer => {
                 const btn = document.createElement('button');
                 btn.classList.add('button-theme', 'lesson-button');
-                btn.textContent = prayer.name;
+                const prayerId = getPrayerId(prayer);
+                const isMemorized = userProfile && Array.isArray(userProfile.memorizedPrayerIds) && userProfile.memorizedPrayerIds.includes(prayerId);
+                btn.textContent = `${isMemorized ? '✓ ' : ''}${prayer.name}`;
                 btn.onclick = () => displayPrayer(prayer);
                 container.appendChild(btn);
             });
@@ -2250,12 +2544,99 @@ if (nextClass) {
         // Display a Single Prayer
         function displayPrayer(prayer) {
             document.getElementById('prayer-display-title').textContent = prayer.name;
+            renderPrayerMemorizedControl(prayer);
             const prayerText = document.getElementById('prayer-display-text');
             prayerText.textContent = '';
             const paragraph = document.createElement('p');
             appendTextWithLineBreaks(paragraph, prayer.text);
             prayerText.appendChild(paragraph);
             showSection('prayer-display-section');
+        }
+
+        function getPrayerId(prayer) {
+            return (prayer.id || prayer.name || '')
+                .toLowerCase()
+                .replace(/&/g, 'and')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        function getMemorizedPrayerNames() {
+            const memorizedIds = new Set((userProfile && userProfile.memorizedPrayerIds) || []);
+            return commonPrayers
+                .filter(prayer => memorizedIds.has(getPrayerId(prayer)))
+                .map(prayer => prayer.name);
+        }
+
+        function renderPrayerMemorizedControl(prayer) {
+            const container = document.getElementById('prayer-memorized-control');
+            if (!container) return;
+
+            const prayerId = getPrayerId(prayer);
+            const isMemorized = userProfile && Array.isArray(userProfile.memorizedPrayerIds) && userProfile.memorizedPrayerIds.includes(prayerId);
+
+            container.textContent = '';
+
+            const header = document.createElement('div');
+            header.className = 'student-firestore-header';
+
+            const copy = document.createElement('div');
+            const kicker = document.createElement('div');
+            kicker.className = 'student-firestore-kicker';
+            kicker.textContent = 'Prayer Memorization';
+
+            const title = document.createElement('h3');
+            title.textContent = isMemorized ? 'Marked as memorized' : 'Memorized?';
+
+            const description = document.createElement('p');
+            description.textContent = isMemorized
+                ? 'This prayer is being tracked on your achievements and instructor progress.'
+                : 'Mark this prayer when you can recite it from memory.';
+
+            copy.appendChild(kicker);
+            copy.appendChild(title);
+            copy.appendChild(description);
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'button-theme';
+            button.textContent = isMemorized ? 'Remove Check' : 'Mark Memorized';
+            button.addEventListener('click', () => togglePrayerMemorized(prayer));
+
+            header.appendChild(copy);
+            header.appendChild(button);
+            container.appendChild(header);
+        }
+
+        async function togglePrayerMemorized(prayer) {
+            if (!currentUser || !userProfile) {
+                showCustomAlert('Please sign in before tracking memorized prayers.');
+                return;
+            }
+
+            const prayerId = getPrayerId(prayer);
+            if (!Array.isArray(userProfile.memorizedPrayerIds)) {
+                userProfile.memorizedPrayerIds = [];
+            }
+
+            const isMemorized = userProfile.memorizedPrayerIds.includes(prayerId);
+            const updatedPrayerIds = isMemorized
+                ? userProfile.memorizedPrayerIds.filter(id => id !== prayerId)
+                : [...userProfile.memorizedPrayerIds, prayerId];
+
+            try {
+                await db.collection('userProfiles').doc(currentUser.uid).update({
+                    memorizedPrayerIds: updatedPrayerIds
+                });
+
+                userProfile.memorizedPrayerIds = updatedPrayerIds;
+                renderPrayerMemorizedControl(prayer);
+                populateCommonPrayersMenu();
+                showCustomAlert(isMemorized ? 'Prayer removed from memorized list.' : 'Prayer marked as memorized.');
+            } catch (error) {
+                console.error('Memorized prayer update error:', error);
+                showCustomAlert(`Failed to update memorized prayer: ${error.message}`);
+            }
         }
 
       // Replace the authentication section in your JavaScript
@@ -2300,6 +2681,8 @@ auth.onAuthStateChanged(async (user) => {
             prayerRequestsListener();
             prayerRequestsListener = null;
         }
+
+        stopStudentDashboardListeners();
         
         console.log('User not authenticated');
         
@@ -2427,6 +2810,7 @@ async function saveProfile() {
             completedLessons: [],
             earnedBadges: [], 
             completedMysteries: [],
+            memorizedPrayerIds: [],
             currentLessonIndex: 0,
             // Also store username separately for web app compatibility
             username: username,
@@ -2448,6 +2832,7 @@ async function saveProfile() {
             completedLessons: [],
             earnedBadges: [],
             completedMysteries: [],
+            memorizedPrayerIds: [],
             currentLessonIndex: 0,
             email: currentUser.email || '',
             isInstructor: false
@@ -2485,6 +2870,8 @@ async function signOut() {
             prayerRequestsListener();
             prayerRequestsListener = null;
         }
+
+        stopStudentDashboardListeners();
         
         await auth.signOut();
         showCustomAlert('Signed out successfully.');
@@ -2517,6 +2904,7 @@ async function loadUserProfile() {
                     completedLessons: profileData.completedLessons || [],
                     earnedBadges: profileData.earnedBadges || [],
                     completedMysteries: profileData.completedMysteries || [],
+                    memorizedPrayerIds: profileData.memorizedPrayerIds || [],
                     currentLessonIndex: profileData.currentLessonIndex || 0,
                     email: profileData.email,
                     isInstructor: profileData.isInstructor || false
@@ -2527,6 +2915,7 @@ async function loadUserProfile() {
                 updateDashboard();
                 setupChatListener();
                 setupPrayerRequestListener();
+                setupStudentDashboardListeners();
                 
             } else {
                 // Profile doesn't exist, show setup
@@ -3125,6 +3514,7 @@ async function submitPrayerRequest() {
         function displayBadges() {
             const container = document.getElementById('badges-container');
             container.innerHTML = '';
+            renderMemorizedPrayersAchievementCard();
 
             badgesData.forEach(badge => {
                 const isEarned = userProfile && userProfile.earnedBadges && userProfile.earnedBadges.includes(badge.id);
@@ -3139,6 +3529,56 @@ async function submitPrayerRequest() {
                 container.appendChild(card);
             });
             showSection('achievements-section');
+        }
+
+        function renderMemorizedPrayersAchievementCard() {
+            const container = document.getElementById('memorized-prayers-achievements');
+            if (!container) return;
+
+            const memorizedNames = getMemorizedPrayerNames();
+            const totalCount = commonPrayers.length;
+
+            container.textContent = '';
+
+            const header = document.createElement('div');
+            header.className = 'student-firestore-header';
+
+            const copy = document.createElement('div');
+
+            const kicker = document.createElement('div');
+            kicker.className = 'student-firestore-kicker';
+            kicker.textContent = 'Prayer Memorization';
+
+            const title = document.createElement('h3');
+            title.textContent = `${memorizedNames.length} of ${totalCount} common prayers memorized`;
+
+            const description = document.createElement('p');
+            description.textContent = 'These are tracked in your profile and visible to the instructor.';
+
+            copy.appendChild(kicker);
+            copy.appendChild(title);
+            copy.appendChild(description);
+            header.appendChild(copy);
+            container.appendChild(header);
+
+            const list = document.createElement('div');
+            list.className = 'student-firestore-list';
+
+            if (!memorizedNames.length) {
+                const empty = document.createElement('p');
+                empty.className = 'student-firestore-empty';
+                empty.textContent = 'No common prayers marked memorized yet.';
+                list.appendChild(empty);
+            } else {
+                memorizedNames.forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'student-firestore-item';
+                    item.textContent = `✓ ${name}`;
+                    list.appendChild(item);
+                });
+            }
+
+            container.appendChild(list);
         }
 
    // Rosary Logic
