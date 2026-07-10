@@ -2703,13 +2703,19 @@ function renderPrayerRequests(requests) {
         const details = document.createElement('div');
         details.className = 'prayer-request-details';
         const detailText = (request.details || '').trim();
-        details.textContent = detailText || 'No additional details.';
+        details.textContent = detailText ? previewText(detailText, 50) : 'No additional details.';
 
         button.appendChild(user);
         button.appendChild(title);
         button.appendChild(details);
         requestList.appendChild(button);
     });
+}
+
+function previewText(text, maxLength) {
+    const cleaned = String(text || '').trim();
+    if (cleaned.length <= maxLength) return cleaned;
+    return `${cleaned.slice(0, maxLength)}...`;
 }
 
 function showPrayerRequestDetail(request) {
