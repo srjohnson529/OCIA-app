@@ -1069,6 +1069,81 @@ nav button:focus-visible {
     margin: 0;
 }
 
+.prayer-request-board {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(247, 247, 245, 0.95);
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.10);
+    color: #1e1c1a;
+    text-shadow: none;
+    text-align: left;
+}
+
+.prayer-request-board h3,
+.prayer-request-board p {
+    text-shadow: none;
+}
+
+.prayer-request-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.prayer-request-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.prayer-request-item {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: rgba(59, 111, 160, 0.08);
+    color: #1e1c1a;
+    text-align: left;
+    cursor: pointer;
+}
+
+.prayer-request-user {
+    color: #3b6fa0;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+}
+
+.prayer-request-title {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.prayer-request-details {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.prayer-request-form {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.prayer-request-form input,
+.prayer-request-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d4d4d4;
+    border-radius: 10px;
+    padding: 0.75rem;
+    font: inherit;
+}
+
 /* Optional: Custom Fade Out Animation */
 @keyframes fadeIn {
     from { opacity: 0; transform: translate(-50%, -60%); }
@@ -1129,6 +1204,28 @@ nav button:focus-visible {
                 <div class="dashboard-item">
                     <span id="badges-earned-stat">0</span>
                     <p>Badges Earned</p>
+                </div>
+            </div>
+
+            <div class="prayer-request-board">
+                <div class="prayer-request-header">
+                    <div>
+                        <h3>Prayer Requests</h3>
+                        <p>The 5 most recent active requests from your class.</p>
+                    </div>
+                    <button class="button-theme" id="toggle-prayer-request-form-button">New</button>
+                </div>
+
+                <div id="prayer-request-list" class="prayer-request-list">
+                    <p>No active prayer requests yet.</p>
+                </div>
+
+                <div id="prayer-request-detail" class="hidden"></div>
+
+                <div id="prayer-request-form" class="prayer-request-form hidden">
+                    <input type="text" id="prayer-request-title-input" placeholder="Prayer request title">
+                    <textarea id="prayer-request-details-input" rows="4" placeholder="Optional details"></textarea>
+                    <button class="button-theme" id="submit-prayer-request-button">Post Prayer Request</button>
                 </div>
             </div>
         </section>
@@ -1680,6 +1777,7 @@ nav button:focus-visible {
         let currentQuiz = null;
         let userProfileListener = null; // Store the listener reference for cleanup
         let chatMessagesListener = null; // Store the chat listener reference for cleanup
+        let prayerRequestsListener = null; // Store the prayer request listener reference for cleanup
 
         function appendTextWithLineBreaks(parent, text) {
             const lines = String(text || '').split('\n');
@@ -2117,6 +2215,11 @@ auth.onAuthStateChanged(async (user) => {
             chatMessagesListener();
             chatMessagesListener = null;
         }
+
+        if (prayerRequestsListener) {
+            prayerRequestsListener();
+            prayerRequestsListener = null;
+        }
         
         console.log('User not authenticated');
         
@@ -2297,6 +2400,11 @@ async function signOut() {
             chatMessagesListener();
             chatMessagesListener = null;
         }
+
+        if (prayerRequestsListener) {
+            prayerRequestsListener();
+            prayerRequestsListener = null;
+        }
         
         await auth.signOut();
         showCustomAlert('Signed out successfully.');
@@ -2338,6 +2446,7 @@ async function loadUserProfile() {
                 updateUIForAuthenticatedUser();
                 updateDashboard();
                 setupChatListener();
+                setupPrayerRequestListener();
                 
             } else {
                 // Profile doesn't exist, show setup
@@ -2502,6 +2611,170 @@ async function sendMessage() {
         messageInput.disabled = false;
         document.getElementById('send-button').disabled = false;
         messageInput.focus();
+    }
+}
+
+function setupPrayerRequestListener() {
+    if (prayerRequestsListener) {
+        prayerRequestsListener();
+        prayerRequestsListener = null;
+    }
+
+    const requestList = document.getElementById('prayer-request-list');
+    if (!requestList) return;
+
+    if (!userProfile || !userProfile.classId) {
+        requestList.innerHTML = '<p>Please create a profile to view prayer requests.</p>';
+        return;
+    }
+
+    prayerRequestsListener = db.collection('prayerRequests')
+        .where('classId', '==', userProfile.classId)
+        .onSnapshot(snapshot => {
+            const requests = [];
+            const expiredRequests = [];
+            const now = new Date();
+
+            snapshot.forEach(doc => {
+                const request = { id: doc.id, ...doc.data() };
+                const expiresAt = request.expiresAt && request.expiresAt.toDate ? request.expiresAt.toDate() : null;
+
+                if (expiresAt && expiresAt <= now) {
+                    expiredRequests.push(request);
+                } else {
+                    requests.push(request);
+                }
+            });
+
+            expiredRequests.forEach(request => {
+                db.collection('prayerRequests').doc(request.id).delete().catch(() => {
+                    // Rules or TTL may handle deletion; expired requests are hidden locally either way.
+                });
+            });
+
+            requests.sort((a, b) => {
+                const aDate = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : new Date(0);
+                const bDate = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : new Date(0);
+                return bDate - aDate;
+            });
+
+            renderPrayerRequests(requests.slice(0, 5));
+        }, error => {
+            console.error('Prayer request listener error:', error);
+            requestList.textContent = '';
+            const errorMessage = document.createElement('p');
+            errorMessage.textContent = `Error loading prayer requests: ${error.message}`;
+            requestList.appendChild(errorMessage);
+        });
+}
+
+function renderPrayerRequests(requests) {
+    const requestList = document.getElementById('prayer-request-list');
+    const detailContainer = document.getElementById('prayer-request-detail');
+    if (!requestList) return;
+
+    requestList.textContent = '';
+    if (detailContainer) {
+        detailContainer.textContent = '';
+        detailContainer.classList.add('hidden');
+    }
+
+    if (!requests.length) {
+        const empty = document.createElement('p');
+        empty.textContent = 'No active prayer requests yet.';
+        requestList.appendChild(empty);
+        return;
+    }
+
+    requests.forEach(request => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'prayer-request-item';
+        button.addEventListener('click', () => showPrayerRequestDetail(request));
+
+        const user = document.createElement('div');
+        user.className = 'prayer-request-user';
+        user.textContent = request.requesterName || 'Anonymous';
+
+        const title = document.createElement('div');
+        title.className = 'prayer-request-title';
+        title.textContent = request.title || 'Prayer Request';
+
+        const details = document.createElement('div');
+        details.className = 'prayer-request-details';
+        const detailText = (request.details || '').trim();
+        details.textContent = detailText || 'No additional details.';
+
+        button.appendChild(user);
+        button.appendChild(title);
+        button.appendChild(details);
+        requestList.appendChild(button);
+    });
+}
+
+function showPrayerRequestDetail(request) {
+    const detailContainer = document.getElementById('prayer-request-detail');
+    if (!detailContainer) return;
+
+    detailContainer.textContent = '';
+    detailContainer.classList.remove('hidden');
+    detailContainer.className = 'prayer-request-item';
+
+    const user = document.createElement('div');
+    user.className = 'prayer-request-user';
+    user.textContent = request.requesterName || 'Anonymous';
+
+    const title = document.createElement('div');
+    title.className = 'prayer-request-title';
+    title.textContent = request.title || 'Prayer Request';
+
+    const details = document.createElement('div');
+    details.className = 'prayer-request-details';
+    appendTextWithLineBreaks(details, (request.details || '').trim() || 'No additional details.');
+
+    detailContainer.appendChild(user);
+    detailContainer.appendChild(title);
+    detailContainer.appendChild(details);
+}
+
+async function submitPrayerRequest() {
+    const titleInput = document.getElementById('prayer-request-title-input');
+    const detailsInput = document.getElementById('prayer-request-details-input');
+    const title = titleInput.value.trim();
+    const details = detailsInput.value.trim();
+
+    if (!currentUser || !userProfile || !userProfile.classId) {
+        showCustomAlert('Please sign in and create a profile before posting a prayer request.');
+        return;
+    }
+
+    if (!title) {
+        showCustomAlert('Please add a title for the prayer request.');
+        return;
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 3);
+
+    try {
+        await db.collection('prayerRequests').add({
+            title,
+            details,
+            classId: userProfile.classId,
+            requesterId: currentUser.uid,
+            requesterName: userProfile.username,
+            requesterEmail: currentUser.email || '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt)
+        });
+
+        titleInput.value = '';
+        detailsInput.value = '';
+        document.getElementById('prayer-request-form').classList.add('hidden');
+        showCustomAlert('Prayer request posted.');
+    } catch (error) {
+        console.error('Prayer request post error:', error);
+        showCustomAlert(`Failed to post prayer request: ${error.message}`);
     }
 }
 
@@ -3127,6 +3400,16 @@ async function sendMessage() {
             document.getElementById('close-chat-button').addEventListener('click', () => {
                 showSection('main-menu-section');
             });
+
+            document.getElementById('toggle-prayer-request-form-button').addEventListener('click', () => {
+                if (!userProfile) {
+                    showCustomAlert('Please create a profile before posting a prayer request.');
+                    showSection('profile-setup');
+                    return;
+                }
+                document.getElementById('prayer-request-form').classList.toggle('hidden');
+            });
+            document.getElementById('submit-prayer-request-button').addEventListener('click', submitPrayerRequest);
         }
         // Initialize on DOMContentLoaded
        window.addEventListener('DOMContentLoaded', async () => {
