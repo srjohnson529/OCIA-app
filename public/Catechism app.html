@@ -1070,20 +1070,24 @@ nav button:focus-visible {
 }
 
 .prayer-request-board {
-    margin-top: 1.5rem;
-    padding: 1.25rem;
+    width: 100%;
+    max-width: 980px;
+    margin: 1.75rem auto 0;
+    padding: 1.5rem;
     background: rgba(247, 247, 245, 0.95);
     border: 1px solid #e0e0e0;
-    border-radius: 16px;
-    box-shadow: 0 6px 16px rgba(0,0,0,.10);
+    border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.14);
     color: #1e1c1a;
     text-shadow: none;
     text-align: left;
+    box-sizing: border-box;
 }
 
 .prayer-request-board h3,
 .prayer-request-board p {
     text-shadow: none;
+    margin-top: 0;
 }
 
 .prayer-request-header {
@@ -1091,23 +1095,60 @@ nav button:focus-visible {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(59,111,160,.14);
+}
+
+.prayer-request-kicker {
+    color: #bf944a;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.prayer-request-header h3 {
+    margin: 0;
+    font-size: 1.45rem;
+}
+
+.prayer-request-header p {
+    margin: 0.25rem 0 0;
+    color: #5b5955;
+    font-size: 0.95rem;
 }
 
 .prayer-request-list {
     display: grid;
-    gap: 0.75rem;
+    gap: 0.85rem;
 }
 
 .prayer-request-item {
     width: 100%;
-    border: none;
-    border-radius: 12px;
-    padding: 0.85rem 1rem;
-    background: rgba(59, 111, 160, 0.08);
+    border: 1px solid rgba(59, 111, 160, 0.12);
+    border-radius: 14px;
+    padding: 1rem;
+    background: #fff;
     color: #1e1c1a;
     text-align: left;
     cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.07);
+    transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.prayer-request-item:hover,
+.prayer-request-item:focus-visible {
+    transform: translateY(-1px);
+    border-color: rgba(191, 148, 74, 0.55);
+    box-shadow: 0 8px 20px rgba(0,0,0,.11);
+    outline: none;
+}
+
+.prayer-request-detail {
+    margin-bottom: 1rem;
+    cursor: default;
 }
 
 .prayer-request-user {
@@ -1120,6 +1161,7 @@ nav button:focus-visible {
 .prayer-request-title {
     font-weight: 700;
     margin-bottom: 0.25rem;
+    font-size: 1.05rem;
 }
 
 .prayer-request-details {
@@ -1130,8 +1172,17 @@ nav button:focus-visible {
 
 .prayer-request-form {
     display: grid;
-    gap: 0.75rem;
-    margin-top: 1rem;
+    gap: 0.85rem;
+    margin: 0 0 1.25rem;
+    padding: 1rem;
+    background: rgba(59,111,160,.07);
+    border: 1px solid rgba(59,111,160,.14);
+    border-radius: 14px;
+}
+
+.prayer-request-form.is-hidden,
+.prayer-request-detail.is-hidden {
+    display: none;
 }
 
 .prayer-request-form input,
@@ -1142,6 +1193,31 @@ nav button:focus-visible {
     border-radius: 10px;
     padding: 0.75rem;
     font: inherit;
+}
+
+.prayer-request-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.prayer-request-empty {
+    padding: 1rem;
+    border-radius: 14px;
+    background: rgba(59,111,160,.07);
+    color: #5b5955;
+}
+
+@media (max-width: 620px) {
+    .prayer-request-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .prayer-request-header .button-theme {
+        width: 100%;
+    }
 }
 
 /* Optional: Custom Fade Out Animation */
@@ -1210,22 +1286,26 @@ nav button:focus-visible {
             <div class="prayer-request-board">
                 <div class="prayer-request-header">
                     <div>
+                        <div class="prayer-request-kicker">Class Prayer Board</div>
                         <h3>Prayer Requests</h3>
-                        <p>The 5 most recent active requests from your class.</p>
+                        <p>Share an intention with your OCIA class. Requests stay visible for 3 days.</p>
                     </div>
-                    <button class="button-theme" id="toggle-prayer-request-form-button">New</button>
+                    <button class="button-theme" id="toggle-prayer-request-form-button">New Prayer Request</button>
                 </div>
 
-                <div id="prayer-request-list" class="prayer-request-list">
-                    <p>No active prayer requests yet.</p>
-                </div>
-
-                <div id="prayer-request-detail" class="hidden"></div>
-
-                <div id="prayer-request-form" class="prayer-request-form hidden">
+                <div id="prayer-request-form" class="prayer-request-form is-hidden">
                     <input type="text" id="prayer-request-title-input" placeholder="Prayer request title">
                     <textarea id="prayer-request-details-input" rows="4" placeholder="Optional details"></textarea>
-                    <button class="button-theme" id="submit-prayer-request-button">Post Prayer Request</button>
+                    <div class="prayer-request-form-actions">
+                        <button class="button-theme" id="cancel-prayer-request-button" type="button">Cancel</button>
+                        <button class="button-theme" id="submit-prayer-request-button" type="button">Post Prayer Request</button>
+                    </div>
+                </div>
+
+                <div id="prayer-request-detail" class="prayer-request-detail is-hidden"></div>
+
+                <div id="prayer-request-list" class="prayer-request-list">
+                    <p class="prayer-request-empty">No active prayer requests yet.</p>
                 </div>
             </div>
         </section>
@@ -2676,11 +2756,12 @@ function renderPrayerRequests(requests) {
     requestList.textContent = '';
     if (detailContainer) {
         detailContainer.textContent = '';
-        detailContainer.classList.add('hidden');
+        detailContainer.className = 'prayer-request-detail is-hidden';
     }
 
     if (!requests.length) {
         const empty = document.createElement('p');
+        empty.className = 'prayer-request-empty';
         empty.textContent = 'No active prayer requests yet.';
         requestList.appendChild(empty);
         return;
@@ -2723,8 +2804,7 @@ function showPrayerRequestDetail(request) {
     if (!detailContainer) return;
 
     detailContainer.textContent = '';
-    detailContainer.classList.remove('hidden');
-    detailContainer.className = 'prayer-request-item';
+    detailContainer.className = 'prayer-request-detail prayer-request-item';
 
     const user = document.createElement('div');
     user.className = 'prayer-request-user';
@@ -2741,6 +2821,22 @@ function showPrayerRequestDetail(request) {
     detailContainer.appendChild(user);
     detailContainer.appendChild(title);
     detailContainer.appendChild(details);
+}
+
+function togglePrayerRequestForm() {
+    const form = document.getElementById('prayer-request-form');
+    if (!form) return;
+    form.classList.toggle('is-hidden');
+
+    if (!form.classList.contains('is-hidden')) {
+        document.getElementById('prayer-request-title-input').focus();
+    }
+}
+
+function closePrayerRequestForm() {
+    const form = document.getElementById('prayer-request-form');
+    if (!form) return;
+    form.classList.add('is-hidden');
 }
 
 async function submitPrayerRequest() {
@@ -2776,7 +2872,7 @@ async function submitPrayerRequest() {
 
         titleInput.value = '';
         detailsInput.value = '';
-        document.getElementById('prayer-request-form').classList.add('hidden');
+        closePrayerRequestForm();
         showCustomAlert('Prayer request posted.');
     } catch (error) {
         console.error('Prayer request post error:', error);
@@ -3413,8 +3509,9 @@ async function submitPrayerRequest() {
                     showSection('profile-setup');
                     return;
                 }
-                document.getElementById('prayer-request-form').classList.toggle('hidden');
+                togglePrayerRequestForm();
             });
+            document.getElementById('cancel-prayer-request-button').addEventListener('click', closePrayerRequestForm);
             document.getElementById('submit-prayer-request-button').addEventListener('click', submitPrayerRequest);
         }
         // Initialize on DOMContentLoaded
