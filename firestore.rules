@@ -1,6 +1,88 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userProfile() {
+      return get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data;
+    }
+
+    function isInstructor() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+        userProfile().isInstructor == true;
+    }
+
+    function isOwnDocument(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isInClass(classId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+        classId in userProfile().classIds;
+    }
+
+    function canReadClass(classId) {
+      return isInClass(classId) || isInstructor();
+    }
+
+    match /userProfiles/{userId} {
+      allow create: if isOwnDocument(userId);
+      allow read: if isOwnDocument(userId) || isInstructor();
+      allow update: if isOwnDocument(userId) || isInstructor();
+      allow delete: if isInstructor();
+    }
+
+    match /chatMessages/{messageId} {
+      allow read: if signedIn() && canReadClass(resource.data.classId);
+      allow create: if signedIn() &&
+        request.resource.data.senderId == request.auth.uid &&
+        isInClass(request.resource.data.classId);
+      allow update, delete: if signedIn() &&
+        (resource.data.senderId == request.auth.uid || isInstructor());
+    }
+
+    match /prayerRequests/{requestId} {
+      allow read: if signedIn() && canReadClass(resource.data.classId);
+
+      allow create: if signedIn() &&
+        request.resource.data.requesterId == request.auth.uid &&
+        isInClass(request.resource.data.classId) &&
+        request.resource.data.title is string &&
+        request.resource.data.details is string &&
+        request.resource.data.expiresAt > request.time;
+
+      allow update: if signedIn() &&
+        (resource.data.requesterId == request.auth.uid || isInstructor());
+
+      allow delete: if signedIn() &&
+        (
+          resource.data.requesterId == request.auth.uid ||
+          isInstructor() ||
+          (canReadClass(resource.data.classId) && resource.data.expiresAt <= request.time)
+        );
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if signedIn() &&
+        (isInstructor() || resource.data.classId in userProfile().classIds);
+      allow create, update, delete: if isInstructor();
+    }
+
+    match /classrooms/{classId} {
+      allow read: if signedIn() && (canReadClass(classId) || resource.data.instructorId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.instructorId == request.auth.uid;
+      allow update, delete: if signedIn() && (resource.data.instructorId == request.auth.uid || isInstructor());
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isInstructor();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
