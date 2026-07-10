@@ -1386,6 +1386,42 @@ nav button:focus-visible {
     background: rgba(247,247,245,.72);
 }
 
+.assignment-check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.assignment-title-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.assignment-check-button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid rgba(59,111,160,.55);
+    background: #fff;
+    color: #3b6fa0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex: 0 0 auto;
+    box-shadow: 0 6px 14px rgba(0,0,0,.08);
+}
+
+.assignment-check-button[aria-pressed="true"] {
+    background: #3b6fa0;
+    color: #fff;
+    border-color: #3b6fa0;
+}
+
 @media (max-width: 620px) {
     #main-menu-section {
         padding: 1rem;
@@ -2076,8 +2112,11 @@ nav button:focus-visible {
         let prayerRequestsListener = null; // Store the prayer request listener reference for cleanup
         let announcementsListener = null;
         let assignmentsListener = null;
+        let assignmentCompletionsListener = null;
         let classScheduleListener = null;
         let firestoreClassSchedule = [];
+        let dashboardAssignments = [];
+        let userAssignmentCompletions = new Map();
 
         function appendTextWithLineBreaks(parent, text) {
             const lines = String(text || '').split('\n');
@@ -2481,11 +2520,17 @@ nav button:focus-visible {
                 assignmentsListener();
                 assignmentsListener = null;
             }
+            if (assignmentCompletionsListener) {
+                assignmentCompletionsListener();
+                assignmentCompletionsListener = null;
+            }
             if (classScheduleListener) {
                 classScheduleListener();
                 classScheduleListener = null;
             }
             firestoreClassSchedule.length = 0;
+            dashboardAssignments = [];
+            userAssignmentCompletions.clear();
         }
 
         function setupStudentDashboardListeners() {
@@ -2493,6 +2538,7 @@ nav button:focus-visible {
 
             if (!userProfile || !userProfile.classId) {
                 renderAnnouncements([]);
+                dashboardAssignments = [];
                 renderAssignments([]);
                 updateNextClassTopic();
                 return;
@@ -2532,10 +2578,27 @@ nav button:focus-visible {
                         return aDate - bDate;
                     });
 
-                    renderAssignments(assignments.filter(item => item.isActive !== false).slice(0, 3));
+                    dashboardAssignments = assignments.filter(item => item.isActive !== false).slice(0, 5);
+                    renderAssignments(dashboardAssignments);
                 }, error => {
                     console.error('Assignments listener error:', error);
                     renderDashboardBoardError('assignment-list', `Error loading assignments: ${error.message}`);
+                });
+
+            assignmentCompletionsListener = db.collection('assignmentCompletions')
+                .where('userId', '==', currentUser.uid)
+                .onSnapshot(snapshot => {
+                    userAssignmentCompletions.clear();
+                    snapshot.forEach(doc => {
+                        const completion = { id: doc.id, ...doc.data() };
+                        if (completion.assignmentId) {
+                            userAssignmentCompletions.set(completion.assignmentId, completion);
+                        }
+                    });
+                    renderAssignments(dashboardAssignments);
+                }, error => {
+                    console.error('Assignment completion listener error:', error);
+                    renderDashboardBoardError('assignment-list', `Error loading assignment checks: ${error.message}`);
                 });
 
             classScheduleListener = db.collection('classSchedule')
@@ -2611,9 +2674,29 @@ nav button:focus-visible {
                 const item = document.createElement('div');
                 item.className = 'student-firestore-item';
 
+                const row = document.createElement('div');
+                row.className = 'assignment-check-row';
+
+                const checkbox = document.createElement('button');
+                checkbox.type = 'button';
+                checkbox.className = 'assignment-check-button';
+                const completion = userAssignmentCompletions.get(assignment.id);
+                const isCompleted = Boolean(completion && completion.isCompleted);
+                checkbox.setAttribute('aria-pressed', isCompleted ? 'true' : 'false');
+                checkbox.setAttribute('aria-label', isCompleted ? 'Mark assignment incomplete' : 'Mark assignment complete');
+                checkbox.textContent = isCompleted ? '✓' : '';
+                checkbox.addEventListener('click', () => toggleAssignmentCompletion(assignment, !isCompleted));
+
+                const titleWrap = document.createElement('div');
+                titleWrap.className = 'assignment-title-wrap';
+
                 const title = document.createElement('div');
                 title.className = 'student-firestore-title';
                 title.textContent = assignment.title || 'Assignment';
+
+                const status = document.createElement('div');
+                status.className = 'student-firestore-meta';
+                status.textContent = isCompleted ? 'Completed' : 'Not completed';
 
                 const meta = document.createElement('div');
                 meta.className = 'student-firestore-meta';
@@ -2632,11 +2715,43 @@ nav button:focus-visible {
                 }
                 appendTextWithLineBreaks(details, assignment.instructions || '');
 
-                item.appendChild(title);
+                titleWrap.appendChild(title);
+                titleWrap.appendChild(status);
+                row.appendChild(checkbox);
+                row.appendChild(titleWrap);
+                item.appendChild(row);
                 item.appendChild(meta);
                 item.appendChild(details);
                 list.appendChild(item);
             });
+        }
+
+        async function toggleAssignmentCompletion(assignment, isCompleted) {
+            if (!currentUser || !userProfile || !userProfile.classId || !assignment || !assignment.id) {
+                alert('Please sign in and join a class before updating assignments.');
+                return;
+            }
+
+            const completionId = `${assignment.id}_${currentUser.uid}`;
+            try {
+                const data = {
+                    assignmentId: assignment.id,
+                    userId: currentUser.uid,
+                    studentName: userProfile.username || currentUser.email || 'Student',
+                    classId: userProfile.classId,
+                    isCompleted,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (isCompleted) {
+                    data.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+                }
+
+                await db.collection('assignmentCompletions').doc(completionId).set(data, { merge: true });
+            } catch (error) {
+                console.error('Assignment completion error:', error);
+                alert(`Could not update assignment: ${error.message}`);
+            }
         }
 
         function renderDashboardBoardError(listId, message) {

@@ -72,6 +72,33 @@ service cloud.firestore {
       allow create, update, delete: if isInstructor();
     }
 
+    match /classSchedule/{scheduleId} {
+      allow read: if signedIn() &&
+        (isInstructor() || resource.data.classId in userProfile().classIds);
+      allow create, update, delete: if isInstructor();
+    }
+
+    match /assignments/{assignmentId} {
+      allow read: if signedIn() &&
+        (isInstructor() || resource.data.classId in userProfile().classIds);
+      allow create, update, delete: if isInstructor();
+    }
+
+    match /assignmentCompletions/{completionId} {
+      allow read: if signedIn() &&
+        (
+          resource.data.userId == request.auth.uid ||
+          isInstructor()
+        );
+
+      allow create, update: if signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        isInClass(request.resource.data.classId);
+
+      allow delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || isInstructor());
+    }
+
     match /classrooms/{classId} {
       allow read: if signedIn() && (canReadClass(classId) || resource.data.instructorId == request.auth.uid);
       allow create: if signedIn() && request.resource.data.instructorId == request.auth.uid;
