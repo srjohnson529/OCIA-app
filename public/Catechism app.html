@@ -1440,6 +1440,27 @@ nav button:focus-visible {
     resize: vertical;
 }
 
+.discussion-list-item {
+    display: block;
+    font-family: Georgia, 'Times New Roman', serif;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.discussion-list-item:hover,
+.discussion-list-item:focus-visible {
+    border-color: rgba(59,111,160,.30);
+    box-shadow: 0 12px 24px rgba(0,0,0,.08);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.discussion-list-item .student-firestore-details {
+    margin-top: 8px;
+}
+
 .discussion-post-author {
     color: #3b6fa0;
     font-weight: 700;
@@ -1554,6 +1575,7 @@ nav button:focus-visible {
     <nav>
         <button id="home-nav-button">Home</button>
         <button id="lessons-nav-button">Lessons & Quizzes</button>
+        <button id="discussion-nav-button">Discussion</button>
         <button id="spiritual-nav-button">Spiritual Formation</button>
         <button id="chat-menu-button">Chat</button>
         <button id="resources-nav-button">Resources</button>
@@ -1679,6 +1701,22 @@ nav button:focus-visible {
             <button class="button-theme" id="back-to-lesson-from-quiz-button">Back to Lesson</button>
         </section>
 
+        <!-- Discussion List Section -->
+        <section id="discussion-list-section" class="hidden">
+            <div class="student-firestore-board">
+                <div class="student-firestore-header">
+                    <div>
+                        <div class="student-firestore-kicker">Class Discussion</div>
+                        <h3>Discussion Board</h3>
+                        <p>Return to discussion assignments, read classmates' responses, and post your own reflections.</p>
+                    </div>
+                </div>
+                <div id="discussion-list" class="student-firestore-list">
+                    <p class="student-firestore-empty">No discussions yet.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Discussion Assignment Section -->
         <section id="discussion-section" class="hidden">
             <div class="student-firestore-board">
@@ -1696,7 +1734,7 @@ nav button:focus-visible {
                 <div class="discussion-compose">
                     <textarea id="discussion-response-input" rows="4" placeholder="Write your response"></textarea>
                     <button class="button-theme" id="submit-discussion-response-button" type="button">Post Response</button>
-                    <button class="button-theme" id="back-to-lessons-from-discussion-button" type="button">Back to Lessons</button>
+                    <button class="button-theme" id="back-to-lessons-from-discussion-button" type="button">Back to Discussions</button>
                 </div>
             </div>
         </section>
@@ -2226,7 +2264,7 @@ nav button:focus-visible {
         var discussionPostsListener = null;
         var discussionRepliesListener = null;
         let firestoreClassSchedule = [];
-        let dashboardAssignments = [];
+        var dashboardAssignments = [];
         let userAssignmentCompletions = new Map();
         var discussionPrompts = [];
         var currentDiscussionPrompt = null;
@@ -2300,6 +2338,56 @@ nav button:focus-visible {
 
         function getDiscussionPromptForLesson(lessonId) {
             return discussionPrompts.find(prompt => prompt.lessonId === lessonId) || null;
+        }
+
+        function showDiscussionList() {
+            if (!currentUser || !userProfile || !userProfile.classId) {
+                showCustomAlert('Please sign in and create a profile to use the discussion board.');
+                showSection('profile-setup');
+                return;
+            }
+
+            renderDiscussionList();
+            showSection('discussion-list-section');
+        }
+
+        function renderDiscussionList() {
+            const list = document.getElementById('discussion-list');
+            if (!list) return;
+
+            list.textContent = '';
+
+            if (!discussionPrompts.length) {
+                const empty = document.createElement('p');
+                empty.className = 'student-firestore-empty';
+                empty.textContent = 'No discussions yet.';
+                list.appendChild(empty);
+                return;
+            }
+
+            discussionPrompts.forEach(prompt => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'student-firestore-item discussion-list-item';
+                item.addEventListener('click', () => openDiscussionPrompt(prompt));
+
+                const title = document.createElement('div');
+                title.className = 'student-firestore-title';
+                title.textContent = prompt.title || 'Discussion';
+
+                const meta = document.createElement('div');
+                meta.className = 'student-firestore-meta';
+                meta.textContent = prompt.lessonTitle || 'Discussion assignment';
+
+                const details = document.createElement('div');
+                details.className = 'student-firestore-details';
+                details.textContent = prompt.prompt || '';
+
+                item.appendChild(title);
+                item.appendChild(meta);
+                item.appendChild(details);
+                list.appendChild(item);
+            });
         }
 
         // Badge Data - NEW
@@ -4478,6 +4566,7 @@ async function submitPrayerRequest() {
                 showSection('lessons-list-section');
                 loadCategories(); // Load categories when lessons button is clicked
             });
+            document.getElementById('discussion-nav-button').addEventListener('click', showDiscussionList);
             document.getElementById('spiritual-nav-button').addEventListener('click', () => {
                 showSection('spiritual-formation-section');
             });
@@ -4512,8 +4601,8 @@ async function submitPrayerRequest() {
             document.getElementById('submit-discussion-response-button').addEventListener('click', submitDiscussionResponse);
             document.getElementById('back-to-lessons-from-discussion-button').addEventListener('click', () => {
                 stopDiscussionListener();
-                loadLessonsForCategory(currentCategory);
-                showSection('lessons-list-section');
+                renderDiscussionList();
+                showSection('discussion-list-section');
             });
 
             // Spiritual Formation Buttons
