@@ -99,12 +99,40 @@ service cloud.firestore {
         (resource.data.userId == request.auth.uid || isInstructor());
     }
 
+    match /discussionPrompts/{promptId} {
+      allow read: if signedIn() &&
+        (
+          isInstructor() ||
+          (
+            resource.data.isActive == true &&
+            resource.data.classId in userProfile().classIds
+          )
+        );
+
+      allow create, update, delete: if isInstructor();
+    }
+
     match /discussionPosts/{postId} {
       allow read: if signedIn() && canReadClass(resource.data.classId);
 
       allow create: if signedIn() &&
         request.resource.data.authorId == request.auth.uid &&
         isInClass(request.resource.data.classId) &&
+        request.resource.data.promptId is string &&
+        request.resource.data.lessonId is string &&
+        request.resource.data.message is string;
+
+      allow update, delete: if signedIn() &&
+        (resource.data.authorId == request.auth.uid || isInstructor());
+    }
+
+    match /discussionReplies/{replyId} {
+      allow read: if signedIn() && canReadClass(resource.data.classId);
+
+      allow create: if signedIn() &&
+        request.resource.data.authorId == request.auth.uid &&
+        isInClass(request.resource.data.classId) &&
+        request.resource.data.postId is string &&
         request.resource.data.promptId is string &&
         request.resource.data.lessonId is string &&
         request.resource.data.message is string;

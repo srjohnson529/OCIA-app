@@ -2261,11 +2261,14 @@ nav button:focus-visible {
         var assignmentsListener = null;
         var assignmentCompletionsListener = null;
         var classScheduleListener = null;
+        var discussionPromptsListener = null;
         var discussionPostsListener = null;
         var discussionRepliesListener = null;
         let firestoreClassSchedule = [];
         var dashboardAssignments = [];
         let userAssignmentCompletions = new Map();
+        let localDiscussionPrompts = [];
+        let firestoreDiscussionPrompts = [];
         var discussionPrompts = [];
         var currentDiscussionPrompt = null;
         let currentDiscussionPosts = [];
@@ -2324,16 +2327,75 @@ nav button:focus-visible {
             try {
                 const response = await fetch('discussion_prompts.json', { cache: 'no-store' });
                 if (!response.ok) {
-                    discussionPrompts = [];
+                    localDiscussionPrompts.length = 0;
+                    publishDiscussionPrompts();
                     return;
                 }
 
                 const catalog = await response.json();
-                discussionPrompts = Array.isArray(catalog.prompts) ? catalog.prompts : [];
+                localDiscussionPrompts.length = 0;
+                localDiscussionPrompts.push(...(Array.isArray(catalog.prompts) ? catalog.prompts : []));
+                publishDiscussionPrompts();
             } catch (error) {
                 console.error('Failed to load discussion prompts:', error);
-                discussionPrompts = [];
+                localDiscussionPrompts.length = 0;
+                publishDiscussionPrompts();
             }
+        }
+
+        function publishDiscussionPrompts() {
+            const localIds = new Set(localDiscussionPrompts.map(prompt => prompt.id));
+            discussionPrompts = [
+                ...localDiscussionPrompts,
+                ...firestoreDiscussionPrompts.filter(prompt => !localIds.has(prompt.id))
+            ].filter(prompt => prompt.isActive !== false)
+             .sort((a, b) => {
+                const lessonCompare = String(a.lessonTitle || '').localeCompare(String(b.lessonTitle || ''));
+                return lessonCompare || String(a.title || '').localeCompare(String(b.title || ''));
+             });
+
+            const discussionListVisible = !document.getElementById('discussion-list-section')?.classList.contains('hidden');
+            if (discussionListVisible) {
+                renderDiscussionList();
+            }
+        }
+
+        function setupDiscussionPromptsListener() {
+            if (discussionPromptsListener) {
+                discussionPromptsListener();
+                discussionPromptsListener = null;
+            }
+
+            firestoreDiscussionPrompts.length = 0;
+
+            if (!userProfile || !userProfile.classId) {
+                publishDiscussionPrompts();
+                return;
+            }
+
+            discussionPromptsListener = db.collection('discussionPrompts')
+                .where('classId', '==', userProfile.classId)
+                .where('isActive', '==', true)
+                .onSnapshot(snapshot => {
+                    firestoreDiscussionPrompts.length = 0;
+                    snapshot.forEach(doc => {
+                        firestoreDiscussionPrompts.push({ id: doc.id, ...doc.data() });
+                    });
+                    publishDiscussionPrompts();
+                }, error => {
+                    console.error('Discussion prompts listener error:', error);
+                    firestoreDiscussionPrompts.length = 0;
+                    publishDiscussionPrompts();
+                });
+        }
+
+        function stopDiscussionPromptsListener() {
+            if (discussionPromptsListener) {
+                discussionPromptsListener();
+                discussionPromptsListener = null;
+            }
+            firestoreDiscussionPrompts.length = 0;
+            publishDiscussionPrompts();
         }
 
         function getDiscussionPromptForLesson(lessonId) {
@@ -2751,6 +2813,7 @@ nav button:focus-visible {
                 classScheduleListener();
                 classScheduleListener = null;
             }
+            stopDiscussionPromptsListener();
             stopDiscussionListener();
             firestoreClassSchedule.length = 0;
             dashboardAssignments = [];
@@ -2767,6 +2830,8 @@ nav button:focus-visible {
                 updateNextClassTopic();
                 return;
             }
+
+            setupDiscussionPromptsListener();
 
             announcementsListener = db.collection('announcements')
                 .where('classId', '==', userProfile.classId)
