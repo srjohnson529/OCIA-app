@@ -2153,19 +2153,19 @@ nav button:focus-visible {
         let currentCategory = null;
         let currentLesson = null;
         let currentQuiz = null;
-        let userProfileListener = null; // Store the listener reference for cleanup
-        let chatMessagesListener = null; // Store the chat listener reference for cleanup
-        let prayerRequestsListener = null; // Store the prayer request listener reference for cleanup
-        let announcementsListener = null;
-        let assignmentsListener = null;
-        let assignmentCompletionsListener = null;
-        let classScheduleListener = null;
-        let discussionPostsListener = null;
+        var userProfileListener = null; // Store the listener reference for cleanup
+        var chatMessagesListener = null; // Store the chat listener reference for cleanup
+        var prayerRequestsListener = null; // Store the prayer request listener reference for cleanup
+        var announcementsListener = null;
+        var assignmentsListener = null;
+        var assignmentCompletionsListener = null;
+        var classScheduleListener = null;
+        var discussionPostsListener = null;
         let firestoreClassSchedule = [];
         let dashboardAssignments = [];
         let userAssignmentCompletions = new Map();
-        let discussionPrompts = [];
-        let currentDiscussionPrompt = null;
+        var discussionPrompts = [];
+        var currentDiscussionPrompt = null;
 
         function appendTextWithLineBreaks(parent, text) {
             const lines = String(text || '').split('\n');
