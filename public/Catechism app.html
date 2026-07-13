@@ -1422,6 +1422,30 @@ nav button:focus-visible {
     border-color: #3b6fa0;
 }
 
+.discussion-compose {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.discussion-compose textarea {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(191,148,74,.28);
+    background: rgba(255,255,255,.96);
+    padding: 14px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1rem;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.discussion-post-author {
+    color: #3b6fa0;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
 @media (max-width: 620px) {
     #main-menu-section {
         padding: 1rem;
@@ -1590,6 +1614,28 @@ nav button:focus-visible {
             <div id="quiz-questions-container"></div>
             <button class="button-theme" id="submit-quiz-button">Submit Quiz</button>
             <button class="button-theme" id="back-to-lesson-from-quiz-button">Back to Lesson</button>
+        </section>
+
+        <!-- Discussion Assignment Section -->
+        <section id="discussion-section" class="hidden">
+            <div class="student-firestore-board">
+                <div class="student-firestore-header">
+                    <div>
+                        <div class="student-firestore-kicker">Discussion Assignment</div>
+                        <h3 id="discussion-title">Discussion</h3>
+                        <p id="discussion-lesson-title"></p>
+                    </div>
+                </div>
+                <p id="discussion-prompt" class="student-firestore-details"></p>
+                <div id="discussion-posts-list" class="student-firestore-list">
+                    <p class="student-firestore-empty">No responses yet.</p>
+                </div>
+                <div class="discussion-compose">
+                    <textarea id="discussion-response-input" rows="4" placeholder="Write your response"></textarea>
+                    <button class="button-theme" id="submit-discussion-response-button" type="button">Post Response</button>
+                    <button class="button-theme" id="back-to-lessons-from-discussion-button" type="button">Back to Lessons</button>
+                </div>
+            </div>
         </section>
 
 <!-- Spiritual Formation Section -->
@@ -2114,9 +2160,12 @@ nav button:focus-visible {
         let assignmentsListener = null;
         let assignmentCompletionsListener = null;
         let classScheduleListener = null;
+        let discussionPostsListener = null;
         let firestoreClassSchedule = [];
         let dashboardAssignments = [];
         let userAssignmentCompletions = new Map();
+        let discussionPrompts = [];
+        let currentDiscussionPrompt = null;
 
         function appendTextWithLineBreaks(parent, text) {
             const lines = String(text || '').split('\n');
@@ -2165,6 +2214,26 @@ nav button:focus-visible {
                 showCustomAlert('Lessons could not be loaded. Make sure lessons.json is published beside this HTML file.');
                 lessonsData = [];
             }
+        }
+
+        async function loadDiscussionPrompts() {
+            try {
+                const response = await fetch('discussion_prompts.json', { cache: 'no-store' });
+                if (!response.ok) {
+                    discussionPrompts = [];
+                    return;
+                }
+
+                const catalog = await response.json();
+                discussionPrompts = Array.isArray(catalog.prompts) ? catalog.prompts : [];
+            } catch (error) {
+                console.error('Failed to load discussion prompts:', error);
+                discussionPrompts = [];
+            }
+        }
+
+        function getDiscussionPromptForLesson(lessonId) {
+            return discussionPrompts.find(prompt => prompt.lessonId === lessonId) || null;
         }
 
         // Badge Data - NEW
@@ -2528,6 +2597,7 @@ nav button:focus-visible {
                 classScheduleListener();
                 classScheduleListener = null;
             }
+            stopDiscussionListener();
             firestoreClassSchedule.length = 0;
             dashboardAssignments = [];
             userAssignmentCompletions.clear();
@@ -2752,6 +2822,144 @@ nav button:focus-visible {
                 console.error('Assignment completion error:', error);
                 alert(`Could not update assignment: ${error.message}`);
             }
+        }
+
+        function stopDiscussionListener() {
+            if (discussionPostsListener) {
+                discussionPostsListener();
+                discussionPostsListener = null;
+            }
+        }
+
+        function openDiscussionPrompt(prompt) {
+            if (!prompt) return;
+            if (!currentUser || !userProfile || !userProfile.classId) {
+                showCustomAlert('Please sign in and join a class before opening discussion assignments.');
+                return;
+            }
+
+            currentDiscussionPrompt = prompt;
+            document.getElementById('discussion-title').textContent = prompt.title || 'Discussion';
+            document.getElementById('discussion-lesson-title').textContent = prompt.lessonTitle || '';
+            document.getElementById('discussion-prompt').textContent = prompt.prompt || '';
+            document.getElementById('discussion-response-input').value = '';
+            showSection('discussion-section');
+            setupDiscussionListener(prompt);
+        }
+
+        function setupDiscussionListener(prompt) {
+            stopDiscussionListener();
+            const list = document.getElementById('discussion-posts-list');
+            if (list) {
+                list.innerHTML = '<p class="student-firestore-empty">Loading responses...</p>';
+            }
+
+            discussionPostsListener = db.collection('discussionPosts')
+                .where('classId', '==', userProfile.classId)
+                .onSnapshot(snapshot => {
+                    const posts = [];
+                    snapshot.forEach(doc => {
+                        const post = { id: doc.id, ...doc.data() };
+                        if (post.promptId === prompt.id) posts.push(post);
+                    });
+                    posts.sort((a, b) => {
+                        const aDate = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : new Date(0);
+                        const bDate = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : new Date(0);
+                        return aDate - bDate;
+                    });
+                    renderDiscussionPosts(posts);
+                }, error => {
+                    console.error('Discussion listener error:', error);
+                    renderDashboardBoardError('discussion-posts-list', `Error loading discussion: ${error.message}`);
+                });
+        }
+
+        function renderDiscussionPosts(posts) {
+            const list = document.getElementById('discussion-posts-list');
+            if (!list) return;
+            list.textContent = '';
+
+            if (!posts.length) {
+                const empty = document.createElement('p');
+                empty.className = 'student-firestore-empty';
+                empty.textContent = 'No responses yet.';
+                list.appendChild(empty);
+                return;
+            }
+
+            posts.forEach(post => {
+                const item = document.createElement('div');
+                item.className = 'student-firestore-item';
+
+                const author = document.createElement('div');
+                author.className = 'discussion-post-author';
+                author.textContent = post.authorName || 'Student';
+
+                const message = document.createElement('div');
+                message.className = 'student-firestore-details';
+                appendTextWithLineBreaks(message, post.message || '');
+
+                item.appendChild(author);
+                item.appendChild(message);
+                list.appendChild(item);
+            });
+        }
+
+        async function submitDiscussionResponse() {
+            if (!currentUser || !userProfile || !userProfile.classId || !currentDiscussionPrompt) {
+                showCustomAlert('Please sign in and open a discussion prompt first.');
+                return;
+            }
+
+            const input = document.getElementById('discussion-response-input');
+            const message = input.value.trim();
+            if (!message) {
+                showCustomAlert('Please write a response before posting.');
+                return;
+            }
+
+            try {
+                await db.collection('discussionPosts').add({
+                    promptId: currentDiscussionPrompt.id,
+                    lessonId: currentDiscussionPrompt.lessonId,
+                    classId: userProfile.classId,
+                    authorId: currentUser.uid,
+                    authorName: userProfile.username || currentUser.email || 'Student',
+                    message,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('discussionParticipation').doc(`${currentDiscussionPrompt.id}_${currentUser.uid}`).set({
+                    promptId: currentDiscussionPrompt.id,
+                    lessonId: currentDiscussionPrompt.lessonId,
+                    classId: userProfile.classId,
+                    userId: currentUser.uid,
+                    studentName: userProfile.username || currentUser.email || 'Student',
+                    postedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                input.value = '';
+                await completeAssignmentsForDiscussion(currentDiscussionPrompt);
+            } catch (error) {
+                console.error('Discussion post error:', error);
+                showCustomAlert(`Could not post discussion response: ${error.message}`);
+            }
+        }
+
+        async function completeAssignmentsForDiscussion(prompt) {
+            const snapshot = await db.collection('assignments')
+                .where('classId', '==', userProfile.classId)
+                .get();
+
+            const writes = [];
+            snapshot.forEach(doc => {
+                const assignment = { id: doc.id, ...doc.data() };
+                if (assignment.isActive === false) return;
+                if ((assignment.lessonId || '').trim() !== prompt.lessonId) return;
+                writes.push(toggleAssignmentCompletion(assignment, true));
+            });
+
+            await Promise.all(writes);
         }
 
         function renderDashboardBoardError(listId, message) {
@@ -3653,7 +3861,12 @@ async function submitPrayerRequest() {
                 }
                 updateDashboard(); // Update dashboard after passing a quiz
                 loadLessonsForCategory(currentCategory);
-                showSection('lessons-list-section');
+                const discussionPrompt = getDiscussionPromptForLesson(currentLesson.id);
+                if (discussionPrompt) {
+                    openDiscussionPrompt(discussionPrompt);
+                } else {
+                    showSection('lessons-list-section');
+                }
             } else {
                 let failureMessage = `You scored ${score}/${totalQuestions}. Please review the material and try again.`;
                 if (incorrectQuestions.length > 0) {
@@ -4090,6 +4303,12 @@ async function submitPrayerRequest() {
                 loadLessonContent(currentLesson); // Go back to the current lesson content
             });
             document.getElementById('back-to-categories-button').addEventListener('click', loadCategories);
+            document.getElementById('submit-discussion-response-button').addEventListener('click', submitDiscussionResponse);
+            document.getElementById('back-to-lessons-from-discussion-button').addEventListener('click', () => {
+                stopDiscussionListener();
+                loadLessonsForCategory(currentCategory);
+                showSection('lessons-list-section');
+            });
 
             // Spiritual Formation Buttons
             document.getElementById('prayers-menu-button').addEventListener('click', () => {
@@ -4195,6 +4414,7 @@ async function submitPrayerRequest() {
         // Initialize on DOMContentLoaded
        window.addEventListener('DOMContentLoaded', async () => {
             await loadSharedLessons();
+            await loadDiscussionPrompts();
             populateCommonPrayersMenu();
             updateDashboard(); // Initial update on load
             document.querySelector('.main-content-container').style.display = 'flex';

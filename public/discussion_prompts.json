@@ -1,0 +1,20 @@
+{
+  "prompts": [
+    {
+      "id": "discussion-foundations-kerygma",
+      "lessonId": "foundations-kerygma",
+      "lessonTitle": "The Kerygma — The First Proclamation of the Gospel",
+      "title": "Responding to the Kerygma",
+      "prompt": "In your own words, what part of the Kerygma most speaks to you right now? How would you explain the Gospel to someone who has never heard it?",
+      "requiredForAssignment": true
+    },
+    {
+      "id": "discussion-foundations-ocia",
+      "lessonId": "foundations-ocia",
+      "lessonTitle": "The Order of Christian Initiation of Adults (OCIA) and the Catechumenate",
+      "title": "Why OCIA Matters",
+      "prompt": "What do you hope to receive from the OCIA process, and what do you think it means to enter formation with a community rather than alone?",
+      "requiredForAssignment": true
+    }
+  ]
+}
