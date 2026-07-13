@@ -1446,6 +1446,69 @@ nav button:focus-visible {
     margin-bottom: 6px;
 }
 
+.discussion-post-actions {
+    margin-top: 12px;
+}
+
+.discussion-reply-button,
+.discussion-submit-reply-button,
+.discussion-cancel-reply-button {
+    border: 0;
+    border-radius: 999px;
+    background: rgba(59,111,160,.10);
+    color: #3b6fa0;
+    cursor: pointer;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    padding: 8px 14px;
+}
+
+.discussion-replies {
+    border-left: 3px solid rgba(191,148,74,.28);
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+    padding-left: 14px;
+}
+
+.discussion-reply {
+    background: rgba(59,111,160,.06);
+    border: 1px solid rgba(59,111,160,.10);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.discussion-reply-author {
+    color: #3b6fa0;
+    font-size: .9rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.discussion-reply-form {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.discussion-reply-form textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(191,148,74,.28);
+    background: rgba(255,255,255,.96);
+    padding: 12px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .95rem;
+    line-height: 1.4;
+    resize: vertical;
+}
+
+.discussion-reply-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 @media (max-width: 620px) {
     #main-menu-section {
         padding: 1rem;
@@ -2161,11 +2224,14 @@ nav button:focus-visible {
         var assignmentCompletionsListener = null;
         var classScheduleListener = null;
         var discussionPostsListener = null;
+        var discussionRepliesListener = null;
         let firestoreClassSchedule = [];
         let dashboardAssignments = [];
         let userAssignmentCompletions = new Map();
         var discussionPrompts = [];
         var currentDiscussionPrompt = null;
+        let currentDiscussionPosts = [];
+        const discussionRepliesByPost = new Map();
 
         function appendTextWithLineBreaks(parent, text) {
             const lines = String(text || '').split('\n');
@@ -2829,6 +2895,12 @@ nav button:focus-visible {
                 discussionPostsListener();
                 discussionPostsListener = null;
             }
+            if (discussionRepliesListener) {
+                discussionRepliesListener();
+                discussionRepliesListener = null;
+            }
+            currentDiscussionPosts.length = 0;
+            discussionRepliesByPost.clear();
         }
 
         function openDiscussionPrompt(prompt) {
@@ -2867,10 +2939,38 @@ nav button:focus-visible {
                         const bDate = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : new Date(0);
                         return aDate - bDate;
                     });
-                    renderDiscussionPosts(posts);
+                    currentDiscussionPosts.length = 0;
+                    currentDiscussionPosts.push(...posts);
+                    renderDiscussionPosts(currentDiscussionPosts);
                 }, error => {
                     console.error('Discussion listener error:', error);
                     renderDashboardBoardError('discussion-posts-list', `Error loading discussion: ${error.message}`);
+                });
+
+            discussionRepliesListener = db.collection('discussionReplies')
+                .where('classId', '==', userProfile.classId)
+                .onSnapshot(snapshot => {
+                    discussionRepliesByPost.clear();
+                    snapshot.forEach(doc => {
+                        const reply = { id: doc.id, ...doc.data() };
+                        if (reply.promptId !== prompt.id || !reply.postId) return;
+                        const replies = discussionRepliesByPost.get(reply.postId) || [];
+                        replies.push(reply);
+                        discussionRepliesByPost.set(reply.postId, replies);
+                    });
+
+                    discussionRepliesByPost.forEach(replies => {
+                        replies.sort((a, b) => {
+                            const aDate = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : new Date(0);
+                            const bDate = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : new Date(0);
+                            return aDate - bDate;
+                        });
+                    });
+
+                    renderDiscussionPosts(currentDiscussionPosts);
+                }, error => {
+                    console.error('Discussion replies listener error:', error);
+                    renderDashboardBoardError('discussion-posts-list', `Error loading replies: ${error.message}`);
                 });
         }
 
@@ -2901,8 +3001,114 @@ nav button:focus-visible {
 
                 item.appendChild(author);
                 item.appendChild(message);
+
+                const actions = document.createElement('div');
+                actions.className = 'discussion-post-actions';
+                const replyButton = document.createElement('button');
+                replyButton.type = 'button';
+                replyButton.className = 'discussion-reply-button';
+                replyButton.textContent = 'Reply';
+                replyButton.addEventListener('click', () => showDiscussionReplyForm(item, post));
+                actions.appendChild(replyButton);
+                item.appendChild(actions);
+
+                const replies = discussionRepliesByPost.get(post.id) || [];
+                if (replies.length) {
+                    const repliesContainer = document.createElement('div');
+                    repliesContainer.className = 'discussion-replies';
+
+                    replies.forEach(reply => {
+                        const replyItem = document.createElement('div');
+                        replyItem.className = 'discussion-reply';
+
+                        const replyAuthor = document.createElement('div');
+                        replyAuthor.className = 'discussion-reply-author';
+                        replyAuthor.textContent = reply.authorName || 'Student';
+
+                        const replyMessage = document.createElement('div');
+                        replyMessage.className = 'student-firestore-details';
+                        appendTextWithLineBreaks(replyMessage, reply.message || '');
+
+                        replyItem.appendChild(replyAuthor);
+                        replyItem.appendChild(replyMessage);
+                        repliesContainer.appendChild(replyItem);
+                    });
+
+                    item.appendChild(repliesContainer);
+                }
+
                 list.appendChild(item);
             });
+        }
+
+        function showDiscussionReplyForm(item, post) {
+            const existingForm = item.querySelector('.discussion-reply-form');
+            if (existingForm) {
+                existingForm.remove();
+                return;
+            }
+
+            document.querySelectorAll('.discussion-reply-form').forEach(form => form.remove());
+
+            const form = document.createElement('div');
+            form.className = 'discussion-reply-form';
+
+            const textarea = document.createElement('textarea');
+            textarea.rows = 3;
+            textarea.placeholder = `Reply to ${post.authorName || 'this response'}`;
+
+            const actions = document.createElement('div');
+            actions.className = 'discussion-reply-actions';
+
+            const submit = document.createElement('button');
+            submit.type = 'button';
+            submit.className = 'discussion-submit-reply-button';
+            submit.textContent = 'Post Reply';
+            submit.addEventListener('click', () => submitDiscussionReply(post, textarea, form));
+
+            const cancel = document.createElement('button');
+            cancel.type = 'button';
+            cancel.className = 'discussion-cancel-reply-button';
+            cancel.textContent = 'Cancel';
+            cancel.addEventListener('click', () => form.remove());
+
+            actions.appendChild(submit);
+            actions.appendChild(cancel);
+            form.appendChild(textarea);
+            form.appendChild(actions);
+            item.appendChild(form);
+            textarea.focus();
+        }
+
+        async function submitDiscussionReply(post, textarea, form) {
+            if (!currentUser || !userProfile || !userProfile.classId || !currentDiscussionPrompt || !post || !post.id) {
+                showCustomAlert('Please sign in and open a discussion prompt first.');
+                return;
+            }
+
+            const message = textarea.value.trim();
+            if (!message) {
+                showCustomAlert('Please write a reply before posting.');
+                return;
+            }
+
+            try {
+                await db.collection('discussionReplies').add({
+                    postId: post.id,
+                    promptId: currentDiscussionPrompt.id,
+                    lessonId: currentDiscussionPrompt.lessonId,
+                    classId: userProfile.classId,
+                    authorId: currentUser.uid,
+                    authorName: userProfile.username || currentUser.email || 'Student',
+                    message,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                form.remove();
+            } catch (error) {
+                console.error('Discussion reply error:', error);
+                showCustomAlert(`Could not post reply: ${error.message}`);
+            }
         }
 
         async function submitDiscussionResponse() {
