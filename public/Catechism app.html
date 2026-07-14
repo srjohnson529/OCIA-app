@@ -3188,13 +3188,6 @@ nav button:focus-visible {
             const row = document.createElement('div');
             row.className = 'assignment-link-row';
 
-            const completion = userAssignmentCompletions.get(assignment.id);
-            const isCompleted = Boolean(completion && completion.isCompleted);
-
-            const icon = document.createElement('div');
-            icon.className = 'assignment-link-icon';
-            icon.textContent = isCompleted ? '✓' : '○';
-
             const body = document.createElement('div');
             body.className = 'assignment-link-body';
 
@@ -3204,11 +3197,10 @@ nav button:focus-visible {
 
             const meta = document.createElement('div');
             meta.className = 'assignment-link-meta';
-            meta.textContent = assignmentMetaText(assignment, isCompleted);
+            meta.textContent = assignmentMetaText(assignment);
 
             body.appendChild(title);
             body.appendChild(meta);
-            row.appendChild(icon);
             row.appendChild(body);
             return row;
         }
@@ -3222,7 +3214,7 @@ nav button:focus-visible {
             return row;
         }
 
-        function assignmentMetaText(assignment, isCompleted) {
+        function assignmentMetaText(assignment) {
             const pieces = [];
             const dueDate = assignment.dueAt && assignment.dueAt.toDate
                 ? assignment.dueAt.toDate().toLocaleDateString()
@@ -3236,18 +3228,7 @@ nav button:focus-visible {
                 const count = getAssignmentLessonLinks(assignment).length;
                 pieces.push(`${count} lesson${count === 1 ? '' : 's'}`);
             }
-            pieces.push(assignmentCompletionProgressText());
             return pieces.join(' • ');
-        }
-
-        function assignmentCompletionProgressText() {
-            const totalAssignments = dashboardAssignments.length;
-            const completedAssignments = dashboardAssignments.filter(assignment => {
-                const completion = userAssignmentCompletions.get(assignment.id);
-                return Boolean(completion && completion.isCompleted);
-            }).length;
-
-            return `Completed ${completedAssignments}/${totalAssignments}`;
         }
 
         function openAssignmentDetail(assignment) {
