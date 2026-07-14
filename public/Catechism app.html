@@ -55,7 +55,7 @@
             border-radius: var(--border-radius); /* Added back from previous working code */
             margin-bottom: 1rem; /* Added back from previous working code */
         }
-        #user-info-display {
+#user-info-display {
     position: absolute;
     top: 8px;
     right: 15px;
@@ -73,6 +73,137 @@
 
 #user-info-display.hidden {
     display: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#user-info-display {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    max-width: none;
+}
+
+#user-info-signout-button {
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.72rem;
+    padding: 0.18rem 0.55rem;
+}
+
+body.auth-locked nav,
+body.auth-locked #user-info-display {
+    display: none !important;
+}
+
+.auth-shell {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.auth-brand {
+    text-align: center;
+    margin-bottom: 1.35rem;
+}
+
+.auth-brand .auth-kicker {
+    color: #3b6fa0;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.auth-brand h2 {
+    margin: 0.25rem 0;
+    font-size: clamp(2.3rem, 5vw, 4rem);
+}
+
+.auth-brand p {
+    margin: 0 auto;
+    max-width: 560px;
+    color: #555;
+}
+
+.auth-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,247,245,0.92));
+    border: 1px solid rgba(191,148,74,0.22);
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    padding: 1.25rem;
+    margin: 1rem 0;
+}
+
+.auth-card h3 {
+    color: #3b6fa0;
+    margin-top: 0;
+}
+
+.auth-field {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0.65rem 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(191,148,74,0.34);
+    border-radius: 12px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    background: #fff;
+}
+
+.auth-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.85rem;
+}
+
+.auth-actions .button-theme {
+    margin: 0;
+}
+
+.button-theme.auth-primary {
+    background: #3b6fa0;
+    color: #fff;
+}
+
+.auth-note {
+    color: #555;
+    font-size: 0.95rem;
+    margin: 0.8rem 0 0;
+}
+
+.auth-message {
+    min-height: 1.25rem;
+    margin-top: 0.75rem;
+    color: #7a5b18;
+    font-weight: 700;
+}
+
+.account-grid {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.account-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 0.75rem 0;
+}
+
+.account-row strong {
+    color: #3b6fa0;
 }
 
         /* Navigation Bar */
@@ -1637,8 +1768,11 @@ nav button:focus-visible {
 }
     </style>
 </head>
-<body>
-    <div id="user-info-display" class="hidden"></div>
+<body class="auth-locked">
+    <div id="user-info-display" class="hidden">
+        <span id="user-info-name"></span>
+        <button id="user-info-signout-button" type="button">Sign Out</button>
+    </div>
 
     <!-- Header -->
     <header>
@@ -1654,7 +1788,7 @@ nav button:focus-visible {
         <button id="chat-menu-button">Chat</button>
         <button id="resources-nav-button">Resources</button>
         <button id="achievements-nav-button">Achievements</button>
-        <button id="quit-nav-button">Quit</button>
+        <button id="quit-nav-button">Account</button>
     </nav>
 
       <!-- Custom Alert Modal -->
@@ -2297,28 +2431,60 @@ nav button:focus-visible {
             </div>
         </section>
 
-<!-- Update the profile setup section in your HTML -->
 <section id="profile-setup" class="hidden">
-    <h2>Create Your Profile</h2>
-    
-    <!-- Authentication Section -->
-    <div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
-        <h3>Sign In or Create Account</h3>
-        <input type="email" id="auth-email" placeholder="Email" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
-        <input type="password" id="auth-password" placeholder="Password" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
-        <div>
-            <button id="login-button" class="button-theme" style="margin: 0.5rem;">Sign In</button>
-            <button id="signup-button" class="button-theme" style="margin: 0.5rem;">Create Account</button>
+    <div class="auth-shell">
+        <div class="auth-brand">
+            <div class="auth-kicker">Welcome to</div>
+            <h2>Illumined</h2>
+            <p>Sign in to continue your OCIA formation, track your lessons, complete assignments, and participate with your class.</p>
+        </div>
+
+        <div class="auth-card">
+            <h3>Sign In</h3>
+            <input type="email" id="auth-email" class="auth-field" autocomplete="email" placeholder="Email">
+            <input type="password" id="auth-password" class="auth-field" autocomplete="current-password" placeholder="Password">
+            <div class="auth-actions">
+                <button id="login-button" class="button-theme auth-primary">Sign In</button>
+                <button id="signup-button" class="button-theme">Create Student Account</button>
+                <button id="forgot-password-button" class="button-theme" type="button">Forgot Password</button>
+            </div>
+            <div id="auth-status-message" class="auth-message" aria-live="polite"></div>
+            <p class="auth-note">Instructor and admin tools are managed in the iOS app. The web version is the student-facing companion.</p>
+        </div>
+
+        <div id="profile-details-card" class="auth-card hidden">
+            <h3>Finish Student Profile</h3>
+            <p>Enter the name you want classmates and instructors to see, then add the class ID given by your instructor.</p>
+            <input type="text" id="username-input" class="auth-field" autocomplete="name" placeholder="Display Name">
+            <input type="text" id="class-input" class="auth-field" autocapitalize="characters" placeholder="Class ID">
+            <div class="auth-actions">
+                <button id="save-profile-button" class="button-theme auth-primary">Save Profile</button>
+                <button id="profile-signout-button" class="button-theme" type="button">Sign Out</button>
+            </div>
         </div>
     </div>
-    
-    <!-- Profile Setup Section -->
-    <div style="padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
-        <h3>Profile Information</h3>
-        <p>Please enter your display name and class ID:</p>
-        <input type="text" id="username-input" placeholder="Your Name (e.g., John Smith)" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
-        <input type="text" id="class-input" placeholder="Class ID (e.g., OCIA-2025)" style="margin: 0.5rem 0; padding: 0.5rem; width: 100%; max-width: 300px;">
-        <button id="save-profile-button" class="button-theme">Save Profile</button>
+</section>
+
+<section id="account-section" class="hidden">
+    <div class="auth-shell">
+        <div class="auth-brand">
+            <div class="auth-kicker">Student Account</div>
+            <h2>Account</h2>
+            <p>Review your current profile and safely sign out of Illumined.</p>
+        </div>
+
+        <div class="auth-card">
+            <h3>Profile</h3>
+            <div class="account-grid">
+                <div class="account-row"><strong>Name</strong><span id="account-name">-</span></div>
+                <div class="account-row"><strong>Email</strong><span id="account-email">-</span></div>
+                <div class="account-row"><strong>Class</strong><span id="account-class">-</span></div>
+            </div>
+            <div class="auth-actions">
+                <button id="account-signout-button" class="button-theme auth-primary" type="button">Sign Out</button>
+                <button id="account-back-button" class="button-theme" type="button">Back to Dashboard</button>
+            </div>
+        </div>
     </div>
 </section>
             
@@ -2397,6 +2563,65 @@ nav button:focus-visible {
         var currentDiscussionPrompt = null;
         let currentDiscussionPosts = [];
         const discussionRepliesByPost = new Map();
+        const publicSections = new Set(['profile-setup']);
+        let authResolved = false;
+
+        function setAuthStatus(message) {
+            const status = document.getElementById('auth-status-message');
+            if (status) status.textContent = message || '';
+        }
+
+        function friendlyAuthError(error) {
+            const code = error?.code || '';
+            if (code.includes('invalid-email')) return 'Please enter a valid email address.';
+            if (code.includes('missing-password')) return 'Please enter your password.';
+            if (code.includes('weak-password')) return 'Please use a password with at least 6 characters.';
+            if (code.includes('email-already-in-use')) return 'That email already has an account. Try signing in instead.';
+            if (code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'The email or password was not correct.';
+            if (code.includes('too-many-requests')) return 'Too many attempts. Please wait a few minutes and try again.';
+            return error?.message || 'Something went wrong. Please try again.';
+        }
+
+        function showProfileDetailsCard(shouldShow) {
+            const profileCard = document.getElementById('profile-details-card');
+            if (!profileCard) return;
+            profileCard.classList.toggle('hidden', !shouldShow);
+        }
+
+        function setAuthenticatedShell(enabled) {
+            document.body.classList.toggle('auth-locked', !enabled);
+        }
+
+        function currentVisibleSectionId() {
+            const visible = document.querySelector('.main-content-container > section:not(.hidden)');
+            return visible ? visible.id : '';
+        }
+
+        function resetStudentUIForSignOut() {
+            const userInfoDisplay = document.getElementById('user-info-display');
+            if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
+
+            const userInfoName = document.getElementById('user-info-name');
+            if (userInfoName) userInfoName.textContent = '';
+
+            const dashboardWelcome = document.getElementById('dashboard-user-welcome');
+            if (dashboardWelcome) {
+                dashboardWelcome.textContent = '';
+                dashboardWelcome.classList.add('hidden');
+            }
+
+            ['account-name', 'account-email', 'account-class'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = '-';
+            });
+
+            const emailInput = document.getElementById('auth-email');
+            const passwordInput = document.getElementById('auth-password');
+            if (emailInput) emailInput.value = '';
+            if (passwordInput) passwordInput.value = '';
+            showProfileDetailsCard(false);
+            setAuthenticatedShell(false);
+        }
 
         function appendTextWithLineBreaks(parent, text) {
             const lines = String(text || '').split('\n');
@@ -2824,6 +3049,10 @@ nav button:focus-visible {
 
         // Show Section Function
       function showSection(sectionId) {
+            if (!publicSections.has(sectionId) && (!currentUser || !userProfile)) {
+                showCustomAlert('Please sign in and finish your student profile first.');
+                sectionId = 'profile-setup';
+            }
             const sections = document.querySelectorAll('.main-content-container > section');
             sections.forEach(section => {
                 if (section.id === sectionId) {
@@ -3953,9 +4182,12 @@ async function initializeAuth() {
 
 // Updated Auth State Changed Handler
 auth.onAuthStateChanged(async (user) => {
+    authResolved = true;
     if (user) {
         currentUser = user;
         console.log('User authenticated:', user.uid);
+        setAuthStatus('Signed in. Loading your profile...');
+        showProfileDetailsCard(true);
         
         // Try to load existing profile
         await loadUserProfile(); // This will handle UI updates
@@ -3964,6 +4196,8 @@ auth.onAuthStateChanged(async (user) => {
         // User not authenticated - cleanup listeners
         currentUser = null;
         userProfile = null;
+        resetStudentUIForSignOut();
+        setAuthStatus('Sign in or create a student account to begin.');
         
         // Clean up the user profile listener
         if (userProfileListener) {
@@ -3985,13 +4219,6 @@ auth.onAuthStateChanged(async (user) => {
         
         console.log('User not authenticated');
         
-        // Hide user info
-        const userInfoDisplay = document.getElementById('user-info-display');
-        if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
-        
-        const dashboardWelcome = document.getElementById('dashboard-user-welcome');
-        if (dashboardWelcome) dashboardWelcome.classList.add('hidden');
-        
         // Disable chat
         document.getElementById('message-input').disabled = true;
         document.getElementById('send-button').disabled = true;
@@ -4005,12 +4232,22 @@ auth.onAuthStateChanged(async (user) => {
 // Helper function to update UI for authenticated users
 function updateUIForAuthenticatedUser() {
     if (!userProfile) return;
+    setAuthenticatedShell(true);
+    setAuthStatus('');
     
     const userInfoDisplay = document.getElementById('user-info-display');
+    const userInfoName = document.getElementById('user-info-name');
     if (userInfoDisplay) {
-        userInfoDisplay.textContent = `${userProfile.username} | ${userProfile.classId}`;
+        if (userInfoName) userInfoName.textContent = `${userProfile.username} | ${userProfile.classId}`;
         userInfoDisplay.classList.remove('hidden');
     }
+
+    const accountName = document.getElementById('account-name');
+    const accountEmail = document.getElementById('account-email');
+    const accountClass = document.getElementById('account-class');
+    if (accountName) accountName.textContent = userProfile.username || '-';
+    if (accountEmail) accountEmail.textContent = userProfile.email || currentUser?.email || '-';
+    if (accountClass) accountClass.textContent = userProfile.classId || '-';
     
     const dashboardWelcome = document.getElementById('dashboard-user-welcome');
     if (dashboardWelcome) {
@@ -4045,13 +4282,15 @@ async function signUp() {
     }
     
     try {
+        setAuthStatus('Creating your student account...');
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         console.log('User created:', userCredential.user.uid);
-        showCustomAlert('Account created successfully! Please fill in your profile below.');
+        setAuthStatus('Account created. Finish your student profile below.');
+        showProfileDetailsCard(true);
         // Don't redirect here - the auth state change will handle it
     } catch (error) {
         console.error('Sign up error:', error);
-        showCustomAlert(`Sign up failed: ${error.message}`);
+        setAuthStatus(friendlyAuthError(error));
     }
 }
 
@@ -4066,13 +4305,30 @@ async function signIn() {
     }
     
     try {
+        setAuthStatus('Signing in...');
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         console.log('User signed in:', userCredential.user.uid);
-        showCustomAlert('Signed in successfully! You can now fill in your profile below.');
+        setAuthStatus('Signed in. Loading your profile...');
         // Don't redirect here - the auth state change will handle it
     } catch (error) {
         console.error('Sign in error:', error);
-        showCustomAlert(`Sign in failed: ${error.message}`);
+        setAuthStatus(friendlyAuthError(error));
+    }
+}
+
+async function sendPasswordReset() {
+    const email = document.getElementById('auth-email').value.trim();
+    if (!email) {
+        setAuthStatus('Enter your email above, then press Forgot Password again.');
+        return;
+    }
+
+    try {
+        await auth.sendPasswordResetEmail(email);
+        setAuthStatus('Password reset email sent. Check your inbox.');
+    } catch (error) {
+        console.error('Password reset error:', error);
+        setAuthStatus(friendlyAuthError(error));
     }
 }
 
@@ -4171,9 +4427,11 @@ async function signOut() {
         }
 
         stopStudentDashboardListeners();
+        resetStudentUIForSignOut();
         
         await auth.signOut();
-        showCustomAlert('Signed out successfully.');
+        showSection('profile-setup');
+        setAuthStatus('Signed out successfully.');
     } catch (error) {
         console.error('Sign out error:', error);
         showCustomAlert(`Sign out failed: ${error.message}`);
@@ -4210,16 +4468,24 @@ async function loadUserProfile() {
                 };
                 
                 console.log('Profile updated:', userProfile);
+                showProfileDetailsCard(false);
                 updateUIForAuthenticatedUser();
                 updateDashboard();
                 setupChatListener();
                 setupPrayerRequestListener();
                 setupStudentDashboardListeners();
+                const visibleSection = currentVisibleSectionId();
+                if (!visibleSection || visibleSection === 'profile-setup') {
+                    showSection('main-menu-section');
+                }
                 
             } else {
                 // Profile doesn't exist, show setup
                 console.log('User authenticated but no profile found');
                 userProfile = null;
+                setAuthenticatedShell(false);
+                showProfileDetailsCard(true);
+                setAuthStatus('Finish your student profile to continue.');
                 showSection('profile-setup');
             }
         }, (error) => {
@@ -5152,8 +5418,12 @@ async function submitPrayerRequest() {
                 showSection('student-resources-section');
             });
             document.getElementById('quit-nav-button').addEventListener('click', () => {
-                showCustomAlert("Thank you for using Illumined! You can close this window.");
+                showSection('account-section');
             });
+            document.getElementById('user-info-signout-button').addEventListener('click', signOut);
+            document.getElementById('profile-signout-button').addEventListener('click', signOut);
+            document.getElementById('account-signout-button').addEventListener('click', signOut);
+            document.getElementById('account-back-button').addEventListener('click', () => showSection('main-menu-section'));
 
             // Lessons & Quiz Buttons
             document.getElementById('take-quiz-button').addEventListener('click', startQuiz);
@@ -5285,9 +5555,11 @@ async function submitPrayerRequest() {
 
             initializeAuth(); // Start Firebase auth process
             initNavListeners(); // Initialize all event listeners
-            showSection('main-menu-section'); // Show initial section immediately
+            showSection('profile-setup');
+            setAuthStatus('Checking your sign-in status...');
 document.getElementById('signup-button').addEventListener('click', signUp);
 document.getElementById('login-button').addEventListener('click', signIn);
+document.getElementById('forgot-password-button').addEventListener('click', sendPasswordReset);
         });
     </script>
 </body>
