@@ -1392,6 +1392,20 @@ nav button:focus-visible {
     gap: 14px;
 }
 
+.assignment-board-link {
+    width: 100%;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.assignment-board-link:focus-visible,
+.assignment-open-row:focus-visible {
+    outline: 3px solid rgba(59,111,160,.35);
+    outline-offset: 4px;
+}
+
 .assignment-title-wrap {
     flex: 1;
     min-width: 0;
@@ -1420,6 +1434,66 @@ nav button:focus-visible {
     background: #3b6fa0;
     color: #fff;
     border-color: #3b6fa0;
+}
+
+.assignment-open-row {
+    width: 100%;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.assignment-link-row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(59,111,160,.09);
+}
+
+.assignment-link-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(191,148,74,.14);
+    color: #bf944a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-size: 1.2rem;
+}
+
+.assignment-link-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.assignment-link-title {
+    color: #1e1c1a;
+    font-weight: 800;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+}
+
+.assignment-link-meta {
+    color: #6d6a65;
+    font-size: .92rem;
+    margin-top: .2rem;
+}
+
+.assignment-link-chevron {
+    color: #77736d;
+    font-weight: 800;
+    flex: 0 0 auto;
+}
+
+.assignment-action-button {
+    width: 100%;
+    margin-top: 1rem;
 }
 
 .discussion-compose {
@@ -1666,6 +1740,54 @@ nav button:focus-visible {
                 <div id="prayer-request-list" class="prayer-request-list">
                     <p class="prayer-request-empty">No active prayer requests yet.</p>
                 </div>
+            </div>
+        </section>
+
+        <!-- Assignment List Section -->
+        <section id="assignment-list-section" class="hidden">
+            <div class="student-firestore-board">
+                <div class="student-firestore-header">
+                    <div>
+                        <div class="student-firestore-kicker">Class Work</div>
+                        <h3>Assignments</h3>
+                        <p>Select an assignment to open readings, lesson links, and completion checks.</p>
+                    </div>
+                    <button class="button-theme" id="assignments-back-home-button" type="button">Back Home</button>
+                </div>
+                <div id="full-assignment-list" class="student-firestore-list">
+                    <p class="student-firestore-empty">No active assignments yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Assignment Detail Section -->
+        <section id="assignment-detail-section" class="hidden">
+            <div class="student-firestore-board">
+                <div class="student-firestore-header">
+                    <div>
+                        <div class="student-firestore-kicker">Assignment</div>
+                        <h3 id="assignment-detail-title">Assignment</h3>
+                        <p id="assignment-detail-due"></p>
+                    </div>
+                    <button class="button-theme" id="assignment-detail-back-button" type="button">Back to Assignments</button>
+                </div>
+                <div id="assignment-detail-content" class="student-firestore-list"></div>
+            </div>
+        </section>
+
+        <!-- Assignment Reading Section -->
+        <section id="assignment-reading-section" class="hidden">
+            <div class="student-firestore-board">
+                <div class="student-firestore-header">
+                    <div>
+                        <div class="student-firestore-kicker">Assigned Reading</div>
+                        <h3 id="assignment-reading-title">Reading</h3>
+                        <p id="assignment-reading-assignment-title"></p>
+                    </div>
+                    <button class="button-theme" id="assignment-reading-back-button" type="button">Back to Assignment</button>
+                </div>
+                <div id="assignment-reading-text" class="student-firestore-item student-firestore-details"></div>
+                <button class="button-theme assignment-action-button" id="assignment-reading-complete-button" type="button">Mark Reading Completed</button>
             </div>
         </section>
 
@@ -2266,6 +2388,8 @@ nav button:focus-visible {
         var discussionRepliesListener = null;
         let firestoreClassSchedule = [];
         var dashboardAssignments = [];
+        var selectedAssignment = null;
+        var selectedAssignmentReading = null;
         let userAssignmentCompletions = new Map();
         let localDiscussionPrompts = [];
         let firestoreDiscussionPrompts = [];
@@ -2867,8 +2991,26 @@ nav button:focus-visible {
                         return aDate - bDate;
                     });
 
-                    dashboardAssignments = assignments.filter(item => item.isActive !== false).slice(0, 5);
+                    dashboardAssignments = assignments.filter(item => item.isActive !== false);
                     renderAssignments(dashboardAssignments);
+                    if (!document.getElementById('assignment-list-section')?.classList.contains('hidden')) {
+                        renderFullAssignmentList();
+                    }
+                    if (!document.getElementById('assignment-detail-section')?.classList.contains('hidden') && selectedAssignment) {
+                        const updatedAssignment = dashboardAssignments.find(item => item.id === selectedAssignment.id);
+                        if (updatedAssignment) {
+                            openAssignmentDetail(updatedAssignment);
+                        }
+                    }
+                    if (!document.getElementById('assignment-reading-section')?.classList.contains('hidden') && selectedAssignment && selectedAssignmentReading) {
+                        const updatedAssignment = dashboardAssignments.find(item => item.id === selectedAssignment.id);
+                        if (updatedAssignment) {
+                            const updatedReading = getAssignmentReadings(updatedAssignment).find(reading => reading.id === selectedAssignmentReading.id);
+                            if (updatedReading) {
+                                openAssignmentReading(updatedAssignment, updatedReading);
+                            }
+                        }
+                    }
                 }, error => {
                     console.error('Assignments listener error:', error);
                     renderDashboardBoardError('assignment-list', `Error loading assignments: ${error.message}`);
@@ -2885,6 +3027,24 @@ nav button:focus-visible {
                         }
                     });
                     renderAssignments(dashboardAssignments);
+                    if (!document.getElementById('assignment-list-section')?.classList.contains('hidden')) {
+                        renderFullAssignmentList();
+                    }
+                    if (!document.getElementById('assignment-detail-section')?.classList.contains('hidden') && selectedAssignment) {
+                        const updatedAssignment = dashboardAssignments.find(item => item.id === selectedAssignment.id);
+                        if (updatedAssignment) {
+                            openAssignmentDetail(updatedAssignment);
+                        }
+                    }
+                    if (!document.getElementById('assignment-reading-section')?.classList.contains('hidden') && selectedAssignment && selectedAssignmentReading) {
+                        const updatedAssignment = dashboardAssignments.find(item => item.id === selectedAssignment.id);
+                        if (updatedAssignment) {
+                            const updatedReading = getAssignmentReadings(updatedAssignment).find(reading => reading.id === selectedAssignmentReading.id);
+                            if (updatedReading) {
+                                openAssignmentReading(updatedAssignment, updatedReading);
+                            }
+                        }
+                    }
                 }, error => {
                     console.error('Assignment completion listener error:', error);
                     renderDashboardBoardError('assignment-list', `Error loading assignment checks: ${error.message}`);
@@ -2959,60 +3119,364 @@ nav button:focus-visible {
                 return;
             }
 
-            assignments.forEach(assignment => {
-                const item = document.createElement('div');
-                item.className = 'student-firestore-item';
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'student-firestore-item assignment-board-link';
+            button.addEventListener('click', showAssignmentsList);
 
-                const row = document.createElement('div');
-                row.className = 'assignment-check-row';
+            const title = document.createElement('div');
+            title.className = 'student-firestore-title';
+            title.textContent = 'Assignments';
 
-                const checkbox = document.createElement('button');
-                checkbox.type = 'button';
-                checkbox.className = 'assignment-check-button';
-                const completion = userAssignmentCompletions.get(assignment.id);
-                const isCompleted = Boolean(completion && completion.isCompleted);
-                checkbox.setAttribute('aria-pressed', isCompleted ? 'true' : 'false');
-                checkbox.setAttribute('aria-label', isCompleted ? 'Mark assignment incomplete' : 'Mark assignment complete');
-                checkbox.textContent = isCompleted ? '✓' : '';
-                checkbox.addEventListener('click', () => toggleAssignmentCompletion(assignment, !isCompleted));
+            const meta = document.createElement('div');
+            meta.className = 'student-firestore-meta';
+            meta.textContent = `${assignments.length} active assignment${assignments.length === 1 ? '' : 's'}`;
 
-                const titleWrap = document.createElement('div');
-                titleWrap.className = 'assignment-title-wrap';
+            button.appendChild(title);
+            button.appendChild(meta);
 
-                const title = document.createElement('div');
-                title.className = 'student-firestore-title';
-                title.textContent = assignment.title || 'Assignment';
+            assignments.slice(0, 5).forEach(assignment => {
+                button.appendChild(buildAssignmentSummaryRow(assignment));
+            });
 
-                const status = document.createElement('div');
-                status.className = 'student-firestore-meta';
-                status.textContent = isCompleted ? 'Completed' : 'Not completed';
+            if (assignments.length > 5) {
+                const more = document.createElement('div');
+                more.className = 'student-firestore-meta';
+                more.textContent = `+ ${assignments.length - 5} more`;
+                button.appendChild(more);
+            }
 
-                const meta = document.createElement('div');
-                meta.className = 'student-firestore-meta';
-                const dueDate = assignment.dueAt && assignment.dueAt.toDate
-                    ? assignment.dueAt.toDate().toLocaleDateString()
-                    : '';
-                meta.textContent = dueDate ? `Due ${dueDate}` : 'No due date';
+            list.appendChild(button);
+        }
 
+        function showAssignmentsList() {
+            if (!currentUser || !userProfile || !userProfile.classId) {
+                showCustomAlert('Please sign in and join a class before viewing assignments.');
+                showSection('profile-setup');
+                return;
+            }
+
+            renderFullAssignmentList();
+            showSection('assignment-list-section');
+        }
+
+        function renderFullAssignmentList() {
+            const list = document.getElementById('full-assignment-list');
+            if (!list) return;
+
+            list.textContent = '';
+
+            if (!dashboardAssignments.length) {
+                const empty = document.createElement('p');
+                empty.className = 'student-firestore-empty';
+                empty.textContent = 'No active assignments yet.';
+                list.appendChild(empty);
+                return;
+            }
+
+            dashboardAssignments.forEach(assignment => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'assignment-open-row';
+                button.addEventListener('click', () => openAssignmentDetail(assignment));
+                button.appendChild(buildAssignmentListRow(assignment));
+                list.appendChild(button);
+            });
+        }
+
+        function buildAssignmentSummaryRow(assignment) {
+            const row = document.createElement('div');
+            row.className = 'assignment-link-row';
+
+            const completion = userAssignmentCompletions.get(assignment.id);
+            const isCompleted = Boolean(completion && completion.isCompleted);
+
+            const icon = document.createElement('div');
+            icon.className = 'assignment-link-icon';
+            icon.textContent = isCompleted ? '✓' : '○';
+
+            const body = document.createElement('div');
+            body.className = 'assignment-link-body';
+
+            const title = document.createElement('div');
+            title.className = 'assignment-link-title';
+            title.textContent = assignment.title || 'Assignment';
+
+            const meta = document.createElement('div');
+            meta.className = 'assignment-link-meta';
+            meta.textContent = assignmentMetaText(assignment, isCompleted);
+
+            body.appendChild(title);
+            body.appendChild(meta);
+            row.appendChild(icon);
+            row.appendChild(body);
+            return row;
+        }
+
+        function buildAssignmentListRow(assignment) {
+            const row = buildAssignmentSummaryRow(assignment);
+            const chevron = document.createElement('div');
+            chevron.className = 'assignment-link-chevron';
+            chevron.textContent = '›';
+            row.appendChild(chevron);
+            return row;
+        }
+
+        function assignmentMetaText(assignment, isCompleted) {
+            const pieces = [];
+            const dueDate = assignment.dueAt && assignment.dueAt.toDate
+                ? assignment.dueAt.toDate().toLocaleDateString()
+                : '';
+            if (dueDate) pieces.push(`Due ${dueDate}`);
+            if (getAssignmentReadings(assignment).length) {
+                const count = getAssignmentReadings(assignment).length;
+                pieces.push(`${count} reading${count === 1 ? '' : 's'}`);
+            }
+            if (getAssignmentLessonLinks(assignment).length) {
+                const count = getAssignmentLessonLinks(assignment).length;
+                pieces.push(`${count} lesson${count === 1 ? '' : 's'}`);
+            }
+            pieces.push(isCompleted ? 'Completed' : 'Not completed');
+            return pieces.join(' • ');
+        }
+
+        function openAssignmentDetail(assignment) {
+            selectedAssignment = assignment;
+            selectedAssignmentReading = null;
+
+            const title = document.getElementById('assignment-detail-title');
+            const due = document.getElementById('assignment-detail-due');
+            const content = document.getElementById('assignment-detail-content');
+            if (!title || !due || !content) return;
+
+            title.textContent = assignment.title || 'Assignment';
+            const dueDate = assignment.dueAt && assignment.dueAt.toDate
+                ? assignment.dueAt.toDate().toLocaleDateString()
+                : '';
+            due.textContent = dueDate ? `Due ${dueDate}` : 'No due date';
+            content.textContent = '';
+
+            const instructions = (assignment.instructions || '').trim();
+            if (instructions) {
+                const card = document.createElement('div');
+                card.className = 'student-firestore-item';
+                const heading = document.createElement('div');
+                heading.className = 'student-firestore-title';
+                heading.textContent = 'Instructions';
                 const details = document.createElement('div');
                 details.className = 'student-firestore-details';
-                const lessonTitle = (assignment.lessonTitle || '').trim();
-                if (lessonTitle) {
-                    const lesson = document.createElement('strong');
-                    lesson.textContent = `${lessonTitle}: `;
-                    details.appendChild(lesson);
-                }
-                appendTextWithLineBreaks(details, assignment.instructions || '');
+                appendTextWithLineBreaks(details, instructions);
+                card.appendChild(heading);
+                card.appendChild(details);
+                content.appendChild(card);
+            }
 
-                titleWrap.appendChild(title);
-                titleWrap.appendChild(status);
-                row.appendChild(checkbox);
-                row.appendChild(titleWrap);
-                item.appendChild(row);
-                item.appendChild(meta);
-                item.appendChild(details);
-                list.appendChild(item);
-            });
+            const readings = getAssignmentReadings(assignment);
+            if (readings.length) {
+                const card = document.createElement('div');
+                card.className = 'student-firestore-item';
+                const heading = document.createElement('div');
+                heading.className = 'student-firestore-title';
+                heading.textContent = 'Assigned Readings';
+                card.appendChild(heading);
+
+                readings.forEach(reading => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'assignment-open-row';
+                    button.addEventListener('click', () => openAssignmentReading(assignment, reading));
+                    button.appendChild(buildReadingLinkRow(assignment, reading));
+                    card.appendChild(button);
+                });
+
+                content.appendChild(card);
+            }
+
+            const lessonLinks = getAssignmentLessonLinks(assignment);
+            if (lessonLinks.length) {
+                const card = document.createElement('div');
+                card.className = 'student-firestore-item';
+                const heading = document.createElement('div');
+                heading.className = 'student-firestore-title';
+                heading.textContent = 'Lesson Links';
+                card.appendChild(heading);
+
+                lessonLinks.forEach(link => {
+                    const match = findLessonById(link.lessonId);
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'assignment-open-row';
+                    button.addEventListener('click', () => {
+                        if (match) {
+                            currentCategory = match.category.category;
+                            loadLessonContent(match.lesson);
+                        } else {
+                            showCustomAlert('This lesson could not be found in the published lesson catalog.');
+                        }
+                    });
+                    button.appendChild(buildLessonLinkRow(link, match));
+                    card.appendChild(button);
+                });
+
+                content.appendChild(card);
+            }
+
+            if (!readings.length) {
+                const completion = userAssignmentCompletions.get(assignment.id);
+                const isCompleted = Boolean(completion && completion.isCompleted);
+                const completeButton = document.createElement('button');
+                completeButton.type = 'button';
+                completeButton.className = 'button-theme assignment-action-button';
+                completeButton.textContent = isCompleted ? 'Mark Assignment Incomplete' : 'Mark Assignment Completed';
+                completeButton.addEventListener('click', () => toggleAssignmentCompletion(assignment, !isCompleted));
+                content.appendChild(completeButton);
+            }
+
+            showSection('assignment-detail-section');
+        }
+
+        function buildReadingLinkRow(assignment, reading) {
+            const row = document.createElement('div');
+            row.className = 'assignment-link-row';
+
+            const icon = document.createElement('div');
+            icon.className = 'assignment-link-icon';
+            icon.textContent = isReadingCompleted(assignment, reading) ? '✓' : '📄';
+
+            const body = document.createElement('div');
+            body.className = 'assignment-link-body';
+
+            const title = document.createElement('div');
+            title.className = 'assignment-link-title';
+            title.textContent = reading.title || 'Assigned Reading';
+
+            const preview = document.createElement('div');
+            preview.className = 'assignment-link-meta';
+            preview.textContent = previewText(reading.text || '', 25);
+
+            const chevron = document.createElement('div');
+            chevron.className = 'assignment-link-chevron';
+            chevron.textContent = '›';
+
+            body.appendChild(title);
+            body.appendChild(preview);
+            row.appendChild(icon);
+            row.appendChild(body);
+            row.appendChild(chevron);
+            return row;
+        }
+
+        function buildLessonLinkRow(link, match) {
+            const row = document.createElement('div');
+            row.className = 'assignment-link-row';
+
+            const icon = document.createElement('div');
+            icon.className = 'assignment-link-icon';
+            icon.textContent = '📖';
+
+            const body = document.createElement('div');
+            body.className = 'assignment-link-body';
+
+            const title = document.createElement('div');
+            title.className = 'assignment-link-title';
+            title.textContent = link.lessonTitle || link.lessonId || 'Lesson';
+
+            const meta = document.createElement('div');
+            meta.className = 'assignment-link-meta';
+            meta.textContent = match ? match.category.category : 'Lesson link';
+
+            const chevron = document.createElement('div');
+            chevron.className = 'assignment-link-chevron';
+            chevron.textContent = '›';
+
+            body.appendChild(title);
+            body.appendChild(meta);
+            row.appendChild(icon);
+            row.appendChild(body);
+            row.appendChild(chevron);
+            return row;
+        }
+
+        function openAssignmentReading(assignment, reading) {
+            selectedAssignment = assignment;
+            selectedAssignmentReading = reading;
+
+            const title = document.getElementById('assignment-reading-title');
+            const assignmentTitle = document.getElementById('assignment-reading-assignment-title');
+            const text = document.getElementById('assignment-reading-text');
+            const button = document.getElementById('assignment-reading-complete-button');
+            if (!title || !assignmentTitle || !text || !button) return;
+
+            title.textContent = reading.title || 'Assigned Reading';
+            assignmentTitle.textContent = assignment.title || 'Assignment';
+            text.textContent = '';
+            appendTextWithLineBreaks(text, reading.text || '');
+
+            const isCompleted = isReadingCompleted(assignment, reading);
+            button.textContent = isCompleted ? 'Mark Reading Incomplete' : 'Mark Reading Completed';
+            button.onclick = () => toggleReadingCompletion(assignment, reading, !isCompleted);
+
+            showSection('assignment-reading-section');
+        }
+
+        function getAssignmentReadings(assignment) {
+            const rawReadings = Array.isArray(assignment.readings) ? assignment.readings : [];
+            const cleanedReadings = rawReadings
+                .map((reading, index) => ({
+                    id: String(reading.id || `reading-${index + 1}`).trim(),
+                    title: String(reading.title || '').trim(),
+                    text: String(reading.text || '').trim()
+                }))
+                .filter(reading => reading.title && reading.text);
+
+            if (cleanedReadings.length) return cleanedReadings;
+
+            const legacyTitle = String(assignment.readingTitle || '').trim();
+            const legacyText = String(assignment.readingText || '').trim();
+            return legacyTitle && legacyText
+                ? [{ id: 'legacy-reading', title: legacyTitle, text: legacyText }]
+                : [];
+        }
+
+        function getAssignmentLessonLinks(assignment) {
+            const rawLinks = Array.isArray(assignment.lessonLinks) ? assignment.lessonLinks : [];
+            const cleanedLinks = rawLinks
+                .map(link => ({
+                    lessonId: String(link.lessonId || '').trim(),
+                    lessonTitle: String(link.lessonTitle || '').trim()
+                }))
+                .filter(link => link.lessonId);
+
+            if (cleanedLinks.length) return cleanedLinks;
+
+            const legacyId = String(assignment.lessonId || '').trim();
+            const legacyTitle = String(assignment.lessonTitle || '').trim();
+            return legacyId ? [{ lessonId: legacyId, lessonTitle: legacyTitle }] : [];
+        }
+
+        function findLessonById(lessonId) {
+            for (const category of lessonsData) {
+                const lesson = category.lessons.find(item => item.id === lessonId);
+                if (lesson) return { lesson, category };
+            }
+            return null;
+        }
+
+        function previewText(text, length) {
+            const compact = String(text || '').split(/\s+/).filter(Boolean).join(' ');
+            return compact.length > length ? `${compact.slice(0, length)}...` : compact;
+        }
+
+        function readingCompletionKey(assignment, reading) {
+            return assignment && assignment.id && reading && reading.id
+                ? `${assignment.id}__reading__${reading.id}`
+                : '';
+        }
+
+        function isReadingCompleted(assignment, reading) {
+            const key = readingCompletionKey(assignment, reading);
+            const completion = key ? userAssignmentCompletions.get(key) : null;
+            return Boolean(completion && completion.isCompleted);
         }
 
         async function toggleAssignmentCompletion(assignment, isCompleted) {
@@ -3040,6 +3504,45 @@ nav button:focus-visible {
             } catch (error) {
                 console.error('Assignment completion error:', error);
                 alert(`Could not update assignment: ${error.message}`);
+            }
+        }
+
+        async function toggleReadingCompletion(assignment, reading, isCompleted) {
+            if (!currentUser || !userProfile || !userProfile.classId || !assignment || !assignment.id || !reading || !reading.id) {
+                alert('Please sign in and join a class before updating assignments.');
+                return;
+            }
+
+            const key = readingCompletionKey(assignment, reading);
+            const completionId = `${key}_${currentUser.uid}`;
+            try {
+                const data = {
+                    assignmentId: key,
+                    parentAssignmentId: assignment.id,
+                    assignmentItemId: reading.id,
+                    assignmentItemTitle: reading.title || 'Assigned Reading',
+                    assignmentItemType: 'reading',
+                    userId: currentUser.uid,
+                    studentName: userProfile.username || currentUser.email || 'Student',
+                    classId: userProfile.classId,
+                    isCompleted,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (isCompleted) {
+                    data.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+                }
+
+                await db.collection('assignmentCompletions').doc(completionId).set(data, { merge: true });
+
+                const readings = getAssignmentReadings(assignment);
+                const allOtherReadingsCompleted = readings
+                    .filter(item => item.id !== reading.id)
+                    .every(item => isReadingCompleted(assignment, item));
+                await toggleAssignmentCompletion(assignment, Boolean(isCompleted && allOtherReadingsCompleted));
+            } catch (error) {
+                console.error('Reading completion error:', error);
+                alert(`Could not update reading: ${error.message}`);
             }
         }
 
@@ -4632,6 +5135,15 @@ async function submitPrayerRequest() {
                 loadCategories(); // Load categories when lessons button is clicked
             });
             document.getElementById('discussion-nav-button').addEventListener('click', showDiscussionList);
+            document.getElementById('assignments-back-home-button').addEventListener('click', () => showSection('main-menu-section'));
+            document.getElementById('assignment-detail-back-button').addEventListener('click', showAssignmentsList);
+            document.getElementById('assignment-reading-back-button').addEventListener('click', () => {
+                if (selectedAssignment) {
+                    openAssignmentDetail(selectedAssignment);
+                } else {
+                    showAssignmentsList();
+                }
+            });
             document.getElementById('spiritual-nav-button').addEventListener('click', () => {
                 showSection('spiritual-formation-section');
             });
