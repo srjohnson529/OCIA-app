@@ -3236,8 +3236,18 @@ nav button:focus-visible {
                 const count = getAssignmentLessonLinks(assignment).length;
                 pieces.push(`${count} lesson${count === 1 ? '' : 's'}`);
             }
-            pieces.push(isCompleted ? 'Completed' : 'Not completed');
+            pieces.push(assignmentCompletionProgressText());
             return pieces.join(' • ');
+        }
+
+        function assignmentCompletionProgressText() {
+            const totalAssignments = dashboardAssignments.length;
+            const completedAssignments = dashboardAssignments.filter(assignment => {
+                const completion = userAssignmentCompletions.get(assignment.id);
+                return Boolean(completion && completion.isCompleted);
+            }).length;
+
+            return `Completed ${completedAssignments}/${totalAssignments}`;
         }
 
         function openAssignmentDetail(assignment) {
