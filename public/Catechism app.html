@@ -47,13 +47,72 @@
         
         /* Header */
         header {
-            background: var(--secondary-color-gradient);
+            background: #3B6FA0;
+            color: #fff;
+            display: flex;
+            justify-content: center;
             padding: 1rem;
             text-align: center;
-            font-size: 3rem;
-            text-shadow: 2px 2px 1px rgba(0, 0, 0, 0.3);
-            border-radius: var(--border-radius); /* Added back from previous working code */
-            margin-bottom: 1rem; /* Added back from previous working code */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            margin-bottom: 1rem;
+        }
+
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+        }
+
+        .brand-lockup img {
+            height: 58px;
+            width: 58px;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .brand-name {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            letter-spacing: 0.01em;
+            text-decoration: underline;
+            text-decoration-color: #bf944a;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 0.22em;
+        }
+
+        .brand-divider-dot {
+            width: 5px;
+            height: 5px;
+            margin-top: 0.16rem;
+            border-radius: 50%;
+            background: #bf944a;
+        }
+
+        .brand-tagline {
+            color: #bf944a;
+            font-size: clamp(0.65rem, 1.6vw, 0.9rem);
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            margin-top: 0.18rem;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 520px) {
+            .brand-lockup img {
+                height: 44px;
+                width: 44px;
+            }
+
+            header {
+                padding: 0.75rem;
+            }
         }
 #user-info-display {
     position: absolute;
@@ -774,46 +833,78 @@ nav button:focus-visible {
         #rosary-section {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    background: #D4AF37; /* Rich gold */
-    color: #333;
-    text-align: center;
-    padding: 2rem 1.5rem;
-    min-height: 300px;
+    min-height: calc(100vh - 180px);
     width: 100%;
     box-sizing: border-box;
 }
 
+#rosary-step-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+}
+
+#rosary-step-card {
+    width: min(100%, 760px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(196, 154, 69, 0.28);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    color: #1f1f1f;
+    cursor: pointer;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#rosary-step-card:hover,
+#rosary-step-card:focus-visible {
+    box-shadow: 0 16px 34px rgba(31, 31, 31, 0.12);
+    transform: translateY(-2px);
+    outline: none;
+}
+
 #rosary-section h2 {
-    font-size: 2rem;
+    color: #3B6FA0;
+    font-family: 'Georgia', serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    line-height: 1.08;
     margin-bottom: 1rem;
-    color: #6A0505;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 #rosary-section p {
-    font-size: 1.1rem;
-    line-height: 1.75;
-    margin-bottom: 0.75rem;
-    max-width: 700px;
+    color: #1f1f1f;
+    font-family: 'Georgia', serif;
+    font-size: clamp(1.15rem, 3.2vw, 1.65rem);
+    line-height: 1.55;
+    margin: 0 auto 0.75rem;
+    max-width: 680px;
+    overflow-wrap: anywhere;
 }
 
 #rosary-section button {
-    background: #8B4513;
-    color: white;
-    font-size: 1.1rem;
+    background: transparent;
     border: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin: 0.5rem;
-    transition: background 0.3s ease, transform 0.2s ease;
+    color: #1f1f1f;
     cursor: pointer;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    margin: 0.75rem 1rem 1rem;
+    padding: 0.6rem 0;
 }
 
 #rosary-section button:hover {
-    background: #5f5429;
-    transform: translateY(-2px);
+    color: #3B6FA0;
+}
+
+.rosary-step-meta {
+    color: #666;
+    font-family: 'Georgia', serif;
+    font-size: 0.95rem;
+    margin-top: 1rem;
 }
 
 #rosary-explanation-content {
@@ -1776,7 +1867,14 @@ nav button:focus-visible {
 
     <!-- Header -->
     <header>
-        ILLUMINED
+        <div class="brand-lockup" aria-label="Illumined">
+            <img src="images/illumined-logo.png" alt="" onerror="this.style.display='none'">
+            <div class="brand-text">
+                <span class="brand-name">Illumined</span>
+                <span class="brand-divider-dot" aria-hidden="true"></span>
+                <span class="brand-tagline">Being • Truth • Goodness</span>
+            </div>
+        </div>
     </header>
 
     <!-- Navigation Bar -->
@@ -2277,13 +2375,16 @@ nav button:focus-visible {
             <button class="button-theme" id="explanation-back-to-mysteries-button">Back to Mysteries</button>
         </section>
 
-        <!-- MODIFIED Rosary Section -->
+        <!-- Guided Rosary Section -->
         <section id="rosary-section" class="hidden">
-            <h2 id="rosary-prayer-title">Current Prayer</h2>
-            <p id="rosary-prayer-text" style="white-space: pre-wrap;"></p>
-            <div id="hail-mary-counter" style="font-size: 1.5rem; font-weight: bold; margin: 1rem 0; display: none;"></div>
-            <button class="button-theme" id="rosary-next-button">Next</button>
-            <button class="button-theme" id="rosary-finish-button" style="display: none;">Finish</button>
+            <div id="rosary-step-stage">
+                <article id="rosary-step-card" tabindex="0" role="button" aria-label="Continue to the next rosary prayer">
+                    <h2 id="rosary-prayer-title">Current Prayer</h2>
+                    <p id="rosary-prayer-text" style="white-space: pre-wrap;"></p>
+                    <div id="hail-mary-counter" style="font-size: 1.1rem; font-weight: bold; margin: 1rem 0; display: none;"></div>
+                    <div id="rosary-step-count" class="rosary-step-meta"></div>
+                </article>
+            </div>
             <button class="button-theme" id="rosary-back-to-mysteries-button">Back to Mysteries</button>
         </section>
 
@@ -2508,6 +2609,7 @@ nav button:focus-visible {
 			<button class="button-theme" onclick="window.open('https://www.catholic.com/', '_blank')">Catholic Answers</button>
             <button class="button-theme" onclick="window.open('https://www.ibreviary.com/m2/breviario.php/', '_blank')">ibreviary</button>
             <button class="button-theme" onclick="window.open('https://www.singthehours.org/', '_blank')">Sing the Hours</button>
+            <button class="button-theme" onclick="showCustomAlert('Push notifications are managed in the Illumined mobile app from More > Notifications. The website will still show dashboard announcements when you sign in.')">Notifications</button>
             <button class="button-theme" onclick="window.open('https://www.newadvent.org/cathen/', '_blank')">New Advent Catholic Enyclopedia</button>
 		</section>
     </div>
@@ -3007,10 +3109,13 @@ nav button:focus-visible {
 
         // Rosary State
            let rosaryState = {
-            currentMysteries: [], // Will hold the selected set of mysteries
+            currentMysteries: [],
             currentMysteryIndex: 0,
             currentPrayerIndex: 0,
-            prayers: [] // Will be populated per mystery
+            prayers: [],
+            fullSequence: [],
+            currentStep: 0,
+            mysteryType: null
         };
 
         // Function to populate prayers for a mystery
@@ -3021,6 +3126,52 @@ nav button:focus-visible {
                 { type: 'Glory Be', text: GLORY_BE },
                 { type: 'Fatima Prayer', text: FATIMA_PRAYER }
             ];
+        }
+
+        async function loadSpiritualFormationData() {
+            try {
+                const response = await fetch('spiritual_formation.json', { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                if (Array.isArray(data.commonPrayers)) {
+                    commonPrayers.length = 0;
+                    data.commonPrayers
+                        .slice()
+                        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                        .forEach(prayer => commonPrayers.push({
+                            id: prayer.id,
+                            name: prayer.title || prayer.name,
+                            text: prayer.text || ''
+                        }));
+                }
+
+                const rosary = data.rosary || {};
+                const prayers = rosary.prayers || {};
+                if (prayers.signOfTheCross) window.SIGN_OF_THE_CROSS_TEXT = prayers.signOfTheCross;
+                if (prayers.apostlesCreed) window.APOSTLES_CREED_TEXT = prayers.apostlesCreed;
+                if (prayers.ourFather) window.OUR_FATHER_TEXT = prayers.ourFather;
+                if (prayers.hailMary) window.HAIL_MARY_TEXT = prayers.hailMary;
+                if (prayers.gloryBe) window.GLORY_BE_TEXT = prayers.gloryBe;
+                if (prayers.fatimaPrayer) window.FATIMA_PRAYER_TEXT = prayers.fatimaPrayer;
+                if (prayers.hailHolyQueen) window.HAIL_HOLY_QUEEN_TEXT = prayers.hailHolyQueen;
+                if (prayers.concludingPrayer) window.ROSARY_PRAYER_TEXT = prayers.concludingPrayer;
+
+                const groups = Array.isArray(rosary.mysteries) ? rosary.mysteries : [];
+                const byId = Object.fromEntries(groups.map(group => [group.id, group]));
+                if (byId.joyful?.mysteries) joyfulMysteries.splice(0, joyfulMysteries.length, ...byId.joyful.mysteries);
+                if (byId.luminous?.mysteries) luminousMysteries.splice(0, luminousMysteries.length, ...byId.luminous.mysteries);
+                if (byId.sorrowful?.mysteries) sorrowfulMysteries.splice(0, sorrowfulMysteries.length, ...byId.sorrowful.mysteries);
+                if (byId.glorious?.mysteries) gloriousMysteries.splice(0, gloriousMysteries.length, ...byId.glorious.mysteries);
+                Object.entries(byId).forEach(([id, group]) => {
+                    if (mysteryInfo[id]) {
+                        mysteryInfo[id].name = group.name || group.title || mysteryInfo[id].name;
+                        mysteryInfo[id].description = group.descriptionHTML || mysteryInfo[id].description;
+                    }
+                });
+            } catch (error) {
+                console.warn('Using embedded spiritual formation content because spiritual_formation.json could not be loaded.', error);
+            }
         }
 
         // Custom Alert Function
@@ -5274,29 +5425,39 @@ async function submitPrayerRequest() {
 };
 
         function buildRosarySequence(mysteries) {
+            const prayers = {
+                signOfTheCross: window.SIGN_OF_THE_CROSS_TEXT || SIGN_OF_THE_CROSS,
+                apostlesCreed: window.APOSTLES_CREED_TEXT || APOSTLES_CREED,
+                ourFather: window.OUR_FATHER_TEXT || OUR_FATHER,
+                hailMary: window.HAIL_MARY_TEXT || HAIL_MARY,
+                gloryBe: window.GLORY_BE_TEXT || GLORY_BE,
+                fatimaPrayer: window.FATIMA_PRAYER_TEXT || FATIMA_PRAYER,
+                hailHolyQueen: window.HAIL_HOLY_QUEEN_TEXT || HAIL_HOLY_QUEEN,
+                concludingPrayer: window.ROSARY_PRAYER_TEXT || ROSARY_PRAYER
+            };
             const sequence = [
-                { title: "Sign of the Cross", text: SIGN_OF_THE_CROSS },
-                { title: "Apostles' Creed", text: APOSTLES_CREED },
-                { title: "Our Father", text: OUR_FATHER },
-                { title: "Hail Mary (for Faith)", text: HAIL_MARY },
-                { title: "Hail Mary (for Hope)", text: HAIL_MARY },
-                { title: "Hail Mary (for Charity)", text: HAIL_MARY },
-                { title: "Glory Be", text: GLORY_BE }
+                { title: "Sign of the Cross", text: prayers.signOfTheCross },
+                { title: "Apostles' Creed", text: prayers.apostlesCreed },
+                { title: "Our Father", text: prayers.ourFather },
+                { title: "Hail Mary (for Faith)", text: prayers.hailMary },
+                { title: "Hail Mary (for Hope)", text: prayers.hailMary },
+                { title: "Hail Mary (for Charity)", text: prayers.hailMary },
+                { title: "Glory Be", text: prayers.gloryBe }
             ];
 
             mysteries.forEach((mystery, index) => {
                 sequence.push({ title: `The ${index + 1}${index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th'} Mystery: ${mystery.title}`, text: mystery.scripture });
-                sequence.push({ title: "Our Father", text: OUR_FATHER });
+                sequence.push({ title: "Our Father", text: prayers.ourFather });
                 for (let i = 0; i < 10; i++) {
-                    sequence.push({ title: "Hail Mary", text: HAIL_MARY, isDecade: true, decadeCount: i + 1 });
+                    sequence.push({ title: "Hail Mary", text: prayers.hailMary, isDecade: true, decadeCount: i + 1 });
                 }
-                sequence.push({ title: "Glory Be", text: GLORY_BE });
-                sequence.push({ title: "Fatima Prayer", text: FATIMA_PRAYER });
+                sequence.push({ title: "Glory Be", text: prayers.gloryBe });
+                sequence.push({ title: "Fatima Prayer", text: prayers.fatimaPrayer });
             });
 
-            sequence.push({ title: "Hail, Holy Queen", text: HAIL_HOLY_QUEEN });
-            sequence.push({ title: "Concluding Rosary Prayer", text: ROSARY_PRAYER });
-            sequence.push({ title: "Final Sign of the Cross", text: SIGN_OF_THE_CROSS });
+            sequence.push({ title: "Hail, Holy Queen", text: prayers.hailHolyQueen });
+            sequence.push({ title: "Concluding Rosary Prayer", text: prayers.concludingPrayer });
+            sequence.push({ title: "Final Sign of the Cross", text: prayers.signOfTheCross });
             sequence.push({ title: "Rosary Completed", text: "You have completed the Holy Rosary. Peace be with you." });
 
             return sequence;
@@ -5325,12 +5486,10 @@ async function submitPrayerRequest() {
             const titleEl = document.getElementById('rosary-prayer-title');
             const textEl = document.getElementById('rosary-prayer-text');
             const counterEl = document.getElementById('hail-mary-counter');
-            const nextButton = document.getElementById('rosary-next-button');
-            const finishButton = document.getElementById('rosary-finish-button');
-
+            const stepCountEl = document.getElementById('rosary-step-count');
 
             titleEl.textContent = step.title;
-            textEl.innerHTML = step.text.replace(/\n/g, '<br>'); // Use innerHTML to render line breaks
+            textEl.innerHTML = (step.text || '').replace(/\n/g, '<br>');
 
             if (step.isDecade) {
                 counterEl.textContent = `${step.decadeCount} / 10`;
@@ -5339,13 +5498,8 @@ async function submitPrayerRequest() {
                 counterEl.style.display = 'none';
            }
 
-            if (rosaryState.currentStep >= rosaryState.fullSequence.length - 1) {
-                nextButton.style.display = 'none';
-                finishButton.style.display = 'inline-block'; // Show the finish button
-            } else {
-                nextButton.style.display = 'inline-block';
-                finishButton.style.display = 'none'; // Hide finish button
-
+            if (stepCountEl) {
+                stepCountEl.textContent = `Step ${rosaryState.currentStep + 1} of ${rosaryState.fullSequence.length}`;
             }
         }
 
@@ -5353,6 +5507,9 @@ async function submitPrayerRequest() {
             if (rosaryState.currentStep < rosaryState.fullSequence.length - 1) {
                 rosaryState.currentStep++;
                 displayCurrentRosaryStep();
+                document.getElementById('rosary-step-stage')?.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                finishRosary();
             }
         }
           function finishRosary() {
@@ -5376,8 +5533,14 @@ async function submitPrayerRequest() {
             document.getElementById('explanation-back-to-mysteries-button').addEventListener('click', () => showSection('rosary-mysteries-section'));
             document.getElementById('start-rosary-button').addEventListener('click', startGuidedRosary);
 
-            document.getElementById('rosary-next-button').addEventListener('click', nextRosaryStep);
-            document.getElementById('rosary-finish-button').addEventListener('click', finishRosary);
+            const rosaryStepCard = document.getElementById('rosary-step-card');
+            rosaryStepCard.addEventListener('click', nextRosaryStep);
+            rosaryStepCard.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    nextRosaryStep();
+                }
+            });
             document.getElementById('rosary-back-to-mysteries-button').addEventListener('click', () => showSection('rosary-mysteries-section'));
 
 
@@ -5546,6 +5709,7 @@ async function submitPrayerRequest() {
         }
         // Initialize on DOMContentLoaded
        window.addEventListener('DOMContentLoaded', async () => {
+            await loadSpiritualFormationData();
             await loadSharedLessons();
             await loadDiscussionPrompts();
             populateCommonPrayersMenu();
@@ -5554,7 +5718,7 @@ async function submitPrayerRequest() {
             document.querySelector('.main-content-container').style.opacity = '1';
 
             initializeAuth(); // Start Firebase auth process
-            initNavListeners(); // Initialize all event listeners
+            initNavListeners();
             showSection('profile-setup');
             setAuthStatus('Checking your sign-in status...');
 document.getElementById('signup-button').addEventListener('click', signUp);
