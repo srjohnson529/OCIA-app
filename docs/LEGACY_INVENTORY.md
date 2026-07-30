@@ -10,11 +10,13 @@ These folders are original working applications. Keep them unchanged until the c
 
 | Existing location | Approximate size | Classification | Planned disposition |
 | --- | ---: | --- | --- |
-| `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Original active iOS Xcode project | Keep until `apps/ios/` resolves Firebase packages and builds successfully; then archive as the pre-consolidation iOS source. |
+| `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Original active iOS Xcode project | An exact 170-file local archive now exists under `archive/legacy/ios-desktop-working-copy-2026-07-30/`. Keep the Desktop original until `apps/ios/` is built once directly in Xcode. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 1.2 GB after macOS hydrated cloud cache placeholders during cleanup | Original Android project plus generated data | Verification hold cleared: the consolidated Android project synchronized, passed 140 unit tests, and built a debug APK. The source and selected work evidence are archived; the two large Gradle cache folders remain in place pending a cloud-safe cleanup method. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons` | 860 KB | Original shared-curriculum HTML output | Keep until the consolidated HTML application’s deployment/hosting origin is documented. The local runtime test already passes. |
 
 ## Historical iOS starters
+
+The current Desktop iOS working project was copied without modification to `archive/legacy/ios-desktop-working-copy-2026-07-30/` on 2026-07-30. The archive contains 170 files, including its local Git metadata and uncommitted working state. A recursive byte comparison found no differences. The Desktop original was not moved or deleted.
 
 These are small starter variants, not the current full application.
 

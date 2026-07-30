@@ -38,14 +38,16 @@ JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradle
 
 One source warning remains: the Firebase Messaging token API usage in `NotificationRegistrar.kt` is deprecated. It does not fail the build or tests.
 
-## iOS — package linkage blocked
+## iOS — source and package configuration verified; direct consolidated build pending
 
-- Xcode recognizes the project and `IlluminedIOS` scheme.
-- The locked Firebase Swift package checkouts and artifacts are available locally.
-- Build planning reaches the application target.
-- The build stops because Xcode reports missing package products: `FirebaseCore`, `FirebaseAuth`, `FirebaseFirestore`, and `FirebaseMessaging`.
+- The consolidated and Desktop `project.pbxproj` files are identical.
+- The application target explicitly links `FirebaseCore`, `FirebaseAuth`, `FirebaseFirestore`, and `FirebaseMessaging`.
+- `Package.resolved` pins Firebase iOS SDK 12.16.0 and all 13 locked package checkouts and binary artifacts are present in the existing Xcode cache.
+- Every application source/project file matches the Desktop working project. Only the two lesson JSON files differ, intentionally, because the consolidated files contain the canonical curriculum.
+- The Desktop working project produced `Debug-iphonesimulator/IlluminedIOS.app` on 2026-07-30 at 10:35:36; its corresponding build log contains no compile errors.
+- A direct command-line build from the consolidated path could not complete inside the Codex filesystem sandbox. Xcode requires write access to its Swift package diagnostic cache and invokes a nested manifest sandbox; those permissions were not granted. This is an execution-environment restriction, not a missing Firebase product reference.
 
-Required next action: open `apps/ios/IlluminedIOS.xcodeproj` in Xcode, reset or resolve package caches, and confirm that the four Firebase products remain attached to the application target. Then build with the local Firebase configuration present.
+Required final confirmation: open `apps/ios/IlluminedIOS.xcodeproj` in Xcode and choose **Product > Build** once. The local Firebase cache is already populated, so package reset should only be attempted if Xcode itself reports a package error.
 
 ## Publication status
 
