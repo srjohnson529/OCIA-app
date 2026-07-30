@@ -37,10 +37,8 @@ The cloud-sensitive folders remain allocated in their current cloud locations be
 | Location | Size | Reason retained |
 | --- | ---: | --- |
 | `2026-07-22/i-w/` | 1.4 GB | Legacy Android folder; source and evidence are archived, and both Gradle caches are isolated under `work/cloud-sensitive-cache-retirement/` |
-| `2026-07-09/ana/` | 20 KB | Historical HTML-improvement experiment and analysis placeholders; not an active app |
-| `2026-07-09/build-a-swift-ui-app-for/` | 132 KB | Two guide/test documents, five transformation scripts, and Finder metadata; active app outputs and defective curriculum were retired |
 
-No active legacy iOS or standalone HTML application remains on the Desktop or in the dated output folders.
+No active legacy iOS or standalone HTML application remains on the Desktop or in the dated output folders. The entire `2026-07-09/` container has been retired. Its final HTML experiment remnants are preserved under `archive/legacy/july-09-html-experiment-remnants/`, and its guides/scripts are preserved under `archive/legacy/july-09-transformation-remnants/`. The two verified task folders were grouped in `~/.Trash/Illumined-July-09-task-folders-2026-07-30/`; the empty date container was moved separately to `~/.Trash/Codex-2026-07-09-empty-container/`. Trash was not emptied.
 
 ## Curriculum safety
 
@@ -51,4 +49,3 @@ The one known defective catalog is isolated at `archive/legacy/defective-curricu
 1. Keep Trash unemptied until the consolidated applications have been used normally for an agreed observation period.
 2. Then permanently remove the specifically labeled generated-cache Trash group, or empty Trash only after reviewing every other retained recovery item.
 3. Remove the two `cloud-sensitive-cache-retirement/` groups with a File Provider-aware method that does not hydrate placeholders first.
-4. Archive the remaining small HTML experiment and transformation documents/scripts if they still have historical value.

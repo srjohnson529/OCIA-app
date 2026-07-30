@@ -2,7 +2,7 @@
 
 Inventory date: 2026-07-30
 
-This inventory covers Illumined-related material found under the accessible Desktop and `/Users/stephenjohnson/Documents/Codex` folders. No legacy source was deleted or moved during this inventory.
+This inventory covers Illumined-related material found under the accessible Desktop and `/Users/stephenjohnson/Documents/Codex` folders. The initial scan was non-destructive; subsequent sections record the verified archives and recoverable moves completed with approval.
 
 ## Verification holds
 
@@ -47,6 +47,8 @@ All three ZIP files have different checksums and contain meaningful code revisio
 | `2026-07-09/build-a-swift-ui-app-for/work/catechism-html` | 620 KB after hydration | Pre-shared-curriculum HTML work copy | Archived under `archive/legacy/shared-lesson-transformations-2026-07-09/catechism-html-work/`. |
 
 The lesson catalogs in the full Swift copy and both generated iOS outputs match the current canonical catalog exactly. The older HTML work copy differs from the current consolidated HTML entry point and was retained as historical transformation evidence. After exact archive comparisons, all original transformation copies were moved into the same recoverable Trash group as the starter variants.
+
+The remaining July 9 HTML experiment and analysis files were later preserved exactly under `archive/legacy/july-09-html-experiment-remnants/`. The remaining two guides and five transformation scripts were preserved under `archive/legacy/july-09-transformation-remnants/`. After recursive comparisons, both task folders were moved to `~/.Trash/Illumined-July-09-task-folders-2026-07-30/`. Their parent `2026-07-09/` contained only `.DS_Store` afterward and was moved separately to `~/.Trash/Codex-2026-07-09-empty-container/`. Trash was not emptied.
 
 ## Divergent legacy curriculum
 

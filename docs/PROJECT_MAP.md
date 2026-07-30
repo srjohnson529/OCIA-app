@@ -39,3 +39,5 @@ The Android copy includes its Gradle project files. Generated build products, de
 The HTML application has a normalized `apps/html/index.html` entry point. The identical file with the original `Catechism app.html` filename is preserved under `archive/html-original/`. A complete five-file copy of the retired standalone output is preserved under `archive/legacy/html-standalone-output-2026-07-09/`; the original output folder was moved recoverably to Trash after all files matched.
 
 Distinct iOS starter revisions are consolidated under `archive/legacy/ios-starter-variants-2026-07-09/`. Generated iOS and HTML shared-lesson transformation evidence is consolidated under `archive/legacy/shared-lesson-transformations-2026-07-09/`. Their verified originals were grouped recoverably in `~/.Trash/Illumined-historical-variants-2026-07-30/`.
+
+The last July 9 HTML experiment remnants and transformation guides/scripts are preserved under `archive/legacy/july-09-html-experiment-remnants/` and `archive/legacy/july-09-transformation-remnants/`. Their dated source container was retired recoverably after exact comparisons.
