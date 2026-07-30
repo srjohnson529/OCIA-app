@@ -76,9 +76,9 @@ The consolidated Android project has synchronized, passed its unit tests, and bu
 - Verified matching SHA-256 checksums for the original and archived `debug.keystore` and `quarantine/IlluminedApp 2.kt` files.
 - Moved `app/build`, `.gradle`, `.kotlin`, the temporary Android SDK/user-home folders, and the root Firebase/Firestore logs to the recoverable Trash folder `~/.Trash/Illumined-Android-generated-2026-07-30/`. The Trash folder was not emptied.
 - Kept `.idea`, all remaining legacy source, task evidence, the debug keystore, and the quarantine folder in their original locations.
-- Deferred `work/gradle-home` and `work/gradle-home-parity`. Moving the first cache caused macOS to download cloud placeholders, increasing its local footprint from approximately 150 MB to 345 MB. The operation was stopped cleanly before either cache moved; both remain at the original location.
+- An ordinary Trash move of `work/gradle-home` and `work/gradle-home-parity` caused macOS to download cloud placeholders, so it was stopped cleanly. A later scan found 11,494 remaining cloud-only files. Both caches were then grouped without hydration under `work/cloud-sensitive-cache-retirement/`, away from the retained evidence and keystore.
 
-The recoverable Trash folder currently occupies approximately 118 MB. The two deferred Gradle caches occupy approximately 345 MB and 811 MB after cloud hydration. They contain regenerable dependency caches, but should be cleaned with a method that does not first download every cloud placeholder.
+The initial recoverable Android-generated Trash folder occupies approximately 118 MB. The two isolated legacy Gradle caches now occupy approximately 418 MB and 1.0 GB. They contain regenerable dependency caches, but should be removed with a File Provider-aware method that does not first download every cloud placeholder.
 
 ## Recommended archive sequence
 
@@ -87,7 +87,7 @@ The recoverable Trash folder currently occupies approximately 118 MB. The two de
 3. Identify the HTML hosting/deployment source. **Completed locally: no separate deployment configuration was present.**
 4. Copy verification-hold projects into a dated external or consolidated archive if a second recovery copy is desired. **Completed for iOS, Android, and HTML.**
 5. Move small historical source variants into one clearly labeled archive. **Completed 2026-07-30.**
-6. Remove only confirmed generated caches, build output, empty folders, and duplicate expanded outputs. **Partially completed; large cloud-sensitive Android caches and local validation caches remain.**
+6. Remove only confirmed generated caches, build output, empty folders, and duplicate expanded outputs. **Fully local caches were moved recoverably to Trash; cloud-sensitive caches are isolated in labeled retirement folders.**
 7. Re-run the inventory and record the recovered disk space. **Completed 2026-07-30; see `docs/FINAL_INVENTORY.md`.**
 
 No legacy material should be deleted solely because its name looks duplicated; its classification and replacement must be confirmed first.

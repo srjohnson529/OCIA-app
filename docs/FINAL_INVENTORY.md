@@ -11,36 +11,32 @@ The active Illumined workspace is `/Users/stephenjohnson/Documents/Codex/Illumin
 | Area | Size | Status |
 | --- | ---: | --- |
 | `apps/ios/` | 2.6 MB | Canonical iOS app; confirmed functioning in Xcode |
-| `apps/android/` | 128 MB | Canonical Android app; 140 tests and debug build passed; size includes generated build output |
+| `apps/android/` | 2.2 MB | Canonical Android source/configuration; 140 tests and debug build passed; generated output is no longer in the app tree |
 | `apps/html/` | 860 KB | Canonical HTML app; browser runtime validation passed |
 | `curriculum/` | 1.3 MB | Canonical lesson source and human-review exports |
 | `archive/` | 26 MB | Verified historical source, evidence, and variants; intentionally ignored by Git |
-| `work/` | 3.4 GB | Generated validation caches only; ignored by Git and eligible for controlled cleanup |
+| `work/` | 1.1 GB | One ignored cloud-sensitive cache-retirement group; no active source |
 
 The canonical lesson SHA-256 is `1040a1f5fc4914e85a3a5777423a4354ca4dadd1f44452bfc3140452ac2d1610`. Every active runtime lesson copy matches it.
 
 ## Remaining generated data
 
-These locations are not canonical source and can be regenerated:
+These locations are not canonical source and can be regenerated. Fully local caches were removed from their active paths on 2026-07-30:
 
 | Location | Size | Notes |
 | --- | ---: | --- |
-| `work/SourcePackages/` | 1.2 GB | Firebase Swift package checkouts and binary artifacts |
-| `work/ios-validation/` | 1.2 GB | Temporary package/build validation clone |
-| `work/android-gradle-download-attempt/` | 987 MB | Temporary Gradle download and partial-copy attempt |
-| `work/XcodeCache/` | 60 MB | Redirected Xcode and Swift package caches |
-| `work/DerivedData/` | 1.5 MB | Temporary Xcode build data |
-| `apps/android/app/build/` | 122 MB | Generated Android build products |
-| `apps/android/.gradle/` | 3.7 MB | Generated project cache |
-| `apps/android/.kotlin/` | 368 KB | Generated Kotlin compiler state |
+| `~/.Trash/Illumined-local-generated-caches-2026-07-30/` | 2.5 GB | Recoverable group containing local Swift packages, iOS validation data, Xcode caches/DerivedData, and Android project caches; Trash was not emptied |
+| `work/cloud-sensitive-cache-retirement/android-gradle-download-attempt/` | approximately 991 MB | Temporary Gradle download attempt containing 54 cloud-only placeholders; grouped by metadata-only move |
+| `work/cloud-sensitive-cache-retirement/android-app-build/` | approximately 122 MB | Generated Android build products containing 9 cloud-only placeholders; removed from the active app tree without hydration |
+| `2026-07-22/i-w/work/cloud-sensitive-cache-retirement/` | 1.4 GB | Both legacy Gradle homes, containing 11,494 cloud-only placeholders; grouped without hydration |
 
-The ignored `work/` folders were created or reused during validation. They should be removed only as exact targets, without touching `apps/`, `curriculum/`, `archive/`, or `docs/`.
+The cloud-sensitive folders remain allocated in their current cloud locations because an ordinary Trash move would download their placeholders first. They are now clearly isolated from active source. They should be removed only with a File Provider-aware method that does not hydrate them, without touching `apps/`, `curriculum/`, `archive/`, `docs/`, the legacy Android evidence, or the debug keystore.
 
 ## Remaining dated material
 
 | Location | Size | Reason retained |
 | --- | ---: | --- |
-| `2026-07-22/i-w/` | 1.4 GB | Legacy Android folder; source and evidence are archived, but two cloud-sensitive Gradle caches remain in `work/` |
+| `2026-07-22/i-w/` | 1.4 GB | Legacy Android folder; source and evidence are archived, and both Gradle caches are isolated under `work/cloud-sensitive-cache-retirement/` |
 | `2026-07-09/ana/` | 20 KB | Historical HTML-improvement experiment and analysis placeholders; not an active app |
 | `2026-07-09/build-a-swift-ui-app-for/` | 132 KB | Two guide/test documents, five transformation scripts, and Finder metadata; active app outputs and defective curriculum were retired |
 
@@ -52,8 +48,7 @@ The one known defective catalog is isolated at `archive/legacy/defective-curricu
 
 ## Recommended next cleanup
 
-1. Remove the generated validation folders under the canonical `work/` directory.
-2. Remove canonical Android build output only when another APK is not immediately needed.
-3. Handle the two legacy Android Gradle caches with a cloud-safe method that does not hydrate placeholders first.
+1. Keep Trash unemptied until the consolidated applications have been used normally for an agreed observation period.
+2. Then permanently remove the specifically labeled generated-cache Trash group, or empty Trash only after reviewing every other retained recovery item.
+3. Remove the two `cloud-sensitive-cache-retirement/` groups with a File Provider-aware method that does not hydrate placeholders first.
 4. Archive the remaining small HTML experiment and transformation documents/scripts if they still have historical value.
-5. Keep Trash unemptied until the consolidated applications have been used normally for an agreed observation period.
