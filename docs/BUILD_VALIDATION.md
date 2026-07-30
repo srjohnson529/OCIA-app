@@ -17,19 +17,26 @@ Last checked: 2026-07-30
 - No browser console warnings or errors were recorded.
 - The optional `/favicon.ico` request returned 404; this does not prevent the application from running.
 
-## Android — Gradle dependency setup blocked
+## Android — passed
 
 - The Gradle project and wrapper are present.
 - Local Android SDK configuration was restored into the ignored `apps/android/local.properties` file.
 - Android Studio is installed at `/Applications/Android Studio.app`.
 - Its bundled Java runtime was found and runs successfully at `Contents/jbr/Contents/Home`.
-- Unit tests could not complete because the local Gradle 9.1 distribution/dependency cache is incomplete and the command-line environment could not resolve `services.gradle.org` to download the missing files.
+- Android Studio opened and synchronized the consolidated `apps/android/` project.
+- The debug application and unit-test sources compiled successfully.
+- `testDebugUnitTest` passed 140 tests with 0 failures, 0 errors, and 0 skipped tests.
+- `assembleDebug` completed successfully and produced `apps/android/app/build/outputs/apk/debug/app-debug.apk`.
+- The APK SHA-256 at validation time was `1554fa1c6900ca5f4053541cd0496b3ab9e61e75b532e9c31b360726c46266f2`.
+- The local debug keystore required by the build was restored to the ignored `apps/android/work/debug.keystore` path.
 
-Required next action: open `apps/android/` in Android Studio and allow the initial Gradle synchronization to finish while online. Then run the unit tests in Android Studio or run the following from `apps/android/`:
+Repeat the unit tests from `apps/android/` with:
 
 ```sh
 JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDebugUnitTest
 ```
+
+One source warning remains: the Firebase Messaging token API usage in `NotificationRegistrar.kt` is deprecated. It does not fail the build or tests.
 
 ## iOS — package linkage blocked
 

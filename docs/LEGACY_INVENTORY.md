@@ -11,7 +11,7 @@ These folders are original working applications. Keep them unchanged until the c
 | Existing location | Approximate size | Classification | Planned disposition |
 | --- | ---: | --- | --- |
 | `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Original active iOS Xcode project | Keep until `apps/ios/` resolves Firebase packages and builds successfully; then archive as the pre-consolidation iOS source. |
-| `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 423 MB | Original Android project plus generated data | Keep source until `apps/android/` completes Gradle sync, tests, and a build; generated subfolders can be removed separately after confirmation. |
+| `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 423 MB | Original Android project plus generated data | Verification hold cleared: the consolidated Android project synchronized, passed 140 unit tests, and built a debug APK. Preserve the source as a historical snapshot if desired; its generated subfolders are eligible for cleanup. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons` | 860 KB | Original shared-curriculum HTML output | Keep until the consolidated HTML application’s deployment/hosting origin is documented. The local runtime test already passes. |
 
 ## Historical iOS starters
@@ -59,12 +59,12 @@ Most of the original Android folder’s size is regenerable build and tool data:
 | `2026-07-22/i-w/.idea` | 164 KB | Android Studio local workspace state |
 | Debug log files in the project root | approximately 100 KB | Firebase and Firestore emulator/debug logs |
 
-Together these account for roughly 421 MB. They are strong cleanup candidates, but should not be removed until the consolidated Android project completes its first Gradle synchronization and build.
+Together these account for roughly 421 MB. The consolidated Android project has now synchronized, passed its unit tests, and built successfully, so these generated folders are eligible for cleanup after explicit approval.
 
 ## Recommended archive sequence
 
 1. Resolve the consolidated iOS Firebase package linkage and complete an iOS build.
-2. Complete Android Studio Gradle Sync, unit tests, and an Android build.
+2. Complete Android Studio Gradle Sync, unit tests, and an Android build. **Completed 2026-07-30.**
 3. Identify the HTML hosting/deployment source.
 4. Copy verification-hold projects into a dated external or consolidated archive if a second recovery copy is desired.
 5. Move small historical source variants into one clearly labeled archive.
@@ -72,4 +72,3 @@ Together these account for roughly 421 MB. They are strong cleanup candidates, b
 7. Re-run the inventory and record the recovered disk space.
 
 No legacy material should be deleted solely because its name looks duplicated; its classification and replacement must be confirmed first.
-
