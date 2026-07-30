@@ -28,7 +28,7 @@ These locations are not canonical source and can be regenerated. Fully local cac
 | `~/.Trash/Illumined-local-generated-caches-2026-07-30/` | 2.5 GB | Recoverable group containing local Swift packages, iOS validation data, Xcode caches/DerivedData, and Android project caches; Trash was not emptied |
 | `work/cloud-sensitive-cache-retirement/android-gradle-download-attempt/` | approximately 991 MB | Temporary Gradle download attempt containing 54 cloud-only placeholders; grouped by metadata-only move |
 | `work/cloud-sensitive-cache-retirement/android-app-build/` | approximately 122 MB | Generated Android build products containing 9 cloud-only placeholders; removed from the active app tree without hydration |
-| `2026-07-22/i-w/work/cloud-sensitive-cache-retirement/` | 1.4 GB | Both legacy Gradle homes, containing 11,494 cloud-only placeholders; grouped without hydration |
+| `2026-07-22/Illumined-cloud-sensitive-cache-retirement/` | 1.4 GB | Legacy Gradle homes and two generated `node_modules` trees, containing 23,755 cloud-only placeholders; grouped without hydration |
 
 The cloud-sensitive folders remain allocated in their current cloud locations because an ordinary Trash move would download their placeholders first. They are now clearly isolated from active source. They should be removed only with a File Provider-aware method that does not hydrate them, without touching `apps/`, `curriculum/`, `archive/`, `docs/`, the legacy Android evidence, or the debug keystore.
 
@@ -36,9 +36,11 @@ The cloud-sensitive folders remain allocated in their current cloud locations be
 
 | Location | Size | Reason retained |
 | --- | ---: | --- |
-| `2026-07-22/i-w/` | 1.4 GB | Legacy Android folder; source and evidence are archived, and both Gradle caches are isolated under `work/cloud-sensitive-cache-retirement/` |
+| `2026-07-22/Illumined-cloud-sensitive-cache-retirement/` | 1.4 GB | Generated Gradle and Node dependency caches only; isolated pending File Provider-aware removal |
 
-No active legacy iOS or standalone HTML application remains on the Desktop or in the dated output folders. The entire `2026-07-09/` container has been retired. Its final HTML experiment remnants are preserved under `archive/legacy/july-09-html-experiment-remnants/`, and its guides/scripts are preserved under `archive/legacy/july-09-transformation-remnants/`. The two verified task folders were grouped in `~/.Trash/Illumined-July-09-task-folders-2026-07-30/`; the empty date container was moved separately to `~/.Trash/Codex-2026-07-09-empty-container/`. Trash was not emptied.
+No active legacy application remains on the Desktop or in a dated Codex folder. The entire `2026-07-09/` container has been retired. Its final HTML experiment remnants are preserved under `archive/legacy/july-09-html-experiment-remnants/`, and its guides/scripts are preserved under `archive/legacy/july-09-transformation-remnants/`. The two verified task folders were grouped in `~/.Trash/Illumined-July-09-task-folders-2026-07-30/`; the empty date container was moved separately to `~/.Trash/Codex-2026-07-09-empty-container/`.
+
+The former July 22 Android `i-w` shell is preserved as a 229-file, 12 MB snapshot under `archive/legacy/android-i-w-final-shell-2026-07-22/`. Its current source, IDE metadata, evidence, keystore, and quarantine were verified before the shell was moved to `~/.Trash/Illumined-legacy-Android-i-w-2026-07-22/`. Only the generated cloud-cache retirement group remains in the dated July 22 folder. Trash was not emptied.
 
 ## Curriculum safety
 

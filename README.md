@@ -24,4 +24,4 @@ This is the consolidated working home for the Illumined project.
 
 ## Historical material
 
-The dated Codex task folders have not been moved or deleted. They remain historical source material until each consolidated application has been opened, built, and formally accepted as canonical.
+The consolidated applications have been validated and their former working copies have been retired recoverably. Verified historical snapshots are grouped under `archive/legacy/`; generated cache groups awaiting cloud-safe removal are documented in `docs/FINAL_INVENTORY.md`. The `archive/` and `work/` folders are local and intentionally ignored by Git.

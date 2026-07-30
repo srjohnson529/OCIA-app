@@ -28,7 +28,7 @@ Generated Android build output, Gradle caches, dependency folders, and temporary
 
 ## Current status
 
-The clean working layout is established, and all three consolidated applications have passed their available validation. The former Desktop iOS project, standalone HTML output, historical iOS starters, and shared-lesson transformation outputs have been archived and moved recoverably to Trash. Remaining dated folders contain audit material, the known defective curriculum variant, and deferred Android caches rather than active application copies.
+The clean working layout is established, and all three consolidated applications have passed their available validation. Former application copies and historical transformations have been archived and moved recoverably to Trash. No active legacy application remains outside this workspace; the only dated Illumined material is a generated cloud-cache retirement group awaiting File Provider-aware removal.
 
 The consolidated iOS folder now contains the complete `IlluminedIOS.xcodeproj`, its Git history, application source, tests, resources, and the Desktop project’s uncommitted work. It has been confirmed functioning in Xcode. The earlier Swift-only source tree is preserved at `archive/ios-swift-source-2026-07-30/`. An exact 170-file copy of the former Desktop working project is preserved at `archive/legacy/ios-desktop-working-copy-2026-07-30/`. After verification, the Desktop original and its empty outer container were moved recoverably to Trash on 2026-07-30; Trash was not emptied.
 

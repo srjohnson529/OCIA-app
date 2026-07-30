@@ -11,7 +11,7 @@ These folders are original working applications. Keep them unchanged until the c
 | Existing location | Approximate size | Classification | Planned disposition |
 | --- | ---: | --- | --- |
 | `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Retired original iOS Xcode project | Verification hold cleared after the consolidated project was confirmed functioning in Xcode. The exact 170-file archive remains under `archive/legacy/ios-desktop-working-copy-2026-07-30/`; the Desktop original was moved recoverably to `~/.Trash/IlluminedIOS-Desktop-original-2026-07-30/`. |
-| `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 1.2 GB after macOS hydrated cloud cache placeholders during cleanup | Original Android project plus generated data | Verification hold cleared: the consolidated Android project synchronized, passed 140 unit tests, and built a debug APK. The source and selected work evidence are archived; the two large Gradle cache folders remain in place pending a cloud-safe cleanup method. |
+| `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 12 MB after cache separation | Retired original Android project | Verification hold cleared after 140 unit tests and a successful debug build. A final 229-file archive exists under `archive/legacy/android-i-w-final-shell-2026-07-22/`; the original shell was moved recoverably to Trash. Generated cloud caches remain separately under `2026-07-22/Illumined-cloud-sensitive-cache-retirement/`. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons` | 860 KB | Retired shared-curriculum HTML output | All five files matched `apps/html/` byte-for-byte and no separate hosting configuration was present. An exact archive exists under `archive/legacy/html-standalone-output-2026-07-09/`; the original output was moved recoverably to Trash. |
 
 ## Retired standalone HTML output
@@ -78,9 +78,11 @@ The consolidated Android project has synchronized, passed its unit tests, and bu
 - Verified matching SHA-256 checksums for the original and archived `debug.keystore` and `quarantine/IlluminedApp 2.kt` files.
 - Moved `app/build`, `.gradle`, `.kotlin`, the temporary Android SDK/user-home folders, and the root Firebase/Firestore logs to the recoverable Trash folder `~/.Trash/Illumined-Android-generated-2026-07-30/`. The Trash folder was not emptied.
 - Kept `.idea`, all remaining legacy source, task evidence, the debug keystore, and the quarantine folder in their original locations.
-- An ordinary Trash move of `work/gradle-home` and `work/gradle-home-parity` caused macOS to download cloud placeholders, so it was stopped cleanly. A later scan found 11,494 remaining cloud-only files. Both caches were then grouped without hydration under `work/cloud-sensitive-cache-retirement/`, away from the retained evidence and keystore.
+- An ordinary Trash move of `work/gradle-home` and `work/gradle-home-parity` caused macOS to download cloud placeholders, so it was stopped cleanly. Both Gradle homes and the two generated `node_modules` trees were later grouped without hydration under `2026-07-22/Illumined-cloud-sensitive-cache-retirement/`, away from the retained evidence and keystore. The group contains 23,755 cloud-only files.
+- Created a final 229-file, 12 MB shell archive at `archive/legacy/android-i-w-final-shell-2026-07-22/`, including current source, `.idea` state, work evidence, debug keystore, and quarantine while excluding only generated dependencies and cloud caches.
+- Verified the final archive against the remaining shell, then moved the original `i-w` folder to `~/.Trash/Illumined-legacy-Android-i-w-2026-07-22/`. Trash was not emptied.
 
-The initial recoverable Android-generated Trash folder occupies approximately 118 MB. The two isolated legacy Gradle caches now occupy approximately 418 MB and 1.0 GB. They contain regenerable dependency caches, but should be removed with a File Provider-aware method that does not first download every cloud placeholder.
+The initial recoverable Android-generated Trash folder occupies approximately 118 MB. The combined isolated legacy dependency group occupies approximately 1.4 GB. It is entirely regenerable, but should be removed with a File Provider-aware method that does not first download every cloud placeholder.
 
 ## Recommended archive sequence
 
