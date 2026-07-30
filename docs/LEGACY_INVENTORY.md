@@ -26,27 +26,27 @@ The current Desktop iOS working project was copied without modification to `arch
 
 These are small starter variants, not the current full application.
 
-| Existing location | Approximate size | Classification | Planned disposition |
+| Original location | Approximate size | Classification | Completed disposition |
 | --- | ---: | --- | --- |
-| `2026-07-09/ana/work/IlluminedIOS` | 60 KB | Starter source workspace | Archive after a final file comparison. |
-| `2026-07-09/ana/outputs/IlluminedIOS-starter-v1` | 16 KB | Expanded starter output | Archive or retain only its matching ZIP. |
-| `2026-07-09/ana/outputs/IlluminedIOS-starter-v1.zip` | 16 KB | Starter snapshot | Retain in historical archive. |
-| `2026-07-09/ana/outputs/IlluminedIOS-starter-v2.zip` | 16 KB | Starter snapshot | Retain in historical archive. |
-| `2026-07-09/ana/outputs/IlluminedIOS-starter-v3.zip` | 16 KB | Starter snapshot | Retain in historical archive. |
-| `2026-07-09/ana/work/IlluminedIOS-DerivedData` | 0 bytes | Empty build artifact | Safe removal candidate. |
+| `2026-07-09/ana/work/IlluminedIOS` | 60 KB | Starter source workspace | Archived under `archive/legacy/ios-starter-variants-2026-07-09/ana-work-IlluminedIOS/`. |
+| `2026-07-09/ana/outputs/IlluminedIOS-starter-v1` | 92 KB after hydration | Edited expanded starter output | Archived under `archive/legacy/ios-starter-variants-2026-07-09/expanded-starter-v1/`. |
+| `2026-07-09/ana/outputs/IlluminedIOS-starter-v1.zip` | 16 KB | Starter snapshot | Archived under `archive/legacy/ios-starter-variants-2026-07-09/zip-snapshots/`. |
+| `2026-07-09/ana/outputs/IlluminedIOS-starter-v2.zip` | 16 KB | Starter snapshot | Archived under `archive/legacy/ios-starter-variants-2026-07-09/zip-snapshots/`. |
+| `2026-07-09/ana/outputs/IlluminedIOS-starter-v3.zip` | 16 KB | Starter snapshot | Archived under `archive/legacy/ios-starter-variants-2026-07-09/zip-snapshots/`. |
+| `2026-07-09/ana/work/IlluminedIOS-DerivedData` | 0 bytes | Empty build artifact | Moved to Trash with the retired variants. |
 
-The three ZIP files have different checksums and should be treated as distinct historical snapshots unless their contents are compared and documented.
+All three ZIP files have different checksums and contain meaningful code revisions. Version 2 changes the authentication, chat, and profile services from version 1; version 3 changes `RootView.swift` from version 2. The expanded v1 folder also differs from the v1 ZIP in `RootView.swift` and the three service files, so it was preserved separately. After exact archive comparisons, all originals were moved to `~/.Trash/Illumined-historical-variants-2026-07-30/`; Trash was not emptied.
 
 ## Swift and shared-lesson transformation copies
 
-| Existing location | Approximate size | Classification | Planned disposition |
+| Original location | Approximate size | Classification | Completed disposition |
 | --- | ---: | --- | --- |
-| `2026-07-09/build-a-swift-ui-app-for/work/existing-swift/illumined copy` | 1.6 MB | Full Swift-only source variant | Archive; an unchanged consolidation-era copy already exists under `Illumined/archive/ios-swift-source-2026-07-30/`. |
-| `2026-07-09/build-a-swift-ui-app-for/outputs/IlluminedIOS_SharedLessons` | 1.5 MB | Generated full-iOS transformation output | Archive as generated historical output. |
-| `2026-07-09/build-a-swift-ui-app-for/outputs/IlluminedIOS_StarterSharedLessons` | 596 KB | Generated starter transformation output | Archive as generated historical output. |
-| `2026-07-09/build-a-swift-ui-app-for/work/catechism-html` | 0 bytes | Empty work folder | Safe removal candidate. |
+| `2026-07-09/build-a-swift-ui-app-for/work/existing-swift/illumined copy` | 1.6 MB | Full Swift-only source variant | Existing source archive verified at `archive/ios-swift-source-2026-07-30/`; only `.DS_Store` metadata was omitted. |
+| `2026-07-09/build-a-swift-ui-app-for/outputs/IlluminedIOS_SharedLessons` | 1.6 MB | Generated full-iOS transformation output | Archived under `archive/legacy/shared-lesson-transformations-2026-07-09/`. |
+| `2026-07-09/build-a-swift-ui-app-for/outputs/IlluminedIOS_StarterSharedLessons` | 2.5 MB after hydration | Generated starter transformation output | Archived under `archive/legacy/shared-lesson-transformations-2026-07-09/`. |
+| `2026-07-09/build-a-swift-ui-app-for/work/catechism-html` | 620 KB after hydration | Pre-shared-curriculum HTML work copy | Archived under `archive/legacy/shared-lesson-transformations-2026-07-09/catechism-html-work/`. |
 
-The lesson catalogs in the full Swift copy, both generated iOS outputs, and the HTML output match the current canonical catalog exactly.
+The lesson catalogs in the full Swift copy and both generated iOS outputs match the current canonical catalog exactly. The older HTML work copy differs from the current consolidated HTML entry point and was retained as historical transformation evidence. After exact archive comparisons, all original transformation copies were moved into the same recoverable Trash group as the starter variants.
 
 ## Divergent legacy curriculum
 
@@ -82,11 +82,11 @@ The recoverable Trash folder currently occupies approximately 118 MB. The two de
 
 ## Recommended archive sequence
 
-1. Resolve the consolidated iOS Firebase package linkage and complete an iOS build.
+1. Resolve the consolidated iOS Firebase package linkage and complete an iOS build. **Completed 2026-07-30.**
 2. Complete Android Studio Gradle Sync, unit tests, and an Android build. **Completed 2026-07-30.**
-3. Identify the HTML hosting/deployment source.
-4. Copy verification-hold projects into a dated external or consolidated archive if a second recovery copy is desired.
-5. Move small historical source variants into one clearly labeled archive.
+3. Identify the HTML hosting/deployment source. **Completed locally: no separate deployment configuration was present.**
+4. Copy verification-hold projects into a dated external or consolidated archive if a second recovery copy is desired. **Completed for iOS, Android, and HTML.**
+5. Move small historical source variants into one clearly labeled archive. **Completed 2026-07-30.**
 6. Remove only confirmed generated caches, build output, empty folders, and duplicate expanded outputs.
 7. Re-run the inventory and record the recovered disk space.
 

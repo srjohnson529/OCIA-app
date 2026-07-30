@@ -28,7 +28,7 @@ Generated Android build output, Gradle caches, dependency folders, and temporary
 
 ## Current status
 
-This establishes a clean working layout, but does not yet retire the old dated folders. Before archival, each application should be opened and built from this workspace, configuration and credentials should be reviewed, and stakeholders should confirm that these are the desired product variants.
+The clean working layout is established, and all three consolidated applications have passed their available validation. The former Desktop iOS project, standalone HTML output, historical iOS starters, and shared-lesson transformation outputs have been archived and moved recoverably to Trash. Remaining dated folders contain audit material, the known defective curriculum variant, and deferred Android caches rather than active application copies.
 
 The consolidated iOS folder now contains the complete `IlluminedIOS.xcodeproj`, its Git history, application source, tests, resources, and the Desktop project’s uncommitted work. It has been confirmed functioning in Xcode. The earlier Swift-only source tree is preserved at `archive/ios-swift-source-2026-07-30/`. An exact 170-file copy of the former Desktop working project is preserved at `archive/legacy/ios-desktop-working-copy-2026-07-30/`. After verification, the Desktop original and its empty outer container were moved recoverably to Trash on 2026-07-30; Trash was not emptied.
 
@@ -37,3 +37,5 @@ The Xcode target includes the root-level `apps/ios/lessons.json`. The additional
 The Android copy includes its Gradle project files. Generated build products, dependency folders, local machine configuration, IDE state, and debug logs were excluded from the working application. Local Android metadata found during consolidation was retained under `archive/android-local-metadata/` rather than deleted.
 
 The HTML application has a normalized `apps/html/index.html` entry point. The identical file with the original `Catechism app.html` filename is preserved under `archive/html-original/`. A complete five-file copy of the retired standalone output is preserved under `archive/legacy/html-standalone-output-2026-07-09/`; the original output folder was moved recoverably to Trash after all files matched.
+
+Distinct iOS starter revisions are consolidated under `archive/legacy/ios-starter-variants-2026-07-09/`. Generated iOS and HTML shared-lesson transformation evidence is consolidated under `archive/legacy/shared-lesson-transformations-2026-07-09/`. Their verified originals were grouped recoverably in `~/.Trash/Illumined-historical-variants-2026-07-30/`.
