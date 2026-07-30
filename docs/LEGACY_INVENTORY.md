@@ -11,7 +11,7 @@ These folders are original working applications. Keep them unchanged until the c
 | Existing location | Approximate size | Classification | Planned disposition |
 | --- | ---: | --- | --- |
 | `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Original active iOS Xcode project | Keep until `apps/ios/` resolves Firebase packages and builds successfully; then archive as the pre-consolidation iOS source. |
-| `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 423 MB | Original Android project plus generated data | Verification hold cleared: the consolidated Android project synchronized, passed 140 unit tests, and built a debug APK. Preserve the source as a historical snapshot if desired; its generated subfolders are eligible for cleanup. |
+| `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 1.2 GB after macOS hydrated cloud cache placeholders during cleanup | Original Android project plus generated data | Verification hold cleared: the consolidated Android project synchronized, passed 140 unit tests, and built a debug APK. The source and selected work evidence are archived; the two large Gradle cache folders remain in place pending a cloud-safe cleanup method. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons` | 860 KB | Original shared-curriculum HTML output | Keep until the consolidated HTML application’s deployment/hosting origin is documented. The local runtime test already passes. |
 
 ## Historical iOS starters
@@ -59,7 +59,18 @@ Most of the original Android folder’s size is regenerable build and tool data:
 | `2026-07-22/i-w/.idea` | 164 KB | Android Studio local workspace state |
 | Debug log files in the project root | approximately 100 KB | Firebase and Firestore emulator/debug logs |
 
-Together these account for roughly 421 MB. The consolidated Android project has now synchronized, passed its unit tests, and built successfully, so these generated folders are eligible for cleanup after explicit approval.
+The consolidated Android project has synchronized, passed its unit tests, and built successfully. Cleanup was explicitly approved and began on 2026-07-30.
+
+### Android archive and cleanup record — 2026-07-30
+
+- Archived 185 source files to `archive/legacy/android-i-w-source-2026-07-22/`, excluding generated caches, build output, Android Studio state, and task-work data.
+- Archived 33 selected work-evidence files to `archive/legacy/android-i-w-work-evidence-2026-07-22/`, including the debug keystore, quarantined Kotlin source, backend-reference reports, screenshots, UI hierarchy captures, and root Firebase/Firestore logs.
+- Verified matching SHA-256 checksums for the original and archived `debug.keystore` and `quarantine/IlluminedApp 2.kt` files.
+- Moved `app/build`, `.gradle`, `.kotlin`, the temporary Android SDK/user-home folders, and the root Firebase/Firestore logs to the recoverable Trash folder `~/.Trash/Illumined-Android-generated-2026-07-30/`. The Trash folder was not emptied.
+- Kept `.idea`, all remaining legacy source, task evidence, the debug keystore, and the quarantine folder in their original locations.
+- Deferred `work/gradle-home` and `work/gradle-home-parity`. Moving the first cache caused macOS to download cloud placeholders, increasing its local footprint from approximately 150 MB to 345 MB. The operation was stopped cleanly before either cache moved; both remain at the original location.
+
+The recoverable Trash folder currently occupies approximately 118 MB. The two deferred Gradle caches occupy approximately 345 MB and 811 MB after cloud hydration. They contain regenerable dependency caches, but should be cleaned with a method that does not first download every cloud placeholder.
 
 ## Recommended archive sequence
 
