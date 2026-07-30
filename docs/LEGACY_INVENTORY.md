@@ -10,13 +10,13 @@ These folders are original working applications. Keep them unchanged until the c
 
 | Existing location | Approximate size | Classification | Planned disposition |
 | --- | ---: | --- | --- |
-| `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Original active iOS Xcode project | Verification hold cleared after the consolidated project was confirmed functioning in Xcode. An exact 170-file archive exists under `archive/legacy/ios-desktop-working-copy-2026-07-30/`; the Desktop original is now eligible for explicit, recoverable retirement. |
+| `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Retired original iOS Xcode project | Verification hold cleared after the consolidated project was confirmed functioning in Xcode. The exact 170-file archive remains under `archive/legacy/ios-desktop-working-copy-2026-07-30/`; the Desktop original was moved recoverably to `~/.Trash/IlluminedIOS-Desktop-original-2026-07-30/`. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 1.2 GB after macOS hydrated cloud cache placeholders during cleanup | Original Android project plus generated data | Verification hold cleared: the consolidated Android project synchronized, passed 140 unit tests, and built a debug APK. The source and selected work evidence are archived; the two large Gradle cache folders remain in place pending a cloud-safe cleanup method. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons` | 860 KB | Original shared-curriculum HTML output | Keep until the consolidated HTML application’s deployment/hosting origin is documented. The local runtime test already passes. |
 
 ## Historical iOS starters
 
-The current Desktop iOS working project was copied without modification to `archive/legacy/ios-desktop-working-copy-2026-07-30/` on 2026-07-30. The archive contains 170 files, including its local Git metadata and uncommitted working state. A recursive byte comparison found no differences. The consolidated project was subsequently confirmed functioning in Xcode. The Desktop original has not yet been moved or deleted.
+The current Desktop iOS working project was copied without modification to `archive/legacy/ios-desktop-working-copy-2026-07-30/` on 2026-07-30. The archive contains 170 files, including its local Git metadata and uncommitted working state. A recursive byte comparison found no differences. The consolidated project was subsequently confirmed functioning in Xcode. After a final comparison, the original was moved to `~/.Trash/IlluminedIOS-Desktop-original-2026-07-30/`; Trash was not emptied. The now-empty outer Desktop container was moved separately to `~/.Trash/IlluminedIOS-Desktop-empty-container-2026-07-30/`.
 
 These are small starter variants, not the current full application.
 
