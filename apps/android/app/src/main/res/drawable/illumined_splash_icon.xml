@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ masks splash icons to a circle.  The inset keeps the complete
+  square Illumined artwork (especially the book corners and outer rays) within
+  that safe area instead of allowing the system mask to crop it.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:top="52dp"
+        android:bottom="52dp"
+        android:start="52dp"
+        android:end="52dp">
+        <bitmap
+            android:antialias="true"
+            android:filter="true"
+            android:gravity="fill"
+            android:src="@drawable/illumined_launch_icon" />
+    </item>
+</layer-list>

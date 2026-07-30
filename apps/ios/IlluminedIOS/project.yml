@@ -1,0 +1,32 @@
+name: IlluminedIOS
+options:
+  bundleIdPrefix: org.illumined
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 11.0.0
+targets:
+  IlluminedIOS:
+    type: application
+    platform: iOS
+    sources:
+      - IlluminedIOS
+    resources:
+      - path: IlluminedIOS/Resources
+        optional: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.illumined.IlluminedIOS
+        INFOPLIST_KEY_CFBundleDisplayName: Illumined
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+    dependencies:
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseCore
+

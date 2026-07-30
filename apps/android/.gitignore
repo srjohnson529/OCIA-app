@@ -1,0 +1,14 @@
+.gradle/
+.idea/
+local.properties
+**/build/
+*.iml
+.DS_Store
+app/google-services.json
+**/node_modules/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+keystore.properties
+*.jks
+*.keystore

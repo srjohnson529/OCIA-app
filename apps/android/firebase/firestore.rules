@@ -1,0 +1,303 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function profilePath() {
+      return /databases/$(database)/documents/userProfiles/$(request.auth.uid);
+    }
+
+    function userProfile() {
+      return get(profilePath()).data;
+    }
+
+    function hasProfile() {
+      return signedIn() && exists(profilePath());
+    }
+
+    function isInstructor() {
+      return hasProfile() && userProfile().isInstructor == true;
+    }
+
+    function isAdmin() {
+      return hasProfile() && userProfile().isAdmin == true;
+    }
+
+    function isOwnDocument(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isInClass(classId) {
+      return hasProfile() && classId in userProfile().classIds;
+    }
+
+    function isInstructorForClass(classId) {
+      return isInstructor() && isInClass(classId);
+    }
+
+    function canReadClass(classId) {
+      return isInClass(classId);
+    }
+
+    function sameClass() {
+      return request.resource.data.classId == resource.data.classId;
+    }
+
+    function instructorInvitePath(code) {
+      return /databases/$(database)/documents/instructorInviteCodes/$(code);
+    }
+
+    function parishSetupPath(code) {
+      return /databases/$(database)/documents/parishSetupCodes/$(code);
+    }
+
+    function validInstructorInviteClaim() {
+      return signedIn() &&
+        request.resource.data.isInstructor == true &&
+        request.resource.data.instructorInviteCode is string &&
+        existsAfter(instructorInvitePath(request.resource.data.instructorInviteCode)) &&
+        getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.usedBy == request.auth.uid &&
+        getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.isActive == false &&
+        getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.classId in request.resource.data.classIds;
+    }
+
+    function validNewClassClaim() {
+      return signedIn() &&
+        request.resource.data.isInstructor == true &&
+        request.resource.data.parishSetupCode is string &&
+        existsAfter(parishSetupPath(request.resource.data.parishSetupCode)) &&
+        getAfter(parishSetupPath(request.resource.data.parishSetupCode)).data.usedBy == request.auth.uid &&
+        getAfter(parishSetupPath(request.resource.data.parishSetupCode)).data.isActive == false &&
+        getAfter(parishSetupPath(request.resource.data.parishSetupCode)).data.classId in request.resource.data.classIds;
+    }
+
+    function validOwnProfileCreate(userId) {
+      return isOwnDocument(userId) &&
+        request.resource.data.userId == request.auth.uid &&
+        (!("isAdmin" in request.resource.data) || request.resource.data.isAdmin == false) &&
+        (
+          request.resource.data.isInstructor == false ||
+          validInstructorInviteClaim() ||
+          validNewClassClaim()
+        );
+    }
+
+    function validOwnProfileUpdate(userId) {
+      return isOwnDocument(userId) &&
+        request.resource.data.userId == request.auth.uid &&
+        (!("isAdmin" in request.resource.data) || request.resource.data.isAdmin == false) &&
+        (
+          request.resource.data.isInstructor == false ||
+          (
+            request.resource.data.isInstructor == resource.data.isInstructor &&
+            request.resource.data.classIds == resource.data.classIds
+          ) ||
+          validInstructorInviteClaim() ||
+          validNewClassClaim()
+        );
+    }
+
+    function validInviteCodeClaim() {
+      return signedIn() &&
+        resource.data.isActive == true &&
+        (resource.data.usedBy == null || resource.data.usedBy == "") &&
+        request.resource.data.isActive == false &&
+        request.resource.data.usedBy == request.auth.uid &&
+        request.resource.data.usedAt == request.time &&
+        request.resource.data.classId == resource.data.classId;
+    }
+
+    function validParishSetupClaim() {
+      return signedIn() &&
+        resource.data.isActive == true &&
+        (resource.data.usedBy == null || resource.data.usedBy == "") &&
+        request.resource.data.isActive == false &&
+        request.resource.data.usedBy == request.auth.uid &&
+        request.resource.data.usedAt == request.time &&
+        request.resource.data.classId is string &&
+        request.resource.data.parishName is string;
+    }
+
+    function validNewClassCreate(classId) {
+      return signedIn() &&
+        request.resource.data.instructorId == request.auth.uid &&
+        request.resource.data.classId == classId &&
+        existsAfter(profilePath()) &&
+        getAfter(profilePath()).data.isInstructor == true &&
+        classId in getAfter(profilePath()).data.classIds;
+    }
+
+    match /userProfiles/{userId} {
+      allow create: if validOwnProfileCreate(userId);
+      allow get: if isOwnDocument(userId) || isAdmin() ||
+        (isInstructor() && resource.data.classIds.hasAny(userProfile().classIds));
+      allow list: if isAdmin() ||
+        (isInstructor() && resource.data.classIds.hasAny(userProfile().classIds));
+      allow update: if isAdmin() || validOwnProfileUpdate(userId);
+      allow delete: if isAdmin();
+    }
+
+    match /instructorInviteCodes/{code} {
+      allow get: if signedIn();
+      allow list: if isInstructorForClass(resource.data.classId);
+      allow create: if isInstructorForClass(request.resource.data.classId) &&
+        request.resource.data.isActive == true;
+      allow delete: if isInstructorForClass(resource.data.classId);
+      allow update: if
+        (isInstructorForClass(resource.data.classId) && sameClass()) ||
+        validInviteCodeClaim();
+    }
+
+    match /parishSetupCodes/{code} {
+      allow get: if signedIn();
+      allow list: if isAdmin();
+      allow create: if isAdmin() &&
+        request.resource.data.isActive == true &&
+        request.resource.data.usedBy == "";
+      allow delete: if isAdmin();
+      allow update: if isAdmin() || validParishSetupClaim();
+    }
+
+    match /chatMessages/{messageId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if signedIn() &&
+        request.resource.data.senderId == request.auth.uid &&
+        isInClass(request.resource.data.classId);
+      allow update: if signedIn() && sameClass() &&
+        request.resource.data.senderId == resource.data.senderId &&
+        (resource.data.senderId == request.auth.uid || isInstructorForClass(resource.data.classId));
+      allow delete: if signedIn() &&
+        (resource.data.senderId == request.auth.uid || isInstructorForClass(resource.data.classId));
+    }
+
+    match /prayerRequests/{requestId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if signedIn() &&
+        request.resource.data.requesterId == request.auth.uid &&
+        isInClass(request.resource.data.classId) &&
+        request.resource.data.title is string &&
+        request.resource.data.details is string &&
+        request.resource.data.expiresAt > request.time;
+      allow update: if signedIn() && sameClass() &&
+        request.resource.data.requesterId == resource.data.requesterId &&
+        (resource.data.requesterId == request.auth.uid || isInstructorForClass(resource.data.classId));
+      allow delete: if signedIn() &&
+        (
+          resource.data.requesterId == request.auth.uid ||
+          isInstructorForClass(resource.data.classId) ||
+          (canReadClass(resource.data.classId) && resource.data.expiresAt <= request.time)
+        );
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if isInstructorForClass(request.resource.data.classId);
+      allow update: if isInstructorForClass(resource.data.classId) && sameClass();
+      allow delete: if isInstructorForClass(resource.data.classId);
+    }
+
+    match /classSchedule/{scheduleId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if isInstructorForClass(request.resource.data.classId);
+      allow update: if isInstructorForClass(resource.data.classId) && sameClass();
+      allow delete: if isInstructorForClass(resource.data.classId);
+    }
+
+    match /assignments/{assignmentId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if isInstructorForClass(request.resource.data.classId);
+      allow update: if isInstructorForClass(resource.data.classId) && sameClass();
+      allow delete: if isInstructorForClass(resource.data.classId);
+    }
+
+    match /assignmentCompletions/{completionId} {
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
+      allow create: if signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        isInClass(request.resource.data.classId);
+      allow update: if signedIn() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        sameClass() && isInClass(resource.data.classId);
+      allow delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
+    }
+
+    match /discussionPrompts/{promptId} {
+      allow read: if isInstructorForClass(resource.data.classId) ||
+        (resource.data.isActive == true && canReadClass(resource.data.classId));
+      allow create: if isInstructorForClass(request.resource.data.classId);
+      allow update: if isInstructorForClass(resource.data.classId) && sameClass();
+      allow delete: if isInstructorForClass(resource.data.classId);
+    }
+
+    match /discussionPosts/{postId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if signedIn() &&
+        request.resource.data.authorId == request.auth.uid &&
+        isInClass(request.resource.data.classId) &&
+        request.resource.data.promptId is string &&
+        request.resource.data.lessonId is string &&
+        request.resource.data.message is string;
+      allow update: if signedIn() && sameClass() &&
+        request.resource.data.authorId == resource.data.authorId &&
+        (resource.data.authorId == request.auth.uid || isInstructorForClass(resource.data.classId));
+      allow delete: if signedIn() &&
+        (resource.data.authorId == request.auth.uid || isInstructorForClass(resource.data.classId));
+    }
+
+    match /discussionReplies/{replyId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if signedIn() &&
+        request.resource.data.authorId == request.auth.uid &&
+        isInClass(request.resource.data.classId) &&
+        request.resource.data.postId is string &&
+        request.resource.data.promptId is string &&
+        request.resource.data.lessonId is string &&
+        request.resource.data.message is string;
+      allow update: if signedIn() && sameClass() &&
+        request.resource.data.authorId == resource.data.authorId &&
+        (resource.data.authorId == request.auth.uid || isInstructorForClass(resource.data.classId));
+      allow delete: if signedIn() &&
+        (resource.data.authorId == request.auth.uid || isInstructorForClass(resource.data.classId));
+    }
+
+    match /discussionParticipation/{participationId} {
+      allow read: if signedIn() &&
+        (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
+      allow create: if signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        isInClass(request.resource.data.classId);
+      allow update: if signedIn() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        sameClass() && isInClass(resource.data.classId);
+      allow delete: if signedIn() &&
+        (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
+    }
+
+    match /classrooms/{classId} {
+      allow read: if canReadClass(classId) ||
+        (signedIn() && resource.data.instructorId == request.auth.uid);
+      allow create: if validNewClassCreate(classId);
+      allow update: if signedIn() &&
+        request.resource.data.classId == classId &&
+        request.resource.data.instructorId == resource.data.instructorId &&
+        (resource.data.instructorId == request.auth.uid || isInstructorForClass(classId));
+      allow delete: if signedIn() &&
+        (resource.data.instructorId == request.auth.uid || isInstructorForClass(classId));
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isInstructor();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

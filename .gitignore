@@ -1,0 +1,33 @@
+.DS_Store
+
+# Local archives and preserved repository metadata
+archive/
+
+# Xcode
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.bak
+
+# Local Firebase application configuration
+GoogleService-Info*.plist
+google-services.json
+
+# Android / Gradle
+.gradle/
+.kotlin/
+**/build/
+*.iml
+local.properties
+keystore.properties
+*.keystore
+*.jks
+
+# Node
+node_modules/
+
+# Temporary work
+work/
+*.tmp
+*-debug*.log
+firestore-debug.log

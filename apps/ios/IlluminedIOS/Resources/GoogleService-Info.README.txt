@@ -1,0 +1,4 @@
+Download GoogleService-Info.plist from Firebase Console after adding an iOS app to the same Firebase project.
+
+Add that plist to the Xcode target. Do not commit a production plist to a public repository unless you are comfortable exposing the Firebase app identifiers.
+

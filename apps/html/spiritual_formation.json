@@ -1,0 +1,395 @@
+{
+  "version": "2026.07.09",
+  "source": "Catechism app.html",
+  "commonPrayers": [
+    {
+      "id": "sign-of-the-cross",
+      "title": "Sign of the Cross",
+      "text": "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.",
+      "sortOrder": 0
+    },
+    {
+      "id": "our-father",
+      "title": "Our Father",
+      "text": "Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.",
+      "sortOrder": 1
+    },
+    {
+      "id": "hail-mary",
+      "title": "Hail Mary",
+      "text": "Hail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.",
+      "sortOrder": 2
+    },
+    {
+      "id": "glory-be",
+      "title": "Glory Be",
+      "text": "Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.",
+      "sortOrder": 3
+    },
+    {
+      "id": "apostles-creed",
+      "title": "Apostles' Creed",
+      "text": "I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born by the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.",
+      "sortOrder": 4
+    },
+    {
+      "id": "nicene-creed",
+      "title": "Nicene Creed",
+      "text": "I believe in one God, the Father almighty, maker of heaven and earth, of all things visible and invisible. I believe in one Lord Jesus Christ, the Only Begotten Son of God, born of the Father before all ages. God from God, Light from Light, true God from true God, begotten, not made, consubstantial with the Father; through him all things were made. For us men and for our salvation he came down from heaven, and by the Holy Spirit was incarnate of the Virgin Mary, and became man. For our sake he was crucified under Pontius Pilate, he suffered death and was buried, and rose again on the third day in accordance with the Scriptures. He ascended into heaven and is seated at the right hand of the Father. He will come again in glory to judge the living and the dead and his kingdom will have no end. I believe in the Holy Spirit, the Lord, the giver of life, who proceeds from the Father and the Son, who with the Father and the Son is adored and glorified, who has spoken through the prophets. I believe in one, holy, catholic and apostolic Church. I confess one Baptism for the forgiveness of sins and I look forward to the resurrection of the dead and the life of the world to come. Amen.",
+      "sortOrder": 5
+    },
+    {
+      "id": "hail-holy-queen",
+      "title": "Hail, Holy Queen",
+      "text": "Hail, Holy Queen, Mother of Mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve. To thee do we send up our sighs, mourning and weeping in this valley of tears. Turn, most gracious advocate, thine eyes of mercy toward us, and after this, our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary. Pray for us, O holy Mother of God. That we may be made worthy of the promises of Christ.",
+      "sortOrder": 6
+    },
+    {
+      "id": "memorare",
+      "title": "Memorare",
+      "text": "Remember, O most gracious Virgin Mary, that never was it known that anyone who fled to thy protection, implored thy help, or sought thy intercession was left unaided. Inspired by this confidence, I fly unto thee, O Virgin of virgins, my Mother. To thee do I come, before thee I stand, sinful and sorrowful. O Mother of the Word Incarnate, despise not my petitions, but in thy mercy hear and answer me. Amen.",
+      "sortOrder": 7
+    },
+    {
+      "id": "the-angelus",
+      "title": "The Angelus",
+      "text": "V. The Angel of the Lord declared unto Mary.\nR. And she conceived of the Holy Spirit.\nHail Mary...\nV. Behold the handmaid of the Lord.\nR. Be it done unto me according to thy word.\nHail Mary...\nV. And the Word was made Flesh.\nR. And dwelt among us.\nHail Mary...\nV. Pray for us, O Holy Mother of God.\nR. That we may be made worthy of the promises of Christ.\nLet us pray: Pour forth, we beseech Thee, O Lord, Thy grace into our hearts; that we, to whom the Incarnation of Christ, Thy Son, was made known by the message of an Angel, may by His Passion and Cross be brought to the glory of His Resurrection, through the same Christ Our Lord. Amen.",
+      "sortOrder": 8
+    },
+    {
+      "id": "regina-caeli",
+      "title": "Regina Caeli",
+      "text": "V. Queen of Heaven, rejoice, alleluia.\nR. For He whom you did merit to bear, alleluia.\nV. Has risen, as he said, alleluia.\nR. Pray for us to God, alleluia.\nV. Rejoice and be glad, O Virgin Mary, alleluia.\nR. For the Lord has truly risen, alleluia.\nLet us pray: O God, who gave joy to the world through the resurrection of Thy Son, our Lord Jesus Christ, grant we beseech Thee, that through the intercession of the Virgin Mary, His Mother, we may obtain the joys of everlasting life. Through the same Christ Our Lord. Amen.",
+      "sortOrder": 9
+    },
+    {
+      "id": "st-michael-prayer",
+      "title": "St. Michael Prayer",
+      "text": "Saint Michael the Archangel, defend us in battle. Be our protection against the wickedness and snares of the devil. May God rebuke him, we humbly pray; and do thou, O Prince of the heavenly host, by the power of God, cast into hell Satan and all the evil spirits who prowl about the world seeking the ruin of souls. Amen.",
+      "sortOrder": 10
+    },
+    {
+      "id": "guardian-angel-prayer",
+      "title": "Guardian Angel Prayer",
+      "text": "Angel of God, my guardian dear, to whom God's love commits me here, ever this day be at my side, to light and guard, to rule and guide. Amen.",
+      "sortOrder": 11
+    },
+    {
+      "id": "act-of-contrition",
+      "title": "Act of Contrition",
+      "text": "O my God, I am heartily sorry for having offended Thee, and I detest all my sins because of Thy just punishments, but most of all because they offend Thee, my God, who art all-good and deserving of all my love. I firmly resolve, with the help of Thy grace, to sin no more and to avoid the near occasion of sin. Amen.",
+      "sortOrder": 12
+    },
+    {
+      "id": "act-of-faith",
+      "title": "Act of Faith",
+      "text": "O my God, I firmly believe that you are one God in three divine Persons, Father, Son, and Holy Spirit. I believe that your divine Son became man and died for our sins and that he will come to judge the living and the dead. I believe these and all the truths which the Holy Catholic Church teaches because you have revealed them who are eternal truth and wisdom, who can neither deceive nor be deceived. In this faith I intend to live and die. Amen.",
+      "sortOrder": 13
+    },
+    {
+      "id": "act-of-hope",
+      "title": "Act of Hope",
+      "text": "O my God, relying on your infinite goodness and promises, I hope to obtain pardon of my sins, the help of your grace, and life everlasting, through the merits of Jesus Christ, my Lord and Redeemer. Amen.",
+      "sortOrder": 14
+    },
+    {
+      "id": "act-of-love",
+      "title": "Act of Love",
+      "text": "O my God, I love you above all things, with my whole heart and soul, because you are all-good and worthy of all love. I love my neighbor as myself for the love of you. I forgive all who have injured me and ask pardon of all whom I have injured. Amen.",
+      "sortOrder": 15
+    },
+    {
+      "id": "anima-christi",
+      "title": "Anima Christi",
+      "text": "Soul of Christ, sanctify me. Body of Christ, save me. Blood of Christ, inebriate me. Water from the side of Christ, wash me. Passion of Christ, strengthen me. O good Jesus, hear me. Within your wounds hide me. Suffer me not to be separated from you. From the malicious enemy defend me. In the hour of my death call me, and bid me come to you, that with your saints I may praise you for ever and ever. Amen.",
+      "sortOrder": 16
+    },
+    {
+      "id": "come-holy-spirit",
+      "title": "Come, Holy Spirit",
+      "text": "Come, Holy Spirit, fill the hearts of your faithful and kindle in them the fire of your love. Send forth your Spirit and they shall be created. And you shall renew the face of the earth. O God, who by the light of the Holy Spirit, did instruct the hearts of the faithful, grant that by the same Holy Spirit we may be truly wise and ever enjoy His consolations, Through Christ Our Lord. Amen.",
+      "sortOrder": 17
+    },
+    {
+      "id": "grace-before-meals",
+      "title": "Grace Before Meals",
+      "text": "Bless us, O Lord, and these thy gifts, which we are about to receive from thy bounty, through Christ our Lord. Amen.",
+      "sortOrder": 18
+    },
+    {
+      "id": "grace-after-meals",
+      "title": "Grace After Meals",
+      "text": "We give Thee thanks for all Thy benefits, O Almighty God, who livest and reignest world without end. Amen. May the souls of the faithful departed, through the mercy of God, rest in peace. Amen.",
+      "sortOrder": 19
+    },
+    {
+      "id": "morning-offering",
+      "title": "Morning Offering",
+      "text": "O Jesus, through the Immaculate Heart of Mary, I offer you my prayers, works, joys, and sufferings of this day for all the intentions of your Sacred Heart, in union with the Holy Sacrifice of the Mass throughout the world, for the salvation of souls, the reparation of sins, the reunion of all Christians, and in particular for the intentions of the Holy Father this month. Amen.",
+      "sortOrder": 20
+    },
+    {
+      "id": "evening-prayer",
+      "title": "Evening Prayer",
+      "text": "O my God, at the end of this day, I thank you most heartily for all the graces I have received from you. I am sorry that I have not made a better use of them. I am sorry for all the sins I have committed against you. Forgive me, O my God, and graciously protect me this night. Blessed Virgin Mary, my dear heavenly mother, take me under your protection. St. Joseph, my dear guardian angel, and all you saints of God, pray for me. Sweet Jesus, have pity on all poor sinners, and save them from hell. Have mercy on the suffering souls in purgatory. Amen.",
+      "sortOrder": 21
+    },
+    {
+      "id": "the-jesus-prayer",
+      "title": "The Jesus Prayer",
+      "text": "Lord Jesus Christ, Son of God, have mercy on me, a sinner.",
+      "sortOrder": 22
+    },
+    {
+      "id": "the-divine-praises",
+      "title": "The Divine Praises",
+      "text": "Blessed be God.\nBlessed be His Holy Name.\nBlessed be Jesus Christ, true God and true Man.\nBlessed be the Name of Jesus.\nBlessed be His Most Sacred Heart.\nBlessed be His Most Precious Blood.\nBlessed be Jesus in the Most Holy Sacrament of the Altar.\nBlessed be the Holy Spirit, the Paraclete.\nBlessed be the great Mother of God, Mary most Holy.\nBlessed be her Holy and Immaculate Conception.\nBlessed be her Glorious Assumption.\nBlessed be the Name of Mary, Virgin and Mother.\nBlessed be St. Joseph, her most chaste spouse.\nBlessed be God in His Angels and in His Saints. Amen.",
+      "sortOrder": 23
+    }
+  ],
+  "rosary": {
+    "prayers": {
+      "signOfTheCross": "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.",
+      "apostlesCreed": "I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born by the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.",
+      "ourFather": "Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.",
+      "hailMary": "Hail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.",
+      "gloryBe": "Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.",
+      "fatimaPrayer": "O my Jesus, forgive us our sins, save us from the fires of hell, and lead all souls to heaven, especially those most in need of thy mercy. Amen",
+      "hailHolyQueen": "Hail, Holy Queen, Mother of Mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve. To thee do we send up our sighs, mourning and weeping in this valley of tears. Turn, most gracious advocate, thine eyes of mercy toward us, and after this, our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary. Pray for us, O holy Mother of God. That we may be made worthy of the promises of Christ.",
+      "concludingPrayer": "O God, whose only-begotten Son, by His life, death, and resurrection, has purchased for us the rewards of eternal life; grant, we beseech Thee, that, meditating upon these mysteries of the Most Holy Rosary of the Blessed Virgin Mary, we may imitate what they contain and obtain what they promise, through the same Christ our Lord. Amen."
+    },
+    "mysteries": [
+      {
+        "id": "joyful",
+        "title": "Joyful Mysteries",
+        "name": "The Joyful Mysteries",
+        "descriptionHTML": "<p>The <strong>Joyful Mysteries</strong> invite us to reflect on the Incarnation and the early life of Jesus. They are traditionally prayed on <strong>Mondays</strong> and <strong>Saturdays</strong>, as well as Sundays during Advent.</p>\n            <ol>\n                <li>\n                    <strong>The Annunciation</strong> – The angel Gabriel announces to Mary that she will conceive the Son of God by the Holy Spirit.<br>\n                    <em>Fruit:</em> Humility\n                </li>\n                <li>\n                    <strong>The Visitation</strong> – Mary visits her cousin Elizabeth, who is pregnant with John the Baptist. Elizabeth is filled with the Holy Spirit.<br>\n                    <em>Fruit:</em> Charity\n                </li>\n                <li>\n                    <strong>The Nativity</strong> – Jesus is born in Bethlehem and laid in a manger. The Word becomes flesh and dwells among us.<br>\n                    <em>Fruit:</em> Poverty of Spirit\n                </li>\n                <li>\n                    <strong>The Presentation</strong> – Mary and Joseph present Jesus in the Temple. Simeon and Anna recognize Him as the Messiah.<br>\n                    <em>Fruit:</em> Obedience\n                </li>\n                <li>\n                    <strong>The Finding in the Temple</strong> – Jesus is found in the Temple, teaching the elders. He reveals His mission to do the Father’s will.<br>\n                    <em>Fruit:</em> Zeal for God\n                </li>\n            </ol>",
+        "mysteries": [
+          {
+            "id": "joyful-1",
+            "title": "The Annunciation",
+            "scripture": "Luke 1:26-38\n\nIn the sixth month the angel Gabriel was sent from God to a city of Galilee named Nazareth, to a virgin betrothed to a man whose name was Joseph, of the house of David; and the virgin's name was Mary. And he came to her and said, “Hail, full of grace, the Lord is with you!” But she was greatly troubled at the saying, and considered in her mind what sort of greeting this might be. And the angel said to her, “Do not be afraid, Mary, for you have found favor with God. And behold, you will conceive in your womb and bear a son, and you shall call his name Jesus. He will be great, and will be called the Son of the Most High; and the Lord God will give to him the throne of his father David, and he will reign over the house of Jacob for ever; and of his kingdom there will be no end.” And Mary said to the angel, “How can this be, since I have no husband?” And the angel said to her, “The Holy Spirit will come upon you, and the power of the Most High will overshadow you; therefore the child to be born will be called holy, the Son of God. And behold, your kinswoman Elizabeth in her old age has also conceived a son; and this is the sixth month with her who was called barren. For with God nothing will be impossible.” And Mary said, “Behold, I am the handmaid of the Lord; let it be to me according to your word.” And the angel departed from her."
+          },
+          {
+            "id": "joyful-2",
+            "title": "The Visitation",
+            "scripture": "Luke 1:39-56\n\nIn those days Mary arose and went with haste into the hill country, to a city of Judah, and she entered the house of Zechariah and greeted Elizabeth. And when Elizabeth heard the greeting of Mary, the babe leaped in her womb; and Elizabeth was filled with the Holy Spirit and she exclaimed with a loud cry, “Blessed are you among women, and blessed is the fruit of your womb! And why is this granted me, that the mother of my Lord should come to me? For behold, when the voice of your greeting came to my ears, the babe in my womb leaped for joy. And blessed is she who believed that there would be a fulfilment of what was spoken to her from the Lord.” And Mary said, “My soul magnifies the Lord, and my spirit rejoices in God my Savior, for he has regarded the low estate of his handmaiden. For behold, henceforth all generations will call me blessed; for he who is mighty has done great things for me, and holy is his name. And his mercy is on those who fear him"
+          },
+          {
+            "id": "joyful-3",
+            "title": "The Nativity",
+            "scripture": "Luke 2:1-20\n\nIn those days a decree went out from Caesar Augustus that all the world should be enrolled. This was the first enrollment, when Quirin′ius was governor of Syria. And all went to be enrolled, each to his own city. And Joseph also went up from Galilee, from the city of Nazareth, to Judea, to the city of David, which is called Bethlehem, because he was of the house and lineage of David, to be enrolled with Mary, his betrothed, who was with child. And while they were there, the days were completed for her to be delivered. And she gave birth to her first-born son, and wrapped him in swaddling clothes, and laid him in a manger, because there was no place for them in the inn. And in that region there were shepherds out in the field, keeping watch over their flock by night. An angel of the Lord appeared to them, and the glory of the Lord shone around them, and they were greatly frightened. And the angel said to them, “Do not be afraid; for behold, I bring you good news of a great joy which will come to all the people; for to you is born this day in the city of David a Savior, who is Christ the Lord. And this will be a sign for you: you will find a babe wrapped in swaddling clothes and lying in a manger.” And suddenly there was with the angel a multitude of the heavenly host praising God and saying, “Glory to God in the highest, and on earth peace among men with whom he is pleased!” When the angels went away from them into heaven, the shepherds said to one another, “Let us go over to Bethlehem and see this thing that has happened, which the Lord has made known to us.” And they went with haste, and found Mary and Joseph, and the babe lying in a manger. And when they saw it, they made known the saying which had been told them concerning this child; and all who heard him wondered at what the shepherds told them. But Mary kept all these things, pondering them in her heart. And the shepherds returned, glorifying and praising God for all they had heard and seen, as it had been told them."
+          },
+          {
+            "id": "joyful-4",
+            "title": "The Presentation",
+            "scripture": "Luke 2:22-38\n\nAnd when the time came for their purification according to the law of Moses, they brought him up to Jerusalem to present him to the Lord (as it is written in the law of the Lord, “Every male that opens the womb shall be called holy to the Lord”) and to offer a sacrifice according to what is said in the law of the Lord, “a pair of turtledoves, or two young pigeons.” Now there was a man in Jerusalem, whose name is Simeon, and this man was righteous and devout, looking for the consolation of Israel; and the Holy Spirit was upon him. And it had been revealed to him by the Holy Spirit that he should not see death before he had seen the Lord's Christ. And inspired by the Spirit he came into the temple; and when the parents brought in the child Jesus, to do for him according to the custom of the law, he took him up in his arms and blessed God and said, “Lord, now lettest thou thy servant depart in peace, according to thy word; for mine eyes have seen thy salvation which thou hast prepared in the presence of all peoples, a light for revelation to the Gentiles, and for glory to thy people Israel.” And there was a prophetess, Anna, the daughter of Phan′uel, of the tribe of Asher; she was of great age, having lived with her husband seven years from her virginity, and as a widow till she was eighty-four. She did not depart from the temple, worshiping with fasting and prayer night and day. And coming up at that very hour she gave thanks to God, and spoke of him to all who were looking for the redemption of Jerusalem."
+          },
+          {
+            "id": "joyful-5",
+            "title": "The Finding in the Temple",
+            "scripture": "Luke 2:41-52\n\nNow his parents went to Jerusalem every year at the feast of the Passover. And when he was twelve years old, they went up according to custom; and when the feast was ended, as they were returning, the boy Jesus stayed behind in Jerusalem. His parents did not know it, but supposing him to be in the company they traveled a day's journey, and then sought him among their kinsfolk and acquaintances; and when they did not find him, they returned to Jerusalem, seeking him. After three days they found him in the temple, sitting among the teachers, listening to them and asking them questions; and all who heard him were amazed at his understanding and his answers. And when they saw him they were astonished; and his mother said to him, “Son, why have you treated us so? Behold, your father and I and I have been looking for you anxiously.” And he said to them, “How is it that you sought me? Did you not know that I must be in my Father's house?” And they did not understand the saying which he spoke to them. He went down with them and came to Nazareth, and was obedient to them; and his mother kept all these things in her heart. And Jesus increased in wisdom and in stature, and in favor with God and man."
+          }
+        ]
+      },
+      {
+        "id": "luminous",
+        "title": "Luminous Mysteries",
+        "name": "The Luminous Mysteries",
+        "descriptionHTML": "<p>The <strong>Luminous Mysteries</strong> (Mysteries of Light) were introduced by Pope St. John Paul II and focus on the public ministry of Jesus. They are traditionally prayed on <strong>Thursdays</strong>.</p>\n            <ol>\n                <li>\n                    <strong>The Baptism in the Jordan</strong> – Jesus is baptized by John, and the Spirit descends upon Him.<br>\n                    <em>Fruit:</em> Openness to the Holy Spirit\n                </li>\n                <li>\n                    <strong>The Wedding at Cana</strong> – Jesus turns water into wine at His mother’s request—the first public sign of His glory.<br>\n                    <em>Fruit:</em> Trust in Mary’s Intercession\n                </li>\n                <li>\n                    <strong>The Proclamation of the Kingdom</strong> – Jesus proclaims the Kingdom of God and calls for repentance.<br>\n                    <em>Fruit:</em> Conversion of Heart\n                </li>\n                <li>\n                    <strong>The Transfiguration</strong> – Jesus is transfigured before Peter, James, and John on Mount Tabor.<br>\n                    <em>Fruit:</em> Desire for Holiness\n                </li>\n                <li>\n                    <strong>The Institution of the Eucharist</strong> – Jesus gives us His Body and Blood at the Last Supper.<br>\n                    <em>Fruit:</em> Love for the Eucharist\n                </li>\n            </ol>",
+        "mysteries": [
+          {
+            "id": "luminous-1",
+            "title": "The Baptism in the Jordan",
+            "scripture": "Matthew 3:13-17"
+          },
+          {
+            "id": "luminous-2",
+            "title": "The Wedding at Cana",
+            "scripture": "John 2:1-11"
+          },
+          {
+            "id": "luminous-3",
+            "title": "The Proclamation of the Kingdom",
+            "scripture": "Mark 1:14-15"
+          },
+          {
+            "id": "luminous-4",
+            "title": "The Transfiguration",
+            "scripture": "Matthew 17:1-8"
+          },
+          {
+            "id": "luminous-5",
+            "title": "The Institution of the Eucharist",
+            "scripture": "Matthew 26:26-30"
+          }
+        ]
+      },
+      {
+        "id": "sorrowful",
+        "title": "Sorrowful Mysteries",
+        "name": "The Sorrowful Mysteries",
+        "descriptionHTML": "<p>The <strong>Sorrowful Mysteries</strong> focus on Christ’s Passion and Death. They are traditionally prayed on <strong>Tuesdays</strong> and <strong>Fridays</strong>, as well as Sundays during Lent.</p>\n            <ol>\n                <li>\n                    <strong>The Agony in the Garden</strong> – Jesus prays in Gethsemane and submits to the Father’s will.<br>\n                    <em>Fruit:</em> Surrender to God’s Will\n                </li>\n                <li>\n                    <strong>The Scourging at the Pillar</strong> – Jesus is brutally whipped before His Crucifixion.<br>\n                    <em>Fruit:</em> Purity and Mortification\n                </li>\n                <li>\n                    <strong>The Crowning with Thorns</strong> – Jesus is mocked and crowned with thorns.<br>\n                    <em>Fruit:</em> Courage and Humility\n                </li>\n                <li>\n                    <strong>The Carrying of the Cross</strong> – Jesus carries His Cross to Calvary, falling under its weight.<br>\n                    <em>Fruit:</em> Patience in Suffering\n                </li>\n                <li>\n                    <strong>The Crucifixion</strong> – Jesus is nailed to the Cross and dies for our sins.<br>\n                    <em>Fruit:</em> Love and Forgiveness\n                </li>\n            </ol>",
+        "mysteries": [
+          {
+            "id": "sorrowful-1",
+            "title": "The Agony in the Garden",
+            "scripture": "Matthew 26:36-46"
+          },
+          {
+            "id": "sorrowful-2",
+            "title": "The Scourging at the Pillar",
+            "scripture": "John 19:1"
+          },
+          {
+            "id": "sorrowful-3",
+            "title": "The Crowning with Thorns",
+            "scripture": "Matthew 27:27-31"
+          },
+          {
+            "id": "sorrowful-4",
+            "title": "The Carrying of the Cross",
+            "scripture": "John 19:17"
+          },
+          {
+            "id": "sorrowful-5",
+            "title": "The Crucifixion and Death",
+            "scripture": "John 19:18-30"
+          }
+        ]
+      },
+      {
+        "id": "glorious",
+        "title": "Glorious Mysteries",
+        "name": "The Glorious Mysteries",
+        "descriptionHTML": "<p>The <strong>Glorious Mysteries</strong> celebrate the Resurrection and the glory of Jesus and Mary. They are traditionally prayed on <strong>Wednesdays</strong> and <strong>Sundays</strong> outside of Advent and Lent.</p>\n            <ol>\n                <li>\n                    <strong>The Resurrection</strong> – Jesus rises from the dead, conquering sin and death.<br>\n                    <em>Fruit:</em> Faith and Joy\n                </li>\n                <li>\n                    <strong>The Ascension</strong> – Jesus ascends into heaven to sit at the right hand of the Father.<br>\n                    <em>Fruit:</em> Hope and Desire for Heaven\n                </li>\n                <li>\n                    <strong>The Descent of the Holy Spirit</strong> – The Spirit comes upon the Apostles at Pentecost.<br>\n                    <em>Fruit:</em> Zeal and Guidance of the Holy Spirit\n                </li>\n                <li>\n                    <strong>The Assumption of Mary</strong> – Mary is taken body and soul into heaven.<br>\n                    <em>Fruit:</em> Devotion to Mary and the Hope of Resurrection\n                </li>\n                <li>\n                    <strong>The Coronation of Mary</strong> – Mary is crowned Queen of Heaven and Earth.<br>\n                    <em>Fruit:</em> Trust in Mary’s Intercession\n                </li>\n            </ol>",
+        "mysteries": [
+          {
+            "id": "glorious-1",
+            "title": "The Resurrection",
+            "scripture": "John 20:1-9"
+          },
+          {
+            "id": "glorious-2",
+            "title": "The Ascension",
+            "scripture": "Luke 24:50-53"
+          },
+          {
+            "id": "glorious-3",
+            "title": "The Descent of the Holy Spirit",
+            "scripture": "Acts 2:1-4"
+          },
+          {
+            "id": "glorious-4",
+            "title": "The Assumption of Mary",
+            "scripture": "Revelation 12:1"
+          },
+          {
+            "id": "glorious-5",
+            "title": "The Coronation of Mary",
+            "scripture": "Revelation 12:1"
+          }
+        ]
+      }
+    ]
+  },
+  "lectioDivina": {
+    "title": "Lectio Divina",
+    "contentHTML": "<h2>Lectio Divina</h2>\n    <p>\n        <em>Lectio Divina</em>, meaning \"divine reading,\" is a traditional monastic practice of praying with the Scriptures. \n        It is a slow, contemplative way of reading God's Word, allowing it to speak to our hearts and transform our lives.\n    </p>\n    \n    <div class=\"content-wrapper\">\n        <h3>The Four Steps of Lectio Divina</h3>\n        <ol>\n            <li>\n                <strong>Lectio (Reading):</strong> Read a short passage of Scripture slowly and attentively. \n                Listen for a word or phrase that stands out to you.\n            </li>\n            <li>\n                <strong>Meditatio (Meditation):</strong> Reflect on the word or phrase. \n                What does it mean? How does it connect to your life? Ponder it in your heart.\n            </li>\n            <li>\n                <strong>Oratio (Prayer):</strong> Respond to God in prayer. \n                Speak to Him from your heart about what you have read and meditated on. \n                This can be a prayer of praise, thanksgiving, repentance, or petition.\n            </li>\n            <li>\n                <strong>Contemplatio (Contemplation):</strong> Rest silently in God's presence. \n                Let go of your own thoughts and simply be with Him, allowing Him to work in your soul.\n            </li>\n        </ol>\n    </div>\n\n    <div class=\"content-wrapper\">\n        <h3>Recommendation: Pray with one of the daily readings</h3>\n\n    </div>",
+    "steps": [
+      {
+        "id": "lectio",
+        "title": "Lectio (Reading)",
+        "description": "Read a short passage of Scripture slowly and attentively. Listen for a word or phrase that stands out to you."
+      },
+      {
+        "id": "meditatio",
+        "title": "Meditatio (Meditation)",
+        "description": "Reflect on the word or phrase. What does it mean? How does it connect to your life?"
+      },
+      {
+        "id": "oratio",
+        "title": "Oratio (Prayer)",
+        "description": "Respond to God in prayer from your heart."
+      },
+      {
+        "id": "contemplatio",
+        "title": "Contemplatio (Contemplation)",
+        "description": "Rest silently in God's presence and allow Him to work in your soul."
+      }
+    ]
+  },
+  "liturgyOfTheHours": {
+    "title": "Liturgy of the Hours",
+    "description": "The Liturgy of the Hours is the daily prayer of the Church, sanctifying the day with psalms, Scripture, and intercession.",
+    "hours": [
+      {
+        "id": "office-of-readings",
+        "title": "Office of Readings",
+        "description": "A longer time of Scripture and spiritual reading."
+      },
+      {
+        "id": "morning-prayer",
+        "title": "Morning Prayer",
+        "description": "Begin the day with praise and intercession."
+      },
+      {
+        "id": "daytime-prayer",
+        "title": "Daytime Prayer",
+        "description": "Pause work to return the day to God."
+      },
+      {
+        "id": "evening-prayer",
+        "title": "Evening Prayer",
+        "description": "Give thanks as the day closes."
+      },
+      {
+        "id": "night-prayer",
+        "title": "Night Prayer",
+        "description": "Examine the day and entrust the night to God."
+      }
+    ]
+  },
+  "examinationOfConscience": {
+    "title": "Examination of Conscience",
+    "contentHTML": "<h2>Examination of Conscience</h2>\n            <div class=\"content-wrapper\">\n                <p>This section will guide you through a prayerful review of your day.</p>\n                <h3>I. What is an Examination of Conscience?</h3>\n                <p>An <strong>examination of conscience</strong> is a prayerful self-reflection on our thoughts, words, deeds, and omissions, measured against God’s commandments and the teaching of the Church. Its purpose is to:</p>\n                <ul>\n            <li><strong>Recognize</strong> sins and faults honestly.</li>\n            <li><strong>Acknowledge</strong> God’s mercy and our need for repentance.</li>\n            <li><strong>Prepare</strong> the soul to make a good Confession.</li>\n            <li><strong>Form</strong> the conscience over time to be more sensitive to sin and more responsive to grace.</li>\n        </ul>\n        <blockquote>\n            “Examine yourselves, to see whether you are holding to your faith. Test yourselves.” — 2 Corinthians 13:5<br>\n            “Search me, O God, and know my heart! Try me and know my thoughts!” — Psalm 139:23\n        </blockquote>\n\n        <h3>II. Why is it Important?</h3>\n        <ul>\n            <li><strong>For Confession</strong> — A good confession requires that we know and confess our mortal sins by kind and number, and it is helped by remembering venial sins as well.</li>\n            <li><strong>For Growth in Holiness</strong> — Even outside of Confession, regular examination fosters humility, self-awareness, and a desire for virtue.</li>\n            <li><strong>To Form the Conscience</strong> — By examining our lives in light of the Gospel, our conscience becomes better aligned with God’s will.</li>\n        </ul>\n\n        <h3>III. When and How Often?</h3>\n        <ul>\n            <li><strong>Before Confession</strong> — A thorough examination should be done before every sacramental confession.</li>\n            <li><strong>Daily (Brief)</strong> — A short version at the end of the day, sometimes called an <em>examen</em>.</li>\n            <li><strong>Retreats or Spiritual Checkpoints</strong> — A deeper examination before retreats, spiritual direction, or big life decisions.</li>\n        </ul>\n\n        <h3>IV. Dispositions for a Good Examination</h3>\n        <ul>\n            <li><strong>Prayerful Attitude</strong> — Begin with prayer, asking the Holy Spirit for light and honesty.</li>\n            <li><strong>Honesty</strong> — Avoid self-justification. Call sins what they are.</li>\n            <li><strong>Hope in God’s Mercy</strong> — Avoid despair; focus on Christ’s saving love.</li>\n            <li><strong>Resolve to Amend</strong> — A sincere desire to avoid sin and its occasions.</li>\n        </ul>\n\n        <h3>V. Step-by-Step Guide</h3>\n        <h4>Step 1: Pray for Light</h4>\n        <p>Ask the Holy Spirit to help you see yourself as God sees you.<br>\n        <em>\"Lord, help me to see my sins clearly and to know Your infinite mercy.\"</em></p>\n\n        <h4>Step 2: Review Your Life</h4>\n        <p>Use a framework such as:</p>\n        <ul>\n            <li>The Ten Commandments</li>\n            <li>The Precepts of the Church</li>\n            <li>The Beatitudes</li>\n            <li>The Seven Deadly Sins</li>\n            <li>Your State in Life Duties</li>\n        </ul>\n\n        <h4>Examination by the Ten Commandments</h4>\n\n        <h5>1. I am the Lord your God; you shall not have strange gods before Me.</h5>\n        <ul>\n            <li>Have I loved God above all things?</li>\n            <li>Have I trusted in superstition, astrology, occult practices?</li>\n            <li>Have I been faithful in prayer?</li>\n            <li>Have I made idols of money, pleasure, or success?</li>\n        </ul>\n\n        <h5>2. You shall not take the name of the Lord your God in vain.</h5>\n        <ul>\n            <li>Have I used God’s name disrespectfully or in anger?</li>\n            <li>Have I spoken irreverently of holy things?</li>\n            <li>Have I broken vows or promises made to God?</li>\n        </ul>\n\n        <h5>3. Remember to keep holy the Lord’s Day.</h5>\n        <ul>\n            <li>Have I missed Mass on Sundays or Holy Days without serious reason?</li>\n            <li>Have I been inattentive or distracted at Mass?</li>\n            <li>Have I done unnecessary work instead of resting in God?</li>\n        </ul>\n\n        <h5>4. Honor your father and your mother.</h5>\n        <ul>\n            <li>Have I disrespected or disobeyed my parents?</li>\n            <li>As a parent, have I failed to guide my children toward God?</li>\n            <li>Have I failed in obedience to lawful authority?</li>\n        </ul>\n\n        <h5>5. You shall not kill.</h5>\n        <ul>\n            <li>Have I harbored hatred, resentment, or revenge?</li>\n            <li>Have I injured someone physically or spiritually?</li>\n            <li>Have I been reckless with my health or others’?</li>\n            <li>Have I supported abortion, euthanasia, or assisted suicide?</li>\n            <li>Have I engaged in gossip or detraction?</li>\n        </ul>\n\n        <h5>6. You shall not commit adultery.</h5>\n        <ul>\n            <li>Have I engaged in sexual activity outside marriage?</li>\n            <li>Have I viewed pornography or entertained lustful thoughts?</li>\n            <li>Have I been faithful to my spouse in thought and action?</li>\n            <li>Have I respected the dignity of my own body and others’?</li>\n        </ul>\n\n        <h5>7. You shall not steal.</h5>\n        <ul>\n            <li>Have I taken what is not mine?</li>\n            <li>Have I cheated in business, school, or games?</li>\n            <li>Have I wasted time or resources?</li>\n            <li>Have I failed in generosity?</li>\n        </ul>\n\n        <h5>8. You shall not bear false witness.</h5>\n        <ul>\n            <li>Have I lied or been deceitful?</li>\n            <li>Have I spoken falsely about others?</li>\n            <li>Have I withheld the truth when obligated to speak?</li>\n        </ul>\n\n        <h5>9. You shall not covet your neighbor’s wife.</h5>\n        <ul>\n            <li>Have I been envious of another’s spouse or relationship?</li>\n            <li>Have I entertained impure desires?</li>\n        </ul>\n\n        <h5>10. You shall not covet your neighbor’s goods.</h5>\n        <ul>\n            <li>Have I been jealous of what others have?</li>\n            <li>Have I been greedy or discontent?</li>\n            <li>Have I trusted in possessions rather than God?</li>\n        </ul>\n\n        <h4>Step 3: Acknowledge Sins and Their Gravity</h4>\n        <p><strong>Mortal Sin</strong> — Grave matter, full knowledge, and deliberate consent (CCC 1857–1859). Must be confessed in kind and number.<br>\n        <strong>Venial Sin</strong> — Lesser matter or without full consent. Still worth confessing for spiritual growth.</p>\n\n        <h4>Step 4: Make an Act of Contrition</h4>\n        <p><em>O my God, I am heartily sorry for having offended You, and I detest all my sins because of Your just punishments, but most of all because they offend You, my God, who are all-good and deserving of all my love. I firmly resolve, with the help of Your grace, to sin no more and to avoid the near occasions of sin. Amen.</em></p>\n\n        <h3>VI. Tips for a Fruitful Examination</h3>\n        <ul>\n            <li>Keep a spiritual journal to note recurring sins and patterns.</li>\n            <li>Regularly read Scripture and the Catechism to form your conscience.</li>\n            <li>Ask a trusted confessor for guidance.</li>\n            <li>Let the examination lead to gratitude for God’s mercy, not scrupulosity.</li>\n        </ul>\n\n        <h3>VII. Quick Daily Mini-Examen (5 minutes)</h3>\n        <ol>\n            <li>Place yourself in God’s presence.</li>\n            <li>Thank Him for the day’s blessings.</li>\n            <li>Ask the Holy Spirit for light.</li>\n            <li>Review the day briefly — thoughts, words, deeds, omissions.</li>\n            <li>Express sorrow, make a resolution, and pray an Act of Contrition.</li>\n        </ol>\n    </div>"
+  },
+  "spiritualPractices": [
+    {
+      "id": "works-of-mercy",
+      "title": "Works of Mercy",
+      "contentHTML": "<h2>The Works of Mercy</h2>\n            <div class=\"content-wrapper\">\n                <p>The Works of Mercy are charitable actions by which we come to the aid of our neighbor in their bodily and spiritual needs. Rooted in Scripture and Tradition, they are concrete ways to live out Christ’s command to love God and love our neighbor (cf. Matthew 25:31–46, Galatians 6:1–2).</p>\n                <h3>Corporal Works of Mercy</h3>\n                <ul>\n                    <li>Feed the hungry</li>\n                    <li>Give drink to the thirsty</li>\n                    <li>Clothe the naked</li>\n                    <li>Shelter the homeless</li>\n                    <li>Visit the sick</li>\n                    <li>Visit the imprisoned</li>\n                    <li>Bury the dead</li>\n                </ul>\n                <h3>Spiritual Works of Mercy</h3>\n                <ul>\n                    <li>Instruct the ignorant</li>\n                    <li>Counsel the doubtful</li>\n                    <li>Admonish the sinner</li>\n                    <li>Bear wrongs patiently</li>\n                    <li>Forgive offenses willingly</li>\n                    <li>Comfort the afflicted</li>\n                    <li>Pray for the living and the dead</li>\n                </ul>\n            </div>",
+      "sortOrder": 0
+    },
+    {
+      "id": "precepts-of-church",
+      "title": "Precepts of the Church",
+      "contentHTML": "<h2>The Precepts of the Catholic Church</h2>\n    <p>The five precepts of the Catholic Church are guidelines that outline the minimum requirements for Catholics to remain in good standing with God and the Church. They help ensure that the faithful grow in love for God, neighbor, and the Body of Christ (cf. Catechism of the Catholic Church 2041–2043).</p>\n                \n    <div class=\"content-wrapper\">\n        <ol>\n            <li><strong>Attend Mass on Sundays and Holy Days of Obligation</strong> – Participate in the Eucharist and refrain from unnecessary servile work on these days.</li>\n            <li><strong>Confess your sins at least once a year</strong> – Receive the Sacrament of Reconciliation to be reconciled with God and the Church.</li>\n            <li><strong>Receive the Eucharist at least during the Easter season</strong> – Share in the Paschal mystery by receiving Christ’s Body and Blood.</li>\n            <li><strong>Observe the days of fasting and abstinence established by the Church</strong> – Unite yourself with Christ’s sacrifice through penance and self-denial.</li>\n            <li><strong>Help to provide for the needs of the Church</strong> – Support the Church’s mission through your time, talents, and financial contributions.</li>\n        </ol>\n    </div>",
+      "sortOrder": 1
+    },
+    {
+      "id": "penitential-practices",
+      "title": "Penitential Practices",
+      "contentHTML": "<h2>Penitential Practices</h2>\n    <p>Penitential practices are voluntary acts of self-denial, prayer, and charity that help us grow in holiness, unite ourselves to the sufferings of Christ, and repair the damage caused by sin. They express conversion of heart and deepen our love for God and neighbor (cf. Catechism of the Catholic Church 1434–1439).</p>\n                \n    <div class=\"content-wrapper\">\n        <ol>\n            <li><strong>Fasting</strong> – Reducing the amount of food consumed as a form of prayer and sacrifice, especially on days appointed by the Church.</li>\n            <li><strong>Abstinence</strong> – Refraining from certain foods (traditionally meat) as an act of penance and solidarity with the poor.</li>\n            <li><strong>Almsgiving</strong> – Giving to those in need, supporting charitable causes, and practicing generosity as a remedy for selfishness.</li>\n            <li><strong>Prayer</strong> – Setting aside extra time for prayer, devotions, or meditation to draw closer to God.</li>\n            <li><strong>Acts of Self-Denial</strong> – Voluntarily giving up comforts, pleasures, or entertainment to grow in virtue and discipline.</li>\n            <li><strong>Reconciliation</strong> – Regularly receiving the Sacrament of Penance to be cleansed from sin and strengthened against temptation.</li>\n            <li><strong>Works of Mercy</strong> – Performing corporal and spiritual acts of service as a concrete expression of repentance and love.</li>\n        </ol>\n    </div>",
+      "sortOrder": 2
+    },
+    {
+      "id": "habit-building",
+      "title": "Habit Building",
+      "contentHTML": "<h2>Virtue-Building Habits</h2>\n    <p>Virtue-building habits are intentional daily practices that help form the mind, heart, and will to live in greater conformity with Christ. By cultivating these habits, we grow in the theological and moral virtues, resist sin, and bear witness to the Gospel in our daily lives.</p>\n                \n    <div class=\"content-wrapper\">\n        <ol>\n            <li><strong>Daily Prayer</strong> – Setting aside dedicated time each day for personal and communal prayer to deepen one’s relationship with God.</li>\n            <li><strong>Daily Scripture Reading</strong> – Reading and meditating on the Word of God to be nourished by truth and guided by divine wisdom.</li>\n            <li><strong>Frequent Reception of the Sacraments</strong> – Regular participation in the Eucharist and Reconciliation to receive grace and spiritual strength.</li>\n            <li><strong>Acts of Kindness</strong> – Performing intentional good deeds for others to grow in charity and compassion.</li>\n            <li><strong>Fasting from Distractions</strong> – Limiting entertainment, technology, or other distractions to create more space for God.</li>\n            <li><strong>Silence and Reflection</strong> – Setting aside quiet time to listen to God, examine one’s conscience, and discern His will.</li>\n            <li><strong>Spiritual Reading</strong> – Studying the lives of saints, Church teaching, and theological works to inspire and form the soul.</li>\n        </ol>\n    </div>",
+      "sortOrder": 3
+    },
+    {
+      "id": "social-teachings",
+      "title": "Social Teachings in Action",
+      "contentHTML": "<h2>Catholic Social Teaching in Action</h2>\n    <p>Catholic Social Teaching applies the Gospel to the social, political, and economic realities of our time. These principles guide us to respect human dignity, promote the common good, and work for justice and peace in the world (cf. Compendium of the Social Doctrine of the Church).</p>\n                \n    <div class=\"content-wrapper\">\n        <ol>\n            <li><strong>Respect for Human Life</strong> – Defending the dignity of every person from conception to natural death through pro-life witness and advocacy.</li>\n            <li><strong>Care for Creation</strong> – Practicing environmental stewardship and using resources responsibly in light of God’s creation mandate.</li>\n            <li><strong>Preferential Option for the Poor</strong> – Serving and advocating for those in poverty or marginalized in society.</li>\n            <li><strong>Solidarity</strong> – Standing with others, especially the vulnerable, in a spirit of unity and shared responsibility.</li>\n            <li><strong>Promotion of Peace</strong> – Working to resolve conflicts, promote reconciliation, and foster harmony between peoples.</li>\n            <li><strong>Economic Justice</strong> – Supporting fair wages, ethical business practices, and economic systems that respect human dignity.</li>\n            <li><strong>Participation in Public Life</strong> – Engaging in civic duties, informed voting, and community service in light of Catholic values.</li>\n        </ol>\n    </div>",
+      "sortOrder": 4
+    },
+    {
+      "id": "liturgical-living",
+      "title": "Liturgical & Sacramental Living",
+      "contentHTML": "<h2>Liturgical Living</h2>\n    <p>Liturgical living is the practice of ordering daily life around the rhythms and seasons of the Church’s liturgy. By observing feasts, fasts, and devotions, Catholics allow the worship of God to shape their time, habits, and home life, making the liturgical year a living expression of faith.</p>\n                \n    <div class=\"content-wrapper\">\n        <ol>\n            <li><strong>Observing the Liturgical Year</strong> – Celebrating seasons like Advent, Christmas, Lent, Easter, and Ordinary Time with their unique prayers and traditions.</li>\n            <li><strong>Honoring Feast Days</strong> – Marking solemnities and memorials of Christ, Our Lady, and the saints through prayer, special meals, or devotions.</li>\n            <li><strong>Keeping Days of Fasting and Abstinence</strong> – Participating in the Church’s penitential days to unite with Christ’s sacrifice.</li>\n            <li><strong>Using Sacramentals</strong> – Incorporating blessed objects such as holy water, medals, scapulars, and crucifixes into daily life as reminders of God’s grace.</li>\n            <li><strong>Praying the Liturgy of the Hours</strong> – Joining the universal prayer of the Church throughout the day.</li>\n            <li><strong>Family and Home Devotions</strong> – Creating a domestic church with practices like a home altar, family rosary, and seasonal decorations.</li>\n            <li><strong>Blessing Meals and Milestones</strong> – Offering prayers of gratitude before eating and marking life events with the Church’s blessings.</li>\n        </ol>\n    </div>",
+      "sortOrder": 5
+    }
+  ]
+}

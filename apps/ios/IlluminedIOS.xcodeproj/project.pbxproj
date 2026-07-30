@@ -1,0 +1,694 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BD39E5B930000A09001BD86A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD39E5B830000A09001BD86A /* GoogleService-Info.plist */; };
+		BD39E5BC30000C06001BD86A /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = BD39E5BB30000C06001BD86A /* FirebaseCore */; };
+		BD39E5BE30000C15001BD86A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = BD39E5BD30000C15001BD86A /* FirebaseAuth */; };
+		BD39E5C030000C1F001BD86A /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BD39E5BF30000C1F001BD86A /* FirebaseFirestore */; };
+		BD51E4253000356500F6040F /* lessons.json in Resources */ = {isa = PBXBuildFile; fileRef = BD51E4243000356500F6040F /* lessons.json */; };
+		BD51E44E30004D8500F6040F /* spiritual_formation.json in Resources */ = {isa = PBXBuildFile; fileRef = BD51E44D30004D8500F6040F /* spiritual_formation.json */; };
+		BD51E48F300055C700F6040F /* achievements.json in Resources */ = {isa = PBXBuildFile; fileRef = BD51E48E300055C700F6040F /* achievements.json */; };
+		BDFB638330080AD500B20220 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = BDFB638230080AD500B20220 /* FirebaseMessaging */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BD39E57230000829001BD86A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD39E55C30000826001BD86A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BD39E56330000826001BD86A;
+			remoteInfo = IlluminedIOS;
+		};
+		BD39E57C30000829001BD86A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD39E55C30000826001BD86A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BD39E56330000826001BD86A;
+			remoteInfo = IlluminedIOS;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		BD39E56430000826001BD86A /* IlluminedIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IlluminedIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD39E57130000829001BD86A /* IlluminedIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IlluminedIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD39E57B30000829001BD86A /* IlluminedIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IlluminedIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD39E5B830000A09001BD86A /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		BD51E423300030B400F6040F /* lessons.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = lessons.json; sourceTree = "<group>"; };
+		BD51E4243000356500F6040F /* lessons.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = lessons.json; sourceTree = "<group>"; };
+		BD51E44D30004D8500F6040F /* spiritual_formation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = spiritual_formation.json; sourceTree = "<group>"; };
+		BD51E48E300055C700F6040F /* achievements.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = achievements.json; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BDFB638630080B0200B20220 /* Exceptions for "IlluminedIOS" folder in "IlluminedIOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BD39E56330000826001BD86A /* IlluminedIOS */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		BD39E56630000826001BD86A /* IlluminedIOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BDFB638630080B0200B20220 /* Exceptions for "IlluminedIOS" folder in "IlluminedIOS" target */,
+			);
+			path = IlluminedIOS;
+			sourceTree = "<group>";
+		};
+		BD39E57430000829001BD86A /* IlluminedIOSTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = IlluminedIOSTests;
+			sourceTree = "<group>";
+		};
+		BD39E57E30000829001BD86A /* IlluminedIOSUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = IlluminedIOSUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BD39E56130000826001BD86A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BDFB638330080AD500B20220 /* FirebaseMessaging in Frameworks */,
+				BD39E5BC30000C06001BD86A /* FirebaseCore in Frameworks */,
+				BD39E5BE30000C15001BD86A /* FirebaseAuth in Frameworks */,
+				BD39E5C030000C1F001BD86A /* FirebaseFirestore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD39E56E30000829001BD86A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD39E57830000829001BD86A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BD39E55B30000826001BD86A = {
+			isa = PBXGroup;
+			children = (
+				BD51E48E300055C700F6040F /* achievements.json */,
+				BD51E44D30004D8500F6040F /* spiritual_formation.json */,
+				BD51E4243000356500F6040F /* lessons.json */,
+				BD51E4223000306600F6040F /* Resources */,
+				BD39E56630000826001BD86A /* IlluminedIOS */,
+				BD39E57430000829001BD86A /* IlluminedIOSTests */,
+				BD39E57E30000829001BD86A /* IlluminedIOSUITests */,
+				BD39E56530000826001BD86A /* Products */,
+				BD39E5B830000A09001BD86A /* GoogleService-Info.plist */,
+				BD39E5BA30000C05001BD86A /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		BD39E56530000826001BD86A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD39E56430000826001BD86A /* IlluminedIOS.app */,
+				BD39E57130000829001BD86A /* IlluminedIOSTests.xctest */,
+				BD39E57B30000829001BD86A /* IlluminedIOSUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD39E5BA30000C05001BD86A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BD51E4223000306600F6040F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BD51E423300030B400F6040F /* lessons.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BD39E56330000826001BD86A /* IlluminedIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD39E58530000829001BD86A /* Build configuration list for PBXNativeTarget "IlluminedIOS" */;
+			buildPhases = (
+				BD39E56030000826001BD86A /* Sources */,
+				BD39E56130000826001BD86A /* Frameworks */,
+				BD39E56230000826001BD86A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BD39E56630000826001BD86A /* IlluminedIOS */,
+			);
+			name = IlluminedIOS;
+			packageProductDependencies = (
+				BD39E5BB30000C06001BD86A /* FirebaseCore */,
+				BD39E5BD30000C15001BD86A /* FirebaseAuth */,
+				BD39E5BF30000C1F001BD86A /* FirebaseFirestore */,
+				BDFB638230080AD500B20220 /* FirebaseMessaging */,
+			);
+			productName = IlluminedIOS;
+			productReference = BD39E56430000826001BD86A /* IlluminedIOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BD39E57030000829001BD86A /* IlluminedIOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD39E58830000829001BD86A /* Build configuration list for PBXNativeTarget "IlluminedIOSTests" */;
+			buildPhases = (
+				BD39E56D30000829001BD86A /* Sources */,
+				BD39E56E30000829001BD86A /* Frameworks */,
+				BD39E56F30000829001BD86A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD39E57330000829001BD86A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BD39E57430000829001BD86A /* IlluminedIOSTests */,
+			);
+			name = IlluminedIOSTests;
+			packageProductDependencies = (
+			);
+			productName = IlluminedIOSTests;
+			productReference = BD39E57130000829001BD86A /* IlluminedIOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BD39E57A30000829001BD86A /* IlluminedIOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD39E58B30000829001BD86A /* Build configuration list for PBXNativeTarget "IlluminedIOSUITests" */;
+			buildPhases = (
+				BD39E57730000829001BD86A /* Sources */,
+				BD39E57830000829001BD86A /* Frameworks */,
+				BD39E57930000829001BD86A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD39E57D30000829001BD86A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BD39E57E30000829001BD86A /* IlluminedIOSUITests */,
+			);
+			name = IlluminedIOSUITests;
+			packageProductDependencies = (
+			);
+			productName = IlluminedIOSUITests;
+			productReference = BD39E57B30000829001BD86A /* IlluminedIOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD39E55C30000826001BD86A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					BD39E56330000826001BD86A = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					BD39E57030000829001BD86A = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = BD39E56330000826001BD86A;
+					};
+					BD39E57A30000829001BD86A = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = BD39E56330000826001BD86A;
+					};
+				};
+			};
+			buildConfigurationList = BD39E55F30000826001BD86A /* Build configuration list for PBXProject "IlluminedIOS" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BD39E55B30000826001BD86A;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BD39E5B730000911001BD86A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = BD39E56530000826001BD86A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BD39E56330000826001BD86A /* IlluminedIOS */,
+				BD39E57030000829001BD86A /* IlluminedIOSTests */,
+				BD39E57A30000829001BD86A /* IlluminedIOSUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BD39E56230000826001BD86A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD51E48F300055C700F6040F /* achievements.json in Resources */,
+				BD51E44E30004D8500F6040F /* spiritual_formation.json in Resources */,
+				BD51E4253000356500F6040F /* lessons.json in Resources */,
+				BD39E5B930000A09001BD86A /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD39E56F30000829001BD86A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD39E57930000829001BD86A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BD39E56030000826001BD86A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD39E56D30000829001BD86A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD39E57730000829001BD86A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BD39E57330000829001BD86A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BD39E56330000826001BD86A /* IlluminedIOS */;
+			targetProxy = BD39E57230000829001BD86A /* PBXContainerItemProxy */;
+		};
+		BD39E57D30000829001BD86A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BD39E56330000826001BD86A /* IlluminedIOS */;
+			targetProxy = BD39E57C30000829001BD86A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BD39E58330000829001BD86A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BD39E58430000829001BD86A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BD39E58630000829001BD86A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = IlluminedIOS/IlluminedIOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 46;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6H687K56LY;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = IlluminedIOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Illumined;
+				INFOPLIST_KEY_CFBundleName = Illumined;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = illumined.app.IlluminedIOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Illumined App Store Profile";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BD39E58730000829001BD86A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = IlluminedIOS/IlluminedIOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 46;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6H687K56LY;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = IlluminedIOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Illumined;
+				INFOPLIST_KEY_CFBundleName = Illumined;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = illumined.app.IlluminedIOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Illumined App Store Profile";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BD39E58930000829001BD86A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 43;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = illumined.app.IlluminedIOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IlluminedIOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IlluminedIOS";
+			};
+			name = Debug;
+		};
+		BD39E58A30000829001BD86A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 43;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = illumined.app.IlluminedIOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IlluminedIOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IlluminedIOS";
+			};
+			name = Release;
+		};
+		BD39E58C30000829001BD86A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 43;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = illumined.app.IlluminedIOSUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = IlluminedIOS;
+			};
+			name = Debug;
+		};
+		BD39E58D30000829001BD86A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 43;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = illumined.app.IlluminedIOSUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = IlluminedIOS;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BD39E55F30000826001BD86A /* Build configuration list for PBXProject "IlluminedIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD39E58330000829001BD86A /* Debug */,
+				BD39E58430000829001BD86A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD39E58530000829001BD86A /* Build configuration list for PBXNativeTarget "IlluminedIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD39E58630000829001BD86A /* Debug */,
+				BD39E58730000829001BD86A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD39E58830000829001BD86A /* Build configuration list for PBXNativeTarget "IlluminedIOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD39E58930000829001BD86A /* Debug */,
+				BD39E58A30000829001BD86A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD39E58B30000829001BD86A /* Build configuration list for PBXNativeTarget "IlluminedIOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD39E58C30000829001BD86A /* Debug */,
+				BD39E58D30000829001BD86A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BD39E5B730000911001BD86A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.16.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BD39E5BB30000C06001BD86A /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD39E5B730000911001BD86A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		BD39E5BD30000C15001BD86A /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD39E5B730000911001BD86A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		BD39E5BF30000C1F001BD86A /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD39E5B730000911001BD86A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		BDFB638230080AD500B20220 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD39E5B730000911001BD86A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = BD39E55C30000826001BD86A /* Project object */;
+}
