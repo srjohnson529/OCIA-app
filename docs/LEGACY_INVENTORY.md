@@ -50,9 +50,9 @@ The lesson catalogs in the full Swift copy and both generated iOS outputs match 
 
 ## Divergent legacy curriculum
 
-`2026-07-09/build-a-swift-ui-app-for/work/shared-lessons/lessons.json` is not canonical. It contains 73 lessons but only 72 unique IDs because both “Freedom and Choice” and “Freedom in Christ” use `morals-Freedom`.
+The retired `2026-07-09/build-a-swift-ui-app-for/work/shared-lessons/lessons.json` is not canonical. It contains 73 lessons but only 72 unique IDs because both “Freedom and Choice” and “Freedom in Christ” use `morals-Freedom`.
 
-It contains no additional lesson titles. Preserve it only as a historical defective variant; do not synchronize it into an application.
+It contains no additional lesson titles. An exact copy is isolated under `archive/legacy/defective-curriculum-2026-07-09/` with a prominent warning and checksum record. The original one-file work folder was moved recoverably to `~/.Trash/Illumined-defective-shared-lessons-2026-07-09/`; Trash was not emptied. Do not synchronize the archived file into an application.
 
 ## Android generated material
 
@@ -87,7 +87,7 @@ The recoverable Trash folder currently occupies approximately 118 MB. The two de
 3. Identify the HTML hosting/deployment source. **Completed locally: no separate deployment configuration was present.**
 4. Copy verification-hold projects into a dated external or consolidated archive if a second recovery copy is desired. **Completed for iOS, Android, and HTML.**
 5. Move small historical source variants into one clearly labeled archive. **Completed 2026-07-30.**
-6. Remove only confirmed generated caches, build output, empty folders, and duplicate expanded outputs.
-7. Re-run the inventory and record the recovered disk space.
+6. Remove only confirmed generated caches, build output, empty folders, and duplicate expanded outputs. **Partially completed; large cloud-sensitive Android caches and local validation caches remain.**
+7. Re-run the inventory and record the recovered disk space. **Completed 2026-07-30; see `docs/FINAL_INVENTORY.md`.**
 
 No legacy material should be deleted solely because its name looks duplicated; its classification and replacement must be confirmed first.

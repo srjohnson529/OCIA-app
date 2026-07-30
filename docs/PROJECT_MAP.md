@@ -11,7 +11,7 @@ The consolidated workspace is `/Users/stephenjohnson/Documents/Codex/Illumined`.
 | HTML | `apps/html/` | Browser application |
 | Curriculum | `curriculum/lessons.json` | Canonical lesson data |
 | Human review | `curriculum/review/` | Readable curriculum exports |
-| Documentation | `docs/` | Project and editorial procedures |
+| Documentation | `docs/` | Project, editorial, validation, and final inventory records |
 | Tools | `tools/` | Future export and synchronization utilities |
 | Archive | `archive/` | Future home for explicitly retired snapshots |
 
