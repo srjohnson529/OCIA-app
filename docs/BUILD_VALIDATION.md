@@ -17,13 +17,19 @@ Last checked: 2026-07-30
 - No browser console warnings or errors were recorded.
 - The optional `/favicon.ico` request returned 404; this does not prevent the application from running.
 
-## Android — environment blocked
+## Android — Gradle dependency setup blocked
 
 - The Gradle project and wrapper are present.
 - Local Android SDK configuration was restored into the ignored `apps/android/local.properties` file.
-- Unit tests could not start because no Java runtime or Android Studio installation was found on this computer.
+- Android Studio is installed at `/Applications/Android Studio.app`.
+- Its bundled Java runtime was found and runs successfully at `Contents/jbr/Contents/Home`.
+- Unit tests could not complete because the local Gradle 9.1 distribution/dependency cache is incomplete and the command-line environment could not resolve `services.gradle.org` to download the missing files.
 
-Required next action: install Android Studio, or install/configure a compatible JDK, then run `./gradlew testDebugUnitTest` from `apps/android/`.
+Required next action: open `apps/android/` in Android Studio and allow the initial Gradle synchronization to finish while online. Then run the unit tests in Android Studio or run the following from `apps/android/`:
+
+```sh
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew testDebugUnitTest
+```
 
 ## iOS — package linkage blocked
 
@@ -37,4 +43,3 @@ Required next action: open `apps/ios/IlluminedIOS.xcodeproj` in Xcode, reset or 
 ## Publication status
 
 No application was published, uploaded, or pushed to GitHub during validation.
-
