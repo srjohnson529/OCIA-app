@@ -12,7 +12,13 @@ These folders are original working applications. Keep them unchanged until the c
 | --- | ---: | --- | --- |
 | `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS` | 3.4 MB | Retired original iOS Xcode project | Verification hold cleared after the consolidated project was confirmed functioning in Xcode. The exact 170-file archive remains under `archive/legacy/ios-desktop-working-copy-2026-07-30/`; the Desktop original was moved recoverably to `~/.Trash/IlluminedIOS-Desktop-original-2026-07-30/`. |
 | `/Users/stephenjohnson/Documents/Codex/2026-07-22/i-w` | 1.2 GB after macOS hydrated cloud cache placeholders during cleanup | Original Android project plus generated data | Verification hold cleared: the consolidated Android project synchronized, passed 140 unit tests, and built a debug APK. The source and selected work evidence are archived; the two large Gradle cache folders remain in place pending a cloud-safe cleanup method. |
-| `/Users/stephenjohnson/Documents/Codex/2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons` | 860 KB | Original shared-curriculum HTML output | Keep until the consolidated HTML application’s deployment/hosting origin is documented. The local runtime test already passes. |
+| `/Users/stephenjohnson/Documents/Codex/2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons` | 860 KB | Retired shared-curriculum HTML output | All five files matched `apps/html/` byte-for-byte and no separate hosting configuration was present. An exact archive exists under `archive/legacy/html-standalone-output-2026-07-09/`; the original output was moved recoverably to Trash. |
+
+## Retired standalone HTML output
+
+The five-file `CatechismHTML_SharedLessons` output was compared with `apps/html/` on 2026-07-30. Its four JSON resources were identical, and `Catechism app.html` was identical to the normalized `apps/html/index.html`. No Firebase Hosting, Netlify, Vercel, GitHub Pages, or other deployment configuration was found in the output or its surrounding work tree. The Firebase project identity and client configuration are embedded in the HTML application itself.
+
+An exact archive is preserved at `archive/legacy/html-standalone-output-2026-07-09/`. After verification, the original output folder was moved to `~/.Trash/CatechismHTML_SharedLessons-original-2026-07-09/`; Trash was not emptied. The surrounding dated project was not moved or modified.
 
 ## Historical iOS starters
 

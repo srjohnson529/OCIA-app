@@ -21,7 +21,7 @@ The initial workspace was assembled non-destructively from these existing folder
 
 - iOS: `/Users/stephenjohnson/Desktop/IlluminedIOS/IlluminedIOS/`
 - Android: `2026-07-22/i-w/`
-- HTML: `2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons/`
+- HTML: `2026-07-09/build-a-swift-ui-app-for/outputs/CatechismHTML_SharedLessons/` (retired after verification; exact archive retained)
 - Curriculum: the iOS application’s `Application/Resources/lessons.json`
 
 Generated Android build output, Gradle caches, dependency folders, and temporary work folders were excluded from the consolidated copy.
@@ -36,4 +36,4 @@ The Xcode target includes the root-level `apps/ios/lessons.json`. The additional
 
 The Android copy includes its Gradle project files. Generated build products, dependency folders, local machine configuration, IDE state, and debug logs were excluded from the working application. Local Android metadata found during consolidation was retained under `archive/android-local-metadata/` rather than deleted.
 
-The HTML application has a normalized `apps/html/index.html` entry point. The identical file with the original `Catechism app.html` filename is preserved under `archive/html-original/`.
+The HTML application has a normalized `apps/html/index.html` entry point. The identical file with the original `Catechism app.html` filename is preserved under `archive/html-original/`. A complete five-file copy of the retired standalone output is preserved under `archive/legacy/html-standalone-output-2026-07-09/`; the original output folder was moved recoverably to Trash after all files matched.
