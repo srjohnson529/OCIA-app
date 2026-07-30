@@ -38,16 +38,17 @@ JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradle
 
 One source warning remains: the Firebase Messaging token API usage in `NotificationRegistrar.kt` is deprecated. It does not fail the build or tests.
 
-## iOS — source and package configuration verified; direct consolidated build pending
+## iOS — passed
 
 - The consolidated and Desktop `project.pbxproj` files are identical.
 - The application target explicitly links `FirebaseCore`, `FirebaseAuth`, `FirebaseFirestore`, and `FirebaseMessaging`.
 - `Package.resolved` pins Firebase iOS SDK 12.16.0 and all 13 locked package checkouts and binary artifacts are present in the existing Xcode cache.
 - Every application source/project file matches the Desktop working project. Only the two lesson JSON files differ, intentionally, because the consolidated files contain the canonical curriculum.
 - The Desktop working project produced `Debug-iphonesimulator/IlluminedIOS.app` on 2026-07-30 at 10:35:36; its corresponding build log contains no compile errors.
-- A direct command-line build from the consolidated path could not complete inside the Codex filesystem sandbox. Xcode requires write access to its Swift package diagnostic cache and invokes a nested manifest sandbox; those permissions were not granted. This is an execution-environment restriction, not a missing Firebase product reference.
+- A direct command-line build from the consolidated path could not complete inside the Codex filesystem sandbox. Xcode requires write access to its Swift package diagnostic cache and invokes a nested manifest sandbox; those permissions were not granted. This was an execution-environment restriction, not a missing Firebase product reference.
+- The consolidated project was subsequently opened in Xcode and confirmed functioning by the user on 2026-07-30.
 
-Required final confirmation: open `apps/ios/IlluminedIOS.xcodeproj` in Xcode and choose **Product > Build** once. The local Firebase cache is already populated, so package reset should only be attempted if Xcode itself reports a package error.
+The consolidated iOS verification hold is cleared.
 
 ## Publication status
 
