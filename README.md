@@ -19,6 +19,7 @@ This is the consolidated working home for the Illumined project.
 - `docs/PROJECT_MAP.md` explains the folder layout and identifies the source used for each consolidated application.
 - `docs/CURRICULUM_WORKFLOW.md` explains how lesson changes should flow into all three applications.
 - `docs/VERSION_CONTROL.md` explains the unified Git repository and local configuration exclusions.
+- `docs/BUILD_VALIDATION.md` records which consolidated applications currently build or run and any remaining blockers.
 
 ## Historical material
 
