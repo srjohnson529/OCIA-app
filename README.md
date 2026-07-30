@@ -20,6 +20,7 @@ This is the consolidated working home for the Illumined project.
 - `docs/CURRICULUM_WORKFLOW.md` explains how lesson changes should flow into all three applications.
 - `docs/VERSION_CONTROL.md` explains the unified Git repository and local configuration exclusions.
 - `docs/BUILD_VALIDATION.md` records which consolidated applications currently build or run and any remaining blockers.
+- `docs/LEGACY_INVENTORY.md` classifies older Illumined folders and defines the non-destructive archive sequence.
 
 ## Historical material
 
