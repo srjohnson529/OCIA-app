@@ -10,6 +10,7 @@ The consolidated workspace is `/Users/stephenjohnson/Documents/Codex/Illumined`.
 | Android | `apps/android/` | Kotlin/Jetpack Compose application |
 | HTML | `apps/html/` | Browser application |
 | Curriculum | `curriculum/lessons.json` | Canonical lesson data |
+| Formation | `curriculum/spiritual_formation.json` | Canonical prayers and spiritual-formation data |
 | Human review | `curriculum/review/` | Readable curriculum exports |
 | Documentation | `docs/` | Project, editorial, validation, and final inventory records |
 | Tools | `tools/` | Future export and synchronization utilities |

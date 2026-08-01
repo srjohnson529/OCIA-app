@@ -13,4 +13,11 @@ class FormationRouteTest {
         assertEquals(FormationRouteState(FormationRoute.MENU), FormationRoute.parse("prayer||bad-back"))
         assertEquals(FormationRouteState(FormationRoute.MENU), FormationRoute.parse("unknown"))
     }
+
+    @Test fun selectedPrayerDetailsReturnToSelectedPrayers() {
+        assertEquals(
+            FormationRouteState(FormationRoute.PRAYER, "hail-mary", FormationRoute.SELECTED_PRAYERS),
+            FormationRoute.parse(FormationRoute.detail(FormationRoute.PRAYER, "hail-mary", FormationRoute.SELECTED_PRAYERS)),
+        )
+    }
 }

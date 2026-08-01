@@ -81,6 +81,7 @@ final class ProfileService: ObservableObject {
                 "earnedBadges": [],
                 "completedMysteries": [],
                 "memorizedPrayerIds": [],
+                "selectedPrayerIds": [],
                 "currentLessonIndex": 0,
                 "createdAt": FieldValue.serverTimestamp(),
                 "username": cleanedName,
@@ -149,6 +150,7 @@ final class ProfileService: ObservableObject {
                     "earnedBadges": [],
                     "completedMysteries": [],
                     "memorizedPrayerIds": [],
+                    "selectedPrayerIds": [],
                     "currentLessonIndex": 0,
                     "createdAt": FieldValue.serverTimestamp(),
                     "username": cleanedName,
@@ -243,6 +245,7 @@ final class ProfileService: ObservableObject {
                     "earnedBadges": [],
                     "completedMysteries": [],
                     "memorizedPrayerIds": [],
+                    "selectedPrayerIds": [],
                     "currentLessonIndex": 0,
                     "createdAt": FieldValue.serverTimestamp(),
                     "username": displayName,
@@ -320,6 +323,21 @@ final class ProfileService: ObservableObject {
         do {
             try await db.collection("userProfiles").document(uid).updateData([
                 "memorizedPrayerIds": isMemorized
+                    ? FieldValue.arrayUnion([cleanedPrayerId])
+                    : FieldValue.arrayRemove([cleanedPrayerId])
+            ])
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func setCommonPrayerSelected(_ prayerId: String, isSelected: Bool) async {
+        let cleanedPrayerId = prayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedPrayerId.isEmpty, let uid = Auth.auth().currentUser?.uid else { return }
+
+        do {
+            try await db.collection("userProfiles").document(uid).updateData([
+                "selectedPrayerIds": isSelected
                     ? FieldValue.arrayUnion([cleanedPrayerId])
                     : FieldValue.arrayRemove([cleanedPrayerId])
             ])

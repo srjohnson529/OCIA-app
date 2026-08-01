@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,8 +70,10 @@ private data class FormationMenuRow(val title: String, val subtitle: String, val
 @Composable
 fun SpiritualFormationExperience(
     memorizedPrayerIds: Set<String>,
+    selectedPrayerIds: Set<String>,
     completedMysteryIds: Set<String>,
     onSetPrayerMemorized: (String, Boolean, () -> Unit, () -> Unit) -> Unit,
+    onSetPrayerSelected: (String, Boolean, () -> Unit, () -> Unit) -> Unit,
     onCompleteMystery: (String, () -> Unit, () -> Unit) -> Unit,
 ) {
     val context = LocalContext.current
@@ -84,6 +88,8 @@ fun SpiritualFormationExperience(
     }
 
     val destination = FormationRoute.parse(route)
+    val visibleSelectedIds = SelectedPrayerPresentation.orderedVisibleIds(catalog.prayers.map { it.id }, selectedPrayerIds).toSet()
+    val selectedPrayers = catalog.prayers.filter { it.id in visibleSelectedIds }
     BackHandler(enabled = destination.kind != FormationRoute.MENU) {
         route = destination.back
     }
@@ -94,16 +100,32 @@ fun SpiritualFormationExperience(
             onMass = { route = FormationRoute.MASS_GUIDE },
             onPractices = { route = FormationRoute.PRACTICES },
         )
-        FormationRoute.PRAYER_HUB -> FormationList("Prayer", { route = FormationRoute.MENU }, listOf(
-            FormationMenuRow("Common Prayers", "${catalog.prayers.size} prayers", SpiritualFormationSymbolKind.Book) { route = FormationRoute.COMMON_PRAYERS },
-            FormationMenuRow("Guided Rosary", "Pray the mysteries step by step", SpiritualFormationSymbolKind.RosaryGrid) { route = FormationRoute.ROSARY },
-            FormationMenuRow("Guided Lectio Divina", "Read, meditate, pray, contemplate", SpiritualFormationSymbolKind.TextBook) { route = FormationRoute.detail(FormationRoute.HTML, "lectio", FormationRoute.PRAYER_HUB) },
-            FormationMenuRow("Liturgy of the Hours", "The daily prayer of the Church", SpiritualFormationSymbolKind.Clock) { route = FormationRoute.detail(FormationRoute.HTML, "hours", FormationRoute.PRAYER_HUB) },
-        ))
+        FormationRoute.PRAYER_HUB -> FormationList("Prayer", { route = FormationRoute.MENU }, buildList {
+            add(FormationMenuRow("Common Prayers", "${catalog.prayers.size} prayers", SpiritualFormationSymbolKind.Book) { route = FormationRoute.COMMON_PRAYERS })
+            add(FormationMenuRow("Guided Rosary", "Pray the mysteries step by step", SpiritualFormationSymbolKind.RosaryGrid) { route = FormationRoute.ROSARY })
+            add(FormationMenuRow("Guided Lectio Divina", "Read, meditate, pray, contemplate", SpiritualFormationSymbolKind.TextBook) { route = FormationRoute.detail(FormationRoute.HTML, "lectio", FormationRoute.PRAYER_HUB) })
+            add(FormationMenuRow("Liturgy of the Hours", "The daily prayer of the Church", SpiritualFormationSymbolKind.Clock) { route = FormationRoute.detail(FormationRoute.HTML, "hours", FormationRoute.PRAYER_HUB) })
+            if (selectedPrayers.isNotEmpty()) {
+                add(FormationMenuRow("Selected Prayers", "${selectedPrayers.size} saved for easy access", SpiritualFormationSymbolKind.Bookmark) { route = FormationRoute.SELECTED_PRAYERS })
+            }
+        })
         FormationRoute.COMMON_PRAYERS -> FormationCards("Common Prayers", { route = FormationRoute.PRAYER_HUB }) {
             items(catalog.prayers, key = { it.id }) { prayer ->
-                CommonPrayerCard(prayer.title, prayer.id in memorizedPrayerIds) {
+                CommonPrayerCard(prayer.title, prayer.id in memorizedPrayerIds, prayer.id in selectedPrayerIds) {
                     route = FormationRoute.detail(FormationRoute.PRAYER, prayer.id, FormationRoute.COMMON_PRAYERS)
+                }
+            }
+        }
+        FormationRoute.SELECTED_PRAYERS -> FormationCards("Selected Prayers", { route = FormationRoute.PRAYER_HUB }) {
+            if (selectedPrayers.isEmpty()) {
+                item { SelectedPrayersEmptyCard() }
+            } else {
+                items(selectedPrayers, key = { it.id }) { prayer ->
+                    SelectedPrayerCard(
+                        prayer = prayer,
+                        onOpen = { route = FormationRoute.detail(FormationRoute.PRAYER, prayer.id, FormationRoute.SELECTED_PRAYERS) },
+                        onRemove = onSetPrayerSelected,
+                    )
                 }
             }
         }
@@ -120,7 +142,14 @@ fun SpiritualFormationExperience(
         FormationRoute.EXAMINATION -> ExaminationExperience { route = FormationRoute.MENU }
         FormationRoute.MASS_GUIDE -> MassGuideExperience { route = FormationRoute.MENU }
         FormationRoute.PRAYER -> catalog.prayers.firstOrNull { it.id == destination.id }?.let { prayer ->
-            PrayerDetail(prayer, prayer.id in memorizedPrayerIds, onBack = { route = destination.back }, onSetPrayerMemorized = onSetPrayerMemorized)
+            PrayerDetail(
+                prayer = prayer,
+                memorized = prayer.id in memorizedPrayerIds,
+                selected = prayer.id in selectedPrayerIds,
+                onBack = { route = destination.back },
+                onSetPrayerMemorized = onSetPrayerMemorized,
+                onSetPrayerSelected = onSetPrayerSelected,
+            )
         } ?: LaunchedEffect(route) { route = FormationRoute.COMMON_PRAYERS }
         FormationRoute.HTML -> {
             if (destination.id == "hours") {
@@ -276,7 +305,7 @@ private fun FormationMenuCard(title: String, subtitle: String, symbol: Spiritual
 
 /** Mirrors the iOS CommonPrayerRow completion treatment. */
 @Composable
-private fun CommonPrayerCard(title: String, memorized: Boolean, onClick: () -> Unit) {
+private fun CommonPrayerCard(title: String, memorized: Boolean, selected: Boolean, onClick: () -> Unit) {
     val accent = if (memorized) IlluminedThemeTokens.Blue else IlluminedThemeTokens.Gold
     Surface(onClick = onClick, shape = RoundedCornerShape(16.dp), color = Color.White.copy(.94f), shadowElevation = 6.dp, border = androidx.compose.foundation.BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.22f))) {
         Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -290,7 +319,13 @@ private fun CommonPrayerCard(title: String, memorized: Boolean, onClick: () -> U
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
-                if (memorized) Text("Memorized", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                if (memorized || selected) {
+                    Text(
+                        listOfNotNull(if (selected) "Selected" else null, if (memorized) "Memorized" else null).joinToString(" • "),
+                        fontSize = 13.sp,
+                        color = IlluminedThemeTokens.SecondaryText,
+                    )
+                }
             }
             LessonSymbol(LessonSymbolKind.ChevronRight, IlluminedThemeTokens.SecondaryText, Modifier.size(12.dp))
         }
@@ -298,9 +333,81 @@ private fun CommonPrayerCard(title: String, memorized: Boolean, onClick: () -> U
 }
 
 @Composable
-private fun PrayerDetail(prayer: FormationPrayer, memorized: Boolean, onBack: () -> Unit,
-    onSetPrayerMemorized: (String, Boolean, () -> Unit, () -> Unit) -> Unit) {
+private fun SelectedPrayersEmptyCard() {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White.copy(.94f),
+        shadowElevation = 6.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.22f)),
+    ) {
+        Text(
+            "No prayers are selected. Return to Common Prayers to add one.",
+            Modifier.fillMaxWidth().padding(20.dp),
+            color = IlluminedThemeTokens.SecondaryText,
+            fontSize = 15.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun SelectedPrayerCard(
+    prayer: FormationPrayer,
+    onOpen: () -> Unit,
+    onRemove: (String, Boolean, () -> Unit, () -> Unit) -> Unit,
+) {
+    var removing by remember(prayer.id) { mutableStateOf(false) }
+    var failed by remember(prayer.id) { mutableStateOf(false) }
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White.copy(.94f),
+        shadowElevation = 6.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.22f)),
+    ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier.weight(1f).clickable(enabled = !removing, onClick = onOpen).padding(18.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(Modifier.size(40.dp).background(IlluminedThemeTokens.Gold.copy(.12f), CircleShape), contentAlignment = Alignment.Center) {
+                    SpiritualFormationSymbol(SpiritualFormationSymbolKind.Bookmark, IlluminedThemeTokens.Gold, Modifier.size(20.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(prayer.title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                    if (failed) Text("Could not remove prayer", fontSize = 12.sp, color = Color.Red)
+                }
+                LessonSymbol(LessonSymbolKind.ChevronRight, IlluminedThemeTokens.SecondaryText, Modifier.size(12.dp))
+            }
+            VerticalDivider(Modifier.height(34.dp))
+            IconButton(
+                onClick = {
+                    removing = true
+                    failed = false
+                    onRemove(prayer.id, false, { removing = false }, { removing = false; failed = true })
+                },
+                enabled = !removing,
+                modifier = Modifier
+                    .padding(horizontal = 6.dp)
+                    .semantics { contentDescription = "Remove ${prayer.title} from Selected Prayers" },
+            ) {
+                SpiritualFormationSymbol(SpiritualFormationSymbolKind.Bookmark, Color.Red, Modifier.size(19.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrayerDetail(
+    prayer: FormationPrayer,
+    memorized: Boolean,
+    selected: Boolean,
+    onBack: () -> Unit,
+    onSetPrayerMemorized: (String, Boolean, () -> Unit, () -> Unit) -> Unit,
+    onSetPrayerSelected: (String, Boolean, () -> Unit, () -> Unit) -> Unit,
+) {
     var saving by remember { mutableStateOf(false) }
+    var saveFailed by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().background(formationBrush()).verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)) {
         TextButton(onClick = onBack) { Text("‹ Back") }
@@ -308,9 +415,19 @@ private fun PrayerDetail(prayer: FormationPrayer, memorized: Boolean, onBack: ()
         Surface(shape = RoundedCornerShape(16.dp), color = Color.White.copy(.94f), shadowElevation = 6.dp) {
             Text(prayer.text, Modifier.padding(20.dp), fontSize = 18.sp, lineHeight = 29.sp, color = IlluminedThemeTokens.Ink)
         }
-        Button(onClick = { saving = true; onSetPrayerMemorized(prayer.id, !memorized, { saving = false }, { saving = false }) },
+        if (saveFailed) Text("Your prayer list could not be updated.", color = Color.Red)
+        Button(onClick = { saving = true; saveFailed = false; onSetPrayerMemorized(prayer.id, !memorized, { saving = false }, { saving = false; saveFailed = true }) },
             enabled = !saving, modifier = Modifier.fillMaxWidth().height(54.dp)) {
             Text(if (memorized) "Mark as Not Memorized" else "Mark as Memorized")
+        }
+        OutlinedButton(
+            onClick = { saving = true; saveFailed = false; onSetPrayerSelected(prayer.id, !selected, { saving = false }, { saving = false; saveFailed = true }) },
+            enabled = !saving,
+            modifier = Modifier.fillMaxWidth().height(54.dp),
+        ) {
+            SpiritualFormationSymbol(SpiritualFormationSymbolKind.Bookmark, IlluminedThemeTokens.Gold, Modifier.size(19.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(if (selected) "Remove from Selected Prayers" else "Add to Selected Prayers")
         }
     }
 }

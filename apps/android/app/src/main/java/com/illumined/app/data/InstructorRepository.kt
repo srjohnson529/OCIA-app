@@ -281,6 +281,7 @@ class InstructorRepository(
                 classIds = (d.get("classIds") as? List<*>)?.filterIsInstance<String>().orEmpty(),
                 completedLessons = (d.get("completedLessons") as? List<*>)?.filterIsInstance<String>().orEmpty().toSet(),
                 memorizedPrayerIds = (d.get("memorizedPrayerIds") as? List<*>)?.filterIsInstance<String>().orEmpty().toSet(),
+                selectedPrayerIds = (d.get("selectedPrayerIds") as? List<*>)?.filterIsInstance<String>().orEmpty().toSet(),
                 earnedBadges = (d.get("earnedBadges") as? List<*>)?.filterIsInstance<String>().orEmpty().toSet(),
                 completedMysteries = (d.get("completedMysteries") as? List<*>)?.filterIsInstance<String>().orEmpty().toSet(),
                 isInstructor = d.getBoolean("isInstructor") == true,

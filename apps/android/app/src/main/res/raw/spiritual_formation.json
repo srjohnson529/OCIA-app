@@ -1,5 +1,5 @@
 {
-  "version": "2026.07.09",
+  "version": "2026.08.01",
   "source": "Catechism app.html",
   "commonPrayers": [
     {
@@ -145,6 +145,24 @@
       "title": "The Divine Praises",
       "text": "Blessed be God.\nBlessed be His Holy Name.\nBlessed be Jesus Christ, true God and true Man.\nBlessed be the Name of Jesus.\nBlessed be His Most Sacred Heart.\nBlessed be His Most Precious Blood.\nBlessed be Jesus in the Most Holy Sacrament of the Altar.\nBlessed be the Holy Spirit, the Paraclete.\nBlessed be the great Mother of God, Mary most Holy.\nBlessed be her Holy and Immaculate Conception.\nBlessed be her Glorious Assumption.\nBlessed be the Name of Mary, Virgin and Mother.\nBlessed be St. Joseph, her most chaste spouse.\nBlessed be God in His Angels and in His Saints. Amen.",
       "sortOrder": 23
+    },
+    {
+      "id": "universal-prayer",
+      "title": "The Universal Prayer of Pope Clement XI",
+      "text": "I believe, O Lord, but may I believe more firmly; I hope, but may I hope more securely; I love, but may I love more ardently; I sorrow, but may I sorrow more deeply. I adore you as my first beginning; I long for you as my last end; I praise you as my constant benefactor; I invoke you as my gracious protector. By your wisdom direct me, By your righteousness restrain me, By your indulgence console me, By your power protect me. I offer you, Lord, my thoughts to be directed to you, my words, to be about you, my deeds, to respect your will, my trials, to be endured for you. I will whatever you will, I will it because you will it, I will it in the way you will it, I will it as long as you will it. Lord, enlighten my understanding, I pray: arouse my will, cleanse my heart, sanctify my soul. May I weep for past sins, repel future temptations, correct evil inclinations, nurture appropriate virtues. Give me, good God, love for you, hatred for myself, zeal for my neighbor, contempt for the world. May I strive to obey my superiors, to help those dependent on me, to have care for my friends, forgiveness for my enemies. May I conquer sensuality by austerity, avarice by generosity, anger by gentleness, lukewarmness by fervor. Render me prudent in planning, steadfast in dangers, patient in adversity, humble in prosperity. Make me, O Lord, attentive at prayer, moderate at meals, diligent at work, steadfast in intent. May I be careful to maintain interior innocence, outward modesty, exemplary behavior, a regular life. May I be always watchful in subduing nature, in nourishing grace, in observing your law, in winning salvation. May I learn from you how precarious are earthly things, how great divine things, how fleeting is time, how lasting things eternal. Grant that I may prepare for death, fear judgment, flee hell, gain paradise. Through Christ our Lord. Amen",
+      "sortOrder": 24
+    },
+    {
+      "id": "prayer-before-mass",
+      "title": "Prayer Before Mass by St. Thomas Aquinas",
+      "text": "Almighty eternal God, behold, I come to the Sacrament of your Only Begotten Son, our Lord Jesus Christ, as one sick to the physician of life, as one unclean to the fountain of mercy, as one blind to the light of eternal brightness, as one poor and needy to the Lord of Heaven and Earth. I ask, therefore, for the abundance of your immense generosity, that you graciously cure my sickness, wash away my defilement, give light to my blindness, enrich my poverty, clothe my nakedness, so that I may receive the bread of Angels, the King of kings and Lord of lords, with such reverence and humility, such contrition and devotion, such purity of faith, such purpose and intent as are conducive to the salvation of my soul. Grant, I pray, that I may receive not only the Sacrament of the Lord’s Body and Blood, but also the reality and power of that Sacrament. O most gentle God, grant that I may so receive the Body of your only Begotten Son, our Lord Jesus Christ, which he took from the Virgin Mary, that I may be made worthy to be incorporated into his Mystical Body and to be counted among its members. O most loving Father, grant that I may at last gaze for ever upon the unveiled face of your beloved Son, whom I, a wayfarer, propose to receive now veiled under these species: Who lives and reigns with you for ever and ever. Amen",
+      "sortOrder": 25
+    },
+    {
+      "id": "prayer-after-mass",
+      "title": "Prayer After Mass by St. Thomas Aquinas",
+      "text": "I give you thanks, Lord, holy Father, almighty and eternal God, who have been pleased to nourish me, a sinner and your unworthy servant, with the precious Body and Blood of your Son, our Lord Jesus Christ: this through no merits of mine, but due solely to the graciousness of your mercy. And I pray that this Holy Communion may not be for me an offense to be punished, but a saving plea for forgiveness. May it be for me the armor of faith, and the shield of good will. May it cancel my faults, destroy concupiscence and carnal passion, increase charity and patience, humility and obedience and all the virtues, may it be a firm defense against the snares of all my enemies, both visible and invisible, the complete calming of my impulses, both of the flesh and of the spirit, a firm adherence to you, the one true God, and the joyful completion of my life’s course. And I beseech you to lead me, a sinner, to that banquet beyond all telling, where with your Son and the Holy Spirit you are the true light of your Saints, fullness of satisfied desire, eternal gladness, consummate delight and perfect happiness. Through Christ our Lord. Amen.",
+      "sortOrder": 26
     }
   ],
   "rosary": {

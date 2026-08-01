@@ -6,6 +6,7 @@ internal object FormationRoute {
     const val MENU = "menu"
     const val PRAYER_HUB = "prayer-hub"
     const val COMMON_PRAYERS = "common-prayers"
+    const val SELECTED_PRAYERS = "selected-prayers"
     const val ROSARY = "rosary"
     const val PRACTICES = "practices"
     const val EXAMINATION = "examination"
@@ -13,7 +14,7 @@ internal object FormationRoute {
     const val PRAYER = "prayer"
     const val HTML = "html"
     const val MYSTERY = "mystery"
-    private val roots = setOf(MENU, PRAYER_HUB, COMMON_PRAYERS, ROSARY, PRACTICES, EXAMINATION, MASS_GUIDE)
+    private val roots = setOf(MENU, PRAYER_HUB, COMMON_PRAYERS, SELECTED_PRAYERS, ROSARY, PRACTICES, EXAMINATION, MASS_GUIDE)
 
     fun detail(kind: String, id: String, back: String) = listOf(kind, id, back).joinToString("|")
 

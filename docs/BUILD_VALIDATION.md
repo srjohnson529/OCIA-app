@@ -1,12 +1,20 @@
 # Build Validation
 
-Last checked: 2026-07-30
+Last checked: 2026-08-01
 
 ## Shared curriculum — passed
 
 - Canonical catalog parsed successfully.
 - 73 lessons and 73 unique lesson IDs.
 - iOS, Android, and HTML runtime copies matched the canonical SHA-256 checksum.
+
+## Shared spiritual formation — passed
+
+- `curriculum/spiritual_formation.json` is the canonical Formation catalog.
+- The catalog parsed successfully with 27 common prayers, 20 Rosary mysteries, unique identifiers, and sequential order values.
+- iOS, Android, and HTML runtime copies matched the canonical SHA-256 checksum.
+- The Xcode application target contains a pre-build validation phase that rejects invalid or unsynchronized Formation content before compilation.
+- The Xcode project file passed property-list validation after the build phase was added.
 
 ## HTML — passed
 

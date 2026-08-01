@@ -153,7 +153,14 @@ private struct SpiritualFormationMenuView: View {
 }
 
 private struct PrayerHubView: View {
+    @EnvironmentObject private var profileService: ProfileService
+
     let formation: SpiritualFormationCatalog
+
+    private var selectedPrayers: [CommonPrayer] {
+        let selectedIds = Set(profileService.profile?.selectedPrayerIds ?? [])
+        return formation.commonPrayers.filter { selectedIds.contains($0.id) }
+    }
 
     var body: some View {
         ZStack {
@@ -197,6 +204,19 @@ private struct PrayerHubView: View {
                         SpiritualMenuRow(title: "Liturgy of the Hours", subtitle: "The daily prayer of the Church", systemImage: "clock")
                     }
                     .buttonStyle(.plain)
+
+                    if !selectedPrayers.isEmpty {
+                        NavigationLink {
+                            SelectedPrayersView(prayers: selectedPrayers)
+                        } label: {
+                            SpiritualMenuRow(
+                                title: "Saved Prayers",
+                                subtitle: "\(selectedPrayers.count) saved for easy access",
+                                systemImage: "bookmark.fill"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding()
             }
@@ -249,6 +269,10 @@ private struct CommonPrayersView: View {
         Set(profileService.profile?.memorizedPrayerIds ?? [])
     }
 
+    private var selectedPrayerIds: Set<String> {
+        Set(profileService.profile?.selectedPrayerIds ?? [])
+    }
+
     var body: some View {
         ZStack {
             IlluminedBackground()
@@ -261,7 +285,8 @@ private struct CommonPrayersView: View {
                         } label: {
                             CommonPrayerRow(
                                 prayer: prayer,
-                                isMemorized: memorizedPrayerIds.contains(prayer.id)
+                                isMemorized: memorizedPrayerIds.contains(prayer.id),
+                                isSelected: selectedPrayerIds.contains(prayer.id)
                             )
                         }
                         .buttonStyle(.plain)
@@ -278,6 +303,7 @@ private struct CommonPrayersView: View {
 private struct CommonPrayerRow: View {
     let prayer: CommonPrayer
     let isMemorized: Bool
+    let isSelected: Bool
 
     var body: some View {
         IlluminedCard {
@@ -293,8 +319,8 @@ private struct CommonPrayerRow: View {
                         .font(IlluminedTheme.font(size: 18, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    if isMemorized {
-                        Text("Memorized")
+                    if isMemorized || isSelected {
+                        Text([isSelected ? "Selected" : nil, isMemorized ? "Memorized" : nil].compactMap { $0 }.joined(separator: " • "))
                             .font(IlluminedTheme.font(size: 13))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
@@ -310,6 +336,94 @@ private struct CommonPrayerRow: View {
     }
 }
 
+private struct SelectedPrayersView: View {
+    @EnvironmentObject private var profileService: ProfileService
+
+    let prayers: [CommonPrayer]
+
+    private var visiblePrayers: [CommonPrayer] {
+        let selectedIds = Set(profileService.profile?.selectedPrayerIds ?? [])
+        return prayers.filter { selectedIds.contains($0.id) }
+    }
+
+    var body: some View {
+        ZStack {
+            IlluminedBackground()
+
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    if visiblePrayers.isEmpty {
+                        IlluminedCard {
+                            Text("No prayers are selected. Return to Common Prayers to add one.")
+                                .font(IlluminedTheme.font(size: 15))
+                                .foregroundStyle(IlluminedTheme.secondaryText)
+                                .multilineTextAlignment(.center)
+                                .frame(maxWidth: .infinity)
+                        }
+                    } else {
+                        ForEach(visiblePrayers) { prayer in
+                            SelectedPrayerRow(prayer: prayer)
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
+        .illuminedBrandHeader()
+        .illuminedNavigation()
+    }
+}
+
+private struct SelectedPrayerRow: View {
+    @EnvironmentObject private var profileService: ProfileService
+
+    let prayer: CommonPrayer
+
+    var body: some View {
+        IlluminedCard {
+            HStack(spacing: 12) {
+                NavigationLink {
+                    CommonPrayerDetailView(prayer: prayer)
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "bookmark.fill")
+                            .font(IlluminedTheme.font(size: 21, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.gold)
+                            .frame(width: 38, height: 38)
+                            .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
+
+                        Text(prayer.title)
+                            .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.ink)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Image(systemName: "chevron.right")
+                            .font(IlluminedTheme.font(size: 12, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.secondaryText)
+                    }
+                }
+                .buttonStyle(.plain)
+
+                Divider()
+                    .frame(height: 32)
+
+                Button {
+                    Task {
+                        await profileService.setCommonPrayerSelected(prayer.id, isSelected: false)
+                    }
+                } label: {
+                    Image(systemName: "bookmark.slash")
+                        .font(IlluminedTheme.font(size: 19, weight: .semibold))
+                        .foregroundStyle(.red)
+                        .frame(width: 38, height: 38)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Remove \(prayer.title) from Selected Prayers")
+            }
+        }
+    }
+}
+
 private struct CommonPrayerDetailView: View {
     @EnvironmentObject private var profileService: ProfileService
 
@@ -317,6 +431,10 @@ private struct CommonPrayerDetailView: View {
 
     private var isMemorized: Bool {
         profileService.profile?.memorizedPrayerIds.contains(prayer.id) == true
+    }
+
+    private var isSelected: Bool {
+        profileService.profile?.selectedPrayerIds.contains(prayer.id) == true
     }
 
     var body: some View {
@@ -355,6 +473,32 @@ private struct CommonPrayerDetailView: View {
                                         .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.ink)
                                     Text(isMemorized ? "Marked as memorized" : "Tap when you have memorized this prayer")
+                                        .font(IlluminedTheme.font(size: 13))
+                                        .foregroundStyle(IlluminedTheme.secondaryText)
+                                }
+
+                                Spacer()
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    IlluminedCard {
+                        Button {
+                            Task {
+                                await profileService.setCommonPrayerSelected(prayer.id, isSelected: !isSelected)
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: isSelected ? "bookmark.fill" : "bookmark")
+                                    .font(IlluminedTheme.font(size: 24, weight: .semibold))
+                                    .foregroundStyle(isSelected ? IlluminedTheme.gold : IlluminedTheme.secondaryText)
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(isSelected ? "Remove from Selected Prayers" : "Add to Selected Prayers")
+                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                        .foregroundStyle(IlluminedTheme.ink)
+                                    Text(isSelected ? "Available in your personal prayer list" : "Keep this prayer close at hand")
                                         .font(IlluminedTheme.font(size: 13))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                 }

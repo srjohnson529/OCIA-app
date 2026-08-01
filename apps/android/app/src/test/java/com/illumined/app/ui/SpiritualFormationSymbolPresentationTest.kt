@@ -21,7 +21,7 @@ class SpiritualFormationSymbolPresentationTest {
 
     @Test
     fun completeCurrentFormationSymbolVocabularyHasScalableDrawings() {
-        assertEquals(21, SpiritualFormationSymbolKind.entries.size)
+        assertEquals(22, SpiritualFormationSymbolKind.entries.size)
     }
 
     @Test

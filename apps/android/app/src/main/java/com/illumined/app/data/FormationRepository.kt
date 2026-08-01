@@ -15,6 +15,7 @@ data class UserProfile(
     val classIds: List<String>,
     val completedLessons: Set<String>,
     val memorizedPrayerIds: Set<String> = emptySet(),
+    val selectedPrayerIds: Set<String> = emptySet(),
     val earnedBadges: Set<String> = emptySet(),
     val completedMysteries: Set<String> = emptySet(),
     val isInstructor: Boolean = false,
@@ -151,6 +152,7 @@ private fun DocumentSnapshot?.toUserProfile(): UserProfile {
         classIds = classIds,
         completedLessons = document?.get("completedLessons").asStringList().toSet(),
         memorizedPrayerIds = document?.get("memorizedPrayerIds").asStringList().toSet(),
+        selectedPrayerIds = document?.get("selectedPrayerIds").asStringList().toSet(),
         earnedBadges = document?.get("earnedBadges").asStringList().toSet(),
         completedMysteries = document?.get("completedMysteries").asStringList().toSet(),
         isInstructor = document?.getBoolean("isInstructor") == true,
@@ -354,6 +356,7 @@ class FormationRepository(
                     classIds = classIds,
                     completedLessons = profileDocument.get("completedLessons").asStringList().toSet(),
                     memorizedPrayerIds = profileDocument.get("memorizedPrayerIds").asStringList().toSet(),
+                    selectedPrayerIds = profileDocument.get("selectedPrayerIds").asStringList().toSet(),
                     earnedBadges = profileDocument.get("earnedBadges").asStringList().toSet(),
                     completedMysteries = profileDocument.get("completedMysteries").asStringList().toSet(),
                     isInstructor = profileDocument.getBoolean("isInstructor") == true,
@@ -626,6 +629,22 @@ class FormationRepository(
         val value = if (memorized) FieldValue.arrayUnion(cleanedPrayerId) else FieldValue.arrayRemove(cleanedPrayerId)
         firestore.collection("userProfiles").document(userId)
             .update("memorizedPrayerIds", value)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener(onError)
+    }
+
+    fun setPrayerSelected(
+        prayerId: String,
+        selected: Boolean,
+        onSuccess: () -> Unit,
+        onError: (Throwable) -> Unit,
+    ) {
+        val userId = auth.currentUser?.uid ?: return onError(IllegalStateException("Please sign in before updating Selected Prayers."))
+        val cleanedPrayerId = FormationProgressWritePolicy.normalizedPrayerId(prayerId)
+            ?: return onSuccess()
+        val value = if (selected) FieldValue.arrayUnion(cleanedPrayerId) else FieldValue.arrayRemove(cleanedPrayerId)
+        firestore.collection("userProfiles").document(userId)
+            .update("selectedPrayerIds", value)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener(onError)
     }

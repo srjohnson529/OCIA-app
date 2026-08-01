@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct ChatView: View {
@@ -161,9 +162,10 @@ private struct ChatBubble: View {
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 }
 
-                Text(message.message)
+                Text(linkedMessage)
                     .font(IlluminedTheme.font(size: 17))
                     .foregroundStyle(isCurrentUser ? .white : IlluminedTheme.ink)
+                    .tint(isCurrentUser ? .white : IlluminedTheme.blue)
                     .lineSpacing(3)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 11)
@@ -185,6 +187,30 @@ private struct ChatBubble: View {
             if !isCurrentUser { Spacer(minLength: 58) }
         }
     }
+
+    private var linkedMessage: AttributedString {
+        let text = message.message
+        var attributed = AttributedString(text)
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+            return attributed
+        }
+
+        let fullRange = NSRange(text.startIndex..<text.endIndex, in: text)
+        for match in detector.matches(in: text, options: [], range: fullRange) {
+            guard
+                let url = match.url,
+                let scheme = url.scheme?.lowercased(),
+                scheme == "http" || scheme == "https",
+                let stringRange = Range(match.range, in: text),
+                let attributedRange = Range(stringRange, in: attributed)
+            else { continue }
+
+            attributed[attributedRange].link = url
+            attributed[attributedRange].underlineStyle = .single
+        }
+
+        return attributed
+    }
 }
 
 private struct ChatInputBar: View {
@@ -194,7 +220,14 @@ private struct ChatInputBar: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 10) {
-            TextField("Message your class", text: $draft, axis: .vertical)
+            TextField(
+                "",
+                text: $draft,
+                prompt: Text("Send Message")
+                    .foregroundStyle(IlluminedTheme.secondaryText),
+                axis: .vertical
+            )
+                .foregroundStyle(IlluminedTheme.ink)
                 .lineLimit(1...4)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 11)

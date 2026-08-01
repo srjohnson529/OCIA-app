@@ -10,6 +10,20 @@ val releaseSigningFile = rootProject.file("keystore.properties")
 val releaseSigning = Properties().apply {
     if (releaseSigningFile.exists()) releaseSigningFile.inputStream().use(::load)
 }
+fun releaseSigningValue(environmentName: String, propertyName: String): String? =
+    providers.environmentVariable(environmentName).orNull
+        ?: releaseSigning.getProperty(propertyName)
+
+val releaseStoreFile = releaseSigningValue("ILLUMINED_UPLOAD_STORE_FILE", "storeFile")
+val releaseStorePassword = releaseSigningValue("ILLUMINED_UPLOAD_STORE_PASSWORD", "storePassword")
+val releaseKeyAlias = releaseSigningValue("ILLUMINED_UPLOAD_KEY_ALIAS", "keyAlias")
+val releaseKeyPassword = releaseSigningValue("ILLUMINED_UPLOAD_KEY_PASSWORD", "keyPassword")
+val hasReleaseSigning = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
 val releaseVersionCode = providers.gradleProperty("ILLUMINED_VERSION_CODE").orNull?.toIntOrNull() ?: 1
 val releaseVersionName = providers.gradleProperty("ILLUMINED_VERSION_NAME").orNull ?: "0.1.0"
 if (hasFirebaseConfig) {
@@ -37,12 +51,12 @@ android {
     }
 
     signingConfigs {
-        if (releaseSigningFile.exists()) {
+        if (hasReleaseSigning) {
             create("release") {
-                storeFile = rootProject.file(requireNotNull(releaseSigning.getProperty("storeFile")) { "keystore.properties requires storeFile" })
-                storePassword = requireNotNull(releaseSigning.getProperty("storePassword")) { "keystore.properties requires storePassword" }
-                keyAlias = requireNotNull(releaseSigning.getProperty("keyAlias")) { "keystore.properties requires keyAlias" }
-                keyPassword = requireNotNull(releaseSigning.getProperty("keyPassword")) { "keystore.properties requires keyPassword" }
+                storeFile = rootProject.file(requireNotNull(releaseStoreFile))
+                storePassword = requireNotNull(releaseStorePassword)
+                keyAlias = requireNotNull(releaseKeyAlias)
+                keyPassword = requireNotNull(releaseKeyPassword)
             }
         }
     }

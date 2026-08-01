@@ -14,6 +14,8 @@ This is the consolidated working home for the Illumined project.
 
 `curriculum/review/` contains human-readable exports intended for clergy, catechetical leaders, and instructors.
 
+`curriculum/spiritual_formation.json` is the canonical Formation catalog for prayers, the Rosary, Lectio Divina, the Liturgy of the Hours, the examination of conscience, and spiritual practices. Copies inside the three applications are generated from this file and must not be edited independently.
+
 ## Documentation
 
 - `docs/PROJECT_MAP.md` explains the folder layout and identifies the source used for each consolidated application.

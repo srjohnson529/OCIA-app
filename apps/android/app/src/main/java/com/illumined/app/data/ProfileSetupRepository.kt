@@ -12,7 +12,7 @@ class ProfileSetupRepository(
     private fun profileData(userId: String, email: String, name: String, classId: String, instructor: Boolean, extra: Map<String, Any> = emptyMap()) =
         mapOf<String, Any>("userId" to userId, "email" to email, "displayName" to name, "isInstructor" to instructor,
             "isAdmin" to false, "classIds" to listOf(classId), "completedLessons" to emptyList<String>(), "earnedBadges" to emptyList<String>(),
-            "completedMysteries" to emptyList<String>(), "memorizedPrayerIds" to emptyList<String>(), "currentLessonIndex" to 0,
+            "completedMysteries" to emptyList<String>(), "memorizedPrayerIds" to emptyList<String>(), "selectedPrayerIds" to emptyList<String>(), "currentLessonIndex" to 0,
             "createdAt" to FieldValue.serverTimestamp(), "username" to name, "classId" to classId) + extra
 
     fun joinStudent(name: String, classId: String, success: () -> Unit, error: (Throwable) -> Unit) {

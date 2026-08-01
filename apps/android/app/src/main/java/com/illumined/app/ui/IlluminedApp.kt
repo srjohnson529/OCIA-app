@@ -677,6 +677,7 @@ private fun FormationHome(userId: String, email: String, onSignOut: () -> Unit) 
                 )
                 FormationSection.Formation -> SpiritualFormationExperience(
                     memorizedPrayerIds = overview?.profile?.memorizedPrayerIds.orEmpty(),
+                    selectedPrayerIds = overview?.profile?.selectedPrayerIds.orEmpty(),
                     completedMysteryIds = overview?.profile?.completedMysteries.orEmpty(),
                     onSetPrayerMemorized = { prayerId, memorized, success, failure ->
                         repository.setPrayerMemorized(
@@ -689,6 +690,25 @@ private fun FormationHome(userId: String, email: String, onSignOut: () -> Unit) 
                                             overview!!.profile.memorizedPrayerIds + prayerId
                                         } else {
                                             overview!!.profile.memorizedPrayerIds - prayerId
+                                        },
+                                    ),
+                                )
+                                success()
+                            },
+                            onError = { failure() },
+                        )
+                    },
+                    onSetPrayerSelected = { prayerId, selected, success, failure ->
+                        repository.setPrayerSelected(
+                            prayerId = prayerId,
+                            selected = selected,
+                            onSuccess = {
+                                overview = overview?.copy(
+                                    profile = overview!!.profile.copy(
+                                        selectedPrayerIds = if (selected) {
+                                            overview!!.profile.selectedPrayerIds + prayerId
+                                        } else {
+                                            overview!!.profile.selectedPrayerIds - prayerId
                                         },
                                     ),
                                 )

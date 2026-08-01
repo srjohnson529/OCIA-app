@@ -187,6 +187,7 @@ test("an instructor cannot self-assign an additional class", async () => {
 test("a learner can update the learner's own formation fields", async () => {
   const db = environment.authenticatedContext("studentA").firestore();
   await assertSucceeds(updateDoc(doc(db, "userProfiles", "studentA"), { completedLessons: ["lesson-1"] }));
+  await assertSucceeds(updateDoc(doc(db, "userProfiles", "studentA"), { selectedPrayerIds: ["our-father"] }));
 });
 
 test("a learner prompt query requires the iOS class and active filters", async () => {

@@ -1108,7 +1108,7 @@ private struct PrayerRequestsCard: View {
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text("The 5 most recent active requests")
+                    Text("Invite your class to pray with you")
                         .font(IlluminedTheme.font(size: 13))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)

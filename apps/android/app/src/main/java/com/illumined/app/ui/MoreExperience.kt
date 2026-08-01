@@ -25,8 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.ListenerRegistration
@@ -197,8 +203,45 @@ private fun ChatBubble(message: ChatMessage, mine: Boolean) {
     Row(Modifier.fillMaxWidth()) { if (mine) Spacer(Modifier.weight(1f)); Column(Modifier.widthIn(max = 290.dp), horizontalAlignment = if (mine) Alignment.End else Alignment.Start) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { Text(message.senderName, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (mine) IlluminedThemeTokens.Blue else IlluminedThemeTokens.Ink); Text(message.timestamp?.toDate()?.let { DateFormat.getTimeInstance(DateFormat.SHORT).format(it) }.orEmpty(), fontSize = 11.sp, color = IlluminedThemeTokens.SecondaryText) }
         Spacer(Modifier.height(5.dp))
-        Surface(shape = RoundedCornerShape(16.dp), color = if (mine) IlluminedThemeTokens.Blue else Color.White.copy(.94f), shadowElevation = 4.dp, border = if (mine) null else BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.20f))) { Text(message.message, Modifier.padding(horizontal = 14.dp, vertical = 11.dp), color = if (mine) Color.White else IlluminedThemeTokens.Ink, fontSize = 17.sp, lineHeight = 20.sp) }
+        Surface(shape = RoundedCornerShape(16.dp), color = if (mine) IlluminedThemeTokens.Blue else Color.White.copy(.94f), shadowElevation = 4.dp, border = if (mine) null else BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.20f))) { ChatMessageText(message.message, mine) }
     }; if (!mine) Spacer(Modifier.weight(1f)) }
+}
+
+@Composable
+private fun ChatMessageText(message: String, mine: Boolean) {
+    val textColor = if (mine) Color.White else IlluminedThemeTokens.Ink
+    val linkColor = if (mine) Color.White else IlluminedThemeTokens.Blue
+    val linkedMessage = remember(message, mine) {
+        buildAnnotatedString {
+            var cursor = 0
+            ChatPresentation.linksIn(message).forEach { link ->
+                append(message.substring(cursor, link.start))
+                withLink(
+                    LinkAnnotation.Url(
+                        url = link.url,
+                        styles = TextLinkStyles(
+                            style = SpanStyle(
+                                color = linkColor,
+                                textDecoration = TextDecoration.Underline,
+                            ),
+                        ),
+                    ),
+                ) {
+                    append(message.substring(link.start, link.endExclusive))
+                }
+                cursor = link.endExclusive
+            }
+            append(message.substring(cursor))
+        }
+    }
+
+    Text(
+        text = linkedMessage,
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
+        color = textColor,
+        fontSize = 17.sp,
+        lineHeight = 20.sp,
+    )
 }
 
 @Composable

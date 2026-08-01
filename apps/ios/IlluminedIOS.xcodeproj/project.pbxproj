@@ -153,6 +153,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = BD39E58530000829001BD86A /* Build configuration list for PBXNativeTarget "IlluminedIOS" */;
 			buildPhases = (
+				BD51E4A030005A0000F6040F /* Validate Formation Content */,
 				BD39E56030000826001BD86A /* Sources */,
 				BD39E56130000826001BD86A /* Frameworks */,
 				BD39E56230000826001BD86A /* Resources */,
@@ -295,6 +296,34 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BD51E4A030005A0000F6040F /* Validate Formation Content */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../../curriculum/spiritual_formation.json",
+				"$(SRCROOT)/../../tools/curriculum/sync_spiritual_formation.py",
+				"$(SRCROOT)/spiritual_formation.json",
+				"$(SRCROOT)/../android/app/src/main/res/raw/spiritual_formation.json",
+				"$(SRCROOT)/../html/spiritual_formation.json",
+			);
+			name = "Validate Formation Content";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"/usr/bin/python3\" \"$SRCROOT/../../tools/curriculum/sync_spiritual_formation.py\" --check\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		BD39E56030000826001BD86A /* Sources */ = {
@@ -462,7 +491,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 46;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6H687K56LY;
 				ENABLE_PREVIEWS = YES;
@@ -503,7 +532,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 46;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6H687K56LY;
 				ENABLE_PREVIEWS = YES;

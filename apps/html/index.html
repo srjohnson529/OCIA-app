@@ -969,6 +969,17 @@ nav button:focus-visible {
     margin: 0;
 }
 
+.message-content a {
+    color: #2457c5;
+    font-weight: 600;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+}
+
+.message.current-user .message-content a {
+    color: #ffffff;
+}
+
 @keyframes slideInMessage {
     from {
         opacity: 0;
@@ -2631,6 +2642,33 @@ nav button:focus-visible {
                 }
                 parent.appendChild(document.createTextNode(line));
             });
+        }
+
+        function appendLinkifiedTextWithLineBreaks(parent, text) {
+            const value = String(text || '');
+            const urlPattern = /\b(?:https?:\/\/|www\.)[^\s<>"']+/gi;
+            const trailingPunctuation = /[.,!?;:)\]}]+$/;
+            let cursor = 0;
+
+            for (const match of value.matchAll(urlPattern)) {
+                const displayedUrl = match[0].replace(trailingPunctuation, '');
+                if (!displayedUrl) continue;
+
+                appendTextWithLineBreaks(parent, value.slice(cursor, match.index));
+
+                const link = document.createElement('a');
+                link.href = displayedUrl.toLowerCase().startsWith('www.')
+                    ? `https://${displayedUrl}`
+                    : displayedUrl;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = displayedUrl;
+                parent.appendChild(link);
+
+                cursor = match.index + displayedUrl.length;
+            }
+
+            appendTextWithLineBreaks(parent, value.slice(cursor));
         }
 
         // Sample Lessons Data (Dynamically generated categories)
@@ -4603,7 +4641,7 @@ function displayMessage(messageData) {
 
     const content = document.createElement('div');
     content.className = 'message-content';
-    appendTextWithLineBreaks(content, messageText);
+    appendLinkifiedTextWithLineBreaks(content, messageText);
 
     bubble.appendChild(content);
     messageDiv.appendChild(header);

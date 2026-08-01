@@ -13,6 +13,7 @@ struct UserProfile: Identifiable, Codable, Equatable {
     var earnedBadges: [String]
     var completedMysteries: [String]
     var memorizedPrayerIds: [String]
+    var selectedPrayerIds: [String]
     var currentLessonIndex: Int
     var createdAt: Timestamp?
 
@@ -31,6 +32,7 @@ struct UserProfile: Identifiable, Codable, Equatable {
         case earnedBadges
         case completedMysteries
         case memorizedPrayerIds
+        case selectedPrayerIds
         case currentLessonIndex
         case createdAt
     }
@@ -46,6 +48,7 @@ struct UserProfile: Identifiable, Codable, Equatable {
         earnedBadges: [String],
         completedMysteries: [String],
         memorizedPrayerIds: [String],
+        selectedPrayerIds: [String] = [],
         currentLessonIndex: Int,
         createdAt: Timestamp?
     ) {
@@ -59,6 +62,7 @@ struct UserProfile: Identifiable, Codable, Equatable {
         self.earnedBadges = earnedBadges
         self.completedMysteries = completedMysteries
         self.memorizedPrayerIds = memorizedPrayerIds
+        self.selectedPrayerIds = selectedPrayerIds
         self.currentLessonIndex = currentLessonIndex
         self.createdAt = createdAt
     }
@@ -76,6 +80,7 @@ struct UserProfile: Identifiable, Codable, Equatable {
         earnedBadges = try container.decodeIfPresent([String].self, forKey: .earnedBadges) ?? []
         completedMysteries = try container.decodeIfPresent([String].self, forKey: .completedMysteries) ?? []
         memorizedPrayerIds = try container.decodeIfPresent([String].self, forKey: .memorizedPrayerIds) ?? []
+        selectedPrayerIds = try container.decodeIfPresent([String].self, forKey: .selectedPrayerIds) ?? []
         currentLessonIndex = try container.decodeIfPresent(Int.self, forKey: .currentLessonIndex) ?? 0
         createdAt = try container.decodeIfPresent(Timestamp.self, forKey: .createdAt)
     }
@@ -91,6 +96,7 @@ struct UserProfile: Identifiable, Codable, Equatable {
             earnedBadges: [],
             completedMysteries: [],
             memorizedPrayerIds: [],
+            selectedPrayerIds: [],
             currentLessonIndex: 0,
             createdAt: nil
         )

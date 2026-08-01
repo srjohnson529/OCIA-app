@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 
 internal enum class SpiritualFormationSymbolKind {
-    Prayers, Search, Church, Walking, Book, RosaryGrid, TextBook, Clock,
+    Prayers, Search, Church, Walking, Book, Bookmark, RosaryGrid, TextBook, Clock,
     PlayCircle, Checklist, SquareOff, SquareOn, CheckSeal, CheckCircle,
     Link, Sunrise, Sun, Sunset, MoonStars, Speaker, MusicTv,
 }
@@ -58,6 +58,7 @@ internal fun SpiritualFormationSymbol(kind: SpiritualFormationSymbolKind, color:
                 SpiritualFormationSymbolKind.Search -> { drawCircle(color,size.minDimension*.27f,Offset(size.width*.42f,size.height*.42f),style=stroke);drawLine(color,Offset(size.width*.61f,size.height*.61f),Offset(size.width*.88f,size.height*.88f),w) }
                 SpiritualFormationSymbolKind.RosaryGrid -> { listOf(.25f,.5f,.75f).forEach{x->listOf(.25f,.5f,.75f).forEach{y->drawCircle(color,size.minDimension*.055f,Offset(size.width*x,size.height*y),style=stroke)}};drawLine(color,Offset(size.width*.5f,size.height*.02f),Offset(size.width*.5f,size.height*.18f),w);drawLine(color,Offset(size.width*.43f,size.height*.09f),Offset(size.width*.57f,size.height*.09f),w) }
                 SpiritualFormationSymbolKind.TextBook -> book(true)
+                SpiritualFormationSymbolKind.Bookmark -> { val p=Path().apply{moveTo(size.width*.26f,size.height*.1f);lineTo(size.width*.74f,size.height*.1f);lineTo(size.width*.74f,size.height*.9f);lineTo(size.width*.5f,size.height*.72f);lineTo(size.width*.26f,size.height*.9f);close()};drawPath(p,color,style=stroke) }
                 SpiritualFormationSymbolKind.Checklist -> { listOf(.25f,.5f,.75f).forEach{y->drawLine(color,Offset(size.width*.1f,size.height*y),Offset(size.width*.18f,size.height*(y+.07f)),w);drawLine(color,Offset(size.width*.18f,size.height*(y+.07f)),Offset(size.width*.29f,size.height*(y-.06f)),w);drawLine(color,Offset(size.width*.39f,size.height*y),Offset(size.width*.9f,size.height*y),w)} }
                 SpiritualFormationSymbolKind.SquareOff, SpiritualFormationSymbolKind.SquareOn -> { drawRoundRect(color,Offset(size.width*.1f,size.height*.1f),Size(size.width*.8f,size.height*.8f),style=stroke);if(kind==SpiritualFormationSymbolKind.SquareOn){val p=Path().apply{moveTo(size.width*.25f,size.height*.5f);lineTo(size.width*.43f,size.height*.68f);lineTo(size.width*.76f,size.height*.32f)};drawPath(p,color,style=stroke)} }
                 SpiritualFormationSymbolKind.Link -> { drawArc(color,135f,180f,false,Offset(size.width*.05f,size.height*.27f),Size(size.width*.52f,size.height*.52f),style=stroke);drawArc(color,-45f,180f,false,Offset(size.width*.43f,size.height*.21f),Size(size.width*.52f,size.height*.52f),style=stroke);drawLine(color,Offset(size.width*.34f,size.height*.62f),Offset(size.width*.66f,size.height*.38f),w) }
