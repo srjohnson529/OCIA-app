@@ -2735,6 +2735,36 @@ nav button:focus-visible {
             });
         }
 
+        function appendLinkifiedTextWithLineBreaks(parent, text) {
+            const value = String(text || '');
+            const urlPattern = /\b(?:(?:https?:\/\/|www\.)[^\s<>"']+|(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}(?::\d{2,5})?(?:\/[^\s<>"']*)?)/gi;
+            const trailingPunctuation = /[.,!?;:)\]}]+$/;
+            let cursor = 0;
+
+            for (const match of value.matchAll(urlPattern)) {
+                // Do not turn the domain portion of an email address into a link.
+                if (match.index > 0 && value[match.index - 1] === '@') continue;
+
+                const displayedUrl = match[0].replace(trailingPunctuation, '');
+                if (!displayedUrl) continue;
+
+                appendTextWithLineBreaks(parent, value.slice(cursor, match.index));
+
+                const link = document.createElement('a');
+                link.href = /^https?:\/\//i.test(displayedUrl)
+                    ? displayedUrl
+                    : `https://${displayedUrl}`;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = displayedUrl;
+                parent.appendChild(link);
+
+                cursor = match.index + displayedUrl.length;
+            }
+
+            appendTextWithLineBreaks(parent, value.slice(cursor));
+        }
+
         // Sample Lessons Data (Dynamically generated categories)
         let lessonsData = [];
 
@@ -4754,7 +4784,7 @@ function displayMessage(messageData) {
 
     const content = document.createElement('div');
     content.className = 'message-content';
-    appendTextWithLineBreaks(content, messageText);
+    appendLinkifiedTextWithLineBreaks(content, messageText);
 
     bubble.appendChild(content);
     messageDiv.appendChild(header);
