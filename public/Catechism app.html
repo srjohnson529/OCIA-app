@@ -2814,7 +2814,8 @@ nav button:focus-visible {
         async function mergeClassroomLessons(canonicalLessons, classId, includeDrafts = false) {
             if (!currentUser || !classId) return canonicalLessons.map(lesson => ({ ...lesson, lessonSource: 'canonical' }));
             const collections = classroomLessonCollections(classId);
-            const [overrideSnapshot, customSnapshot, settingsSnapshot] = await Promise.all([collections.overrides.get(), collections.custom.get(), collections.lessonSettings.get()]);
+            const customLessonsQuery = includeDrafts ? collections.custom : collections.custom.where('isPublished', '==', true);
+            const [overrideSnapshot, customSnapshot, settingsSnapshot] = await Promise.all([collections.overrides.get(), customLessonsQuery.get(), collections.lessonSettings.get()]);
             const settings = settingsSnapshot.exists ? settingsSnapshot.data() : {};
             const hiddenCategories = new Set(Array.isArray(settings.hiddenCanonicalCategories) ? settings.hiddenCanonicalCategories : []);
             const showClassroomLessons = settings.showClassroomLessons !== false;
