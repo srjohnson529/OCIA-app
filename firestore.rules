@@ -29,6 +29,10 @@ service cloud.firestore {
       return isInClass(classId) || isInstructor();
     }
 
+    function canTeachClass(classId) {
+      return isInstructor() && isInClass(classId);
+    }
+
     match /userProfiles/{userId} {
       allow create: if isOwnDocument(userId);
       allow read: if isOwnDocument(userId) || isInstructor();
@@ -159,9 +163,20 @@ service cloud.firestore {
       allow update, delete: if signedIn() && (resource.data.instructorId == request.auth.uid || isInstructor());
     }
 
+    match /classrooms/{classId}/lessonOverrides/{lessonId} {
+      allow read: if isInClass(classId);
+      allow create, update, delete: if canTeachClass(classId);
+    }
+
+    match /classrooms/{classId}/customLessons/{lessonId} {
+      allow read: if isInClass(classId) && resource.data.isPublished != false;
+      allow read: if canTeachClass(classId);
+      allow create, update, delete: if canTeachClass(classId);
+    }
+
     match /lessons/{lessonId} {
       allow read: if signedIn();
-      allow create, update, delete: if isInstructor();
+      allow write: if false;
     }
 
     match /{document=**} {
