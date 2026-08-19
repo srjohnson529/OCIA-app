@@ -82,7 +82,8 @@ fun LessonsExperience(
     ) -> Unit,
 ) {
     val context = LocalContext.current
-    val catalogResult = remember { LessonCatalog.load(context.applicationContext) }
+    val classId = profile?.classIds?.firstOrNull().orEmpty()
+    var catalogResult by remember { mutableStateOf(LessonCatalog.load(context.applicationContext)) }
     val categories = catalogResult.getOrNull().orEmpty()
     var selectedCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedLessonId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -96,7 +97,10 @@ fun LessonsExperience(
     val selectedDiscussion = prompts.firstOrNull { it.id == selectedDiscussionId }
     var completedPromptIds by remember { mutableStateOf(emptySet<String>()) }
     val discussionRepository = remember { DiscussionRepository() }
-    val classId = profile?.classIds?.firstOrNull().orEmpty()
+    DisposableEffect(classId) {
+        val listener = LessonCatalog.listenForClassroom(context.applicationContext, classId) { catalogResult = it }
+        onDispose { listener.close() }
+    }
     DisposableEffect(classId, userId) {
         val listener = if (classId.isNotBlank()) discussionRepository.listenParticipation(classId, userId, { completedPromptIds = it }, {}) else null
         onDispose { listener?.remove() }

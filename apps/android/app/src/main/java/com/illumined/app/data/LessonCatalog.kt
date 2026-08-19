@@ -2,6 +2,8 @@ package com.illumined.app.data
 
 import android.content.Context
 import com.illumined.app.R
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -35,6 +37,66 @@ object LessonCatalog {
     )
 
     fun load(context: Context): Result<List<LessonCategory>> = runCatching {
+        grouped(bundledLessons(context))
+    }
+
+    fun listenForClassroom(
+        context: Context,
+        classId: String,
+        onUpdate: (Result<List<LessonCategory>>) -> Unit,
+    ): AutoCloseable {
+        val canonical = runCatching { bundledLessons(context) }.getOrElse {
+            onUpdate(Result.failure(it))
+            return AutoCloseable { }
+        }
+        if (classId.isBlank()) {
+            onUpdate(Result.success(grouped(canonical)))
+            return AutoCloseable { }
+        }
+
+        val classroom = FirebaseFirestore.getInstance().collection("classrooms").document(classId)
+        var overrides: Map<String, Map<String, Any>>? = null
+        var customLessons: List<Pair<String, Map<String, Any>>>? = null
+        var hiddenCategories: Set<String>? = null
+        var showClassroomLessons: Boolean? = null
+
+        fun publish() {
+            val overrideData = overrides ?: return
+            val customData = customLessons ?: return
+            val hidden = hiddenCategories ?: return
+            val showCustom = showClassroomLessons ?: return
+            val merged = canonical.filterNot { it.category in hidden }.map { lesson ->
+                overrideData[lesson.id]?.toLesson(lesson.id, lesson) ?: lesson
+            }.toMutableList()
+            if (showCustom) customData.mapNotNullTo(merged) { (id, data) -> data.toLesson(id, null) }
+            onUpdate(Result.success(grouped(merged)))
+        }
+
+        fun fail(error: Exception?) {
+            onUpdate(Result.failure(error ?: IllegalStateException("Classroom lessons could not be loaded.")))
+        }
+
+        val listeners = mutableListOf<ListenerRegistration>()
+        listeners += classroom.collection("lessonOverrides").addSnapshotListener { snapshot, error ->
+            if (error != null) return@addSnapshotListener fail(error)
+            overrides = snapshot?.documents?.associate { it.id to it.data.orEmpty() }.orEmpty()
+            publish()
+        }
+        listeners += classroom.collection("customLessons").whereEqualTo("isPublished", true).addSnapshotListener { snapshot, error ->
+            if (error != null) return@addSnapshotListener fail(error)
+            customLessons = snapshot?.documents?.map { it.id to it.data.orEmpty() }.orEmpty()
+            publish()
+        }
+        listeners += classroom.collection("settings").document("lessonLibrary").addSnapshotListener { snapshot, error ->
+            if (error != null) return@addSnapshotListener fail(error)
+            hiddenCategories = (snapshot?.get("hiddenCanonicalCategories") as? List<*>)?.filterIsInstance<String>()?.toSet().orEmpty()
+            showClassroomLessons = snapshot?.getBoolean("showClassroomLessons") ?: true
+            publish()
+        }
+        return AutoCloseable { listeners.forEach(ListenerRegistration::remove) }
+    }
+
+    private fun bundledLessons(context: Context): List<CatechismLesson> {
         val json = context.resources.openRawResource(R.raw.lessons)
             .bufferedReader()
             .use { it.readText() }
@@ -45,12 +107,45 @@ object LessonCatalog {
             }
         }
 
-        categoryOrder.mapNotNull { categoryName ->
+        return lessons
+    }
+
+    private fun grouped(lessons: List<CatechismLesson>): List<LessonCategory> {
+        val order = categoryOrder + lessons.map { it.category }.filterNot { it in categoryOrder }.distinct()
+        return order.mapNotNull { categoryName ->
             lessons.filter { it.category == categoryName }
                 .takeIf { it.isNotEmpty() }
                 ?.let { LessonCategory(categoryName, it) }
         }
     }
+}
+
+private fun Map<String, Any>.toLesson(id: String, fallback: CatechismLesson?): CatechismLesson? {
+    val title = this["title"] as? String ?: fallback?.title ?: return null
+    val category = this["category"] as? String ?: fallback?.category ?: "Classroom Lessons"
+    val content = this["content"] as? String ?: this["contentHTML"] as? String ?: fallback?.contentHtml.orEmpty()
+    val quizData = this["quiz"] as? List<*>
+    val quiz = if (quizData == null) fallback?.quiz.orEmpty() else quizData.mapIndexedNotNull { index, value ->
+        val item = value as? Map<*, *> ?: return@mapIndexedNotNull null
+        val question = item["question"] as? String ?: return@mapIndexedNotNull null
+        val options = (item["options"] as? List<*>)?.filterIsInstance<String>() ?: return@mapIndexedNotNull null
+        QuizQuestion(
+            id = item["id"] as? String ?: "$index-${question.hashCode()}",
+            question = question,
+            options = options,
+            correctAnswerIndex = (item["correct"] as? Number)?.toInt()
+                ?: (item["correctAnswerIndex"] as? Number)?.toInt()
+                ?: 0,
+        )
+    }
+    return CatechismLesson(
+        id = id,
+        title = title,
+        category = category,
+        contentHtml = content,
+        videoUrl = this["videoUrl"] as? String ?: fallback?.videoUrl,
+        quiz = quiz,
+    )
 }
 
 private fun JSONObject.toLesson(): CatechismLesson {
