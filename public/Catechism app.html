@@ -1857,6 +1857,7 @@ nav button:focus-visible {
     from { opacity: 1; transform: translate(-50%, -50%); }
     to { opacity: 0; transform: translate(-50%, -60%); }
 }
+    .instructor-shell{max-width:1180px;margin:auto;display:grid;gap:18px}.instructor-hero{display:flex;justify-content:space-between;gap:24px;align-items:end;padding:26px;border-radius:22px;background:linear-gradient(135deg,#183654,#3b6fa0);color:#fff;box-shadow:0 14px 34px rgba(0,0,0,.16)}.instructor-hero h2{margin:.2rem 0}.instructor-hero p{margin:0;max-width:620px}.instructor-class-picker{display:grid;gap:8px;min-width:260px}.instructor-class-picker select,.instructor-form input,.instructor-form textarea,.instructor-form select{width:100%;box-sizing:border-box;border:1px solid rgba(59,111,160,.25);border-radius:12px;background:#fff;padding:12px;font:inherit}.instructor-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.instructor-stat{padding:18px;border-radius:16px;background:#fff;border:1px solid rgba(191,148,74,.22);box-shadow:0 8px 20px rgba(0,0,0,.07)}.instructor-stat strong{display:block;font-size:1.7rem;color:#3b6fa0}.instructor-tabs{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.instructor-tabs button{white-space:nowrap;border:1px solid rgba(59,111,160,.2);border-radius:999px;padding:10px 15px;background:#fff;color:#274e73;font:inherit;font-weight:700;cursor:pointer}.instructor-tabs button.active{background:#3b6fa0;color:#fff}.instructor-panel{background:rgba(255,255,255,.95);border:1px solid rgba(191,148,74,.22);border-radius:20px;padding:22px;min-height:300px}.instructor-grid{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(360px,1.2fr);gap:20px}.instructor-form,.instructor-list{display:grid;gap:12px}.instructor-card{padding:15px;border:1px solid rgba(59,111,160,.15);border-radius:14px;background:#f9faf9}.instructor-card h4{margin:0 0 5px}.instructor-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.instructor-actions button{border:0;border-radius:999px;padding:8px 12px;background:#e8f0f7;color:#274e73;font:inherit;font-weight:700;cursor:pointer}.instructor-actions button.danger{background:#f8e7e5;color:#8b2f29}.progress-meter{height:8px;border-radius:999px;background:#e3e6e8;overflow:hidden;margin-top:8px}.progress-meter span{display:block;height:100%;background:#bf944a}.muted{color:#666;font-size:.92rem}@media(max-width:760px){.instructor-hero{align-items:stretch;flex-direction:column}.instructor-class-picker{min-width:0}.instructor-summary{grid-template-columns:repeat(2,1fr)}.instructor-grid{grid-template-columns:1fr}.instructor-panel{padding:15px}}
     </style>
 </head>
 <body class="auth-locked">
@@ -1886,6 +1887,7 @@ nav button:focus-visible {
         <button id="chat-menu-button">Chat</button>
         <button id="resources-nav-button">Resources</button>
         <button id="achievements-nav-button">Achievements</button>
+        <button id="instructor-nav-button" class="hidden">Instructor Tools</button>
         <button id="quit-nav-button">Account</button>
     </nav>
 
@@ -2550,7 +2552,7 @@ nav button:focus-visible {
                 <button id="forgot-password-button" class="button-theme" type="button">Forgot Password</button>
             </div>
             <div id="auth-status-message" class="auth-message" aria-live="polite"></div>
-            <p class="auth-note">Instructor and admin tools are managed in the iOS app. The web version is the student-facing companion.</p>
+            <p class="auth-note">Student and instructor accounts use the same secure Illumined sign-in. Instructor tools appear automatically for authorized profiles.</p>
         </div>
 
         <div id="profile-details-card" class="auth-card hidden">
@@ -2563,6 +2565,21 @@ nav button:focus-visible {
                 <button id="profile-signout-button" class="button-theme" type="button">Sign Out</button>
             </div>
         </div>
+    </div>
+</section>
+
+<section id="instructor-section" class="hidden">
+    <div class="instructor-shell">
+        <div class="instructor-hero">
+            <div><div class="auth-kicker">Illumined OCIA</div><h2>Instructor Workspace</h2><p>Plan formation, care for your class, and see how students are progressing.</p></div>
+            <div class="instructor-class-picker"><label for="instructor-class-select">Active classroom</label><select id="instructor-class-select"></select><button class="button-theme" id="instructor-open-chat">Open classroom chat</button></div>
+        </div>
+        <div id="instructor-summary" class="instructor-summary"></div>
+        <div class="instructor-tabs" role="tablist">
+            <button data-instructor-tab="lessons">Lessons</button><button data-instructor-tab="classes">Classrooms</button><button data-instructor-tab="announcements">Announcements</button><button data-instructor-tab="prayers">Prayer requests</button><button data-instructor-tab="progress">Student progress</button><button data-instructor-tab="schedule">Schedule</button>
+        </div>
+        <div id="instructor-panel" class="instructor-panel"></div>
+        <button class="button-theme" id="instructor-back-button">Back to dashboard</button>
     </div>
 </section>
 
@@ -2723,6 +2740,7 @@ nav button:focus-visible {
             if (passwordInput) passwordInput.value = '';
             showProfileDetailsCard(false);
             setAuthenticatedShell(false);
+            document.getElementById('instructor-nav-button')?.classList.add('hidden');
         }
 
         function appendTextWithLineBreaks(parent, text) {
@@ -2781,7 +2799,7 @@ nav button:focus-visible {
                     'Life in Christ',
                     'Christian Prayer'
                 ];
-                const normalizedLessons = (catalog.lessons || []).map(lesson => ({
+                let normalizedLessons = (catalog.lessons || []).map(lesson => ({
                     ...lesson,
                     content: lesson.content || lesson.contentHTML || '',
                     videoUrl: lesson.videoUrl || null,
@@ -2793,6 +2811,15 @@ nav button:focus-visible {
                         }))
                 }));
 
+                if (currentUser) {
+                    try {
+                        const managed = await db.collection('lessons').get();
+                        const byId = new Map(normalizedLessons.map(lesson => [lesson.id, lesson]));
+                        managed.forEach(doc => byId.set(doc.id, { id: doc.id, ...byId.get(doc.id), ...doc.data() }));
+                        normalizedLessons = [...byId.values()];
+                    } catch (error) { console.warn('Managed lesson overrides unavailable.', error); }
+                }
+                normalizedLessons.forEach(lesson => { if (lesson.category && !categoryOrder.includes(lesson.category)) categoryOrder.push(lesson.category); });
                 lessonsData = categoryOrder.map(category => ({
                     category,
                     lessons: normalizedLessons.filter(lesson => lesson.category === category)
@@ -4413,6 +4440,7 @@ auth.onAuthStateChanged(async (user) => {
 // Helper function to update UI for authenticated users
 function updateUIForAuthenticatedUser() {
     if (!userProfile) return;
+    document.getElementById('instructor-nav-button')?.classList.toggle('hidden', userProfile.isInstructor !== true);
     setAuthenticatedShell(true);
     setAuthStatus('');
     
@@ -4639,6 +4667,7 @@ async function loadUserProfile() {
                 userProfile = {
                     username: profileData.displayName || profileData.username || 'User', // Use displayName first, then username
                     classId: profileData.classIds && profileData.classIds.length > 0 ? profileData.classIds[0] : profileData.classId || '',
+                    classIds: profileData.classIds || (profileData.classId ? [profileData.classId] : []),
                     completedLessons: profileData.completedLessons || [],
                     earnedBadges: profileData.earnedBadges || [],
                     completedMysteries: profileData.completedMysteries || [],
@@ -4649,6 +4678,7 @@ async function loadUserProfile() {
                 };
                 
                 console.log('Profile updated:', userProfile);
+                loadSharedLessons().then(updateDashboard);
                 showProfileDetailsCard(false);
                 updateUIForAuthenticatedUser();
                 updateDashboard();
@@ -4856,7 +4886,7 @@ function setupPrayerRequestListener() {
 
                 if (expiresAt && expiresAt <= now) {
                     expiredRequests.push(request);
-                } else {
+                } else if (request.isHidden !== true || userProfile.isInstructor === true) {
                     requests.push(request);
                 }
             });
@@ -5575,6 +5605,50 @@ async function submitPrayerRequest() {
 
 
 
+        let instructorTab = 'lessons';
+        let instructorClassId = '';
+        const esc = value => String(value ?? '').replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+        const instructorTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
+        function requireInstructor() { if (!userProfile?.isInstructor) { showCustomAlert('Instructor access is required.'); return false; } return true; }
+        function instructorClasses() { return [...new Set((userProfile?.classIds || [userProfile?.classId]).filter(Boolean))]; }
+        function formValue(id) { return document.getElementById(id)?.value.trim() || ''; }
+        function instructorCard(title, meta, body, actions='') { return `<article class="instructor-card"><h4>${esc(title)}</h4><div class="muted">${esc(meta)}</div>${body ? `<p>${esc(body)}</p>` : ''}${actions ? `<div class="instructor-actions">${actions}</div>` : ''}</article>`; }
+        async function openInstructorWorkspace(tab='lessons') {
+            if (!requireInstructor()) return;
+            const ids = instructorClasses(); instructorClassId = instructorClassId && ids.includes(instructorClassId) ? instructorClassId : (userProfile.classId || ids[0] || '');
+            const picker = document.getElementById('instructor-class-select'); picker.innerHTML = ids.map(id => `<option ${id===instructorClassId?'selected':''}>${esc(id)}</option>`).join('') || '<option value="">Create a classroom</option>';
+            instructorTab = tab; showSection('instructor-section'); await renderInstructorWorkspace();
+        }
+        async function renderInstructorWorkspace() {
+            document.querySelectorAll('[data-instructor-tab]').forEach(b => b.classList.toggle('active', b.dataset.instructorTab===instructorTab));
+            const panel=document.getElementById('instructor-panel'); panel.innerHTML='<p class="muted">Loading instructor data…</p>';
+            try {
+                const [students, schedule, prayers] = instructorClassId ? await Promise.all([
+                    db.collection('userProfiles').where('classIds','array-contains',instructorClassId).get(), db.collection('classSchedule').where('classId','==',instructorClassId).get(), db.collection('prayerRequests').where('classId','==',instructorClassId).get()
+                ]) : [{docs:[]},{docs:[]},{docs:[]}];
+                const studentCount=students.docs.filter(d=>d.data().isInstructor!==true).length;
+                document.getElementById('instructor-summary').innerHTML=[['Class ID',instructorClassId||'—'],['Students',studentCount],['Sessions',schedule.size||0],['Prayer requests',prayers.size||0]].map(([l,v])=>`<div class="instructor-stat"><strong>${esc(v)}</strong>${esc(l)}</div>`).join('');
+                await ({lessons:renderInstructorLessons,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
+            } catch(error) { panel.innerHTML=`<p class="student-firestore-empty">${esc(error.message)}</p>`; }
+        }
+        async function renderInstructorLessons(panel) {
+            const snap=await db.collection('lessons').get(); const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+            panel.innerHTML=`<div class="instructor-grid"><form id="lesson-editor" class="instructor-form"><h3>Create or edit lesson</h3><input id="inst-lesson-id" placeholder="Lesson ID" required><input id="inst-lesson-title" placeholder="Lesson title" required><input id="inst-lesson-category" placeholder="Category" required><input id="inst-lesson-video" placeholder="Video URL (optional)"><textarea id="inst-lesson-content" rows="10" placeholder="Lesson content (HTML supported)" required></textarea><textarea id="inst-lesson-quiz" rows="5" placeholder='Quiz JSON (optional)'></textarea><button class="button-theme">Save lesson</button><p class="muted">Published Firestore lessons override matching bundled lessons for signed-in students.</p></form><div class="instructor-list"><h3>Managed lessons</h3>${rows.length?rows.map(x=>instructorCard(x.title||x.id,x.category||'Uncategorized','',`<button data-edit-lesson="${esc(x.id)}">Edit</button><button class="danger" data-delete-doc="lessons:${esc(x.id)}">Delete</button>`)).join(''):'<p class="muted">No Firestore lesson overrides yet. The bundled catalog remains available.</p>'}</div></div>`;
+            panel.querySelector('#lesson-editor').onsubmit=async e=>{e.preventDefault();let quiz=[];try{quiz=formValue('inst-lesson-quiz')?JSON.parse(formValue('inst-lesson-quiz')):[];}catch{showCustomAlert('Quiz must be valid JSON.');return;}const id=formValue('inst-lesson-id');await db.collection('lessons').doc(id).set({title:formValue('inst-lesson-title'),category:formValue('inst-lesson-category'),content:formValue('inst-lesson-content'),videoUrl:formValue('inst-lesson-video')||null,quiz,updatedAt:instructorTimestamp(),updatedBy:currentUser.uid},{merge:true});await loadSharedLessons();await renderInstructorWorkspace();};
+            panel.querySelectorAll('[data-edit-lesson]').forEach(b=>b.onclick=()=>{const x=rows.find(r=>r.id===b.dataset.editLesson);document.getElementById('inst-lesson-id').value=x.id;document.getElementById('inst-lesson-title').value=x.title||'';document.getElementById('inst-lesson-category').value=x.category||'';document.getElementById('inst-lesson-video').value=x.videoUrl||'';document.getElementById('inst-lesson-content').value=x.content||x.contentHTML||'';document.getElementById('inst-lesson-quiz').value=JSON.stringify(x.quiz||[],null,2);}); bindInstructorDeletes(panel);
+        }
+        async function renderInstructorClasses(panel) {
+            const ids=instructorClasses(); const snaps=await Promise.all(ids.map(id=>db.collection('classrooms').doc(id).get()));
+            panel.innerHTML=`<div class="instructor-grid"><form id="class-editor" class="instructor-form"><h3>Create classroom</h3><input id="class-id-new" placeholder="Class ID (for example STMARK2026)" required><input id="class-name-new" placeholder="Classroom or parish name" required><button class="button-theme">Create classroom</button></form><div class="instructor-list"><h3>Your classrooms</h3>${snaps.map((s,i)=>{const x=s.data()||{};return instructorCard(x.name||ids[i],`Class ID: ${ids[i]}`,x.isArchived?'Archived':'Active',`<button data-select-class="${esc(ids[i])}">Manage</button><button data-toggle-archive="${esc(ids[i])}">${x.isArchived?'Restore':'Archive'}</button>`)}).join('')||'<p class="muted">No classrooms yet.</p>'}</div></div>`;
+            panel.querySelector('#class-editor').onsubmit=async e=>{e.preventDefault();const id=formValue('class-id-new').toUpperCase().replace(/\s+/g,''),ref=db.collection('classrooms').doc(id),existing=await ref.get();if(existing.exists){showCustomAlert('That class ID is already in use. Choose another.');return;}await ref.set({name:formValue('class-name-new'),instructorId:currentUser.uid,createdBy:currentUser.uid,isArchived:false,createdAt:instructorTimestamp()});const ids=[...new Set([...instructorClasses(),id])];await db.collection('userProfiles').doc(currentUser.uid).update({classIds:ids,classId:id});instructorClassId=id;await renderInstructorWorkspace();};
+            panel.querySelectorAll('[data-select-class]').forEach(b=>b.onclick=async()=>{instructorClassId=b.dataset.selectClass;userProfile.classId=instructorClassId;document.getElementById('instructor-class-select').value=instructorClassId;await renderInstructorWorkspace();});panel.querySelectorAll('[data-toggle-archive]').forEach(b=>b.onclick=async()=>{const ref=db.collection('classrooms').doc(b.dataset.toggleArchive),s=await ref.get();await ref.update({isArchived:s.data()?.isArchived!==true,updatedAt:instructorTimestamp()});await renderInstructorWorkspace();});
+        }
+        async function renderInstructorAnnouncements(panel) { const snap=await db.collection('announcements').where('classId','==',instructorClassId).get();const rows=snap.docs.map(d=>({id:d.id,...d.data()}));panel.innerHTML=`<div class="instructor-grid"><form id="announcement-editor" class="instructor-form"><h3>Post announcement</h3><input type="hidden" id="announcement-id"><input id="announcement-title" placeholder="Title" required><textarea id="announcement-message" rows="6" placeholder="Message" required></textarea><label><input id="announcement-active" type="checkbox" checked> Visible to students</label><button class="button-theme">Save announcement</button></form><div class="instructor-list"><h3>Announcements</h3>${rows.map(x=>instructorCard(x.title,x.isActive===false?'Hidden':'Visible',x.message,`<button data-edit-announcement="${x.id}">Edit</button><button class="danger" data-delete-doc="announcements:${x.id}">Delete</button>`)).join('')||'<p class="muted">No announcements yet.</p>'}</div></div>`;panel.querySelector('form').onsubmit=async e=>{e.preventDefault();const id=formValue('announcement-id');const ref=id?db.collection('announcements').doc(id):db.collection('announcements').doc();await ref.set({classId:instructorClassId,title:formValue('announcement-title'),message:formValue('announcement-message'),isActive:document.getElementById('announcement-active').checked,createdBy:currentUser.uid,updatedAt:instructorTimestamp()},{merge:true});await renderInstructorWorkspace();};panel.querySelectorAll('[data-edit-announcement]').forEach(b=>b.onclick=()=>{const x=rows.find(r=>r.id===b.dataset.editAnnouncement);document.getElementById('announcement-id').value=x.id;document.getElementById('announcement-title').value=x.title||'';document.getElementById('announcement-message').value=x.message||'';document.getElementById('announcement-active').checked=x.isActive!==false;});bindInstructorDeletes(panel); }
+        async function renderInstructorPrayers(panel){const snap=await db.collection('prayerRequests').where('classId','==',instructorClassId).get();const rows=snap.docs.map(d=>({id:d.id,...d.data()}));panel.innerHTML=`<h3>Prayer request moderation</h3><div class="instructor-list">${rows.map(x=>instructorCard(x.title||'Prayer request',x.requesterName||'Class member',x.details,`<button data-toggle-prayer="${x.id}">${x.isHidden?'Restore':'Hide'}</button><button class="danger" data-delete-doc="prayerRequests:${x.id}">Delete</button>`)).join('')||'<p class="muted">No prayer requests in this class.</p>'}</div>`;panel.querySelectorAll('[data-toggle-prayer]').forEach(b=>b.onclick=async()=>{const ref=db.collection('prayerRequests').doc(b.dataset.togglePrayer),s=await ref.get();await ref.update({isHidden:s.data()?.isHidden!==true,moderatedAt:instructorTimestamp(),moderatedBy:currentUser.uid});await renderInstructorWorkspace();});bindInstructorDeletes(panel);}
+        async function renderInstructorProgress(panel){const snap=await db.collection('userProfiles').where('classIds','array-contains',instructorClassId).get();const total=lessonsData.reduce((n,c)=>n+c.lessons.length,0);const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>!x.isInstructor);panel.innerHTML=`<h3>Student lesson progress</h3><div class="instructor-list">${rows.map(x=>{const done=(x.completedLessons||[]).length,p=total?Math.min(100,Math.round(done/total*100)):0;return `<article class="instructor-card"><h4>${esc(x.displayName||x.username||x.email||'Student')}</h4><div class="muted">${done} of ${total} lessons complete · ${p}%</div><div class="progress-meter"><span style="width:${p}%"></span></div></article>`}).join('')||'<p class="muted">No students have joined this classroom.</p>'}</div>`;}
+        async function renderInstructorSchedule(panel){const snap=await db.collection('classSchedule').where('classId','==',instructorClassId).get();const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));panel.innerHTML=`<div class="instructor-grid"><form id="schedule-editor" class="instructor-form"><h3>Add or edit session</h3><input type="hidden" id="schedule-id"><input id="schedule-topic" placeholder="Topic" required><input id="schedule-date" type="datetime-local" required><textarea id="schedule-notes" rows="4" placeholder="Notes or location"></textarea><button class="button-theme">Save session</button></form><div class="instructor-list"><h3>Course schedule</h3>${rows.map(x=>instructorCard(x.topic,x.date?.toDate?x.date.toDate().toLocaleString():'Date pending',x.notes||x.location||'',`<button data-edit-schedule="${x.id}">Edit</button><button class="danger" data-delete-doc="classSchedule:${x.id}">Delete</button>`)).join('')||'<p class="muted">No sessions scheduled.</p>'}</div></div>`;panel.querySelector('form').onsubmit=async e=>{e.preventDefault();const id=formValue('schedule-id'),ref=id?db.collection('classSchedule').doc(id):db.collection('classSchedule').doc();await ref.set({classId:instructorClassId,topic:formValue('schedule-topic'),date:firebase.firestore.Timestamp.fromDate(new Date(document.getElementById('schedule-date').value)),notes:formValue('schedule-notes'),createdBy:currentUser.uid,updatedAt:instructorTimestamp()},{merge:true});await renderInstructorWorkspace();};panel.querySelectorAll('[data-edit-schedule]').forEach(b=>b.onclick=()=>{const x=rows.find(r=>r.id===b.dataset.editSchedule);document.getElementById('schedule-id').value=x.id;document.getElementById('schedule-topic').value=x.topic||'';document.getElementById('schedule-notes').value=x.notes||'';if(x.date?.toDate){const d=x.date.toDate(),local=new Date(d-d.getTimezoneOffset()*60000);document.getElementById('schedule-date').value=local.toISOString().slice(0,16);}});bindInstructorDeletes(panel);}
+        function bindInstructorDeletes(panel){panel.querySelectorAll('[data-delete-doc]').forEach(b=>b.onclick=async()=>{const [collection,id]=b.dataset.deleteDoc.split(':');if(!confirm('Delete this item? This cannot be undone.'))return;await db.collection(collection).doc(id).delete();await renderInstructorWorkspace();});}
+
        // Event Listeners Initialization
         function initNavListeners() {
             document.getElementById('home-nav-button').addEventListener('click', () => {
@@ -5613,6 +5687,11 @@ async function submitPrayerRequest() {
             document.getElementById('quit-nav-button').addEventListener('click', () => {
                 showSection('account-section');
             });
+            document.getElementById('instructor-nav-button').addEventListener('click', () => openInstructorWorkspace());
+            document.getElementById('instructor-back-button').addEventListener('click', () => showSection('main-menu-section'));
+            document.getElementById('instructor-class-select').addEventListener('change', async event => { instructorClassId=event.target.value; userProfile.classId=instructorClassId; await renderInstructorWorkspace(); });
+            document.getElementById('instructor-open-chat').addEventListener('click', () => { if(!instructorClassId)return; userProfile.classId=instructorClassId; setupChatListener(); showSection('chat-section'); });
+            document.querySelectorAll('[data-instructor-tab]').forEach(button => button.addEventListener('click', async () => { instructorTab=button.dataset.instructorTab; await renderInstructorWorkspace(); }));
             document.getElementById('user-info-signout-button').addEventListener('click', signOut);
             document.getElementById('profile-signout-button').addEventListener('click', signOut);
             document.getElementById('account-signout-button').addEventListener('click', signOut);
