@@ -14,6 +14,15 @@ struct Lesson: Identifiable, Codable, Equatable {
     var videoURL: String?
     var quiz: [QuizQuestion]
 
+    init(id: String, title: String, category: String, contentHTML: String, videoURL: String?, quiz: [QuizQuestion]) {
+        self.id = id
+        self.title = title
+        self.category = category
+        self.contentHTML = contentHTML
+        self.videoURL = videoURL
+        self.quiz = quiz
+    }
+
     enum CodingKeys: String, CodingKey {
         case id
         case title
@@ -50,6 +59,13 @@ struct QuizQuestion: Identifiable, Codable, Equatable {
     var question: String
     var options: [String]
     var correct: Int
+
+    init(id: String = UUID().uuidString, question: String, options: [String], correct: Int) {
+        self.id = id
+        self.question = question
+        self.options = options
+        self.correct = correct
+    }
 
     enum CodingKeys: String, CodingKey {
         case id
