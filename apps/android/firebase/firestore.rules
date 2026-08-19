@@ -291,9 +291,25 @@ service cloud.firestore {
         (resource.data.instructorId == request.auth.uid || isInstructorForClass(classId));
     }
 
+    match /classrooms/{classId}/lessonOverrides/{lessonId} {
+      allow read: if isInClass(classId);
+      allow create, update, delete: if isInstructorForClass(classId);
+    }
+
+    match /classrooms/{classId}/customLessons/{lessonId} {
+      allow read: if isInstructorForClass(classId) ||
+        (isInClass(classId) && resource.data.isPublished == true);
+      allow create, update, delete: if isInstructorForClass(classId);
+    }
+
+    match /classrooms/{classId}/settings/{settingId} {
+      allow read: if isInClass(classId);
+      allow create, update, delete: if isInstructorForClass(classId);
+    }
+
     match /lessons/{lessonId} {
       allow read: if signedIn();
-      allow create, update, delete: if isInstructor();
+      allow write: if false;
     }
 
     match /{document=**} {

@@ -44,8 +44,8 @@ struct LessonsPlaceholderView: View {
             }
             .illuminedBrandHeader()
             .illuminedNavigation()
-            .task {
-                service.loadLessons()
+            .task(id: profileService.profile?.primaryClassId) {
+                await service.loadLessons(classId: profileService.profile?.primaryClassId ?? "")
             }
         }
     }
