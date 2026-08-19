@@ -77,7 +77,9 @@ final class LessonCatalogService: ObservableObject {
 
     private func grouped(_ lessons: [Lesson]) -> [LessonCategory] {
         var order = categoryOrder
-        lessons.map(\.category).filter { !order.contains($0) }.forEach { order.append($0) }
+        for lesson in lessons where !order.contains(lesson.category) {
+            order.append(lesson.category)
+        }
         return order.compactMap { name in
             let matching = lessons.filter { $0.category == name }
             return matching.isEmpty ? nil : LessonCategory(category: name, lessons: matching)
