@@ -2811,6 +2811,11 @@ nav button:focus-visible {
             };
         }
 
+        function classroomLessonCategoryName(classId) {
+            const name = String(classId || '').trim();
+            return name ? `${name} Lessons` : 'Classroom Lessons';
+        }
+
         async function mergeClassroomLessons(canonicalLessons, classId, includeDrafts = false) {
             if (!currentUser || !classId) return canonicalLessons.map(lesson => ({ ...lesson, lessonSource: 'canonical' }));
             const collections = classroomLessonCollections(classId);
@@ -2829,7 +2834,9 @@ nav button:focus-visible {
             }));
             customSnapshot.forEach(doc => {
                 const lesson = { id: doc.id, ...doc.data(), lessonSource: 'classroom-custom' };
-                if ((includeDrafts || showClassroomLessons) && (includeDrafts || lesson.isPublished !== false)) merged.push(normalizeLesson(lesson));
+                if ((includeDrafts || showClassroomLessons) && (includeDrafts || lesson.isPublished !== false)) {
+                    merged.push(normalizeLesson({ ...lesson, displayCategory: classroomLessonCategoryName(classId) }));
+                }
             });
             return merged;
         }
@@ -2852,10 +2859,13 @@ nav button:focus-visible {
                 try {
                     normalizedLessons = await mergeClassroomLessons(canonicalLessonsData, userProfile?.classId || '', userProfile?.isInstructor === true);
                 } catch (error) { console.warn('Classroom lesson customizations unavailable.', error); }
-                normalizedLessons.forEach(lesson => { if (lesson.category && !categoryOrder.includes(lesson.category)) categoryOrder.push(lesson.category); });
+                normalizedLessons.forEach(lesson => {
+                    const category = lesson.displayCategory || lesson.category;
+                    if (category && !categoryOrder.includes(category)) categoryOrder.push(category);
+                });
                 lessonsData = categoryOrder.map(category => ({
                     category,
-                    lessons: normalizedLessons.filter(lesson => lesson.category === category)
+                    lessons: normalizedLessons.filter(lesson => (lesson.displayCategory || lesson.category) === category)
                 })).filter(category => category.lessons.length > 0);
             } catch (error) {
                 console.error('Failed to load shared lessons:', error);
