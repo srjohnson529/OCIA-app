@@ -1,4 +1,5 @@
 import SwiftUI
+import WebKit
 
 struct LessonsPlaceholderView: View {
     @EnvironmentObject private var profileService: ProfileService
@@ -284,6 +285,10 @@ struct LessonDetailScreen: View {
                             .frame(height: htmlHeight)
                     }
 
+                    if let video = LessonVideoDetails(rawValue: lesson.videoURL) {
+                        LessonVideoCard(video: video)
+                    }
+
                     if isCompleted {
                         Label("Lesson completed", systemImage: "checkmark.circle.fill")
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
@@ -344,6 +349,94 @@ struct LessonDetailScreen: View {
             discussionPromptService.stopPromptListening()
             discussionPromptService.stopParticipationListening()
         }
+    }
+}
+
+private struct LessonVideoDetails {
+    let embedURL: URL?
+    let externalURL: URL
+
+    init?(rawValue: String?) {
+        guard let rawValue else { return nil }
+        let value = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let iframePattern = #"<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>"#
+        let iframeSource = try? NSRegularExpression(pattern: iframePattern, options: .caseInsensitive)
+            .firstMatch(in: value, range: NSRange(value.startIndex..., in: value))
+            .flatMap { Range($0.range(at: 1), in: value).map { String(value[$0]) } }
+        let candidate = (iframeSource ?? value).replacingOccurrences(of: "&amp;", with: "&")
+        guard let url = URL(string: candidate),
+              url.scheme?.lowercased() == "https" else { return nil }
+
+        let host = (url.host ?? "").lowercased().replacingOccurrences(of: "www.", with: "")
+        let components = url.pathComponents.filter { $0 != "/" }
+        var videoID: String?
+
+        if host == "youtu.be" {
+            videoID = components.first
+        } else if ["youtube.com", "m.youtube.com", "youtube-nocookie.com"].contains(host) {
+            if url.path == "/watch" {
+                videoID = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "v" })?.value
+            } else if let first = components.first,
+                      ["embed", "shorts", "live"].contains(first),
+                      components.count > 1 {
+                videoID = components[1]
+            }
+        }
+
+        if let videoID, videoID.range(of: "^[A-Za-z0-9_-]{11}$", options: .regularExpression) != nil {
+            embedURL = URL(string: "https://www.youtube-nocookie.com/embed/\(videoID)")
+            externalURL = URL(string: "https://www.youtube.com/watch?v=\(videoID)")!
+        } else {
+            embedURL = nil
+            externalURL = url
+        }
+    }
+}
+
+private struct LessonVideoCard: View {
+    let video: LessonVideoDetails
+
+    var body: some View {
+        VStack(spacing: 12) {
+            if let embedURL = video.embedURL {
+                LessonYouTubeView(url: embedURL)
+                    .aspectRatio(16 / 9, contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+
+            Link(destination: video.externalURL) {
+                Label(video.embedURL == nil ? "Open video" : "Open on YouTube", systemImage: "arrow.up.right.square")
+                    .font(IlluminedTheme.font(size: 16, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .tint(IlluminedTheme.blue)
+        }
+    }
+}
+
+private struct LessonYouTubeView: UIViewRepresentable {
+    let url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = .all
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.scrollView.isScrollEnabled = false
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        guard webView.url != url else { return }
+        webView.load(URLRequest(url: url))
+    }
+
+    static func dismantleUIView(_ webView: WKWebView, coordinator: ()) {
+        webView.stopLoading()
+        webView.loadHTMLString("", baseURL: nil)
     }
 }
 

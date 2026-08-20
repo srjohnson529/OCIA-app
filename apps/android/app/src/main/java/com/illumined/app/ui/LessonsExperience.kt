@@ -1,12 +1,15 @@
 package com.illumined.app.ui
 
+import android.content.Intent
 import android.graphics.Color as AndroidColor
+import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -320,6 +323,8 @@ private fun LessonDetail(
     onReviewQuiz: () -> Unit = {},
     onOpenDiscussion: (DiscussionPrompt) -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val video = remember(lesson.videoUrl) { lessonVideoDetails(lesson.videoUrl) }
     var htmlHeight by remember(lesson.id) { mutableStateOf(500.dp) }
     Column(
         modifier = Modifier.fillMaxSize().background(parchmentBrush())
@@ -356,6 +361,36 @@ private fun LessonDetail(
                 },
             )
         }
+        video?.let { details ->
+            IosCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    details.embedUrl?.let { embedUrl ->
+                        AndroidView(
+                            modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
+                            factory = { webContext ->
+                                WebView(webContext).apply {
+                                    setBackgroundColor(AndroidColor.BLACK)
+                                    settings.javaScriptEnabled = true
+                                    settings.domStorageEnabled = true
+                                    settings.mediaPlaybackRequiresUserGesture = true
+                                    webViewClient = WebViewClient()
+                                    loadUrl(embedUrl)
+                                }
+                            },
+                            update = { webView ->
+                                if (webView.url != embedUrl) webView.loadUrl(embedUrl)
+                            },
+                        )
+                    }
+                    TextButton(
+                        onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(details.externalUrl))) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(if (details.embedUrl == null) "Open video" else "Open on YouTube")
+                    }
+                }
+            }
+        }
         when {
             isCompleted -> {
                 Row(Modifier.align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
@@ -391,6 +426,35 @@ private fun LessonDetail(
             }
         }
         Spacer(Modifier.height(16.dp))
+    }
+}
+
+private data class LessonVideoDetails(val embedUrl: String?, val externalUrl: String)
+
+private fun lessonVideoDetails(rawValue: String?): LessonVideoDetails? {
+    val value = rawValue?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+    val iframeSource = Regex("""<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>""", RegexOption.IGNORE_CASE)
+        .find(value)?.groupValues?.getOrNull(1)
+    val candidate = (iframeSource ?: value).replace("&amp;", "&")
+    val uri = runCatching { Uri.parse(candidate) }.getOrNull() ?: return null
+    if (uri.scheme?.lowercase() != "https" || uri.host.isNullOrBlank()) return null
+
+    val host = uri.host.orEmpty().lowercase().removePrefix("www.")
+    val parts = uri.pathSegments.filter { it.isNotBlank() }
+    val videoId = when {
+        host == "youtu.be" -> parts.firstOrNull()
+        host in setOf("youtube.com", "m.youtube.com", "youtube-nocookie.com") && uri.path == "/watch" -> uri.getQueryParameter("v")
+        host in setOf("youtube.com", "m.youtube.com", "youtube-nocookie.com") && parts.firstOrNull() in setOf("embed", "shorts", "live") -> parts.getOrNull(1)
+        else -> null
+    }
+
+    return if (videoId?.matches(Regex("^[A-Za-z0-9_-]{11}$")) == true) {
+        LessonVideoDetails(
+            embedUrl = "https://www.youtube-nocookie.com/embed/$videoId",
+            externalUrl = "https://www.youtube.com/watch?v=$videoId",
+        )
+    } else {
+        LessonVideoDetails(embedUrl = null, externalUrl = uri.toString())
     }
 }
 
