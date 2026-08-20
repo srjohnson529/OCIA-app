@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DashboardView: View {
+    let onOpenLessons: () -> Void
+
     @EnvironmentObject private var profileService: ProfileService
     @StateObject private var lessonService = LessonCatalogService()
     @StateObject private var announcementService = AnnouncementService()
@@ -22,12 +24,14 @@ struct DashboardView: View {
         max(totalLessons - completedLessons, 0)
     }
 
-    private var nextClassSession: OCIAClassSession? {
-        if let nextClass = classScheduleService.nextClass {
-            return OCIAClassSession(date: nextClass.classDate, topic: nextClass.topic)
+    private var nextClassSessions: [OCIAClassSession] {
+        classScheduleService.nextClasses.enumerated().map { index, item in
+            OCIAClassSession(
+                id: item.id ?? "\(item.classDate.timeIntervalSince1970)-\(index)",
+                date: item.classDate,
+                topic: item.topic
+            )
         }
-
-        return OCIAClassSchedule.nextClass
     }
 
     var body: some View {
@@ -48,29 +52,34 @@ struct DashboardView: View {
                                 }
                             }
                             
-                            NextClassTopicCard(session: nextClassSession)
+                            NextScheduledDayCard(sessions: nextClassSessions)
 
-                            IlluminedCard {
-                                VStack(alignment: .leading, spacing: 14) {
-                                    HStack {
-                                        Text("Lesson Tracker")
-                                            .font(IlluminedTheme.font(size: 17, weight: .semibold))
-                                            .foregroundStyle(IlluminedTheme.ink)
-                                        Spacer()
-                                        Text("\(completedLessons)/\(totalLessons)")
-                                            .font(IlluminedTheme.font(size: 17, weight: .semibold))
-                                            .foregroundStyle(IlluminedTheme.blue)
-                                    }
+                            Button(action: onOpenLessons) {
+                                IlluminedCard {
+                                    VStack(alignment: .leading, spacing: 14) {
+                                        HStack {
+                                            Text("Lesson Tracker")
+                                                .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                                                .foregroundStyle(IlluminedTheme.ink)
+                                            Spacer()
+                                            Text("\(completedLessons)/\(totalLessons)")
+                                                .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                                                .foregroundStyle(IlluminedTheme.blue)
+                                        }
 
-                                    ProgressView(value: totalLessons == 0 ? 0 : Double(completedLessons) / Double(totalLessons))
-                                        .tint(IlluminedTheme.gold)
+                                        ProgressView(value: totalLessons == 0 ? 0 : Double(completedLessons) / Double(totalLessons))
+                                            .tint(IlluminedTheme.gold)
 
-                                    HStack(spacing: 12) {
-                                        StatPill(title: "Completed", value: "\(completedLessons)", color: IlluminedTheme.blue)
-                                        StatPill(title: "Uncompleted", value: "\(uncompletedLessons)", color: IlluminedTheme.gold)
+                                        HStack(spacing: 12) {
+                                            StatPill(title: "Completed", value: "\(completedLessons)", color: IlluminedTheme.blue)
+                                            StatPill(title: "Uncompleted", value: "\(uncompletedLessons)", color: IlluminedTheme.gold)
+                                        }
                                     }
                                 }
                             }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Lesson Tracker")
+                            .accessibilityHint("Opens the lessons page")
 
                     
 
@@ -107,7 +116,7 @@ struct DashboardView: View {
                 if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
                     announcementService.listen(classId: classId)
                     assignmentService.listen(classId: classId)
-                    assignmentCompletionService.listenForStudent()
+                    assignmentCompletionService.listenForStudent(classId: classId)
                     classScheduleService.listen(classId: classId)
                     prayerRequestService.listen(classId: classId)
                 } else {
@@ -195,7 +204,13 @@ private struct AnnouncementBoardCard: View {
                 } else {
                     VStack(spacing: 10) {
                         ForEach(visibleAnnouncements) { announcement in
-                            AnnouncementRow(announcement: announcement)
+                            NavigationLink {
+                                AnnouncementDetailView(announcement: announcement)
+                            } label: {
+                                AnnouncementRow(announcement: announcement)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Opens the full announcement")
                         }
                     }
                 }
@@ -215,29 +230,79 @@ private struct AnnouncementRow: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(announcement.title)
-                    .font(IlluminedTheme.font(size: 16, weight: .semibold))
-                    .foregroundStyle(IlluminedTheme.blue)
-                    .lineLimit(2)
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(announcement.title)
+                        .font(IlluminedTheme.font(size: 16, weight: .semibold))
+                        .foregroundStyle(IlluminedTheme.blue)
+                        .lineLimit(2)
 
-                Spacer(minLength: 10)
+                    Spacer(minLength: 10)
 
-                Text(Self.dateFormatter.string(from: announcement.updatedDate))
-                    .font(IlluminedTheme.font(size: 11))
-                    .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
+                    Text(Self.dateFormatter.string(from: announcement.updatedDate))
+                        .font(IlluminedTheme.font(size: 11))
+                        .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
+                }
+
+                Text(announcement.message)
+                    .font(IlluminedTheme.font(size: 14))
+                    .foregroundStyle(IlluminedTheme.ink)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text(announcement.message)
-                .font(IlluminedTheme.font(size: 14))
-                .foregroundStyle(IlluminedTheme.ink)
-                .lineLimit(3)
-                .fixedSize(horizontal: false, vertical: true)
+            Image(systemName: "chevron.right")
+                .font(IlluminedTheme.font(size: 12, weight: .semibold))
+                .foregroundStyle(IlluminedTheme.ink.opacity(0.5))
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(IlluminedTheme.gold.opacity(0.09), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+private struct AnnouncementDetailView: View {
+    let announcement: Announcement
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
+    var body: some View {
+        ZStack {
+            IlluminedBackground()
+
+            ScrollView {
+                IlluminedCard {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text(announcement.title)
+                            .font(IlluminedTheme.font(size: 22, weight: .bold))
+                            .foregroundStyle(IlluminedTheme.ink)
+
+                        Text(Self.dateFormatter.string(from: announcement.updatedDate))
+                            .font(IlluminedTheme.font(size: 13))
+                            .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
+
+                        Divider()
+
+                        Text(announcement.message)
+                            .font(IlluminedTheme.font(size: 17))
+                            .lineSpacing(5)
+                            .foregroundStyle(IlluminedTheme.ink)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding()
+            }
+        }
+        .navigationTitle("Announcement")
+        .navigationBarTitleDisplayMode(.inline)
+        .illuminedNavigation()
     }
 }
 
@@ -967,94 +1032,13 @@ private struct AssignmentLinkedLessonsView: View {
 }
 
 private struct OCIAClassSession: Identifiable {
+    let id: String
     let date: Date
     let topic: String
-
-    var id: String {
-        "\(date.timeIntervalSince1970)-\(topic)"
-    }
 }
 
-private enum OCIAClassSchedule {
-    private static let calendar = Calendar.current
-
-    private static let rawSchedule: [(date: String, topic: String)] = [
-        ("2026-08-09", "Introduction & The O.C.I.A."),
-        ("2026-08-16", "Revelation — Scripture"),
-        ("2026-08-23", "Revelation — Tradition"),
-        ("2026-08-30", "Salvation History & The Creed"),
-        ("2026-09-06", "God & the Blessed Trinity"),
-        ("2026-09-13", "Creation & Humanity"),
-        ("2026-09-20", "Jesus Christ, Incarnation & Public Ministry"),
-        ("2026-09-27", "The Paschal Mystery"),
-        ("2026-10-04", "Holy Spirit & The Church"),
-        ("2026-10-11", "Communion of the Saints"),
-        ("2026-10-18", "The Blessed Virgin Mary"),
-        ("2026-10-25", "Last Things — Death, Judgement, Heaven, Hell"),
-        ("2026-11-01", "The Early Church and the Development of Doctrine"),
-        ("2026-11-08", "Q&A (Last Session of Pre-Catechumenate)"),
-        ("2026-11-15", "Rite of Acceptance and Welcome with Sponsor"),
-        ("2026-11-15", "Introduction to the Seven Sacraments"),
-        ("2026-11-22", "Sacraments of Initiation Pt. I: Baptism & Confirmation"),
-        ("2026-11-29", "Sacraments of Initiation Pt. II: Holy Eucharist"),
-        ("2026-12-06", "Sacraments of Vocation: Marriage & Holy Orders"),
-        ("2026-12-13", "Sacraments of Healing: Reconciliation & Anointing"),
-        ("2026-12-20", "Sacred Liturgy & The Mass"),
-        ("2026-12-27", "Christmas: No Class"),
-        ("2027-01-03", "Foundations of Morality I"),
-        ("2027-01-10", "Foundations of Morality II"),
-        ("2027-01-17", "Foundations of Morality III"),
-        ("2027-01-24", "Catholic Social Doctrine"),
-        ("2027-01-31", "Church: Mother and Teacher"),
-        ("2027-02-07", "Q&A Catechumenate Wrap-up & Purification and Enlightenment Preparation"),
-        ("2027-02-10", "Ash Wednesday"),
-        ("2027-02-14", "Rite of Sending"),
-        ("2027-02-14", "Rite of Election"),
-        ("2027-02-14", "Introduction to the Ten Commandments & Commandments 1–3"),
-        ("2027-02-21", "Commandments 4 & 5"),
-        ("2027-02-28", "First Scrutiny"),
-        ("2027-02-28", "Commandments 6 & 9"),
-        ("2027-03-07", "Second Scrutiny"),
-        ("2027-03-08", "Commandments 7, 8, & 10"),
-        ("2027-03-14", "Third Scrutiny"),
-        ("2027-03-15", "Christian Prayer & the Lord's Prayer"),
-        ("2027-03-20", "Lectio Divina & The Rosary + Rehearsal (Saturday)"),
-        ("2027-03-21", "Liturgy of the Hours & Adoration"),
-        ("2027-03-25", "Holy Thursday: The Lord's Supper"),
-        ("2027-03-26", "Good Friday: Stations of the Cross and Good Friday Service"),
-        ("2027-03-27", "Holy Saturday"),
-        ("2027-03-27", "Easter Vigil: Baptism, Confirmation, and Eucharist"),
-        ("2027-03-28", "Easter Sunday"),
-        ("2027-04-11", "Reflection on Easter Vigil"),
-        ("2027-05-02", "Living the Sacramental Life"),
-        ("2027-06-06", "Prayer and Discernment"),
-        ("2027-07-04", "Mission and Evangelization")
-    ]
-
-    private static var sessions: [OCIAClassSession] {
-        rawSchedule.compactMap { item in
-            guard let date = dateFormatter.date(from: item.date) else { return nil }
-            return OCIAClassSession(date: date, topic: item.topic)
-        }
-        .sorted { $0.date < $1.date }
-    }
-
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter
-    }()
-
-    static var nextClass: OCIAClassSession? {
-        let today = calendar.startOfDay(for: Date())
-        return sessions.first { $0.date > today } ?? sessions.first
-    }
-}
-
-private struct NextClassTopicCard: View {
-    let session: OCIAClassSession?
+private struct NextScheduledDayCard: View {
+    let sessions: [OCIAClassSession]
 
     private static let displayFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -1073,19 +1057,27 @@ private struct NextClassTopicCard: View {
                     .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Next Class Topic")
+                    Text("Upcoming")
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text(session?.topic ?? "TBD")
-                        .font(IlluminedTheme.font(size: 22, weight: .semibold))
-                        .foregroundStyle(IlluminedTheme.blue)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if let date = sessions.first?.date {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(sessions) { session in
+                                Text(session.topic)
+                                    .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.blue)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
 
-                    if let date = session?.date {
                         Text(Self.displayFormatter.string(from: date))
-                            .font(IlluminedTheme.font(size: 13))
+                            .font(IlluminedTheme.font(size: 15))
                             .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
+                    } else {
+                        Text("No class scheduled")
+                            .font(IlluminedTheme.font(size: 19, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.blue)
                     }
                 }
 

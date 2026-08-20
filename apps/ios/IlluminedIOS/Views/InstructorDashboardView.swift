@@ -1,6 +1,8 @@
 import Combine
+import CoreImage.CIFilterBuiltins
 import FirebaseFirestore
 import SwiftUI
+import UIKit
 
 struct InstructorDashboardView: View {
     @EnvironmentObject private var profileService: ProfileService
@@ -22,6 +24,7 @@ struct InstructorDashboardView: View {
                                     .font(IlluminedTheme.font(size: 16))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .lineSpacing(4)
+
                             }
                         }
 
@@ -33,18 +36,6 @@ struct InstructorDashboardView: View {
                                     title: "Announcements",
                                     subtitle: "Create dashboard announcements and optional push alerts.",
                                     systemImage: "megaphone",
-                                    status: "Open"
-                                )
-                            }
-                            .buttonStyle(.plain)
-
-                            NavigationLink {
-                                InstructorClassScheduleView()
-                            } label: {
-                                InstructorToolCard(
-                                    title: "Class Schedule",
-                                    subtitle: "Update the next class date and topic.",
-                                    systemImage: "calendar.badge.clock",
                                     status: "Open"
                                 )
                             }
@@ -87,6 +78,30 @@ struct InstructorDashboardView: View {
                             .buttonStyle(.plain)
 
                             NavigationLink {
+                                InstructorClassScheduleView()
+                            } label: {
+                                InstructorToolCard(
+                                    title: "Class Schedule",
+                                    subtitle: "Update the next class date and topic.",
+                                    systemImage: "calendar.badge.clock",
+                                    status: "Open"
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink {
+                                InstructorClassesView()
+                            } label: {
+                                InstructorToolCard(
+                                    title: "Classes",
+                                    subtitle: "Create, switch, archive, and restore your classes.",
+                                    systemImage: "person.3",
+                                    status: "Open"
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink {
                                 InstructorInviteCodesView()
                             } label: {
                                 InstructorToolCard(
@@ -104,6 +119,228 @@ struct InstructorDashboardView: View {
             }
             .illuminedNavigation()
             .illuminedBrandHeader()
+            .alert("Class Error", isPresented: Binding(
+                get: { profileService.errorMessage != nil },
+                set: { if !$0 { profileService.errorMessage = nil } }
+            )) {
+                Button("OK") { profileService.errorMessage = nil }
+            } message: {
+                Text(profileService.errorMessage ?? "")
+            }
+        }
+    }
+}
+
+private struct InstructorClassesView: View {
+    @EnvironmentObject private var profileService: ProfileService
+    @State private var showCreateClass = false
+    @State private var newClassId = ""
+    @State private var workingClassId: String?
+    @State private var archiveCandidate: String?
+    @State private var statusMessage: String?
+
+    private var activeClasses: [String] {
+        profileService.profile?.activeClassIds ?? []
+    }
+
+    private var archivedClasses: [String] {
+        guard let profile = profileService.profile else { return [] }
+        return profile.classIds.filter(profile.archivedClassIds.contains)
+    }
+
+    var body: some View {
+        ZStack {
+            IlluminedBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    IlluminedCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Label("Classes", systemImage: "person.3")
+                                    .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.blue)
+                                Spacer()
+                                Button {
+                                    showCreateClass = true
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 28))
+                                }
+                                .accessibilityLabel("Create a new class")
+                                .disabled(workingClassId != nil)
+                            }
+
+                            Text("Create classes, choose the active class, or archive a class while preserving its records.")
+                                .font(IlluminedTheme.font(size: 15))
+                                .foregroundStyle(IlluminedTheme.secondaryText)
+                        }
+                    }
+
+                    if showCreateClass {
+                        IlluminedCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Create a Class")
+                                    .font(IlluminedTheme.font(size: 19, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.blue)
+                                Text("Students will enter this class ID when setting up their accounts.")
+                                    .font(IlluminedTheme.font(size: 13))
+                                    .foregroundStyle(IlluminedTheme.secondaryText)
+                                TextField("New class ID", text: $newClassId)
+                                    .autocorrectionDisabled()
+                                    .textInputAutocapitalization(.never)
+                                    .textFieldStyle(.roundedBorder)
+                                    .disabled(workingClassId != nil)
+                                HStack {
+                                    Button("Cancel") {
+                                        showCreateClass = false
+                                        newClassId = ""
+                                    }
+                                    .buttonStyle(.bordered)
+
+                                    Spacer()
+
+                                    Button(workingClassId == newClassId.trimmingCharacters(in: .whitespacesAndNewlines) ? "Creating..." : "Create") {
+                                        let requestedId = newClassId.trimmingCharacters(in: .whitespacesAndNewlines)
+                                        workingClassId = requestedId
+                                        Task {
+                                            await profileService.createAdditionalInstructorClass(classId: requestedId)
+                                            workingClassId = nil
+                                            if profileService.errorMessage == nil {
+                                                newClassId = ""
+                                                showCreateClass = false
+                                                statusMessage = "\(requestedId) was created and is now active."
+                                            }
+                                        }
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .disabled(newClassId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || workingClassId != nil)
+                                }
+                            }
+                        }
+                    }
+
+                    if let statusMessage {
+                        Text(statusMessage)
+                            .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.blue)
+                    }
+
+                    Text("Active Classes")
+                        .font(IlluminedTheme.font(size: 21, weight: .semibold))
+
+                    if activeClasses.isEmpty {
+                        IlluminedCard {
+                            Text("No active classes.")
+                                .foregroundStyle(IlluminedTheme.secondaryText)
+                        }
+                    }
+
+                    ForEach(activeClasses, id: \.self) { classId in
+                        IlluminedCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Label(classId, systemImage: "person.3")
+                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                    Spacer()
+                                    if classId == profileService.profile?.primaryClassId {
+                                        Text("Active")
+                                            .font(IlluminedTheme.font(size: 13, weight: .semibold))
+                                            .foregroundStyle(IlluminedTheme.blue)
+                                    }
+                                }
+
+                                if classId != profileService.profile?.primaryClassId {
+                                    Button("Select") {
+                                        workingClassId = classId
+                                        Task {
+                                            await profileService.setActiveClass(classId)
+                                            workingClassId = nil
+                                        }
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .frame(maxWidth: .infinity)
+                                    .disabled(workingClassId != nil)
+                                }
+
+                                Button("Archive Class") {
+                                    archiveCandidate = classId
+                                }
+                                .foregroundStyle(IlluminedTheme.blue)
+                                .disabled(activeClasses.count <= 1 || workingClassId != nil)
+
+                                if activeClasses.count <= 1 {
+                                    Text("Create or restore another class before archiving this one.")
+                                        .font(IlluminedTheme.font(size: 12))
+                                        .foregroundStyle(IlluminedTheme.secondaryText)
+                                }
+                            }
+                        }
+                    }
+
+                    if !archivedClasses.isEmpty {
+                        Text("Archived Classes")
+                            .font(IlluminedTheme.font(size: 21, weight: .semibold))
+
+                        ForEach(archivedClasses, id: \.self) { classId in
+                            IlluminedCard {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text(classId)
+                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                    Text("Records are preserved. New class activity is paused.")
+                                        .font(IlluminedTheme.font(size: 13))
+                                        .foregroundStyle(IlluminedTheme.secondaryText)
+                                    Button(workingClassId == classId ? "Restoring..." : "Restore Class") {
+                                        workingClassId = classId
+                                        Task {
+                                            if await profileService.restoreInstructorClass(classId) {
+                                                statusMessage = "\(classId) was restored."
+                                            }
+                                            workingClassId = nil
+                                        }
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .disabled(workingClassId != nil)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
+        .illuminedNavigation()
+        .illuminedBrandHeader("Classes")
+        .confirmationDialog(
+            "Archive \(archiveCandidate ?? "this class")?",
+            isPresented: Binding(
+                get: { archiveCandidate != nil },
+                set: { if !$0 { archiveCandidate = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Archive") {
+                guard let classId = archiveCandidate else { return }
+                archiveCandidate = nil
+                workingClassId = classId
+                Task {
+                    if await profileService.archiveInstructorClass(classId) {
+                        statusMessage = "\(classId) was archived."
+                    }
+                    workingClassId = nil
+                }
+            }
+            Button("Cancel", role: .cancel) { archiveCandidate = nil }
+        } message: {
+            Text("New activity will pause, but all class records will be preserved and can be restored later.")
+        }
+        .alert("Class Error", isPresented: Binding(
+            get: { profileService.errorMessage != nil },
+            set: { if !$0 { profileService.errorMessage = nil } }
+        )) {
+            Button("OK") { profileService.errorMessage = nil }
+        } message: {
+            Text(profileService.errorMessage ?? "")
         }
     }
 }
@@ -263,6 +500,20 @@ private struct InstructorInviteCodesView: View {
                         }
                     }
 
+                    if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
+                        IlluminedCard {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Label("Student Class Link", systemImage: "person.badge.plus")
+                                    .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.blue)
+                                Text("Share this reusable link with students joining class \(classId).")
+                                    .font(IlluminedTheme.font(size: 14))
+                                    .foregroundStyle(IlluminedTheme.secondaryText)
+                                InviteShareControls(invite: IlluminedInviteLink(role: .student, classId: classId, code: ""))
+                            }
+                        }
+                    }
+
                     if inviteService.inviteCodes.isEmpty {
                         IlluminedCard {
                             ContentUnavailableView(
@@ -351,8 +602,96 @@ private struct InstructorInviteCodeCard: View {
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
                 }
+
+                if inviteCode.isActive {
+                    InviteShareControls(invite: IlluminedInviteLink(
+                        role: .instructor,
+                        classId: inviteCode.classId,
+                        code: inviteCode.displayCode
+                    ))
+                }
             }
         }
+    }
+}
+
+struct InviteShareControls: View {
+    let invite: IlluminedInviteLink
+    @Environment(\.openURL) private var openURL
+    @State private var showingQR = false
+    @State private var copied = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Button {
+                UIPasteboard.general.string = invite.url.absoluteString
+                copied = true
+            } label: {
+                Label(copied ? "Copied" : "Copy Link", systemImage: copied ? "checkmark" : "doc.on.doc")
+            }
+
+            Button {
+                showingQR = true
+            } label: {
+                Label("QR Code", systemImage: "qrcode")
+            }
+
+            Button {
+                if let emailURL { openURL(emailURL) }
+            } label: {
+                Label("Email", systemImage: "envelope")
+            }
+        }
+        .font(IlluminedTheme.font(size: 13, weight: .semibold))
+        .buttonStyle(.bordered)
+        .sheet(isPresented: $showingQR) {
+            NavigationStack {
+                VStack(spacing: 20) {
+                    Text(invite.title)
+                        .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                        .foregroundStyle(IlluminedTheme.blue)
+                        .multilineTextAlignment(.center)
+                    if let image = qrImage {
+                        Image(uiImage: image)
+                            .interpolation(.none)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: 280, maxHeight: 280)
+                            .accessibilityLabel("QR code for \(invite.title)")
+                    }
+                    Text(invite.classId.isEmpty ? invite.code : "Class \(invite.classId)")
+                        .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                        .foregroundStyle(IlluminedTheme.secondaryText)
+                }
+                .padding(28)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { showingQR = false }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
+    }
+
+    private var emailURL: URL? {
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.queryItems = [
+            URLQueryItem(name: "subject", value: invite.title),
+            URLQueryItem(name: "body", value: invite.message),
+        ]
+        return components.url
+    }
+
+    private var qrImage: UIImage? {
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(invite.url.absoluteString.utf8)
+        filter.correctionLevel = "M"
+        guard let output = filter.outputImage else { return nil }
+        let scaled = output.transformed(by: CGAffineTransform(scaleX: 12, y: 12))
+        guard let cgImage = CIContext().createCGImage(scaled, from: scaled.extent) else { return nil }
+        return UIImage(cgImage: cgImage)
     }
 }
 

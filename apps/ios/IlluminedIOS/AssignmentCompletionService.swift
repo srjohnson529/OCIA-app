@@ -52,7 +52,7 @@ final class AssignmentCompletionService: ObservableObject {
         )
     }
 
-    func listenForStudent() {
+    func listenForStudent(classId: String) {
         stopListening()
 
         guard let user = Auth.auth().currentUser else {
@@ -71,7 +71,7 @@ final class AssignmentCompletionService: ObservableObject {
 
                     self?.completions = snapshot?.documents.compactMap { document in
                         try? document.data(as: AssignmentCompletion.self)
-                    } ?? []
+                    }.filter { $0.classId == classId } ?? []
                 }
             }
     }

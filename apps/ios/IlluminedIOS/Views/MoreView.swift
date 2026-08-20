@@ -54,7 +54,7 @@ struct MoreView: View {
                             } label: {
                                 MoreMenuCard(
                                     title: "Notifications",
-                                    subtitle: "Turn on class announcements, assignments, and discussion alerts.",
+                                    subtitle: "Turn class and formation alerts on or off.",
                                     systemImage: "bell.badge"
                                 )
                             }
@@ -123,7 +123,7 @@ private struct NotificationSettingsView: View {
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Receive alerts for class announcements, new assignments, and important discussion activity.")
+                            Text("Receive alerts for class announcements, assignments, prayer requests, and discussion activity. All alert types follow the notification status shown below.")
                                 .font(IlluminedTheme.font(size: 16))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
 
@@ -162,23 +162,27 @@ private struct NotificationSettingsView: View {
                     }
 
                     Button {
+                        if notificationService.authorizationStatus == .denied {
+                            notificationService.openSystemSettings()
+                            return
+                        }
                         guard let profile = profileService.profile else { return }
                         Task {
                             await notificationService.requestPermission(for: profile)
                         }
                     } label: {
-                        Text(notificationService.notificationsAreEnabled ? "Refresh Notification Setup" : "Turn On Notifications")
+                        Text(notificationService.authorizationStatus == .denied ? "Open iPhone Settings" : (notificationService.notificationsAreEnabled ? "Refresh Notification Setup" : "Turn On Notifications"))
                             .font(IlluminedTheme.font(size: 18, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(IlluminedPrimaryButtonStyle())
                     .disabled(profileService.profile == nil)
 
-                    if notificationService.authorizationStatus == .denied {
+                    if notificationService.notificationsAreEnabled {
                         Button {
                             notificationService.openSystemSettings()
                         } label: {
-                            Text("Open iPhone Settings")
+                            Text("Manage in iPhone Settings")
                                 .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
@@ -426,6 +430,14 @@ private struct ParishSetupCodeCard: View {
                             .font(IlluminedTheme.font(size: 14))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
+                }
+
+                if setupCode.isActive {
+                    InviteShareControls(invite: IlluminedInviteLink(
+                        role: .parish,
+                        classId: "",
+                        code: setupCode.displayCode
+                    ))
                 }
             }
         }

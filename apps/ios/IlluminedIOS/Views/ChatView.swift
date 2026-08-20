@@ -7,73 +7,73 @@ struct ChatView: View {
     @State private var draft = ""
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                IlluminedBackground()
+        ZStack {
+            IlluminedBackground()
 
-                VStack(spacing: 0) {
-                    chatHeader
+            VStack(spacing: 0) {
+                chatHeader
 
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            LazyVStack(alignment: .leading, spacing: 14) {
-                                if chatService.messages.isEmpty {
-                                    EmptyChatView()
-                                        .padding(.top, 24)
-                                } else {
-                                    ForEach(chatService.messages) { message in
-                                        ChatBubble(
-                                            message: message,
-                                            isCurrentUser: message.senderId == profileService.profile?.userId
-                                        )
-                                        .id(message.id)
-                                    }
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 14) {
+                            if chatService.messages.isEmpty {
+                                EmptyChatView()
+                                    .padding(.top, 24)
+                            } else {
+                                ForEach(chatService.messages) { message in
+                                    ChatBubble(
+                                        message: message,
+                                        isCurrentUser: message.senderId == profileService.profile?.userId
+                                    )
+                                    .id(message.id)
                                 }
                             }
-                            .padding(.horizontal)
-                            .padding(.vertical, 18)
                         }
-                        .onChange(of: chatService.messages) { _, messages in
-                            if let last = messages.last?.id {
-                                withAnimation(.easeOut(duration: 0.2)) {
-                                    proxy.scrollTo(last, anchor: .bottom)
-                                }
+                        .padding(.horizontal)
+                        .padding(.vertical, 18)
+                    }
+                    .scrollDismissesKeyboard(.interactively)
+                    .onChange(of: chatService.messages) { _, messages in
+                        if let last = messages.last?.id {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                proxy.scrollTo(last, anchor: .bottom)
                             }
                         }
                     }
-
-                    ChatInputBar(
-                        draft: $draft,
-                        canSend: canSend,
-                        onSend: sendMessage
-                    )
                 }
             }
-            .illuminedNavigation()
-            .navigationTitle("")
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Illumined")
-                        .font(IlluminedTheme.font(size: 24, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            ChatInputBar(
+                draft: $draft,
+                canSend: canSend,
+                onSend: sendMessage
+            )
+        }
+        .illuminedNavigation()
+        .navigationTitle("")
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Illumined")
+                    .font(IlluminedTheme.font(size: 24, weight: .semibold))
+                    .foregroundStyle(.white)
             }
-            .task(id: profileService.profile?.primaryClassId) {
-                if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
-                    chatService.listen(classId: classId)
-                }
+        }
+        .task(id: profileService.profile?.primaryClassId) {
+            if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
+                chatService.listen(classId: classId)
             }
-            .onDisappear {
-                chatService.stopListening()
-            }
-            .alert("Chat Error", isPresented: Binding(
-                get: { chatService.errorMessage != nil },
-                set: { if !$0 { chatService.errorMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) { chatService.errorMessage = nil }
-            } message: {
-                Text(chatService.errorMessage ?? "")
-            }
+        }
+        .onDisappear {
+            chatService.stopListening()
+        }
+        .alert("Chat Error", isPresented: Binding(
+            get: { chatService.errorMessage != nil },
+            set: { if !$0 { chatService.errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { chatService.errorMessage = nil }
+        } message: {
+            Text(chatService.errorMessage ?? "")
         }
     }
 

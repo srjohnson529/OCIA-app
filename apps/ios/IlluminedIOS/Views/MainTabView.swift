@@ -14,7 +14,7 @@ struct MainTabView: View {
             ZStack {
                 switch selectedTab {
                 case .home:
-                    DashboardView()
+                    DashboardView(onOpenLessons: { selectedTab = .lessons })
                         .id(homeResetID)
                 case .lessons:
                     LessonsPlaceholderView()
@@ -37,15 +37,13 @@ struct MainTabView: View {
                     selectedTab: $selectedTab,
                     onSelect: selectTab
                 )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .environment(\.font, .custom(IlluminedTheme.fontName, size: 17))
-        .animation(.easeInOut(duration: 0.18), value: isKeyboardVisible)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             isKeyboardVisible = true
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)) { _ in
             isKeyboardVisible = false
         }
     }

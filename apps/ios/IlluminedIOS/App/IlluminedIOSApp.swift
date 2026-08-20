@@ -8,6 +8,7 @@ struct IlluminedIOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var authService: AuthService
     @StateObject private var notificationService: NotificationService
+    @StateObject private var inviteLinkStore = InviteLinkStore()
 
     @MainActor
     init() {
@@ -24,6 +25,14 @@ struct IlluminedIOSApp: App {
             RootView()
                 .environmentObject(authService)
                 .environmentObject(notificationService)
+                .environmentObject(inviteLinkStore)
+                .onOpenURL { url in
+                    inviteLinkStore.accept(url)
+                }
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    guard let url = activity.webpageURL else { return }
+                    inviteLinkStore.accept(url)
+                }
         }
     }
 }

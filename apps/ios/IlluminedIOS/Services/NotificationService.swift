@@ -73,12 +73,14 @@ final class NotificationService: NSObject, ObservableObject {
             refreshAuthorizationStatus()
 
             guard granted || notificationsAreEnabled else {
+                await updateAllPreferences(enabled: false)
                 statusMessage = "Notifications are off. You can turn them on later in iPhone Settings."
                 return
             }
 
             UIApplication.shared.registerForRemoteNotifications()
             fetchAndSaveCurrentToken()
+            await updateAllPreferences(enabled: true)
             statusMessage = "Notifications are ready for \(profile.primaryClassId.isEmpty ? "your class" : profile.primaryClassId)."
         } catch {
             errorMessage = error.localizedDescription
@@ -86,8 +88,34 @@ final class NotificationService: NSObject, ObservableObject {
     }
 
     func openSystemSettings() {
+        statusMessage = nil
+        errorMessage = nil
         guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(settingsURL)
+    }
+
+    private func updateAllPreferences(enabled: Bool) async {
+        guard let profile = currentProfile, let user = Auth.auth().currentUser else {
+            return
+        }
+
+        if [profile.notificationsEnabled, profile.notificationNewPrayerRequests, profile.notificationNewAssignments, profile.notificationAssignmentReminders, profile.notificationDiscussionReplies].allSatisfy({ $0 == enabled }) {
+            return
+        }
+
+        do {
+            try await db.collection("userProfiles").document(user.uid).setData([
+                "notificationNewPrayerRequests": enabled,
+                "notificationNewAssignments": enabled,
+                "notificationAssignmentReminders": enabled,
+                "notificationDiscussionReplies": enabled,
+                "notificationsEnabled": enabled,
+                "notificationPreferencesUpdatedAt": FieldValue.serverTimestamp()
+            ], merge: true)
+            errorMessage = nil
+        } catch {
+            errorMessage = "Notification status could not be synchronized."
+        }
     }
 
     private func refreshAuthorizationStatus() {
@@ -95,6 +123,11 @@ final class NotificationService: NSObject, ObservableObject {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
             await MainActor.run {
                 self.authorizationStatus = settings.authorizationStatus
+            }
+            await updateAllPreferences(enabled: notificationsAreEnabled)
+            if notificationsAreEnabled {
+                UIApplication.shared.registerForRemoteNotifications()
+                fetchAndSaveCurrentToken()
             }
         }
     }
@@ -133,7 +166,13 @@ final class NotificationService: NSObject, ObservableObject {
                 "lastFcmToken": token,
                 "notificationPlatform": "ios",
                 "notificationClassId": profile.primaryClassId,
-                "notificationUpdatedAt": FieldValue.serverTimestamp()
+                "notificationUpdatedAt": FieldValue.serverTimestamp(),
+                "notificationNewPrayerRequests": notificationsAreEnabled,
+                "notificationNewAssignments": notificationsAreEnabled,
+                "notificationAssignmentReminders": notificationsAreEnabled,
+                "notificationDiscussionReplies": notificationsAreEnabled,
+                "notificationsEnabled": notificationsAreEnabled,
+                "notificationPreferencesUpdatedAt": FieldValue.serverTimestamp()
             ], merge: true)
 
             lastTokenSavedAt = Date()
@@ -143,6 +182,7 @@ final class NotificationService: NSObject, ObservableObject {
         }
     }
 }
+
 
 extension NotificationService: MessagingDelegate {
     nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
