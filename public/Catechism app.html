@@ -1461,6 +1461,39 @@ nav button:focus-visible {
     line-height: 1.4;
 }
 
+.prayer-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.prayer-reaction-button {
+    border: 1px solid rgba(57, 108, 151, 0.28);
+    border-radius: 999px;
+    background: #fff;
+    color: #24384b;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.prayer-reaction-button.is-selected {
+    color: #fff;
+    background: #396c97;
+    border-color: #396c97;
+}
+
+.prayer-reaction-button:disabled {
+    cursor: default;
+    opacity: 0.62;
+}
+
+.prayer-reaction-summary {
+    margin-top: 8px;
+    color: #66717d;
+    font-size: 0.9rem;
+}
+
 .prayer-request-form {
     display: grid;
     gap: 0.85rem;
@@ -2672,6 +2705,7 @@ nav button:focus-visible {
         var userProfileListener = null; // Store the listener reference for cleanup
         var chatMessagesListener = null; // Store the chat listener reference for cleanup
         var prayerRequestsListener = null; // Store the prayer request listener reference for cleanup
+        var selectedPrayerRequestId = null;
         var announcementsListener = null;
         var assignmentsListener = null;
         var assignmentCompletionsListener = null;
@@ -4998,7 +5032,7 @@ function renderPrayerRequests(requests) {
     if (!requestList) return;
 
     requestList.textContent = '';
-    if (detailContainer) {
+    if (detailContainer && !selectedPrayerRequestId) {
         detailContainer.textContent = '';
         detailContainer.className = 'prayer-request-detail is-hidden';
     }
@@ -5035,6 +5069,10 @@ function renderPrayerRequests(requests) {
         button.appendChild(details);
         requestList.appendChild(button);
     });
+
+    const selectedRequest = requests.find(request => request.id === selectedPrayerRequestId);
+    if (selectedRequest) showPrayerRequestDetail(selectedRequest);
+    else selectedPrayerRequestId = null;
 }
 
 function previewText(text, maxLength) {
@@ -5047,6 +5085,7 @@ function showPrayerRequestDetail(request) {
     const detailContainer = document.getElementById('prayer-request-detail');
     if (!detailContainer) return;
 
+    selectedPrayerRequestId = request.id;
     detailContainer.textContent = '';
     detailContainer.className = 'prayer-request-detail prayer-request-item';
 
@@ -5065,6 +5104,63 @@ function showPrayerRequestDetail(request) {
     detailContainer.appendChild(user);
     detailContainer.appendChild(title);
     detailContainer.appendChild(details);
+
+    const reactionOptions = [
+        { value: 'praying', emoji: '🙏', label: 'Praying' },
+        { value: 'with_you', emoji: '❤️', label: 'With you' },
+        { value: 'amen', emoji: '🕊️', label: 'Amen' }
+    ];
+    const reactions = request.reactions && typeof request.reactions === 'object' ? request.reactions : {};
+    const controls = document.createElement('div');
+    controls.className = 'prayer-reactions';
+    reactionOptions.forEach(option => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'prayer-reaction-button';
+        const selected = currentUser && reactions[currentUser.uid] === option.value;
+        const count = Object.values(reactions).filter(value => value === option.value).length;
+        button.textContent = `${option.emoji} ${option.label}${count ? ` · ${count}` : ''}`;
+        button.classList.toggle('is-selected', selected);
+        button.disabled = !currentUser || request.requesterId === currentUser.uid;
+        button.addEventListener('click', async () => {
+            button.disabled = true;
+            await setPrayerReaction(request, selected ? null : option.value);
+        });
+        controls.appendChild(button);
+    });
+    detailContainer.appendChild(controls);
+
+    if (currentUser && request.requesterId === currentUser.uid) {
+        const summary = document.createElement('div');
+        summary.className = 'prayer-reaction-summary';
+        const count = Object.keys(reactions).length;
+        summary.textContent = `Classmates can acknowledge this request. ${count} response${count === 1 ? '' : 's'} received.`;
+        detailContainer.appendChild(summary);
+    }
+}
+
+async function setPrayerReaction(request, reaction) {
+    if (!currentUser || !userProfile || request.requesterId === currentUser.uid) return;
+    if (reaction !== null && !['praying', 'with_you', 'amen'].includes(reaction)) return;
+    const reference = db.collection('prayerRequests').doc(request.id);
+    try {
+        await db.runTransaction(async transaction => {
+            const snapshot = await transaction.get(reference);
+            if (!snapshot.exists) throw new Error('This prayer request is no longer available.');
+            const data = snapshot.data();
+            if (data.classId !== userProfile.classId) throw new Error('This prayer request belongs to another class.');
+            const reactions = data.reactions && typeof data.reactions === 'object' ? { ...data.reactions } : {};
+            if (reaction === null) delete reactions[currentUser.uid];
+            else reactions[currentUser.uid] = reaction;
+            transaction.update(reference, {
+                reactions,
+                reactionUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+    } catch (error) {
+        console.error('Prayer reaction error:', error);
+        showCustomAlert(`Prayer response could not be saved: ${error.message}`);
+    }
 }
 
 function togglePrayerRequestForm() {
@@ -5110,6 +5206,7 @@ async function submitPrayerRequest() {
             requesterId: currentUser.uid,
             requesterName: userProfile.username,
             requesterEmail: currentUser.email || '',
+            reactions: {},
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt)
         });
