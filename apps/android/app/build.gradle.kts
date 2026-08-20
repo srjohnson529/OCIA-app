@@ -24,8 +24,8 @@ val hasReleaseSigning = listOf(
     releaseKeyAlias,
     releaseKeyPassword,
 ).all { !it.isNullOrBlank() }
-val releaseVersionCode = providers.gradleProperty("ILLUMINED_VERSION_CODE").orNull?.toIntOrNull() ?: 8
-val releaseVersionName = providers.gradleProperty("ILLUMINED_VERSION_NAME").orNull ?: "1.1"
+val releaseVersionCode = providers.gradleProperty("ILLUMINED_VERSION_CODE").orNull?.toIntOrNull() ?: 10
+val releaseVersionName = providers.gradleProperty("ILLUMINED_VERSION_NAME").orNull ?: "1.2"
 if (hasFirebaseConfig) {
     apply(plugin = "com.google.gms.google-services")
 }

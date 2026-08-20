@@ -3,6 +3,11 @@ package com.illumined.app.ui
 import android.content.Intent
 import android.graphics.Color as AndroidColor
 import android.net.Uri
+import android.webkit.CookieManager
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
@@ -366,26 +371,77 @@ private fun LessonDetail(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     details.embedUrl?.let { embedUrl ->
                         val playerHtml = remember(embedUrl) { youtubePlayerHtml(embedUrl) }
-                        AndroidView(
-                            modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
-                            factory = { webContext ->
-                                WebView(webContext).apply {
-                                    setBackgroundColor(AndroidColor.BLACK)
-                                    settings.javaScriptEnabled = true
-                                    settings.domStorageEnabled = true
-                                    settings.mediaPlaybackRequiresUserGesture = true
-                                    webViewClient = WebViewClient()
-                                    tag = embedUrl
-                                    loadDataWithBaseURL("https://illumined.net", playerHtml, "text/html", "UTF-8", null)
+                        var playerLoading by remember(embedUrl) { mutableStateOf(true) }
+                        var playerFailed by remember(embedUrl) { mutableStateOf(false) }
+                        Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(Color(0xFF222222))) {
+                            if (!playerFailed) {
+                                AndroidView(
+                                    modifier = Modifier.fillMaxSize(),
+                                    factory = { webContext ->
+                                        WebView(webContext).apply playerWebView@{
+                                            setBackgroundColor(AndroidColor.BLACK)
+                                            settings.javaScriptEnabled = true
+                                            settings.domStorageEnabled = true
+                                            settings.mediaPlaybackRequiresUserGesture = true
+                                            settings.loadWithOverviewMode = true
+                                            settings.useWideViewPort = true
+                                            CookieManager.getInstance().apply {
+                                                setAcceptCookie(true)
+                                                setAcceptThirdPartyCookies(this@playerWebView, true)
+                                            }
+                                            webChromeClient = object : WebChromeClient() {
+                                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                                                    if (newProgress >= 100) playerLoading = false
+                                                }
+                                            }
+                                            webViewClient = object : WebViewClient() {
+                                                override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+                                                    if (request.url.host.orEmpty().contains("youtube")) {
+                                                        playerLoading = false
+                                                        playerFailed = true
+                                                    }
+                                                }
+
+                                                override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
+                                                    if (request.url.host.orEmpty().contains("youtube") && response.statusCode >= 400) {
+                                                        playerLoading = false
+                                                        playerFailed = true
+                                                    }
+                                                }
+                                            }
+                                            tag = embedUrl
+                                            loadDataWithBaseURL("https://illumined.net/", playerHtml, "text/html", "UTF-8", null)
+                                        }
+                                    },
+                                    update = { webView ->
+                                        if (webView.tag != embedUrl) {
+                                            playerLoading = true
+                                            playerFailed = false
+                                            webView.tag = embedUrl
+                                            webView.loadDataWithBaseURL("https://illumined.net/", playerHtml, "text/html", "UTF-8", null)
+                                        }
+                                    },
+                                    onRelease = { webView ->
+                                        webView.stopLoading()
+                                        webView.loadUrl("about:blank")
+                                        webView.destroy()
+                                    },
+                                )
+                            }
+                            if (playerLoading && !playerFailed) {
+                                CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
+                            }
+                            if (playerFailed) {
+                                Column(
+                                    Modifier.align(Alignment.Center).padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text("Video preview unavailable", color = Color.White, fontWeight = FontWeight.SemiBold)
+                                    Text("Use Open on YouTube below.", color = Color.White.copy(alpha = .8f))
                                 }
-                            },
-                            update = { webView ->
-                                if (webView.tag != embedUrl) {
-                                    webView.tag = embedUrl
-                                    webView.loadDataWithBaseURL("https://illumined.net", playerHtml, "text/html", "UTF-8", null)
-                                }
-                            },
-                        )
+                            }
+                        }
                     }
                     TextButton(
                         onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(details.externalUrl))) },
@@ -437,11 +493,13 @@ private fun LessonDetail(
 private data class LessonVideoDetails(val embedUrl: String?, val externalUrl: String)
 
 private fun youtubePlayerHtml(embedUrl: String): String {
-    val playerUrl = "$embedUrl?playsinline=1&origin=https%3A%2F%2Fillumined.net"
+    val identity = "https%3A%2F%2Fillumined.net"
+    val playerUrl = "$embedUrl?playsinline=1&enablejsapi=1&origin=$identity&widget_referrer=$identity"
     return """
         <!doctype html>
         <html><head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="referrer" content="strict-origin-when-cross-origin">
         <style>html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#222;overflow:hidden}</style>
         </head><body>
         <iframe src="$playerUrl" title="Lesson video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
