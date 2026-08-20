@@ -2,6 +2,7 @@ import FirebaseAuth
 import SwiftUI
 
 struct RootView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var authService: AuthService
     @EnvironmentObject private var notificationService: NotificationService
     @StateObject private var profileService = ProfileService()
@@ -28,6 +29,11 @@ struct RootView: View {
         }
         .task(id: profileService.profile?.primaryClassId) {
             notificationService.sync(profile: profileService.profile)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                notificationService.sync(profile: profileService.profile)
+            }
         }
     }
 }

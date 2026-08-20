@@ -1,5 +1,24 @@
 import SwiftUI
 
+private enum DiscussionFocusField: Hashable {
+    case response
+    case reply(String)
+    case edit(String)
+
+    var scrollTarget: DiscussionScrollTarget? {
+        switch self {
+        case .response:
+            nil
+        case .reply(let postId), .edit(let postId):
+            .post(postId)
+        }
+    }
+}
+
+private enum DiscussionScrollTarget: Hashable {
+    case post(String)
+}
+
 struct DiscussionBoardView: View {
     @EnvironmentObject private var profileService: ProfileService
     @StateObject private var discussionService = DiscussionPromptService()
@@ -17,6 +36,7 @@ struct DiscussionBoardView: View {
     @State private var editingPostId: String?
     @State private var savingEditPostId: String?
     @State private var deletingPostId: String?
+    @FocusState private var focusedField: DiscussionFocusField?
 
     private var matchingAssignments: [Assignment] {
         assignmentService.activeAssignments.filter { assignment in
@@ -37,7 +57,7 @@ struct DiscussionBoardView: View {
         ZStack {
             IlluminedBackground()
 
-            VStack(spacing: 0) {
+            ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 14) {
                         IlluminedCard {
@@ -88,11 +108,22 @@ struct DiscussionBoardView: View {
                                         get: { editDrafts[post.id ?? ""] ?? post.message },
                                         set: { editDrafts[post.id ?? ""] = $0 }
                                     ),
+                                    focusedField: $focusedField,
                                     isPostingReply: postingReplyPostId == post.id,
                                     isSavingEdit: savingEditPostId == post.id,
                                     isDeleting: deletingPostId == post.id,
                                     onToggleReply: {
-                                        activeReplyPostId = activeReplyPostId == post.id ? nil : post.id
+                                        guard let postId = post.id else { return }
+                                        if activeReplyPostId == postId {
+                                            activeReplyPostId = nil
+                                            if focusedField == .reply(postId) {
+                                                focusedField = nil
+                                            }
+                                        } else {
+                                            activeReplyPostId = postId
+                                            editingPostId = nil
+                                            focusAfterLayout(.reply(postId))
+                                        }
                                     },
                                     onPostReply: {
                                         postReply(to: post)
@@ -102,11 +133,15 @@ struct DiscussionBoardView: View {
                                         editDrafts[postId] = post.message
                                         editingPostId = postId
                                         activeReplyPostId = nil
+                                        focusAfterLayout(.edit(postId))
                                     },
                                     onCancelEdit: {
                                         guard let postId = post.id else { return }
                                         editDrafts[postId] = post.message
                                         editingPostId = nil
+                                        if focusedField == .edit(postId) {
+                                            focusedField = nil
+                                        }
                                     },
                                     onSaveEdit: {
                                         saveEdit(for: post)
@@ -115,24 +150,38 @@ struct DiscussionBoardView: View {
                                         deletePost(post)
                                     }
                                 )
+                                .id(DiscussionScrollTarget.post(post.id ?? post.authorId))
                             }
                         }
                     }
                     .padding()
                 }
                 .scrollDismissesKeyboard(.interactively)
+                .onChange(of: focusedField) { _, newValue in
+                    guard let field = newValue, let target = field.scrollTarget else { return }
 
-                if !isComposingInline {
-                    if let currentUserPost {
-                        DiscussionPostedNotice(post: currentUserPost)
-                    } else {
-                        DiscussionInputBar(
-                            draft: $draft,
-                            isPosting: isPosting,
-                            canPost: canPost,
-                            onPost: postResponse
-                        )
+                    Task { @MainActor in
+                        try? await Task.sleep(nanoseconds: 250_000_000)
+                        guard focusedField == field else { return }
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            proxy.scrollTo(target, anchor: .bottom)
+                        }
                     }
+                }
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !isComposingInline {
+                if let currentUserPost {
+                    DiscussionPostedNotice(post: currentUserPost)
+                } else {
+                    DiscussionInputBar(
+                        draft: $draft,
+                        focusedField: $focusedField,
+                        isPosting: isPosting,
+                        canPost: canPost,
+                        onPost: postResponse
+                    )
                 }
             }
         }
@@ -143,7 +192,7 @@ struct DiscussionBoardView: View {
             guard let profile = profileService.profile, !profile.primaryClassId.isEmpty else { return }
             discussionService.listen(prompt: prompt, classId: profile.primaryClassId)
             assignmentService.listen(classId: profile.primaryClassId)
-            completionService.listenForStudent()
+            completionService.listenForStudent(classId: profile.primaryClassId)
         }
         .onDisappear {
             discussionService.stopListening()
@@ -184,6 +233,7 @@ struct DiscussionBoardView: View {
     private func postResponse() {
         guard let profile = profileService.profile else { return }
         let message = draft
+        focusedField = nil
         isPosting = true
 
         Task {
@@ -203,6 +253,7 @@ struct DiscussionBoardView: View {
     private func postReply(to post: DiscussionPost) {
         guard let profile = profileService.profile, let postId = post.id else { return }
         let message = replyDrafts[postId] ?? ""
+        focusedField = nil
         postingReplyPostId = postId
 
         Task {
@@ -219,6 +270,7 @@ struct DiscussionBoardView: View {
     private func saveEdit(for post: DiscussionPost) {
         guard let profile = profileService.profile, let postId = post.id else { return }
         let message = editDrafts[postId] ?? post.message
+        focusedField = nil
         savingEditPostId = postId
 
         Task {
@@ -249,6 +301,13 @@ struct DiscussionBoardView: View {
             deletingPostId = nil
         }
     }
+
+    private func focusAfterLayout(_ field: DiscussionFocusField) {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 120_000_000)
+            focusedField = field
+        }
+    }
 }
 
 private struct DiscussionPostCard: View {
@@ -260,6 +319,7 @@ private struct DiscussionPostCard: View {
     let isEditing: Bool
     @Binding var replyDraft: String
     @Binding var editDraft: String
+    @FocusState.Binding var focusedField: DiscussionFocusField?
     let isPostingReply: Bool
     let isSavingEdit: Bool
     let isDeleting: Bool
@@ -301,6 +361,7 @@ private struct DiscussionPostCard: View {
                             .foregroundStyle(IlluminedTheme.secondaryText),
                         axis: .vertical
                     )
+                        .focused($focusedField, equals: .edit(post.id ?? post.authorId))
                         .font(IlluminedTheme.font(size: 16))
                         .foregroundStyle(IlluminedTheme.ink)
                         .tint(IlluminedTheme.blue)
@@ -395,6 +456,7 @@ private struct DiscussionPostCard: View {
                                 .foregroundStyle(IlluminedTheme.secondaryText),
                             axis: .vertical
                         )
+                            .focused($focusedField, equals: .reply(post.id ?? post.authorId))
                             .font(IlluminedTheme.font(size: 15))
                             .foregroundStyle(IlluminedTheme.ink)
                             .tint(IlluminedTheme.blue)
@@ -482,6 +544,7 @@ private struct DiscussionPostedNotice: View {
 
 private struct DiscussionInputBar: View {
     @Binding var draft: String
+    @FocusState.Binding var focusedField: DiscussionFocusField?
     let isPosting: Bool
     let canPost: Bool
     let onPost: () -> Void
@@ -495,6 +558,7 @@ private struct DiscussionInputBar: View {
                     .foregroundStyle(IlluminedTheme.secondaryText),
                 axis: .vertical
             )
+                .focused($focusedField, equals: .response)
                 .font(IlluminedTheme.font(size: 16))
                 .foregroundStyle(IlluminedTheme.ink)
                 .tint(IlluminedTheme.blue)

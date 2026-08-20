@@ -1,6 +1,7 @@
 import Combine
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseFunctions
 import Foundation
 
 @MainActor
@@ -14,7 +15,9 @@ final class ProfileService: ObservableObject {
     func listen(uid: String) {
         stopListening()
 
-        listener = db.collection("userProfiles").document(uid).addSnapshotListener { [weak self] snapshot, error in
+        listener = db.collection("userProfiles").document(uid).addSnapshotListener(
+            includeMetadataChanges: true
+        ) { [weak self] snapshot, error in
             Task { @MainActor in
                 if let error {
                     self?.errorMessage = error.localizedDescription
@@ -26,10 +29,25 @@ final class ProfileService: ObservableObject {
                     return
                 }
 
+                // A newly created profile is first reported from Firestore's local
+                // cache while its write is still pending. Publishing that temporary
+                // snapshot would open the dashboard before the server-side profile
+                // exists, causing every class-scoped listener to fail its rules check.
+                // The metadata-only event after acknowledgement will publish it.
+                guard !snapshot.metadata.hasPendingWrites else {
+                    return
+                }
+
                 do {
-                    self?.profile = try snapshot.data(as: UserProfile.self)
+                    var decodedProfile = try snapshot.data(as: UserProfile.self)
+                    if decodedProfile.userId.isEmpty {
+                        decodedProfile.userId = snapshot.documentID
+                    }
+                    self?.profile = decodedProfile
+                    self?.errorMessage = nil
                 } catch {
-                    self?.errorMessage = error.localizedDescription
+                    self?.profile = nil
+                    self?.errorMessage = Self.profileDecodingMessage(for: error)
                 }
             }
         }
@@ -77,6 +95,7 @@ final class ProfileService: ObservableObject {
                 "isInstructor": false,
                 "isAdmin": false,
                 "classIds": [cleanedClass],
+                "activeClassId": cleanedClass,
                 "completedLessons": [],
                 "earnedBadges": [],
                 "completedMysteries": [],
@@ -89,6 +108,112 @@ final class ProfileService: ObservableObject {
             ], merge: true)
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    func setActiveClass(_ classId: String) async {
+        guard let user = Auth.auth().currentUser, let profile else {
+            errorMessage = "Please sign in before switching classes."
+            return
+        }
+        let selected = classId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard profile.isInstructor, profile.activeClassIds.contains(selected) else {
+            errorMessage = "You can only switch to a class assigned to your instructor profile."
+            return
+        }
+        do {
+            try await db.collection("userProfiles").document(user.uid).updateData([
+                "activeClassId": selected,
+                "classId": selected
+            ])
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func createAdditionalInstructorClass(classId: String) async {
+        guard let user = Auth.auth().currentUser, let profile, profile.isInstructor else {
+            errorMessage = "Instructor access is required to create another class."
+            return
+        }
+
+        let cleanedClass = classId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedClass.isEmpty else {
+            errorMessage = "Enter a class ID."
+            return
+        }
+        guard cleanedClass.count <= 100, !cleanedClass.contains("/") else {
+            errorMessage = "Class IDs must be 100 characters or fewer and cannot contain a slash."
+            return
+        }
+        guard !profile.classIds.contains(where: { $0.caseInsensitiveCompare(cleanedClass) == .orderedSame }) else {
+            errorMessage = "That class ID is already attached to your account."
+            return
+        }
+
+        let profileRef = db.collection("userProfiles").document(user.uid)
+        let classroomRef = db.collection("classrooms").document(cleanedClass)
+
+        let batch = db.batch()
+        batch.updateData([
+            "classIds": profile.classIds + [cleanedClass],
+            "activeClassId": cleanedClass,
+            "classId": cleanedClass
+        ], forDocument: profileRef)
+        batch.setData([
+            "id": cleanedClass,
+            "classId": cleanedClass,
+            "name": cleanedClass,
+            "parishName": "",
+            "instructorId": user.uid,
+            "instructorName": profile.displayName,
+            "studentIds": [],
+            "createdAt": FieldValue.serverTimestamp(),
+            "createdBy": user.uid,
+            "isArchived": false
+        ], forDocument: classroomRef)
+
+        do {
+            errorMessage = nil
+            try await batch.commit()
+        } catch let error as NSError {
+            if error.domain == FirestoreErrorDomain,
+               error.code == FirestoreErrorCode.permissionDenied.rawValue {
+                errorMessage = "That class ID could not be created. It may already be in use."
+            } else {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func archiveInstructorClass(_ classId: String) async -> Bool {
+        await changeInstructorClassArchiveState(classId, functionName: "archiveClass")
+    }
+
+    func restoreInstructorClass(_ classId: String) async -> Bool {
+        await changeInstructorClassArchiveState(classId, functionName: "restoreClass")
+    }
+
+    private func changeInstructorClassArchiveState(_ classId: String, functionName: String) async -> Bool {
+        guard let profile, profile.isInstructor else {
+            errorMessage = "Instructor access is required to manage classes."
+            return false
+        }
+        let cleanedClass = classId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard profile.classIds.contains(cleanedClass) else {
+            errorMessage = "This class is not assigned to your instructor account."
+            return false
+        }
+        do {
+            errorMessage = nil
+            _ = try await Functions.functions(region: "us-central1")
+                .httpsCallable(functionName)
+                .call(["classId": cleanedClass])
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
         }
     }
 
@@ -116,9 +241,11 @@ final class ProfileService: ObservableObject {
             errorMessage = nil
 
             db.runTransaction({ transaction, errorPointer -> Any? in
+                let profileSnapshot: DocumentSnapshot
                 let setupCodeSnapshot: DocumentSnapshot
 
                 do {
+                    profileSnapshot = try transaction.getDocument(profileRef)
                     setupCodeSnapshot = try transaction.getDocument(setupCodeRef)
                 } catch let error as NSError {
                     errorPointer?.pointee = error
@@ -138,24 +265,35 @@ final class ProfileService: ObservableObject {
                     return nil
                 }
 
-                transaction.setData([
+                let existingClassIds = profileSnapshot.data()?["classIds"] as? [String] ?? []
+                let combinedClassIds = (existingClassIds + [cleanedClass]).reduce(into: [String]()) { result, classId in
+                    if !result.contains(classId) { result.append(classId) }
+                }
+
+                var profileData: [String: Any] = [
                     "userId": user.uid,
                     "email": user.email ?? "",
                     "displayName": cleanedName,
                     "isInstructor": true,
                     "isAdmin": false,
-                    "classIds": [cleanedClass],
+                    "classIds": combinedClassIds,
+                    "activeClassId": cleanedClass,
                     "parishSetupCode": cleanedSetupCode,
-                    "completedLessons": [],
-                    "earnedBadges": [],
-                    "completedMysteries": [],
-                    "memorizedPrayerIds": [],
-                    "selectedPrayerIds": [],
-                    "currentLessonIndex": 0,
-                    "createdAt": FieldValue.serverTimestamp(),
                     "username": cleanedName,
                     "classId": cleanedClass
-                ], forDocument: profileRef, merge: true)
+                ]
+                if !profileSnapshot.exists {
+                    profileData.merge([
+                        "completedLessons": [],
+                        "earnedBadges": [],
+                        "completedMysteries": [],
+                        "memorizedPrayerIds": [],
+                        "selectedPrayerIds": [],
+                        "currentLessonIndex": 0,
+                        "createdAt": FieldValue.serverTimestamp()
+                    ]) { current, _ in current }
+                }
+                transaction.setData(profileData, forDocument: profileRef, merge: true)
 
                 transaction.setData([
                     "id": cleanedClass,
@@ -166,7 +304,8 @@ final class ProfileService: ObservableObject {
                     "instructorName": cleanedName,
                     "studentIds": [],
                     "createdAt": FieldValue.serverTimestamp(),
-                    "createdBy": user.uid
+                    "createdBy": user.uid,
+                    "isArchived": false
                 ], forDocument: classroomRef)
 
                 transaction.updateData([
@@ -201,9 +340,11 @@ final class ProfileService: ObservableObject {
             errorMessage = nil
 
             db.runTransaction({ transaction, errorPointer -> Any? in
+                let profileSnapshot: DocumentSnapshot
                 let inviteSnapshot: DocumentSnapshot
 
                 do {
+                    profileSnapshot = try transaction.getDocument(profileRef)
                     inviteSnapshot = try transaction.getDocument(inviteRef)
                 } catch let error as NSError {
                     errorPointer?.pointee = error
@@ -228,29 +369,40 @@ final class ProfileService: ObservableObject {
                     return nil
                 }
 
-                guard inviteClassId.caseInsensitiveCompare(classId) == .orderedSame else {
+                guard classId.isEmpty || inviteClassId.caseInsensitiveCompare(classId) == .orderedSame else {
                     errorPointer?.pointee = Self.profileError("That invite code belongs to class \(inviteClassId). Enter that class ID to continue.")
                     return nil
                 }
 
-                transaction.setData([
+                let existingClassIds = profileSnapshot.data()?["classIds"] as? [String] ?? []
+                let combinedClassIds = (existingClassIds + [inviteClassId]).reduce(into: [String]()) { result, classId in
+                    if !result.contains(classId) { result.append(classId) }
+                }
+
+                var profileData: [String: Any] = [
                     "userId": user.uid,
                     "email": user.email ?? "",
                     "displayName": displayName,
                     "isInstructor": true,
                     "isAdmin": false,
-                    "classIds": [inviteClassId],
+                    "classIds": combinedClassIds,
+                    "activeClassId": inviteClassId,
                     "instructorInviteCode": code,
-                    "completedLessons": [],
-                    "earnedBadges": [],
-                    "completedMysteries": [],
-                    "memorizedPrayerIds": [],
-                    "selectedPrayerIds": [],
-                    "currentLessonIndex": 0,
-                    "createdAt": FieldValue.serverTimestamp(),
                     "username": displayName,
                     "classId": inviteClassId
-                ], forDocument: profileRef, merge: true)
+                ]
+                if !profileSnapshot.exists {
+                    profileData.merge([
+                        "completedLessons": [],
+                        "earnedBadges": [],
+                        "completedMysteries": [],
+                        "memorizedPrayerIds": [],
+                        "selectedPrayerIds": [],
+                        "currentLessonIndex": 0,
+                        "createdAt": FieldValue.serverTimestamp()
+                    ]) { current, _ in current }
+                }
+                transaction.setData(profileData, forDocument: profileRef, merge: true)
 
                 transaction.updateData([
                     "isActive": false,
@@ -276,6 +428,13 @@ final class ProfileService: ObservableObject {
 
     private static func profileError(_ message: String) -> NSError {
         NSError(domain: "Illumined.ProfileService", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+    }
+
+    private static func profileDecodingMessage(for error: Error) -> String {
+        if case DecodingError.keyNotFound(_, _) = error {
+            return "This profile is missing older account information. Enter your name and class ID again to repair it."
+        }
+        return "Your profile could not be loaded. Please enter your profile information again."
     }
 
     func markLessonCompleted(_ lessonId: String) async {

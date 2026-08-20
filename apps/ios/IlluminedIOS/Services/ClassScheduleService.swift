@@ -25,11 +25,21 @@ final class ClassScheduleService: ObservableObject {
     private var listener: ListenerRegistration?
     private static let csvHeaderNames = ["date", "topic", "details", "description", "notes"]
 
-    var nextClass: ClassScheduleItem? {
+    var nextClasses: [ClassScheduleItem] {
         let today = Calendar.current.startOfDay(for: Date())
-        return scheduleItems
-            .sorted { $0.classDate < $1.classDate }
-            .first { $0.classDate > today }
+        let upcoming = scheduleItems.filter {
+            Calendar.current.startOfDay(for: $0.classDate) >= today
+        }
+        guard let nextDay = upcoming.map({ Calendar.current.startOfDay(for: $0.classDate) }).min() else {
+            return []
+        }
+        return upcoming
+            .filter { Calendar.current.isDate($0.classDate, inSameDayAs: nextDay) }
+            .sorted(by: scheduleItemComesBefore)
+    }
+
+    var nextClass: ClassScheduleItem? {
+        nextClasses.first
     }
 
     func listen(classId: String) {
@@ -53,8 +63,8 @@ final class ClassScheduleService: ObservableObject {
                         try? document.data(as: ClassScheduleItem.self)
                     } ?? []
 
-                    self?.scheduleItems = loadedItems.sorted {
-                        $0.classDate < $1.classDate
+                    if let self {
+                        self.scheduleItems = loadedItems.sorted(by: self.scheduleItemComesBefore)
                     }
                 }
             }
@@ -92,11 +102,13 @@ final class ClassScheduleService: ObservableObject {
 
         do {
             errorMessage = nil
+            let normalizedDate = Calendar.current.startOfDay(for: date)
             try await db.collection("classSchedule").addDocument(data: [
                 "classId": profile.primaryClassId,
                 "topic": cleanedTopic,
                 "details": cleanedDetails,
-                "date": Timestamp(date: Calendar.current.startOfDay(for: date)),
+                "date": Timestamp(date: normalizedDate),
+                "sortOrder": nextSortOrder(for: normalizedDate),
                 "createdBy": user.uid,
                 "createdAt": FieldValue.serverTimestamp(),
                 "updatedAt": FieldValue.serverTimestamp()
@@ -167,7 +179,10 @@ final class ClassScheduleService: ObservableObject {
             return .failure("No class rows were found. Make sure the first columns are date and topic.")
         }
 
-        return .success(parsedItems.sorted { $0.date < $1.date })
+        return .success(parsedItems.sorted {
+            if $0.date != $1.date { return $0.date < $1.date }
+            return $0.rowNumber < $1.rowNumber
+        })
     }
 
     func importScheduleItems(_ items: [ScheduleImportItem], replacingExisting: Bool, profile: UserProfile) async -> Bool {
@@ -203,13 +218,25 @@ final class ClassScheduleService: ObservableObject {
                 }
             }
 
+            var nextOrderByDay: [Date: Int] = [:]
+            if !replacingExisting {
+                for (day, existingItems) in Dictionary(grouping: scheduleItems, by: { Calendar.current.startOfDay(for: $0.classDate) }) {
+                    let highestOrder = existingItems.compactMap(\.sortOrder).max() ?? -1
+                    nextOrderByDay[day] = max(highestOrder + 1, existingItems.count)
+                }
+            }
+
             for item in items {
+                let day = Calendar.current.startOfDay(for: item.date)
+                let sortOrder = nextOrderByDay[day] ?? 0
+                nextOrderByDay[day] = sortOrder + 1
                 let document = db.collection("classSchedule").document()
                 batch.setData([
                     "classId": profile.primaryClassId,
                     "topic": item.topic.trimmingCharacters(in: .whitespacesAndNewlines),
                     "details": item.details.trimmingCharacters(in: .whitespacesAndNewlines),
-                    "date": Timestamp(date: Calendar.current.startOfDay(for: item.date)),
+                    "date": Timestamp(date: day),
+                    "sortOrder": sortOrder,
                     "createdBy": user.uid,
                     "createdAt": FieldValue.serverTimestamp(),
                     "updatedAt": FieldValue.serverTimestamp()
@@ -240,10 +267,15 @@ final class ClassScheduleService: ObservableObject {
 
         do {
             errorMessage = nil
+            let normalizedDate = Calendar.current.startOfDay(for: date)
+            let sortOrder = Calendar.current.isDate(item.classDate, inSameDayAs: normalizedDate)
+                ? (item.sortOrder ?? nextSortOrder(for: normalizedDate, excluding: id))
+                : nextSortOrder(for: normalizedDate, excluding: id)
             try await db.collection("classSchedule").document(id).updateData([
                 "topic": cleanedTopic,
                 "details": cleanedDetails,
-                "date": Timestamp(date: Calendar.current.startOfDay(for: date)),
+                "date": Timestamp(date: normalizedDate),
+                "sortOrder": sortOrder,
                 "updatedAt": FieldValue.serverTimestamp()
             ])
             return true
@@ -301,6 +333,24 @@ final class ClassScheduleService: ObservableObject {
 
         fields.append(currentField.trimmingCharacters(in: .whitespacesAndNewlines))
         return fields
+    }
+
+    private func nextSortOrder(for date: Date, excluding excludedID: String? = nil) -> Int {
+        let existingItems = scheduleItems.filter { item in
+            item.id != excludedID && Calendar.current.isDate(item.classDate, inSameDayAs: date)
+        }
+        let highestOrder = existingItems.compactMap(\.sortOrder).max() ?? -1
+        return max(highestOrder + 1, existingItems.count)
+    }
+
+    private func scheduleItemComesBefore(_ lhs: ClassScheduleItem, _ rhs: ClassScheduleItem) -> Bool {
+        if lhs.classDate != rhs.classDate { return lhs.classDate < rhs.classDate }
+        let lhsOrder = lhs.sortOrder ?? Int.max
+        let rhsOrder = rhs.sortOrder ?? Int.max
+        if lhsOrder != rhsOrder { return lhsOrder < rhsOrder }
+        let topicComparison = lhs.topic.localizedCaseInsensitiveCompare(rhs.topic)
+        if topicComparison != .orderedSame { return topicComparison == .orderedAscending }
+        return (lhs.id ?? "") < (rhs.id ?? "")
     }
 
     private func isHeaderRow(_ fields: [String]) -> Bool {

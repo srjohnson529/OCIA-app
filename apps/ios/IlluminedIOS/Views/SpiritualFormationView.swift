@@ -127,9 +127,9 @@ private struct SpiritualFormationMenuView: View {
                 .buttonStyle(.plain)
 
                 NavigationLink {
-                    ExaminationIntroView()
+                    ExaminationHubView()
                 } label: {
-                    SpiritualMenuRow(title: "Examination of Conscience", subtitle: "Prayerful review and preparation for confession", systemImage: "magnifyingglass")
+                    SpiritualMenuRow(title: "Examination of Conscience", subtitle: "Prepare for Reconciliation or pray a daily examen", systemImage: "magnifyingglass")
                 }
                 .buttonStyle(.plain)
 
@@ -156,6 +156,7 @@ private struct PrayerHubView: View {
     @EnvironmentObject private var profileService: ProfileService
 
     let formation: SpiritualFormationCatalog
+    @State private var isShowingRosary = false
 
     private var selectedPrayers: [CommonPrayer] {
         let selectedIds = Set(profileService.profile?.selectedPrayerIds ?? [])
@@ -180,8 +181,8 @@ private struct PrayerHubView: View {
                     }
                     .buttonStyle(.plain)
 
-                    NavigationLink {
-                        RosaryMysteryPickerView(rosary: formation.rosary)
+                    Button {
+                        isShowingRosary = true
                     } label: {
                         SpiritualMenuRow(title: "Guided Rosary", subtitle: "Pray the mysteries step by step", systemImage: "circle.grid.cross")
                     }
@@ -220,6 +221,12 @@ private struct PrayerHubView: View {
                 }
                 .padding()
             }
+        }
+        .navigationDestination(isPresented: $isShowingRosary) {
+            RosaryMysteryPickerView(
+                rosary: formation.rosary,
+                onRosaryCompleted: { isShowingRosary = false }
+            )
         }
         .illuminedBrandHeader()
         .illuminedNavigation()
@@ -537,6 +544,204 @@ private struct HTMLFormationView: View {
 
                     if showsDailyGospelCard {
                         DailyGospelCard()
+                    }
+                }
+                .padding()
+            }
+        }
+        .illuminedBrandHeader()
+        .illuminedNavigation()
+    }
+}
+
+private struct ExaminationHubView: View {
+    var body: some View {
+        ZStack {
+            IlluminedBackground()
+
+            ScrollView {
+                VStack(spacing: 14) {
+                    NavigationLink {
+                        DailyExamenMethodsView()
+                    } label: {
+                        SpiritualMenuRow(
+                            title: "Daily Examen",
+                            subtitle: "Four prayerful ways to review the day with God",
+                            systemImage: "moon.stars"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        ExaminationIntroView()
+                    } label: {
+                        SpiritualMenuRow(
+                            title: "Preparation for Reconciliation",
+                            subtitle: "A thorough, private examination before Confession",
+                            systemImage: "checklist"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding()
+            }
+        }
+        .illuminedBrandHeader()
+        .illuminedNavigation()
+    }
+}
+
+private struct DailyExamenMethod: Identifiable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let introduction: String
+    let steps: [String]
+    let closingPrayer: String
+}
+
+private enum DailyExamenCatalog {
+    static let methods = [
+        DailyExamenMethod(
+            id: "ignatian",
+            title: "Ignatian Examen",
+            subtitle: "Gratitude, light, review, mercy, and grace for tomorrow",
+            introduction: "Pray slowly through the day in God’s presence. Notice not only failures, but also where God was near and how grace was moving.",
+            steps: [
+                "Become aware of God’s presence and rest quietly before Him.",
+                "Give thanks for the gifts of this day, naming particular people, moments, and graces.",
+                "Ask the Holy Spirit for light to see the day truthfully and with God’s compassion.",
+                "Review the day from beginning to end. Notice consolation, resistance, choices, feelings, and invitations from God.",
+                "Ask forgiveness where needed, receive God’s mercy, and ask for the grace you need tomorrow."
+            ],
+            closingPrayer: "Lord, thank You for remaining with me through this day. Show me how to receive tomorrow as Your gift and to respond more freely to Your grace. Amen."
+        ),
+        DailyExamenMethod(
+            id: "francis-de-sales",
+            title: "St. Francis de Sales Evening Examen",
+            subtitle: "A gentle review before rest from Introduction to the Devout Life",
+            introduction: "St. Francis de Sales recommends recollecting yourself before Christ and closing the day with gratitude, honest review, pardon, and trust.",
+            steps: [
+                "Place yourself in the presence of Christ and briefly renew a grace or holy desire from your morning prayer.",
+                "Thank God for preserving you and accompanying you throughout the day.",
+                "Recall where you were, whom you met, and what you did. Review your conduct with simplicity and honesty.",
+                "Thank God for whatever was good. Ask pardon for faults in thought, word, deed, or omission, and resolve with grace to do better.",
+                "Commend your body and soul, the Church, your family, friends, and all in need to God before resting."
+            ],
+            closingPrayer: "Jesus, receive all that this day has held. Forgive my faults, strengthen every good desire, and keep me and those I love in Your peace. Amen."
+        ),
+        DailyExamenMethod(
+            id: "benedictine",
+            title: "Benedictine Daily Review",
+            subtitle: "Listen for God through prayer, work, relationships, and humility",
+            introduction: "Inspired by the Benedictine call to continual conversion, this review listens for God in the ordinary rhythm of the day.",
+            steps: [
+                "Be still before God and listen: what word, event, or person is He bringing to mind?",
+                "Give thanks for the day’s prayer, work, rest, and encounters.",
+                "Review how you practiced humility, patience, obedience, hospitality, and care for others.",
+                "Notice where self-will, distraction, resentment, or excess disturbed peace and charity.",
+                "Choose one small act of conversion for tomorrow and entrust it to God’s help."
+            ],
+            closingPrayer: "God of peace, gather my work and rest into Your love. Teach me to listen, begin again, and seek You faithfully in the ordinary duties of tomorrow. Amen."
+        ),
+        DailyExamenMethod(
+            id: "gospel-love",
+            title: "Gospel Examen of Love",
+            subtitle: "Review the day through love of God and neighbor",
+            introduction: "Let Jesus’ two great commandments provide a simple lens for seeing the day and choosing a concrete response of love.",
+            steps: [
+                "Thank God for one moment in which you received or gave love today.",
+                "Where did you love God with your attention, trust, prayer, or choices?",
+                "Where did you love your neighbor through patience, truth, mercy, generosity, or service?",
+                "Where did you withhold love or fail to recognize another person’s dignity? Ask for mercy without discouragement.",
+                "Choose one specific way to love God or neighbor tomorrow, and ask for the grace to follow through."
+            ],
+            closingPrayer: "Jesus, form my heart after Your own. Heal what was lacking in love today and make me attentive, courageous, and generous tomorrow. Amen."
+        )
+    ]
+}
+
+private struct DailyExamenMethodsView: View {
+    var body: some View {
+        ZStack {
+            IlluminedBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    IlluminedCard {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Daily Examen")
+                                .font(IlluminedTheme.font(size: 24, weight: .semibold))
+                                .foregroundStyle(IlluminedTheme.blue)
+                            Text("Choose a method and spend a few quiet minutes reviewing your day with God. A daily examen is prayer for gratitude, discernment, mercy, and growth; it is not a replacement for sacramental Confession.")
+                                .font(IlluminedTheme.font(size: 15))
+                                .foregroundStyle(IlluminedTheme.secondaryText)
+                                .lineSpacing(4)
+                        }
+                    }
+
+                    ForEach(DailyExamenCatalog.methods) { method in
+                        NavigationLink {
+                            DailyExamenDetailView(method: method)
+                        } label: {
+                            SpiritualMenuRow(title: method.title, subtitle: method.subtitle, systemImage: "sparkles")
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding()
+            }
+        }
+        .illuminedBrandHeader()
+        .illuminedNavigation()
+    }
+}
+
+private struct DailyExamenDetailView: View {
+    let method: DailyExamenMethod
+
+    var body: some View {
+        ZStack {
+            IlluminedBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    IlluminedCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(method.title)
+                                .font(IlluminedTheme.font(size: 24, weight: .semibold))
+                                .foregroundStyle(IlluminedTheme.blue)
+                            Text(method.introduction)
+                                .font(IlluminedTheme.font(size: 16))
+                                .foregroundStyle(IlluminedTheme.secondaryText)
+                                .lineSpacing(4)
+                        }
+                    }
+
+                    ForEach(Array(method.steps.enumerated()), id: \.offset) { index, step in
+                        IlluminedCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Step \(index + 1)")
+                                    .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.blue)
+                                Text(step)
+                                    .font(IlluminedTheme.font(size: 17))
+                                    .foregroundStyle(IlluminedTheme.ink)
+                                    .lineSpacing(5)
+                            }
+                        }
+                    }
+
+                    IlluminedCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Closing Prayer")
+                                .font(IlluminedTheme.font(size: 20, weight: .semibold))
+                                .foregroundStyle(IlluminedTheme.blue)
+                            Text(method.closingPrayer)
+                                .font(IlluminedTheme.font(size: 18))
+                                .foregroundStyle(IlluminedTheme.ink)
+                                .lineSpacing(6)
+                        }
                     }
                 }
                 .padding()
@@ -1814,7 +2019,7 @@ private struct MassGuidePart: Identifiable {
                 systemImage: "hands.sparkles",
                 summary: "The opening prayer proper to the day. The priest gathers the prayer of the Church and directs it to God.",
                 fullText: """
-                Full official text for the Collect is not bundled yet. The Collect changes according to the day, feast, season, and Mass being celebrated.
+                The Collect changes according to the day, feast, season, and Mass being celebrated.
 
                 What to listen for:
                 • The invitation “Let us pray”
@@ -1863,7 +2068,6 @@ private struct MassGuidePart: Identifiable {
                 systemImage: "gift",
                 summary: "Bread and wine are prepared at the altar, and the offering of the people is joined to Christ’s sacrifice.",
                 fullText: """
-                Full official text for the preparation prayers is not bundled yet.
 
                 What is happening:
                 • Bread and wine are brought to the altar
@@ -1881,7 +2085,7 @@ private struct MassGuidePart: Identifiable {
                 systemImage: "tray",
                 summary: "The priest prays that God receive and sanctify the gifts prepared for the Eucharist.",
                 fullText: """
-                Full official text for the Prayer over the Offerings is not bundled yet. This prayer changes according to the day, feast, season, and Mass being celebrated.
+                This prayer changes according to the day, feast, season, and Mass being celebrated.
 
                 What to listen for:
                 • The offering of bread and wine
@@ -1942,8 +2146,7 @@ private struct MassGuidePart: Identifiable {
                 systemImage: "circle.grid.2x2",
                 summary: "The priest shows the Eucharist and invites the faithful to the supper of the Lamb.",
                 fullText: """
-                Full official text for the Invitation to Communion is not bundled yet.
-
+                
                 What to listen for:
                 • The priest presents the Lamb of God
                 • The faithful acknowledge their unworthiness
@@ -1959,7 +2162,7 @@ private struct MassGuidePart: Identifiable {
                 systemImage: "heart.text.square",
                 summary: "The priest prays that the sacrament received will bear fruit in the lives of the faithful.",
                 fullText: """
-                Full official text for the Prayer after Communion is not bundled yet. This prayer changes according to the day, feast, season, and Mass being celebrated.
+                This prayer changes according to the day, feast, season, and Mass being celebrated.
 
                 What to listen for:
                 • Thanksgiving for the gift received
@@ -1981,7 +2184,6 @@ private struct MassGuidePart: Identifiable {
                 systemImage: "cross",
                 summary: "The priest blesses the faithful before they are sent forth.",
                 fullText: """
-                Full official text for solemn blessings and prayers over the people is not bundled yet.
 
                 The usual pattern:
                 • The priest greets the people
@@ -2191,9 +2393,15 @@ private struct MassPrayerOption: Identifiable, Equatable {
             systemImage: "quote.bubble",
             summary: "Christ is addressed with brief titles or invocations, and the people respond: Lord, have mercy; Christ, have mercy.",
             fullText: """
+            English:
             Lord, have mercy.
             Christ, have mercy.
             Lord, have mercy.
+            
+            Greek:
+            Kyrie eleison.
+            Christe eleison.
+            Kyrie eleison.
 
             At Mass this form may include short invocations such as:
             “You were sent to heal the contrite of heart.”
@@ -2312,8 +2520,7 @@ private struct MassPrayerOption: Identifiable, Equatable {
             systemImage: "book.closed",
             summary: "The ancient Roman Canon. It has a solemn, expansive character, with longer commemorations of the saints and intercessions for the Church.",
             fullText: """
-            Full official text for Eucharistic Prayer I is not bundled yet. Add licensed Roman Missal text here when available.
-
+            
             Follow-along structure:
             • Thanksgiving and praise
             • Prayer for the Church and her leaders
@@ -2334,8 +2541,7 @@ private struct MassPrayerOption: Identifiable, Equatable {
             systemImage: "book.closed",
             summary: "A concise Eucharistic Prayer with a clear structure of thanksgiving, epiclesis, institution narrative, memorial, offering, and intercession.",
             fullText: """
-            Full official text for Eucharistic Prayer II is not bundled yet. Add licensed Roman Missal text here when available.
-
+            
             Follow-along structure:
             • Preface and Holy, Holy, Holy
             • Calling down the Holy Spirit upon the gifts
@@ -2355,8 +2561,7 @@ private struct MassPrayerOption: Identifiable, Equatable {
             systemImage: "book.closed",
             summary: "A fuller prayer often used on Sundays and feasts. It emphasizes the gathered Church, the sacrifice of Christ, and the unity of the faithful.",
             fullText: """
-            Full official text for Eucharistic Prayer III is not bundled yet. Add licensed Roman Missal text here when available.
-
+            
             Follow-along structure:
             • Praise of God’s holiness
             • Calling down the Holy Spirit upon the gifts
@@ -2377,8 +2582,7 @@ private struct MassPrayerOption: Identifiable, Equatable {
             systemImage: "book.closed",
             summary: "A longer prayer with a fixed preface that recounts salvation history, from creation and covenant to Christ and the mission of the Spirit.",
             fullText: """
-            Full official text for Eucharistic Prayer IV is not bundled yet. Add licensed Roman Missal text here when available.
-
+            
             Follow-along structure:
             • Salvation history from creation through Christ
             • Thanksgiving for God’s covenant love
@@ -2433,12 +2637,22 @@ private struct MassPrayerOption: Identifiable, Equatable {
             systemImage: "sparkles",
             summary: "The acclamation before the Eucharistic Prayer, joining the praise of angels and saints.",
             fullText: """
+            English:
             Holy, Holy, Holy Lord God of hosts.
             Heaven and earth are full of your glory.
             Hosanna in the highest.
 
             Blessed is he who comes in the name of the Lord.
             Hosanna in the highest.
+            
+            Latin: 
+            Sanctus, Sanctus, Sanctus
+            Dominus Deus Sabaoth.
+            Pleni sunt cæli et terra gloria tua.
+            Hosanna in excelsis.
+            
+            Benedictus qui venit in nomine Domini.
+            Hosanna in excelsis.
             """,
             note: nil,
             textNote: "Use the text provided in the parish missal or worship aid when praying at Mass."
@@ -2451,7 +2665,8 @@ private struct MassPrayerOption: Identifiable, Equatable {
             summary: "The people acclaim the mystery of faith after the consecration.",
             fullText: """
             Common forms include:
-
+            
+            English:
             We proclaim your Death, O Lord,
             and profess your Resurrection
             until you come again.
@@ -2467,6 +2682,20 @@ private struct MassPrayerOption: Identifiable, Equatable {
             Save us, Savior of the world,
             for by your Cross and Resurrection
             you have set us free.
+            
+            Latin: 
+            Mortem tuam annuntiamus, domine,
+            et tuam resurrectionem confitemur,
+            donec venias.
+
+            or:
+
+            Salvator mundi, salva nos, qui per crucem et resurrectionem tuam liberasti nos.
+
+            or:
+
+            Quotiescumque manducamus panem hunc et calicem bibimus,
+            mortem tuam annuntiamus, domine, donec venias.
             """,
             note: nil,
             textNote: "The acclamation used may vary by Mass setting."
@@ -2488,6 +2717,17 @@ private struct MassPrayerOption: Identifiable, Equatable {
             as we forgive those who trespass against us;
             and lead us not into temptation,
             but deliver us from evil.
+            
+            Latin: 
+            Pater Noster, qui es in caelis, 
+            sanctificetur nomen tuum. 
+            Adveniat regnum tuum. 
+            Fiat voluntas tua, sicut in caelo et in terra. 
+            
+            Panem nostrum quotidianum da nobis hodie,
+            et dimitte nobis debita nostra sicut et nos dimittimus debitoribus nostris. 
+            Et ne nos inducas in tentationem,
+            sed libera nos a malo. Amen.
             """,
             note: nil,
             textNote: "At Mass the priest continues with the embolism, and the people respond with the doxology."
@@ -2499,6 +2739,7 @@ private struct MassPrayerOption: Identifiable, Equatable {
             systemImage: "leaf",
             summary: "The litany sung or spoken during the breaking of the bread before Communion.",
             fullText: """
+            English: 
             Lamb of God, you take away the sins of the world,
             have mercy on us.
 
@@ -2507,6 +2748,16 @@ private struct MassPrayerOption: Identifiable, Equatable {
 
             Lamb of God, you take away the sins of the world,
             grant us peace.
+            
+            Latin: 
+            Agnus Dei qui tollis peccata mundi, 
+            miserere nobis.
+            
+            Agnus Dei, qui tollis peccata mundi,
+            miserere nobis.
+            
+            Agnus Dei, qui tollis peccata mundi,
+            dona nobis pacem.
             """,
             note: nil,
             textNote: "The first invocation may be repeated as needed during the fraction rite."
@@ -2516,6 +2767,7 @@ private struct MassPrayerOption: Identifiable, Equatable {
 
 private struct RosaryMysteryPickerView: View {
     let rosary: RosaryCatalog
+    let onRosaryCompleted: () -> Void
 
     var body: some View {
         ZStack {
@@ -2525,7 +2777,11 @@ private struct RosaryMysteryPickerView: View {
                 VStack(spacing: 12) {
                     ForEach(rosary.mysteries) { mysterySet in
                         NavigationLink {
-                            RosaryIntroView(rosary: rosary, mysterySet: mysterySet)
+                            RosaryIntroView(
+                                rosary: rosary,
+                                mysterySet: mysterySet,
+                                onRosaryCompleted: onRosaryCompleted
+                            )
                         } label: {
                             SpiritualMenuRow(title: mysterySet.title, subtitle: "\(mysterySet.mysteries.count) mysteries", systemImage: "circle.grid.cross")
                         }
@@ -2543,6 +2799,7 @@ private struct RosaryMysteryPickerView: View {
 private struct RosaryIntroView: View {
     let rosary: RosaryCatalog
     let mysterySet: RosaryMysterySet
+    let onRosaryCompleted: () -> Void
 
     @State private var htmlHeight: CGFloat = 450
 
@@ -2560,7 +2817,8 @@ private struct RosaryIntroView: View {
                     NavigationLink {
                         GuidedRosaryView(
                             mysteryId: mysterySet.id,
-                            sequence: RosarySequenceBuilder.build(rosary: rosary, mysterySet: mysterySet)
+                            sequence: RosarySequenceBuilder.build(rosary: rosary, mysterySet: mysterySet),
+                            onRosaryCompleted: onRosaryCompleted
                         )
                     } label: {
                         Label("Start Rosary", systemImage: "play.circle.fill")
@@ -2582,6 +2840,7 @@ private struct GuidedRosaryView: View {
 
     let mysteryId: String
     let sequence: [RosaryStep]
+    let onRosaryCompleted: () -> Void
 
     @State private var stepIndex = 0
     @State private var isSavingCompletion = false
@@ -2592,6 +2851,16 @@ private struct GuidedRosaryView: View {
                 IlluminedBackground()
 
                 VStack(spacing: 16) {
+                    ProgressView(
+                        value: Double(stepIndex + 1),
+                        total: Double(sequence.count)
+                    )
+                    .tint(IlluminedTheme.gold)
+                    .padding(.horizontal)
+                    .padding(.top)
+                    .accessibilityLabel("Rosary progress")
+                    .accessibilityValue("Step \(stepIndex + 1) of \(sequence.count)")
+
                     ScrollView {
                         VStack {
                             Spacer(minLength: 0)
@@ -2620,9 +2889,6 @@ private struct GuidedRosaryView: View {
                                                 .foregroundStyle(IlluminedTheme.gold)
                                         }
 
-                                        Text("Step \(stepIndex + 1) of \(sequence.count)")
-                                            .font(IlluminedTheme.font(size: 13))
-                                            .foregroundStyle(IlluminedTheme.secondaryText)
                                     }
                                 }
                             }
@@ -2631,7 +2897,7 @@ private struct GuidedRosaryView: View {
 
                             Spacer(minLength: 0)
                         }
-                        .frame(minHeight: max(proxy.size.height - 92, 1))
+                        .frame(minHeight: max(proxy.size.height - 124, 1))
                         .padding(.horizontal)
                         .padding(.top)
                     }
@@ -2667,7 +2933,7 @@ private struct GuidedRosaryView: View {
         Task {
             await profileService.markRosaryMysteryCompleted(mysteryId)
             isSavingCompletion = false
-            stepIndex = 0
+            onRosaryCompleted()
         }
     }
 }

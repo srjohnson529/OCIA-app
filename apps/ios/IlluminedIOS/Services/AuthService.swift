@@ -1,5 +1,6 @@
 import Combine
 import FirebaseAuth
+import FirebaseFunctions
 import Foundation
 
 @MainActor
@@ -13,7 +14,11 @@ final class AuthService: ObservableObject {
     init() {
         handle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor in
-                self?.user = user
+                guard let user else {
+                    self?.user = nil
+                    return
+                }
+                await self?.acceptValidSessionOrSignOut(user)
             }
         }
     }
@@ -69,6 +74,39 @@ final class AuthService: ObservableObject {
         }
     }
 
+    func deleteAccount(password: String) async -> Bool {
+        guard let currentUser = Auth.auth().currentUser else {
+            errorMessage = "Please sign in before deleting your account."
+            statusMessage = nil
+            return false
+        }
+        guard let email = currentUser.email else {
+            errorMessage = "This account does not have an email address."
+            statusMessage = nil
+            return false
+        }
+        guard !password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            errorMessage = "Enter your password to continue."
+            statusMessage = nil
+            return false
+        }
+
+        do {
+            clearMessages()
+            let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+            _ = try await currentUser.reauthenticate(with: credential)
+            _ = try await Functions.functions(region: "us-central1")
+                .httpsCallable("deleteOwnAccount")
+                .call()
+            try Auth.auth().signOut()
+            return true
+        } catch {
+            errorMessage = friendlyAccountDeletionMessage(for: error)
+            statusMessage = nil
+            return false
+        }
+    }
+
     func clearMessages() {
         errorMessage = nil
         statusMessage = nil
@@ -76,6 +114,34 @@ final class AuthService: ObservableObject {
 
     private func cleanedEmail(_ email: String) -> String {
         email.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func acceptValidSessionOrSignOut(_ cachedUser: User) async {
+        do {
+            try await cachedUser.reload()
+            user = Auth.auth().currentUser
+        } catch {
+            let nsError = error as NSError
+            let invalidSession: Bool
+            if let code = AuthErrorCode(rawValue: nsError.code) {
+                switch code {
+                case .userNotFound, .invalidUserToken, .userTokenExpired:
+                    invalidSession = true
+                default:
+                    invalidSession = false
+                }
+            } else {
+                invalidSession = false
+            }
+            if invalidSession {
+                try? Auth.auth().signOut()
+                user = nil
+                clearMessages()
+            } else {
+                // Preserve an existing session during a temporary network outage.
+                user = cachedUser
+            }
+        }
     }
 
     private func friendlyAuthMessage(for error: Error) -> String {
@@ -98,5 +164,36 @@ final class AuthService: ObservableObject {
         default:
             return error.localizedDescription
         }
+    }
+
+    private func friendlyAccountDeletionMessage(for error: Error) -> String {
+        let nsError = error as NSError
+
+        if let authCode = AuthErrorCode(rawValue: nsError.code) {
+            switch authCode {
+            case .wrongPassword, .invalidCredential:
+                return "The password was not correct. Your account was not deleted."
+            case .tooManyRequests:
+                return "Too many attempts. Please wait a few minutes and try again."
+            case .networkError:
+                return "Account deletion could not connect to the server. Please try again."
+            default:
+                break
+            }
+        }
+
+        if nsError.domain == FunctionsErrorDomain,
+           let functionsCode = FunctionsErrorCode(rawValue: nsError.code) {
+            switch functionsCode {
+            case .failedPrecondition:
+                return "Please sign out and sign back in, then try deleting your account again."
+            case .unavailable:
+                return "Account deletion is temporarily unavailable. Please try again."
+            default:
+                break
+            }
+        }
+
+        return "Your account could not be deleted. Nothing has been changed. Please try again."
     }
 }

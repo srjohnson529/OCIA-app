@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AuthView: View {
     @EnvironmentObject private var authService: AuthService
+    @EnvironmentObject private var inviteLinkStore: InviteLinkStore
     @State private var email = ""
     @State private var password = ""
     @State private var resetEmail = ""
@@ -19,6 +20,21 @@ struct AuthView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
+                        if let invite = inviteLinkStore.pendingInvite {
+                            IlluminedCard {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Label("Invitation saved", systemImage: "person.crop.circle.badge.plus")
+                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                        .foregroundStyle(IlluminedTheme.blue)
+                                    Text(invite.title)
+                                        .font(IlluminedTheme.font(size: 16))
+                                        .foregroundStyle(IlluminedTheme.ink)
+                                    Text("Create an account or sign in. Your invitation will be applied automatically during profile setup.")
+                                        .font(IlluminedTheme.font(size: 14))
+                                        .foregroundStyle(IlluminedTheme.secondaryText)
+                                }
+                            }
+                        }
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text(isCreatingAccount ? "Create your account" : "Welcome back")
@@ -111,6 +127,9 @@ struct AuthView: View {
             }
             .illuminedNavigation()
             .illuminedBrandHeader()
+            .task {
+                if inviteLinkStore.pendingInvite != nil { isCreatingAccount = true }
+            }
             .sheet(isPresented: $isShowingPasswordReset) {
                 PasswordResetView(
                     email: $resetEmail,
