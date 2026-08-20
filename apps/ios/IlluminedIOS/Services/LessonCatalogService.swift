@@ -54,7 +54,9 @@ final class LessonCatalogService: ObservableObject {
 
             if showClassroomLessons {
                 merged.append(contentsOf: customSnapshot.documents.compactMap {
-                    lesson(from: $0.data(), id: $0.documentID, fallback: nil)
+                    var customLesson = lesson(from: $0.data(), id: $0.documentID, fallback: nil)
+                    customLesson.category = classroomCategoryName(for: classId)
+                    return customLesson
                 })
             }
 
@@ -84,6 +86,11 @@ final class LessonCatalogService: ObservableObject {
             let matching = lessons.filter { $0.category == name }
             return matching.isEmpty ? nil : LessonCategory(category: name, lessons: matching)
         }
+    }
+
+    private func classroomCategoryName(for classId: String) -> String {
+        let name = classId.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "Classroom Lessons" : "\(name) Lessons"
     }
 
     private func lesson(from data: [String: Any]?, id: String, fallback: Lesson?) -> Lesson {

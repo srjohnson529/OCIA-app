@@ -68,7 +68,9 @@ object LessonCatalog {
             val merged = canonical.filterNot { it.category in hidden }.map { lesson ->
                 overrideData[lesson.id]?.toLesson(lesson.id, lesson) ?: lesson
             }.toMutableList()
-            if (showCustom) customData.mapNotNullTo(merged) { (id, data) -> data.toLesson(id, null) }
+            if (showCustom) customData.mapNotNullTo(merged) { (id, data) ->
+                data.toLesson(id, null)?.copy(category = classroomCategoryName(classId))
+            }
             onUpdate(Result.success(grouped(merged)))
         }
 
@@ -118,6 +120,11 @@ object LessonCatalog {
                 ?.let { LessonCategory(categoryName, it) }
         }
     }
+}
+
+internal fun classroomCategoryName(classId: String): String {
+    val name = classId.trim()
+    return if (name.isEmpty()) "Classroom Lessons" else "$name Lessons"
 }
 
 private fun Map<String, Any>.toLesson(id: String, fallback: CatechismLesson?): CatechismLesson? {
