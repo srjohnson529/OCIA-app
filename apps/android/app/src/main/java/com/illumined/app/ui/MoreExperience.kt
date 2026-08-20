@@ -23,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
@@ -39,6 +41,7 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.illumined.app.R
 import com.illumined.app.data.ChatMessage
 import com.illumined.app.data.ChatRepository
+import com.illumined.app.data.AccountDeletionRepository
 import com.illumined.app.data.UserProfile
 import com.illumined.app.data.ScheduleItem
 import com.illumined.app.data.Assignment
@@ -78,7 +81,7 @@ private fun MoreMenu(profile: UserProfile?, navigate: (MorePage) -> Unit) {
         add(Triple("Awards", "View badges, achievements, and memorized prayers.", MorePage.AWARDS))
         add(Triple("Chat", "Open your OCIA classroom conversation.", MorePage.CHAT))
         add(Triple("Account", "View your profile and sign out.", MorePage.ACCOUNT))
-        add(Triple("Notifications", "Turn on class announcements, assignments, and discussion alerts.", MorePage.NOTIFICATIONS))
+        add(Triple("Notifications", "Turn class and formation alerts on or off.", MorePage.NOTIFICATIONS))
         add(Triple("Games", "Practice virtue terms with matching and quiz games.", MorePage.GAMES))
         if (profile?.isInstructor == true) add(Triple("Instructor Tools", "Manage announcements, schedule, assignments, and student progress.", MorePage.INSTRUCTOR))
         if (profile?.isAdmin == true) add(Triple("Admin Tools", "Create first-instructor setup codes for new parishes.", MorePage.ADMIN))
@@ -165,10 +168,10 @@ private fun AwardsPage(profile: UserProfile?, onBack: () -> Unit) {
 
 @Composable
 private fun ChatPage(userId: String, profile: UserProfile?, onBack: () -> Unit) {
-    val repository = remember { ChatRepository() }; val classId = profile?.classIds?.firstOrNull().orEmpty()
+    val repository = remember { ChatRepository() }; val classId = profile?.selectedClassId.orEmpty()
     val listState = rememberLazyListState()
     var messages by remember { mutableStateOf(emptyList<ChatMessage>()) }; var draft by rememberSaveable { mutableStateOf("") }; var error by remember { mutableStateOf<String?>(null) }; var sending by remember { mutableStateOf(false) }
-    DisposableEffect(classId) { var registration: ListenerRegistration? = null; if (classId.isNotBlank()) registration = repository.listen(classId, { messages = it }, { error = it.localizedMessage ?: "Chat could not be loaded." }); onDispose { registration?.remove() } }
+    DisposableEffect(classId) { messages = emptyList(); var registration: ListenerRegistration? = null; if (classId.isNotBlank()) registration = repository.listen(classId, { messages = it }, { error = it.localizedMessage ?: "Chat could not be loaded." }); onDispose { registration?.remove() } }
     LaunchedEffect(messages.lastOrNull()?.id) { if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex) }
     Column(Modifier.fillMaxSize().background(moreBrush())) {
         PageHeading("Chat", onBack)
@@ -246,6 +249,12 @@ private fun ChatMessageText(message: String, mine: Boolean) {
 
 @Composable
 private fun AccountPage(email: String, profile: UserProfile?, onSignOut: () -> Unit, onBack: () -> Unit) {
+    val deletionRepository = remember { AccountDeletionRepository() }
+    val uriHandler = LocalUriHandler.current
+    var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
+    var deletionPassword by rememberSaveable { mutableStateOf("") }
+    var deletionWorking by remember { mutableStateOf(false) }
+    var deletionError by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxSize().background(moreBrush()).verticalScroll(rememberScrollState())) {
         PageHeading("Account", onBack)
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -255,12 +264,12 @@ private fun AccountPage(email: String, profile: UserProfile?, onSignOut: () -> U
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             AccountSymbol(AccountSymbolKind.Avatar, IlluminedThemeTokens.Blue, Modifier.size(48.dp))
                             Spacer(Modifier.width(14.dp))
-                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(profile.displayName, fontSize = 24.sp, fontWeight = FontWeight.SemiBold); Text(profile.classIds.firstOrNull().orEmpty().ifBlank { "No class assigned" }, fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText) }
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(profile.displayName, fontSize = 24.sp, fontWeight = FontWeight.SemiBold); Text(profile.selectedClassId.ifBlank { "No class assigned" }, fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText) }
                         }
                         HorizontalDivider()
                         AccountDetailRow(AccountSymbolKind.Person, "Name", profile.displayName)
                         AccountDetailRow(AccountSymbolKind.Envelope, "Email", profile.email.ifBlank { email })
-                        AccountDetailRow(AccountSymbolKind.ClassMembers, "Class", profile.classIds.firstOrNull().orEmpty().ifBlank { "Not assigned" })
+                        AccountDetailRow(AccountSymbolKind.ClassMembers, "Class", profile.selectedClassId.ifBlank { "Not assigned" })
                         AccountDetailRow(if (profile.isInstructor) AccountSymbolKind.Instructor else AccountSymbolKind.Student, "Role", MorePresentation.roleText(profile.isInstructor))
                     }
                 }
@@ -277,7 +286,62 @@ private fun AccountPage(email: String, profile: UserProfile?, onSignOut: () -> U
                 }
             }
             OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth().height(54.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red), border = BorderStroke(1.dp, Color.Red.copy(.18f)), shape = RoundedCornerShape(16.dp)) { AccountSymbol(AccountSymbolKind.SignOut, Color.Red, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Sign Out", fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
+            Surface(shape = RoundedCornerShape(16.dp), color = Color.White.copy(.94f), border = BorderStroke(1.dp, Color.Red.copy(.18f))) {
+                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Delete Account", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.Red)
+                    Text("Permanently delete your Illumined account and associated personal data.", fontSize = 14.sp, color = IlluminedThemeTokens.SecondaryText)
+                    OutlinedButton(
+                        onClick = { deletionPassword = ""; deletionError = null; showDeleteConfirmation = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+                        border = BorderStroke(1.dp, Color.Red.copy(.32f)),
+                    ) { Text("Delete My Account") }
+                    TextButton(onClick = { uriHandler.openUri(AccountDeletionPresentation.WebUrl) }) {
+                        Text("Account deletion information")
+                    }
+                }
+            }
         }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { if (!deletionWorking) showDeleteConfirmation = false },
+            title = { Text("Permanently Delete Account?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(AccountDeletionPresentation.Warning)
+                    Text(AccountDeletionPresentation.SharedContentNotice, fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                    OutlinedTextField(
+                        value = deletionPassword,
+                        onValueChange = { deletionPassword = it; deletionError = null },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Password") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                        enabled = !deletionWorking,
+                    )
+                    deletionError?.let { Text(it, color = Color.Red, fontSize = 13.sp) }
+                    if (deletionWorking) LinearProgressIndicator(Modifier.fillMaxWidth(), color = Color.Red)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        deletionWorking = true
+                        deletionError = null
+                        deletionRepository.deleteAccount(
+                            deletionPassword,
+                            onSuccess = { deletionWorking = false; showDeleteConfirmation = false; onSignOut() },
+                            onError = { deletionWorking = false; deletionError = AccountDeletionPresentation.errorMessage(it) },
+                        )
+                    },
+                    enabled = AccountDeletionPresentation.canDelete(deletionPassword, deletionWorking),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                ) { Text(if (deletionWorking) "Deleting…" else "Delete Permanently") }
+            },
+            dismissButton = { TextButton(onClick = { showDeleteConfirmation = false }, enabled = !deletionWorking) { Text("Cancel") } },
+        )
     }
 }
 

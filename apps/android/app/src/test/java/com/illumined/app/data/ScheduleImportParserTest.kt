@@ -21,6 +21,25 @@ class ScheduleImportParserTest {
         assertEquals("Welcome, prayer, and tour", csv.rows.single().details)
     }
 
+    @Test fun preservesSpreadsheetOrderForRepeatedDates() {
+        val result = ScheduleImportParser.parse(
+            "2/10/2027\tAsh Wednesday\n" +
+                "2/14/2027\tRite of Sending\n" +
+                "2/14/2027\tRite of Election\n" +
+                "2/14/2027\tIntroduction to the Ten Commandments & Commandments 1–3",
+        ) as ScheduleParseResult.Success
+
+        assertEquals(
+            listOf(
+                "Ash Wednesday",
+                "Rite of Sending",
+                "Rite of Election",
+                "Introduction to the Ten Commandments & Commandments 1–3",
+            ),
+            result.rows.map { it.topic },
+        )
+    }
+
     @Test fun reportsOriginalRowNumberForBadDate() {
         val result = ScheduleImportParser.parse("date,topic\nnot-a-date,Creed")
         assertTrue(result is ScheduleParseResult.Failure)

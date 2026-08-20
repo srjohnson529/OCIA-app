@@ -104,11 +104,13 @@ internal fun DiscussionBoard(
     onCompleteAssignment: (Assignment, () -> Unit, () -> Unit) -> Unit,
     onBack: () -> Unit,
 ) {
-    val repository = remember { DiscussionRepository() }; val classId = profile?.classIds?.firstOrNull().orEmpty()
+    val repository = remember { DiscussionRepository() }; val classId = profile?.selectedClassId.orEmpty()
     var posts by remember { mutableStateOf(emptyList<DiscussionPost>()) }; var replies by remember { mutableStateOf(emptyList<DiscussionReply>()) }
     var draft by rememberSaveable(prompt.id) { mutableStateOf("") }; var working by remember { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }
     val myPost = posts.firstOrNull { it.authorId == userId }
     DisposableEffect(prompt.id, classId) {
+        posts = emptyList()
+        replies = emptyList()
         var postListener: ListenerRegistration? = null; var replyListener: ListenerRegistration? = null
         if (classId.isNotBlank()) { postListener = repository.listenPosts(prompt.id, classId, { posts = it }, { error = "Responses could not be loaded." }); replyListener = repository.listenReplies(prompt.id, classId, { replies = it }, { error = "Replies could not be loaded." }) }
         onDispose { postListener?.remove(); replyListener?.remove() }

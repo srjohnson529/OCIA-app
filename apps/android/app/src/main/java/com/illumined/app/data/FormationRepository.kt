@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.MetadataChanges
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
@@ -14,6 +15,7 @@ data class UserProfile(
     val displayName: String,
     val classIds: List<String>,
     val completedLessons: Set<String>,
+    val archivedClassIds: List<String> = emptyList(),
     val memorizedPrayerIds: Set<String> = emptySet(),
     val selectedPrayerIds: Set<String> = emptySet(),
     val earnedBadges: Set<String> = emptySet(),
@@ -24,7 +26,19 @@ data class UserProfile(
     val userId: String = "",
     val email: String = "",
     val currentLessonIndex: Int = 0,
-)
+    val activeClassId: String = "",
+    val notificationNewPrayerRequests: Boolean = true,
+    val notificationNewAssignments: Boolean = true,
+    val notificationAssignmentReminders: Boolean = true,
+    val notificationDiscussionReplies: Boolean = true,
+    val notificationsEnabled: Boolean = true,
+) {
+    val activeClassIds: List<String>
+        get() = classIds.filterNot(archivedClassIds::contains)
+
+    val selectedClassId: String
+        get() = activeClassId.takeIf { it in activeClassIds } ?: activeClassIds.firstOrNull().orEmpty()
+}
 
 data class Assignment(
     val id: String,
@@ -56,6 +70,14 @@ data class ScheduleItem(
     val topic: String,
     val details: String,
     val date: Timestamp?,
+    val sortOrder: Long? = null,
+)
+
+internal val scheduleItemComparator = compareBy<ScheduleItem>(
+    { it.date?.seconds ?: Long.MAX_VALUE },
+    { it.sortOrder ?: Long.MAX_VALUE },
+    { it.topic.lowercase() },
+    { it.id },
 )
 
 data class DiscussionPrompt(
@@ -98,8 +120,8 @@ internal data class OverviewListenerScope(
 )
 
 internal fun overviewListenerScopes(userId: String, classId: String?): List<OverviewListenerScope> = buildList {
-    add(OverviewListenerScope("assignmentCompletions", "userId", userId))
     if (!classId.isNullOrBlank()) {
+        add(OverviewListenerScope("assignmentCompletions", "userId", userId))
         add(OverviewListenerScope("assignments", "classId", classId))
         add(OverviewListenerScope("classSchedule", "classId", classId))
         add(OverviewListenerScope("discussionPrompts", "classId", classId, activeOnly = true))
@@ -124,17 +146,21 @@ internal class FormationOverviewAccumulator {
 
     fun resetClassData() {
         assignments = emptyList()
+        completions = emptyList()
         schedule = emptyList()
         prompts = emptyList()
         prayers = emptyList()
     }
 
     fun overview(): FormationOverview? = profile?.let { currentProfile ->
+        val selectedCompletions = completions.filter {
+            it.classId.isBlank() || it.classId == currentProfile.selectedClassId
+        }
         FormationOverview(
             profile = currentProfile,
             assignments = assignments,
-            completedAssignmentIds = completions.filter { it.isCompleted }.map { it.assignmentId }.toSet(),
-            assignmentCompletions = completions,
+            completedAssignmentIds = selectedCompletions.filter { it.isCompleted }.map { it.assignmentId }.toSet(),
+            assignmentCompletions = selectedCompletions,
             schedule = schedule,
             discussionPrompts = prompts,
             prayerRequests = prayers,
@@ -151,6 +177,7 @@ private fun DocumentSnapshot?.toUserProfile(): UserProfile {
         displayName = document?.getString("displayName") ?: document?.getString("username") ?: "Friend",
         classIds = classIds,
         completedLessons = document?.get("completedLessons").asStringList().toSet(),
+        archivedClassIds = document?.get("archivedClassIds").asStringList().distinct(),
         memorizedPrayerIds = document?.get("memorizedPrayerIds").asStringList().toSet(),
         selectedPrayerIds = document?.get("selectedPrayerIds").asStringList().toSet(),
         earnedBadges = document?.get("earnedBadges").asStringList().toSet(),
@@ -161,6 +188,12 @@ private fun DocumentSnapshot?.toUserProfile(): UserProfile {
         userId = document?.getString("userId") ?: document?.id.orEmpty(),
         email = document?.getString("email").orEmpty(),
         currentLessonIndex = document?.getLong("currentLessonIndex")?.toInt() ?: 0,
+        activeClassId = document?.getString("activeClassId").orEmpty(),
+        notificationNewPrayerRequests = document?.getBoolean("notificationNewPrayerRequests") != false,
+        notificationNewAssignments = document?.getBoolean("notificationNewAssignments") != false,
+        notificationAssignmentReminders = document?.getBoolean("notificationAssignmentReminders") != false,
+        notificationDiscussionReplies = document?.getBoolean("notificationDiscussionReplies") != false,
+        notificationsEnabled = document?.getBoolean("notificationsEnabled") != false,
     )
 }
 
@@ -220,6 +253,7 @@ private fun QuerySnapshot.toAssignmentCompletions(): List<AssignmentCompletion> 
         assignmentItemId = document.getString("assignmentItemId").orEmpty(),
         assignmentItemTitle = document.getString("assignmentItemTitle").orEmpty(),
         assignmentItemType = document.getString("assignmentItemType").orEmpty(),
+        classId = document.getString("classId").orEmpty(),
     )
 }
 
@@ -230,8 +264,9 @@ private fun QuerySnapshot.toSchedule(): List<ScheduleItem> = documents.map { doc
         topic = document.getString("topic").orEmpty(),
         details = document.getString("details").orEmpty(),
         date = document.getTimestamp("date"),
+        sortOrder = document.getLong("sortOrder"),
     )
-}.sortedBy { it.date?.seconds ?: Long.MAX_VALUE }
+}.sortedWith(scheduleItemComparator)
 
 private fun QuerySnapshot.toDiscussionPrompts(): List<DiscussionPrompt> = documents
     .filter { it.getBoolean("isActive") != false }
@@ -273,6 +308,17 @@ class FormationRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
 ) {
+    fun setActiveClass(profile: UserProfile, classId: String, onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onError(IllegalStateException("Please sign in before switching classes."))
+        val selected = classId.trim()
+        if (!profile.isInstructor || selected !in profile.classIds) {
+            return onError(IllegalArgumentException("You can only switch to a class assigned to your instructor profile."))
+        }
+        firestore.collection("userProfiles").document(userId).update(
+            mapOf("activeClassId" to selected, "classId" to selected),
+        ).addOnSuccessListener { onSuccess() }.addOnFailureListener(onError)
+    }
+
     fun listenOverview(
         userId: String,
         onSuccess: (FormationOverview) -> Unit,
@@ -309,14 +355,23 @@ class FormationRepository(
         }
 
         val profileListener = firestore.collection("userProfiles").document(userId)
-            .addSnapshotListener { profile, problem ->
+            .addSnapshotListener(MetadataChanges.INCLUDE) { profile, problem ->
                 if (problem != null) {
                     onError(problem)
                     return@addSnapshotListener
                 }
+
+                // Firestore reports a newly created profile from its local cache
+                // before the server has accepted the write. Class-scoped listeners
+                // must wait for the server acknowledgement or their rules checks
+                // can fail with "Missing or insufficient permissions."
+                if (profile?.metadata?.hasPendingWrites() == true) {
+                    return@addSnapshotListener
+                }
+
                 val currentProfile = profile.toUserProfile()
                 accumulator.updateProfile(currentProfile)
-                val classId = currentProfile.classIds.firstOrNull()
+                val classId = currentProfile.selectedClassId.takeIf(String::isNotBlank)
                 if (!hasBoundScopes || classId != activeClassId) {
                     dynamicListeners.forEach { it.remove() }
                     dynamicListeners.clear()
@@ -355,6 +410,7 @@ class FormationRepository(
                         ?: "Friend",
                     classIds = classIds,
                     completedLessons = profileDocument.get("completedLessons").asStringList().toSet(),
+                    archivedClassIds = profileDocument.get("archivedClassIds").asStringList().distinct(),
                     memorizedPrayerIds = profileDocument.get("memorizedPrayerIds").asStringList().toSet(),
                     selectedPrayerIds = profileDocument.get("selectedPrayerIds").asStringList().toSet(),
                     earnedBadges = profileDocument.get("earnedBadges").asStringList().toSet(),
@@ -365,6 +421,12 @@ class FormationRepository(
                     userId = profileDocument.getString("userId") ?: profileDocument.id,
                     email = profileDocument.getString("email").orEmpty(),
                     currentLessonIndex = profileDocument.getLong("currentLessonIndex")?.toInt() ?: 0,
+                    activeClassId = profileDocument.getString("activeClassId").orEmpty(),
+                    notificationNewPrayerRequests = profileDocument.getBoolean("notificationNewPrayerRequests") != false,
+                    notificationNewAssignments = profileDocument.getBoolean("notificationNewAssignments") != false,
+                    notificationAssignmentReminders = profileDocument.getBoolean("notificationAssignmentReminders") != false,
+                    notificationDiscussionReplies = profileDocument.getBoolean("notificationDiscussionReplies") != false,
+                    notificationsEnabled = profileDocument.getBoolean("notificationsEnabled") != false,
                 )
 
                 if (classIds.isEmpty()) {
@@ -372,7 +434,7 @@ class FormationRepository(
                     return@addOnSuccessListener
                 }
 
-                val primaryClassId = classIds.first()
+                val primaryClassId = profile.selectedClassId
                 val assignmentsTask = firestore.collection("assignments")
                     .whereEqualTo("classId", primaryClassId)
                     .get()
@@ -446,11 +508,14 @@ class FormationRepository(
                                 }
                                 .sortedBy { it.dueAt?.seconds ?: Long.MAX_VALUE }
 
-                            val completedIds = completionSnapshot.documents
+                            val classCompletionDocuments = completionSnapshot.documents.filter {
+                                it.getString("classId").isNullOrBlank() || it.getString("classId") == primaryClassId
+                            }
+                            val completedIds = classCompletionDocuments
                                 .filter { it.getBoolean("isCompleted") == true }
                                 .mapNotNull { it.getString("assignmentId") }
                                 .toSet()
-                            val completionRecords = completionSnapshot.documents.map { document ->
+                            val completionRecords = classCompletionDocuments.map { document ->
                                 AssignmentCompletion(
                                     assignmentId = document.getString("assignmentId").orEmpty(),
                                     userId = document.getString("userId").orEmpty(),
@@ -460,6 +525,7 @@ class FormationRepository(
                                     assignmentItemId = document.getString("assignmentItemId").orEmpty(),
                                     assignmentItemTitle = document.getString("assignmentItemTitle").orEmpty(),
                                     assignmentItemType = document.getString("assignmentItemType").orEmpty(),
+                                    classId = document.getString("classId").orEmpty(),
                                 )
                             }
 
@@ -470,8 +536,9 @@ class FormationRepository(
                                     topic = document.getString("topic").orEmpty(),
                                     details = document.getString("details").orEmpty(),
                                     date = document.getTimestamp("date"),
+                                    sortOrder = document.getLong("sortOrder"),
                                 )
-                            }.sortedBy { it.date?.seconds ?: Long.MAX_VALUE }
+                            }.sortedWith(scheduleItemComparator)
 
                             val prompts = promptSnapshot.documents
                                 .filter { it.getBoolean("isActive") != false }

@@ -38,7 +38,7 @@ class CatalogIntegrityTest {
         val commonPrayers = between(formation, "\"commonPrayers\"", "\"rosary\"")
         val rosary = between(formation, "\"rosary\"", "\"spiritualPractices\"")
         val practices = formation.substringAfter("\"spiritualPractices\"")
-        assertEquals(24, count("\\\"id\\\"\\s*:", commonPrayers))
+        assertEquals(27, count("\\\"id\\\"\\s*:", commonPrayers))
         assertEquals(4, count("\\\"name\\\"\\s*:\\s*\\\"The [^\\\"]+ Mysteries\\\"", rosary))
         assertEquals(6, count("\\\"id\\\"\\s*:", practices))
         assertEquals(9, count("\\\"id\\\"\\s*:", raw("achievements")))

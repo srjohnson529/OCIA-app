@@ -25,9 +25,13 @@ class IlluminedMessagingService : FirebaseMessagingService() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         FirebaseFirestore.getInstance().collection("userProfiles").document(userId).get()
             .addOnSuccessListener { profile ->
-                val classId = (profile.get("classIds") as? List<*>)?.filterIsInstance<String>()?.firstOrNull()
+                val classIds = (profile.get("classIds") as? List<*>)?.filterIsInstance<String>().orEmpty()
+                val classId = profile.getString("activeClassId")?.takeIf { it in classIds }
+                    ?: classIds.firstOrNull()
                     ?: profile.getString("classId").orEmpty()
-                NotificationRegistrar().save(classId, token)
+                val enabled = NotificationManagerCompat.from(this).areNotificationsEnabled() &&
+                    (Build.VERSION.SDK_INT < 33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+                NotificationRegistrar().save(classId, token, notificationsEnabled = enabled)
             }
     }
 

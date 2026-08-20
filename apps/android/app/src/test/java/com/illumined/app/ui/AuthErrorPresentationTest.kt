@@ -1,7 +1,9 @@
 package com.illumined.app.ui
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AuthErrorPresentationTest {
@@ -27,6 +29,16 @@ class AuthErrorPresentationTest {
         assertEquals("Enter a valid email address.", AuthErrorPresentation.resetEmailError("invalid", false))
         assertNull(AuthErrorPresentation.resetEmailError("person@example.com", true))
         assertEquals("Password reset email sent. Check your inbox for a secure reset link.", AuthErrorPresentation.ResetEmailSent)
+    }
+
+    @Test
+    fun `deleted and expired users invalidate cached sessions`() {
+        assertTrue(AuthErrorPresentation.isInvalidCachedSessionCode("ERROR_USER_NOT_FOUND"))
+        assertTrue(AuthErrorPresentation.isInvalidCachedSessionCode("ERROR_INVALID_USER_TOKEN"))
+        assertTrue(AuthErrorPresentation.isInvalidCachedSessionCode("ERROR_USER_TOKEN_EXPIRED"))
+        assertTrue(AuthErrorPresentation.isInvalidCachedSessionCode("ERROR_USER_DISABLED"))
+        assertFalse(AuthErrorPresentation.isInvalidCachedSessionCode("ERROR_NETWORK_REQUEST_FAILED"))
+        assertFalse(AuthErrorPresentation.isInvalidCachedSessionCode(null))
     }
 
     private fun message(code: String) = AuthErrorPresentation.messageForCode(code, "Fallback")

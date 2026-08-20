@@ -49,7 +49,7 @@ class DiscussionRepository(
     fun post(prompt: DiscussionPrompt, profile: UserProfile, existingPosts: List<DiscussionPost>, message: String,
         success: () -> Unit, error: (Throwable) -> Unit) {
         val authenticatedId = auth.currentUser?.uid
-        val primaryClassId = profile.classIds.firstOrNull().orEmpty()
+        val primaryClassId = profile.selectedClassId
         DiscussionWritePolicy.postError(authenticatedId, primaryClassId, message, existingPosts.any { it.promptId == prompt.id && it.authorId == authenticatedId })
             ?.let { return error(IllegalStateException(it)) }
         val userId = authenticatedId!!
@@ -68,7 +68,7 @@ class DiscussionRepository(
     fun reply(post: DiscussionPost, prompt: DiscussionPrompt, profile: UserProfile, message: String,
         success: () -> Unit, error: (Throwable) -> Unit) {
         val authenticatedId = auth.currentUser?.uid
-        val primaryClassId = profile.classIds.firstOrNull().orEmpty()
+        val primaryClassId = profile.selectedClassId
         DiscussionWritePolicy.replyError(authenticatedId, primaryClassId, message)
             ?.let { return error(IllegalStateException(it)) }
         db.collection("discussionReplies").add(mapOf("postId" to post.id, "promptId" to prompt.id, "lessonId" to prompt.lessonId,

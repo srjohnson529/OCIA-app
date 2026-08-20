@@ -8,7 +8,7 @@ import android.os.Build
 object NotificationChannelPolicy {
     const val ID = "illumined_class_updates"
     const val NAME = "Class updates"
-    const val DESCRIPTION = "Announcements, assignments, and discussion activity from Illumined"
+    const val DESCRIPTION = "Announcements, assignments, prayer requests, and discussion activity from Illumined"
 }
 
 object IlluminedNotificationChannel {

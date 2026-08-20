@@ -19,9 +19,9 @@ class OverviewListenerScopesTest {
     }
 
     @Test
-    fun `unconfigured learner observes only their completion records`() {
+    fun `unconfigured learner starts no class or progress listeners`() {
         assertEquals(
-            listOf(OverviewListenerScope("assignmentCompletions", "userId", "user-1")),
+            emptyList<OverviewListenerScope>(),
             overviewListenerScopes("user-1", null),
         )
     }

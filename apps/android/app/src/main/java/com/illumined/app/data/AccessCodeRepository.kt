@@ -29,7 +29,7 @@ class AccessCodeRepository(
 
     fun createInstructorCode(profile: UserProfile, success: () -> Unit, error: (Throwable) -> Unit) {
         RoleWritePolicy.instructorError(profile, auth.currentUser != null, "Please sign in before creating invite codes.", "Only instructors can create invite codes.", "Assign your instructor profile to a class before creating invite codes.")?.let { return error(IllegalStateException(it)) }
-        val classId = profile.classIds.firstOrNull().orEmpty()
+        val classId = profile.selectedClassId
         val userId = auth.currentUser!!.uid
         val code = generateCode(false)
         db.collection("instructorInviteCodes").document(code).set(mapOf("classId" to classId, "isActive" to true,

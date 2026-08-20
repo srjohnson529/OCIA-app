@@ -83,7 +83,8 @@ import com.illumined.app.data.Assignment
 import com.illumined.app.data.AssignmentCompletion
 import com.illumined.app.data.AssignmentReading
 import com.illumined.app.data.CatechismLesson
-import com.illumined.app.data.DefaultClassSchedule
+import com.illumined.app.data.ClassScheduleDay
+import com.illumined.app.data.ClassScheduleSelection
 import com.illumined.app.data.InstructorRepository
 import com.illumined.app.data.InstructorReadinessCalculator
 import com.illumined.app.data.LessonCatalog
@@ -115,9 +116,40 @@ private class AuthController(context: Context) {
         null
     }
 
-    fun initialState(): SessionState = auth?.currentUser?.let {
-        SessionState.SignedIn(it.uid, it.email.orEmpty())
-    } ?: SessionState.SignedOut
+    fun initialState(): SessionState = when {
+        auth?.currentUser != null -> SessionState.Working
+        else -> SessionState.SignedOut
+    }
+
+    fun validateCachedSession(update: (SessionState) -> Unit) {
+        val firebaseAuth = auth ?: return
+        val cachedUser = firebaseAuth.currentUser ?: run {
+            update(SessionState.SignedOut)
+            return
+        }
+
+        cachedUser.reload()
+            .addOnSuccessListener {
+                val currentUser = firebaseAuth.currentUser
+                update(
+                    currentUser?.let { SessionState.SignedIn(it.uid, it.email.orEmpty()) }
+                        ?: SessionState.SignedOut,
+                )
+            }
+            .addOnFailureListener { problem ->
+                if (AuthErrorPresentation.isInvalidCachedSession(problem)) {
+                    firebaseAuth.signOut()
+                    update(SessionState.SignedOut)
+                } else {
+                    // Keep a valid cached session during a temporary network outage.
+                    val currentUser = firebaseAuth.currentUser
+                    update(
+                        currentUser?.let { SessionState.SignedIn(it.uid, it.email.orEmpty()) }
+                            ?: SessionState.SignedOut,
+                    )
+                }
+            }
+    }
 
     fun signIn(email: String, password: String, update: (SessionState) -> Unit) {
         val firebaseAuth = auth ?: run {
@@ -170,12 +202,25 @@ private class AuthController(context: Context) {
 }
 
 @Composable
-fun IlluminedApp() {
+fun IlluminedApp(inviteUri: String? = null) {
     IlluminedTheme {
         val context = LocalContext.current
         val controller = remember { AuthController(context.applicationContext) }
+        val inviteStore = remember { PendingInviteStore(context.applicationContext) }
+        var pendingInvite by remember { mutableStateOf(inviteStore.load()) }
         var session by remember { mutableStateOf(controller.initialState()) }
         var showBrandedLaunch by remember { mutableStateOf(true) }
+
+        LaunchedEffect(controller) {
+            controller.validateCachedSession { session = it }
+        }
+
+        LaunchedEffect(inviteUri) {
+            IlluminedInviteLink.parse(inviteUri)?.let { invite ->
+                pendingInvite = invite
+                inviteStore.save(invite)
+            }
+        }
 
         // Android 12's mandatory system splash is icon-only. This brief in-app
         // handoff recreates the full iOS launch composition, including its motto.
@@ -192,10 +237,16 @@ fun IlluminedApp() {
                     is SessionState.SignedIn -> FormationHome(
                         userId = current.userId,
                         email = current.email,
+                        inviteLink = pendingInvite,
+                        onInviteConsumed = {
+                            pendingInvite = null
+                            inviteStore.clear()
+                        },
                         onSignOut = { session = controller.signOut() },
                     )
                     else -> SignInScreen(
                         state = current,
+                        inviteLink = pendingInvite,
                         isConfigured = BuildConfig.FIREBASE_CONFIGURED,
                         onSignIn = { email, password ->
                             controller.signIn(email, password) { session = it }
@@ -249,6 +300,7 @@ private fun BrandedLaunchScreen() {
 @Composable
 private fun SignInScreen(
     state: SessionState,
+    inviteLink: IlluminedInviteLink?,
     isConfigured: Boolean,
     onSignIn: (String, String) -> Unit,
     onCreateAccount: (String, String) -> Unit,
@@ -258,11 +310,15 @@ private fun SignInScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localMessage by remember { mutableStateOf<String?>(null) }
-    var isCreatingAccount by remember { mutableStateOf(false) }
+    var isCreatingAccount by rememberSaveable { mutableStateOf(inviteLink != null) }
     var showReset by remember { mutableStateOf(false) }
     var resetEmail by remember { mutableStateOf("") }
     val isWorking = state is SessionState.Working
     val message = (state as? SessionState.Error)?.message ?: localMessage
+
+    LaunchedEffect(inviteLink) {
+        if (inviteLink != null) isCreatingAccount = true
+    }
 
     if (showReset) {
         PasswordResetScreen(
@@ -289,6 +345,15 @@ private fun SignInScreen(
             Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
+            inviteLink?.let { invite ->
+                AuthCard {
+                    Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Invitation saved", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                        Text(invite.title, fontSize = 16.sp, color = IlluminedThemeTokens.Ink)
+                        Text("Create an account or sign in. Your invitation will be applied automatically during profile setup.", fontSize = 14.sp, color = IlluminedThemeTokens.SecondaryText)
+                    }
+                }
+            }
             AuthCard {
                 Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(AuthPresentation.introTitle(isCreatingAccount), fontSize = 26.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
@@ -446,7 +511,7 @@ private fun AuthMessageCard(message: String, success: Boolean) {
 }
 
 @Composable
-private fun FormationHome(userId: String, email: String, onSignOut: () -> Unit) {
+private fun FormationHome(userId: String, email: String, inviteLink: IlluminedInviteLink?, onInviteConsumed: () -> Unit, onSignOut: () -> Unit) {
     val repository = remember { FormationRepository() }
     val notificationRegistrar = remember { NotificationRegistrar() }
     val notificationContext = LocalContext.current
@@ -488,13 +553,13 @@ private fun FormationHome(userId: String, email: String, onSignOut: () -> Unit) 
         )
     }
 
-    val notificationClassId = overview?.profile?.classIds?.firstOrNull().orEmpty()
+    val notificationClassId = overview?.profile?.selectedClassId.orEmpty()
     LaunchedEffect(userId, notificationClassId, overview?.profile?.isConfigured) {
         val permissionGranted = Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(notificationContext, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         if (overview?.profile?.isConfigured == true && permissionGranted) notificationRegistrar.register(notificationClassId, {}, {})
     }
 
-    val nextSession = overview?.let { DefaultClassSchedule.next(it.schedule) }
+    val nextScheduleDay = overview?.let { ClassScheduleSelection.nextDay(it.schedule) }
     val selectedAssignment = overview?.assignments?.firstOrNull { it.id == selectedAssignmentId }
     LaunchedEffect(selectedAssignmentId, overview?.assignments) {
         if (overview != null && selectedAssignmentId != null && selectedAssignment == null) {
@@ -505,7 +570,11 @@ private fun FormationHome(userId: String, email: String, onSignOut: () -> Unit) 
     if (overview?.profile?.isConfigured == false) {
         Column(Modifier.fillMaxSize().background(IlluminedThemeTokens.Cream)) {
             IlluminedBrandHeader()
-            ProfileSetupExperience(onComplete = { profileReload += 1 })
+            ProfileSetupExperience(
+                inviteLink = inviteLink,
+                onComplete = { onInviteConsumed(); profileReload += 1 },
+                onSignOut = onSignOut,
+            )
         }
         return
     }
@@ -617,8 +686,8 @@ private fun FormationHome(userId: String, email: String, onSignOut: () -> Unit) 
                     repository = repository,
                     overview = overview,
                     error = error,
-                    nextSessionTitle = nextSession?.topic,
-                    nextSessionDate = nextSession?.date,
+                    nextScheduleDay = nextScheduleDay,
+                    onOpenLessons = { selectedSection = FormationSection.Lessons },
                     onOpenAssignment = { selectedAssignmentId = it.id },
                     onPrayerPosted = { profileReload += 1 },
                     onRetry = { error = null; profileReload += 1 },
@@ -795,8 +864,8 @@ private fun HomeSection(
     repository: FormationRepository,
     overview: FormationOverview?,
     error: String?,
-    nextSessionTitle: String?,
-    nextSessionDate: java.util.Date?,
+    nextScheduleDay: ClassScheduleDay?,
+    onOpenLessons: () -> Unit,
     onOpenAssignment: (Assignment) -> Unit,
     onPrayerPosted: () -> Unit,
     onRetry: () -> Unit,
@@ -804,6 +873,7 @@ private fun HomeSection(
     val usesStackedTracker = ResponsivePresentation.usesStackedTracker(LocalDensity.current.fontScale)
     val announcementRepository = remember { InstructorRepository() }
     var announcements by remember { mutableStateOf(emptyList<com.illumined.app.data.Announcement>()) }
+    var selectedAnnouncement by remember { mutableStateOf<com.illumined.app.data.Announcement?>(null) }
     var prayerComposer by rememberSaveable { mutableStateOf(false) }
     var selectedPrayerId by rememberSaveable { mutableStateOf<String?>(null) }
     var assignmentsOpen by rememberSaveable { mutableStateOf(false) }
@@ -811,11 +881,12 @@ private fun HomeSection(
     var prayerDetails by rememberSaveable { mutableStateOf("") }
     var prayerWorking by remember { mutableStateOf(false) }
     var prayerError by remember { mutableStateOf<String?>(null) }
-    val classId = overview?.profile?.classIds?.firstOrNull().orEmpty()
+    val classId = overview?.profile?.selectedClassId.orEmpty()
     val selectedPrayer = overview?.prayerRequests?.firstOrNull { it.id == selectedPrayerId }
 
-    BackHandler(enabled = selectedPrayerId != null || prayerComposer || assignmentsOpen) {
+    BackHandler(enabled = selectedAnnouncement != null || selectedPrayerId != null || prayerComposer || assignmentsOpen) {
         when {
+            selectedAnnouncement != null -> selectedAnnouncement = null
             selectedPrayerId != null -> selectedPrayerId = null
             prayerComposer && !prayerWorking -> prayerComposer = false
             assignmentsOpen -> assignmentsOpen = false
@@ -826,10 +897,15 @@ private fun HomeSection(
     val lessonCompleteCount = overview?.profile?.completedLessons?.count { completed -> allLessons.any { it.id == completed } } ?: 0
     val lessonRemaining = (allLessons.size - lessonCompleteCount).coerceAtLeast(0)
     DisposableEffect(classId) {
+        announcements = emptyList()
         val listener = if (classId.isNotBlank()) announcementRepository.listenAnnouncements(
             classId, { announcements = it.filter { item -> item.isActive } }, {},
         ) else null
         onDispose { listener?.remove() }
+    }
+    selectedAnnouncement?.let { announcement ->
+        AnnouncementDetail(announcement) { selectedAnnouncement = null }
+        return
     }
     selectedPrayer?.let { request ->
         PrayerRequestDetail(request) { selectedPrayerId = null }
@@ -877,9 +953,10 @@ private fun HomeSection(
             else -> {
                 HomeWelcomeCard(overview.profile)
                 Spacer(modifier = Modifier.height(14.dp))
-                NextClassTopicCard(nextSessionTitle, nextSessionDate)
+                NextScheduledDayCard(nextScheduleDay)
                 Spacer(modifier = Modifier.height(14.dp))
                 Surface(
+                    onClick = onOpenLessons,
                     modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
                     color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp,
                 ) {
@@ -907,7 +984,10 @@ private fun HomeSection(
                     }
                 }
                 Spacer(modifier = Modifier.height(14.dp))
-                HomeAnnouncementsCard(announcements.take(3))
+                HomeAnnouncementsCard(
+                    announcements = announcements.take(3),
+                    onOpen = { selectedAnnouncement = it },
+                )
                 Spacer(modifier = Modifier.height(14.dp))
                 HomeAssignmentsCard(
                     assignments = overview.assignments,
@@ -939,7 +1019,7 @@ private fun HomeWelcomeCard(profile: com.illumined.app.data.UserProfile) {
             Text("Welcome, ${profile.displayName}", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 HomeSymbol(HomeSymbolKind.ClassMembers, IlluminedThemeTokens.SecondaryText, Modifier.size(22.dp))
-                Text(profile.classIds.firstOrNull().orEmpty().ifBlank { "No class assigned" }, color = IlluminedThemeTokens.SecondaryText)
+                Text(profile.selectedClassId.ifBlank { "No class assigned" }, color = IlluminedThemeTokens.SecondaryText)
             }
         }
     }
@@ -961,7 +1041,7 @@ private fun HomePrayerRequestsCard(
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Prayer Requests", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-                Text("The 5 most recent active requests", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                Text("Invite your class to pray with you", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
             }
             Button(
                 onClick = onNewRequest,
@@ -1004,7 +1084,7 @@ private fun HomePrayerRequestsCard(
 }
 
 @Composable
-private fun NextClassTopicCard(topic: String?, date: java.util.Date?) {
+private fun NextScheduledDayCard(day: ClassScheduleDay?) {
     Surface(
         modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
         color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp,
@@ -1015,16 +1095,34 @@ private fun NextClassTopicCard(topic: String?, date: java.util.Date?) {
             }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Next Class Topic", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
-                Text(topic ?: "TBD", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
-                date?.let { Text(java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL).format(it), fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText) }
+                Text("Upcoming", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                if (day == null) {
+                    Text("No class scheduled", fontSize = 19.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                } else {
+                    day.sessions.forEach { session ->
+                        Text(
+                            session.topic,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = IlluminedThemeTokens.Blue,
+                        )
+                    }
+                    Text(
+                        java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL).format(day.date),
+                        fontSize = 15.sp,
+                        color = IlluminedThemeTokens.SecondaryText,
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun HomeAnnouncementsCard(announcements: List<com.illumined.app.data.Announcement>) {
+private fun HomeAnnouncementsCard(
+    announcements: List<com.illumined.app.data.Announcement>,
+    onOpen: (com.illumined.app.data.Announcement) -> Unit,
+) {
     Surface(modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.Top) {
@@ -1036,13 +1134,68 @@ private fun HomeAnnouncementsCard(announcements: List<com.illumined.app.data.Ann
             }
             if (announcements.isEmpty()) Text("No announcements yet.", fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText, modifier = Modifier.padding(vertical = 8.dp))
             else announcements.forEach { announcement ->
-                Column(Modifier.fillMaxWidth().background(IlluminedThemeTokens.Gold.copy(.09f), RoundedCornerShape(12.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(verticalAlignment = Alignment.Top) {
-                        Text(announcement.title, Modifier.weight(1f), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue, maxLines = 2)
-                        Spacer(Modifier.width(10.dp)); Text(announcement.updatedAt?.toDate()?.let { java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it) }.orEmpty(), fontSize = 11.sp, color = IlluminedThemeTokens.SecondaryText)
+                Surface(
+                    onClick = { onOpen(announcement) },
+                    color = IlluminedThemeTokens.Gold.copy(.09f),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(verticalAlignment = Alignment.Top) {
+                                Text(announcement.title, Modifier.weight(1f), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue, maxLines = 2)
+                                Spacer(Modifier.width(10.dp)); Text(announcement.displayTimestamp?.toDate()?.let { java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it) }.orEmpty(), fontSize = 11.sp, color = IlluminedThemeTokens.SecondaryText)
+                            }
+                            Text(announcement.message, fontSize = 14.sp, color = IlluminedThemeTokens.Ink, maxLines = 3)
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        LessonSymbol(LessonSymbolKind.ChevronRight, IlluminedThemeTokens.SecondaryText, Modifier.size(10.dp, 16.dp))
                     }
-                    Text(announcement.message, fontSize = 14.sp, color = IlluminedThemeTokens.Ink, maxLines = 3)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnnouncementDetail(
+    announcement: com.illumined.app.data.Announcement,
+    onBack: () -> Unit,
+) {
+    Column(
+        Modifier.fillMaxSize()
+            .background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f))
+            .verticalScroll(rememberScrollState()),
+    ) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onBack) { Text("‹ Back") }
+            Spacer(Modifier.weight(1f))
+            Text("Announcement", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.width(60.dp))
+        }
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                .border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
+            color = Color.White.copy(.94f),
+            shape = RoundedCornerShape(16.dp),
+            shadowElevation = 6.dp,
+        ) {
+            Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(announcement.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = IlluminedThemeTokens.Ink)
+                announcement.displayTimestamp?.toDate()?.let { date ->
+                    Text(
+                        java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.LONG, java.text.DateFormat.SHORT).format(date),
+                        fontSize = 13.sp,
+                        color = IlluminedThemeTokens.SecondaryText,
+                    )
+                }
+                androidx.compose.material3.HorizontalDivider()
+                Text(
+                    announcement.message,
+                    fontSize = 17.sp,
+                    lineHeight = 27.sp,
+                    color = IlluminedThemeTokens.Ink,
+                )
             }
         }
     }
@@ -1745,6 +1898,7 @@ private fun SignInPreview() {
     IlluminedTheme {
         SignInScreen(
             state = SessionState.SignedOut,
+            inviteLink = null,
             isConfigured = true,
             onSignIn = { _, _ -> },
             onCreateAccount = { _, _ -> },

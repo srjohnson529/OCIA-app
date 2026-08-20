@@ -32,7 +32,7 @@ class InstructorRepository(
             error(IllegalStateException(it)); return null
         }
         val userId = auth.currentUser!!.uid
-        val classId = profile.classIds.firstOrNull().orEmpty()
+        val classId = profile.selectedClassId
         return Creator(userId, classId, profile.displayName)
     }
     fun listenAssignments(classId: String, update: (List<Assignment>) -> Unit, error: (Throwable) -> Unit): ListenerRegistration =
@@ -74,6 +74,7 @@ class InstructorRepository(
                     assignmentItemId = document.getString("assignmentItemId").orEmpty(),
                     assignmentItemTitle = document.getString("assignmentItemTitle").orEmpty(),
                     assignmentItemType = document.getString("assignmentItemType").orEmpty(),
+                    classId = document.getString("classId").orEmpty(),
                 )
             })
         }
@@ -134,11 +135,12 @@ class InstructorRepository(
         db.collection("announcements").document(id).delete().addOnSuccessListener { success() }.addOnFailureListener(error)
     }
 
-    fun createSchedule(profile: UserProfile, topic: String, details: String, dateMillis: Long, success: () -> Unit, error: (Throwable) -> Unit) {
+    fun createSchedule(profile: UserProfile, topic: String, details: String, dateMillis: Long, sortOrder: Long, success: () -> Unit, error: (Throwable) -> Unit) {
         val creator = creator(profile, "Please sign in before creating a class schedule item.", "Only instructors can edit the class schedule.", error) ?: return
         InstructorWriteValidation.scheduleError(topic)?.let { return error(IllegalArgumentException(it)) }
         db.collection("classSchedule").add(mapOf("classId" to creator.classId, "topic" to topic.trim(), "details" to details.trim(),
-            "date" to Timestamp(java.util.Date(FirestoreDatePolicy.localStartOfDayMillis(dateMillis))), "createdBy" to creator.userId, "createdAt" to FieldValue.serverTimestamp(), "updatedAt" to FieldValue.serverTimestamp()))
+            "date" to Timestamp(java.util.Date(FirestoreDatePolicy.localStartOfDayMillis(dateMillis))), "sortOrder" to sortOrder,
+            "createdBy" to creator.userId, "createdAt" to FieldValue.serverTimestamp(), "updatedAt" to FieldValue.serverTimestamp()))
             .addOnSuccessListener { success() }.addOnFailureListener(error)
     }
 
@@ -147,13 +149,14 @@ class InstructorRepository(
         db.collection("classSchedule").document(id).delete().addOnSuccessListener { success() }.addOnFailureListener(error)
     }
 
-    fun updateSchedule(profile: UserProfile, id: String, topic: String, details: String, dateMillis: Long, success: () -> Unit, error: (Throwable) -> Unit) {
+    fun updateSchedule(profile: UserProfile, id: String, topic: String, details: String, dateMillis: Long, sortOrder: Long, success: () -> Unit, error: (Throwable) -> Unit) {
         creator(profile, "Please sign in before editing a class schedule item.", "Only instructors can edit the class schedule.", error) ?: return
         InstructorWriteValidation.scheduleError(topic)?.let { return error(IllegalArgumentException(it)) }
         db.collection("classSchedule").document(id).update(mapOf(
             "topic" to topic.trim(),
             "details" to details.trim(),
             "date" to Timestamp(java.util.Date(FirestoreDatePolicy.localStartOfDayMillis(dateMillis))),
+            "sortOrder" to sortOrder,
             "updatedAt" to FieldValue.serverTimestamp(),
         )).addOnSuccessListener { success() }.addOnFailureListener(error)
     }
@@ -173,13 +176,27 @@ class InstructorRepository(
         if (replacingExisting) existing.filter { it.classId == classId }.forEach {
             batch.delete(db.collection("classSchedule").document(it.id))
         }
+        val nextOrderByDay = mutableMapOf<java.time.LocalDate, Long>()
+        if (!replacingExisting) {
+            existing.groupBy { item ->
+                item.date?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+            }.forEach { (day, items) ->
+                if (day != null) {
+                    val highestOrder = items.mapNotNull { it.sortOrder }.maxOrNull() ?: -1L
+                    nextOrderByDay[day] = maxOf(highestOrder + 1L, items.size.toLong())
+                }
+            }
+        }
         rows.forEach { row ->
             val date = java.util.Date.from(row.date.atStartOfDay(ZoneId.systemDefault()).toInstant())
+            val sortOrder = nextOrderByDay[row.date] ?: 0L
+            nextOrderByDay[row.date] = sortOrder + 1L
             batch.set(db.collection("classSchedule").document(), mapOf(
                 "classId" to classId,
                 "topic" to row.topic.trim(),
                 "details" to row.details.trim(),
                 "date" to Timestamp(date),
+                "sortOrder" to sortOrder,
                 "createdBy" to creator.userId,
                 "createdAt" to FieldValue.serverTimestamp(),
                 "updatedAt" to FieldValue.serverTimestamp(),

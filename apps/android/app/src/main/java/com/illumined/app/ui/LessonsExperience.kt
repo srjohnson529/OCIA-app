@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -63,6 +65,7 @@ import com.illumined.app.data.DiscussionRepository
 import com.illumined.app.data.LessonCatalog
 import com.illumined.app.data.LessonCategory
 import com.illumined.app.data.UserProfile
+import com.illumined.app.R
 import com.illumined.app.ui.theme.IlluminedThemeTokens
 import kotlinx.coroutines.delay
 
@@ -96,7 +99,7 @@ fun LessonsExperience(
     val selectedDiscussion = prompts.firstOrNull { it.id == selectedDiscussionId }
     var completedPromptIds by remember { mutableStateOf(emptySet<String>()) }
     val discussionRepository = remember { DiscussionRepository() }
-    val classId = profile?.classIds?.firstOrNull().orEmpty()
+    val classId = profile?.selectedClassId.orEmpty()
     DisposableEffect(classId, userId) {
         val listener = if (classId.isNotBlank()) discussionRepository.listenParticipation(classId, userId, { completedPromptIds = it }, {}) else null
         onDispose { listener?.remove() }
@@ -185,7 +188,7 @@ fun AssignedLessonExperience(
     var completedPromptIds by remember(lesson.id) { mutableStateOf(emptySet<String>()) }
     val prompt = prompts.firstOrNull { it.lessonId == lesson.id }
     val repository = remember { DiscussionRepository() }
-    val classId = profile?.classIds?.firstOrNull().orEmpty()
+    val classId = profile?.selectedClassId.orEmpty()
     DisposableEffect(classId, userId) {
         val listener = if (classId.isNotBlank()) repository.listenParticipation(classId, userId, { completedPromptIds = it }, {}) else null
         onDispose { listener?.remove() }
@@ -655,7 +658,14 @@ private fun LessonStatusBadge(status: LessonProgressStatus) {
 private fun CategoryCircleBadge(icon: LessonCategoryIcon) {
     val color = IlluminedThemeTokens.Gold
     Box(Modifier.size(44.dp).background(color.copy(alpha = 0.12f), CircleShape), contentAlignment = Alignment.Center) {
-        Canvas(Modifier.size(25.dp)) {
+        if (icon == LessonCategoryIcon.PRAYING_HANDS) {
+            Icon(
+                painter = painterResource(R.drawable.ic_praying_hands),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(25.dp),
+            )
+        } else Canvas(Modifier.size(25.dp)) {
             val stroke = Stroke(width = size.minDimension * .085f, cap = StrokeCap.Round)
             when (icon) {
                 LessonCategoryIcon.CROSS -> {
@@ -670,11 +680,7 @@ private fun CategoryCircleBadge(icon: LessonCategoryIcon) {
                     val path = Path().apply { moveTo(size.width*.5f,size.height*.88f); cubicTo(size.width*.08f,size.height*.62f,size.width*.05f,size.height*.28f,size.width*.28f,size.height*.20f); cubicTo(size.width*.42f,size.height*.15f,size.width*.5f,size.height*.27f,size.width*.5f,size.height*.34f); cubicTo(size.width*.5f,size.height*.27f,size.width*.58f,size.height*.15f,size.width*.72f,size.height*.20f); cubicTo(size.width*.95f,size.height*.28f,size.width*.92f,size.height*.62f,size.width*.5f,size.height*.88f); close() }
                     drawPath(path, color)
                 }
-                LessonCategoryIcon.PRAYING_HANDS -> {
-                    val left = Path().apply { moveTo(size.width*.45f,size.height*.84f); cubicTo(size.width*.31f,size.height*.71f,size.width*.19f,size.height*.54f,size.width*.17f,size.height*.32f); cubicTo(size.width*.16f,size.height*.20f,size.width*.27f,size.height*.18f,size.width*.32f,size.height*.29f); lineTo(size.width*.51f,size.height*.69f) }
-                    val right = Path().apply { moveTo(size.width*.55f,size.height*.84f); cubicTo(size.width*.69f,size.height*.71f,size.width*.81f,size.height*.54f,size.width*.83f,size.height*.32f); cubicTo(size.width*.84f,size.height*.20f,size.width*.73f,size.height*.18f,size.width*.68f,size.height*.29f); lineTo(size.width*.49f,size.height*.69f) }
-                    drawPath(left,color,style=stroke); drawPath(right,color,style=stroke); drawLine(color,androidx.compose.ui.geometry.Offset(size.width*.38f,size.height*.89f),androidx.compose.ui.geometry.Offset(size.width*.62f,size.height*.89f),stroke.width,StrokeCap.Round)
-                }
+                LessonCategoryIcon.PRAYING_HANDS -> Unit
                 LessonCategoryIcon.BOOK -> {
                     val left = Path().apply { moveTo(size.width*.48f,size.height*.22f); cubicTo(size.width*.34f,size.height*.14f,size.width*.18f,size.height*.15f,size.width*.13f,size.height*.22f); lineTo(size.width*.13f,size.height*.78f); cubicTo(size.width*.25f,size.height*.72f,size.width*.37f,size.height*.73f,size.width*.48f,size.height*.82f); close() }
                     val right = Path().apply { moveTo(size.width*.52f,size.height*.22f); cubicTo(size.width*.66f,size.height*.14f,size.width*.82f,size.height*.15f,size.width*.87f,size.height*.22f); lineTo(size.width*.87f,size.height*.78f); cubicTo(size.width*.75f,size.height*.72f,size.width*.63f,size.height*.73f,size.width*.52f,size.height*.82f); close() }

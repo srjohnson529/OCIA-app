@@ -37,7 +37,7 @@ class FormationOverviewAccumulatorTest {
     }
 
     @Test
-    fun `class change clears class data but preserves user completions`() {
+    fun `class change clears every class scoped section`() {
         val accumulator = FormationOverviewAccumulator()
         accumulator.updateProfile(profile())
         accumulator.updateSchedule(listOf(session("Old class")))
@@ -49,7 +49,20 @@ class FormationOverviewAccumulatorTest {
         val overview = accumulator.overview()!!
         assertEquals(emptyList<ScheduleItem>(), overview.schedule)
         assertEquals(emptyList<DiscussionPrompt>(), overview.discussionPrompts)
-        assertEquals(setOf("assignment-1"), overview.completedAssignmentIds)
+        assertEquals(emptyList<AssignmentCompletion>(), overview.assignmentCompletions)
+        assertEquals(emptySet<String>(), overview.completedAssignmentIds)
+    }
+
+    @Test
+    fun `overview includes completion records only for the active class`() {
+        val accumulator = FormationOverviewAccumulator()
+        accumulator.updateProfile(UserProfile("Stephen", listOf("OCIA", "MENS"), emptySet(), isInstructor = true, activeClassId = "MENS"))
+        accumulator.updateCompletions(listOf(
+            completion("ocia-assignment", true).copy(classId = "OCIA"),
+            completion("mens-assignment", true).copy(classId = "MENS"),
+        ))
+
+        assertEquals(setOf("mens-assignment"), accumulator.overview()!!.completedAssignmentIds)
     }
 
     @Test
