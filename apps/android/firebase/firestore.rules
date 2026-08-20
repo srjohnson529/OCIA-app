@@ -72,6 +72,25 @@ service cloud.firestore {
       return request.resource.data.classId == resource.data.classId;
     }
 
+    function prayerReactions(data) {
+      return ("reactions" in data && data.reactions is map) ? data.reactions : {};
+    }
+
+    function validPrayerReactionUpdate() {
+      let before = prayerReactions(resource.data);
+      let after = prayerReactions(request.resource.data);
+      return signedIn() &&
+        request.auth.uid != resource.data.requesterId &&
+        isInActiveClass(resource.data.classId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["reactions", "reactionUpdatedAt"]) &&
+        after.diff(before).affectedKeys().hasOnly([request.auth.uid]) &&
+        (
+          !(request.auth.uid in after) ||
+          after[request.auth.uid] in ["praying", "with_you", "amen"]
+        ) &&
+        request.resource.data.reactionUpdatedAt == request.time;
+    }
+
     function instructorInvitePath(code) {
       return /databases/$(database)/documents/instructorInviteCodes/$(code);
     }
@@ -252,9 +271,11 @@ service cloud.firestore {
         request.resource.data.title is string &&
         request.resource.data.details is string &&
         request.resource.data.expiresAt > request.time;
-      allow update: if signedIn() && sameClass() &&
-        request.resource.data.requesterId == resource.data.requesterId &&
-        (resource.data.requesterId == request.auth.uid || isInstructorForClass(resource.data.classId));
+      allow update: if validPrayerReactionUpdate() ||
+        (signedIn() && sameClass() &&
+          request.resource.data.requesterId == resource.data.requesterId &&
+          prayerReactions(request.resource.data) == prayerReactions(resource.data) &&
+          (resource.data.requesterId == request.auth.uid || isInstructorForClass(resource.data.classId)));
       allow delete: if signedIn() &&
         (
           resource.data.requesterId == request.auth.uid ||

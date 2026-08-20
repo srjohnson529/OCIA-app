@@ -2,7 +2,7 @@ import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
@@ -134,6 +134,27 @@ async function removeCreatedAccessCodes(collectionName, userId) {
   return snapshot.size;
 }
 
+async function removePrayerReactions(userId) {
+  const snapshot = await db.collection("prayerRequests").get();
+  const matchingDocuments = snapshot.docs.filter((document) => {
+    const reactions = document.get("reactions");
+    return reactions && typeof reactions === "object" && Object.hasOwn(reactions, userId);
+  });
+  if (!matchingDocuments.length) return 0;
+
+  const writer = db.bulkWriter();
+  matchingDocuments.forEach((document) => {
+    const reactions = { ...document.get("reactions") };
+    delete reactions[userId];
+    writer.update(document.ref, {
+      reactions,
+      reactionUpdatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+  await writer.close();
+  return matchingDocuments.length;
+}
+
 /**
  * Permanently deletes the signed-in user's Illumined account and personal data.
  * Shared class resources are retained for other members, but their creator
@@ -176,6 +197,8 @@ export const deleteOwnAccount = onCall({ region: "us-central1" }, async (request
       updatedAt: FieldValue.serverTimestamp(),
     });
   }
+
+  anonymizedDocumentCount += await removePrayerReactions(userId);
 
   anonymizedDocumentCount += await anonymizeDocuments("classrooms", "instructorId", userId, {
     instructorId: "",
@@ -348,6 +371,37 @@ export const notifyNewPrayerRequest = onDocumentCreated(
       "New Prayer Request",
       request.title || `${request.requesterName || "A class member"} shared a prayer request.`,
       { type: "prayer_request", prayerRequestId: event.params.requestId, classId: request.classId },
+    );
+  },
+);
+
+export const notifyPrayerReaction = onDocumentUpdated(
+  { document: "prayerRequests/{requestId}", region: "us-central1" },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after?.classId || !after.requesterId) return;
+
+    const beforeReactions = before.reactions && typeof before.reactions === "object" ? before.reactions : {};
+    const afterReactions = after.reactions && typeof after.reactions === "object" ? after.reactions : {};
+    const addedUserId = Object.keys(afterReactions).find((userId) => !(userId in beforeReactions));
+    if (!addedUserId || addedUserId === after.requesterId) return;
+
+    const [reactor, recipient] = await Promise.all([
+      db.collection("userProfiles").doc(addedUserId).get(),
+      db.collection("userProfiles").doc(after.requesterId).get(),
+    ]);
+    if (!reactor.exists || !recipient.exists) return;
+    if (!stringArray(reactor.get("classIds")).includes(after.classId)) return;
+    if (!notificationEnabled(recipient, "notificationNewPrayerRequests")) return;
+
+    const labels = { praying: "is praying for you", with_you: "is with you in prayer", amen: "said Amen" };
+    const reactionText = labels[afterReactions[addedUserId]] || "acknowledged your prayer request";
+    await sendProfileNotifications(
+      [recipient],
+      "Your Prayer Was Acknowledged",
+      `${reactor.get("displayName") || "A classmate"} ${reactionText}.`,
+      { type: "prayer_reaction", prayerRequestId: event.params.requestId, classId: after.classId },
     );
   },
 );

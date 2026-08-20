@@ -3,6 +3,7 @@ package com.illumined.app.data
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.MetadataChanges
@@ -98,6 +99,7 @@ data class PrayerRequest(
     val requesterName: String,
     val requesterId: String,
     val requesterEmail: String,
+    val reactions: Map<String, String> = emptyMap(),
     val createdAt: Timestamp?,
     val expiresAt: Timestamp?,
 )
@@ -294,6 +296,8 @@ private fun QuerySnapshot.toPrayerRequestsAndDeleteExpired(): List<PrayerRequest
             requesterName = document.getString("requesterName").orEmpty(),
             requesterId = document.getString("requesterId").orEmpty(),
             requesterEmail = document.getString("requesterEmail").orEmpty(),
+            reactions = (document.get("reactions") as? Map<*, *>).orEmpty()
+                .mapNotNull { (key, value) -> if (key is String && value is String) key to value else null }.toMap(),
             createdAt = document.getTimestamp("createdAt"),
             expiresAt = document.getTimestamp("expiresAt"),
         )
@@ -566,6 +570,8 @@ class FormationRepository(
                                     requesterName = document.getString("requesterName").orEmpty(),
                                     requesterId = document.getString("requesterId").orEmpty(),
                                     requesterEmail = document.getString("requesterEmail").orEmpty(),
+                                    reactions = (document.get("reactions") as? Map<*, *>).orEmpty()
+                                        .mapNotNull { (key, value) -> if (key is String && value is String) key to value else null }.toMap(),
                                     createdAt = document.getTimestamp("createdAt"),
                                     expiresAt = document.getTimestamp("expiresAt"),
                                 )
@@ -735,9 +741,28 @@ class FormationRepository(
                 "requesterId" to user!!.uid,
                 "requesterName" to profile.displayName,
                 "requesterEmail" to user.email.orEmpty(),
+                "reactions" to emptyMap<String, String>(),
                 "createdAt" to FieldValue.serverTimestamp(),
                 "expiresAt" to Timestamp(expires),
             ),
+        ).addOnSuccessListener { onSuccess() }.addOnFailureListener(onError)
+    }
+
+    fun setPrayerReaction(
+        request: PrayerRequest,
+        reaction: String?,
+        onSuccess: () -> Unit,
+        onError: (Throwable) -> Unit,
+    ) {
+        val userId = auth.currentUser?.uid
+            ?: return onError(IllegalStateException("Please sign in before acknowledging a prayer request."))
+        if (userId == request.requesterId) return onError(IllegalStateException("Your classmates can acknowledge your prayer request."))
+        if (reaction != null && reaction !in setOf("praying", "with_you", "amen")) {
+            return onError(IllegalArgumentException("Please choose a valid prayer response."))
+        }
+        firestore.collection("prayerRequests").document(request.id).update(
+            FieldPath.of("reactions", userId), reaction ?: FieldValue.delete(),
+            "reactionUpdatedAt", FieldValue.serverTimestamp(),
         ).addOnSuccessListener { onSuccess() }.addOnFailureListener(onError)
     }
 

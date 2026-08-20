@@ -48,6 +48,7 @@ beforeEach(async () => {
       setDoc(doc(db, "userProfiles", "instructorA"), profile("instructorA", ["classA"], { instructor: true })),
       setDoc(doc(db, "userProfiles", "instructorB"), profile("instructorB", ["classB"], { instructor: true })),
       setDoc(doc(db, "userProfiles", "studentA"), profile("studentA", ["classA"])),
+      setDoc(doc(db, "userProfiles", "studentC"), profile("studentC", ["classA"])),
       setDoc(doc(db, "userProfiles", "studentB"), profile("studentB", ["classB"])),
       setDoc(doc(db, "userProfiles", "admin"), profile("admin", [], { admin: true })),
       setDoc(doc(db, "classrooms", "classA"), { classId: "classA", instructorId: "instructorA", createdBy: "instructorA", isArchived: false }),
@@ -177,6 +178,39 @@ test("prayer requests enforce requester identity, class isolation, and owner cle
   await assertFails(deleteDoc(doc(db, "prayerRequests", "prayerB")));
 });
 
+test("classmates can update only their own valid prayer reaction", async () => {
+  const classmateDb = environment.authenticatedContext("studentC").firestore();
+  await assertSucceeds(updateDoc(doc(classmateDb, "prayerRequests", "prayerA"), {
+    reactions: { studentC: "praying" },
+    reactionUpdatedAt: serverTimestamp(),
+  }));
+  await assertSucceeds(updateDoc(doc(classmateDb, "prayerRequests", "prayerA"), {
+    reactions: { studentC: "amen" },
+    reactionUpdatedAt: serverTimestamp(),
+  }));
+  await assertFails(updateDoc(doc(classmateDb, "prayerRequests", "prayerA"), {
+    reactions: { studentC: "invalid" },
+    reactionUpdatedAt: serverTimestamp(),
+  }));
+  await assertFails(updateDoc(doc(classmateDb, "prayerRequests", "prayerA"), {
+    title: "Changed by reactor",
+    reactions: { studentC: "with_you" },
+    reactionUpdatedAt: serverTimestamp(),
+  }));
+
+  const authorDb = environment.authenticatedContext("studentA").firestore();
+  await assertFails(updateDoc(doc(authorDb, "prayerRequests", "prayerA"), {
+    reactions: { studentA: "praying", studentC: "amen" },
+    reactionUpdatedAt: serverTimestamp(),
+  }));
+
+  const otherClassDb = environment.authenticatedContext("studentB").firestore();
+  await assertFails(updateDoc(doc(otherClassDb, "prayerRequests", "prayerA"), {
+    reactions: { studentB: "praying", studentC: "amen" },
+    reactionUpdatedAt: serverTimestamp(),
+  }));
+});
+
 test("only administrators can create and manage parish setup codes", async () => {
   const adminDb = environment.authenticatedContext("admin").firestore();
   await assertSucceeds(setDoc(doc(adminDb, "parishSetupCodes", "setupNew"), { classId: "", parishName: "", isActive: true, usedBy: "" }));
@@ -230,7 +264,7 @@ test("a newly authenticated parish organizer can redeem a setup code and create 
 test("an instructor roster query returns only profiles sharing the assigned class", async () => {
   const db = environment.authenticatedContext("instructorA").firestore();
   const result = await assertSucceeds(getDocs(query(collection(db, "userProfiles"), where("classIds", "array-contains", "classA"))));
-  assert.deepEqual(result.docs.map((item) => item.id).sort(), ["instructorA", "studentA"]);
+  assert.deepEqual(result.docs.map((item) => item.id).sort(), ["instructorA", "studentA", "studentC"]);
   await assertFails(getDoc(doc(db, "userProfiles", "studentB")));
 });
 

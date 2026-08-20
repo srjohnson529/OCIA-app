@@ -908,7 +908,7 @@ private fun HomeSection(
         return
     }
     selectedPrayer?.let { request ->
-        PrayerRequestDetail(request) { selectedPrayerId = null }
+        PrayerRequestDetail(request, userId, repository) { selectedPrayerId = null }
         return
     }
     if (prayerComposer) {
@@ -1275,7 +1275,14 @@ private fun HomeAssignmentsList(assignments: List<Assignment>, completedIds: Set
 }
 
 @Composable
-private fun PrayerRequestDetail(request: PrayerRequest, onBack: () -> Unit) {
+private fun PrayerRequestDetail(request: PrayerRequest, currentUserId: String, repository: FormationRepository, onBack: () -> Unit) {
+    var reactionWorking by remember { mutableStateOf(false) }
+    var reactionError by remember { mutableStateOf<String?>(null) }
+    val reactionOptions = listOf(
+        Triple("praying", "🙏", "Praying"),
+        Triple("with_you", "❤️", "With you"),
+        Triple("amen", "🕊️", "Amen"),
+    )
     Column(
         Modifier.fillMaxSize()
             .background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f))
@@ -1306,6 +1313,44 @@ private fun PrayerRequestDetail(request: PrayerRequest, onBack: () -> Unit) {
                     lineHeight = if (cleanedDetails.isEmpty()) 22.sp else 27.sp,
                     color = if (cleanedDetails.isEmpty()) IlluminedThemeTokens.SecondaryText else IlluminedThemeTokens.Ink,
                 )
+                androidx.compose.material3.HorizontalDivider()
+                Text("Prayer acknowledgements", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    reactionOptions.forEach { (value, emoji, label) ->
+                        val selected = request.reactions[currentUserId] == value
+                        val count = request.reactions.values.count { it == value }
+                        OutlinedButton(
+                            onClick = {
+                                reactionWorking = true
+                                reactionError = null
+                                repository.setPrayerReaction(request, if (selected) null else value, {
+                                    reactionWorking = false
+                                }, { problem ->
+                                    reactionWorking = false
+                                    reactionError = problem.message ?: "Prayer response could not be saved."
+                                })
+                            },
+                            enabled = request.requesterId != currentUserId && !reactionWorking,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = if (selected) IlluminedThemeTokens.Blue else IlluminedThemeTokens.Ink,
+                            ),
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(emoji)
+                                Text("$label${if (count > 0) " · $count" else ""}", fontSize = 11.sp, maxLines = 1)
+                            }
+                        }
+                    }
+                }
+                if (request.requesterId == currentUserId) {
+                    Text(
+                        "Classmates can acknowledge this request. ${request.reactions.size} response${if (request.reactions.size == 1) "" else "s"} received.",
+                        fontSize = 12.sp,
+                        color = IlluminedThemeTokens.SecondaryText,
+                    )
+                }
+                reactionError?.let { Text(it, fontSize = 12.sp, color = Color.Red) }
             }
         }
     }

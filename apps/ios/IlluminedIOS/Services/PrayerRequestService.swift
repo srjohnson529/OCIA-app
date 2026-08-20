@@ -77,8 +77,38 @@ final class PrayerRequestService: ObservableObject {
                 "requesterId": user.uid,
                 "requesterName": profile.displayName,
                 "requesterEmail": user.email ?? "",
+                "reactions": [:],
                 "createdAt": FieldValue.serverTimestamp(),
                 "expiresAt": Timestamp(date: Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date().addingTimeInterval(259_200))
+            ])
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
+    func setReaction(_ reaction: String?, for request: PrayerRequest) async -> Bool {
+        guard let user = Auth.auth().currentUser, let requestId = request.id else {
+            errorMessage = "Please sign in before acknowledging a prayer request."
+            return false
+        }
+        guard user.uid != request.requesterId else {
+            errorMessage = "Your classmates can acknowledge your prayer request."
+            return false
+        }
+        guard reaction == nil || ["praying", "with_you", "amen"].contains(reaction!) else {
+            errorMessage = "Please choose a valid prayer response."
+            return false
+        }
+
+        do {
+            errorMessage = nil
+            let reactionField = FieldPath(["reactions", user.uid])
+            let value: Any = reaction ?? FieldValue.delete()
+            try await db.collection("prayerRequests").document(requestId).updateData([
+                reactionField: value,
+                "reactionUpdatedAt": FieldValue.serverTimestamp()
             ])
             return true
         } catch {

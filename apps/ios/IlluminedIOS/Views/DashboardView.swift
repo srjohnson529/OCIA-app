@@ -96,6 +96,8 @@ struct DashboardView: View {
                             PrayerRequestsCard(
                                 requests: prayerRequestService.recentRequests,
                                 canPost: !profile.primaryClassId.isEmpty,
+                                currentUserId: profile.userId,
+                                prayerRequestService: prayerRequestService,
                                 onNewRequest: { isShowingPrayerComposer = true }
                             )
                         } else {
@@ -1090,6 +1092,8 @@ private struct NextScheduledDayCard: View {
 private struct PrayerRequestsCard: View {
     let requests: [PrayerRequest]
     let canPost: Bool
+    let currentUserId: String
+    @ObservedObject var prayerRequestService: PrayerRequestService
     let onNewRequest: () -> Void
 
     var body: some View {
@@ -1125,7 +1129,11 @@ private struct PrayerRequestsCard: View {
                     VStack(spacing: 10) {
                         ForEach(requests) { request in
                             NavigationLink {
-                                PrayerRequestDetailView(request: request)
+                                PrayerRequestDetailView(
+                                    request: request,
+                                    currentUserId: currentUserId,
+                                    prayerRequestService: prayerRequestService
+                                )
                             } label: {
                                 PrayerRequestRow(request: request)
                             }
@@ -1189,6 +1197,15 @@ private struct PrayerRequestRow: View {
 
 private struct PrayerRequestDetailView: View {
     let request: PrayerRequest
+    let currentUserId: String
+    @ObservedObject var prayerRequestService: PrayerRequestService
+    @State private var isUpdatingReaction = false
+
+    private let reactionOptions = [
+        ("praying", "🙏", "Praying"),
+        ("with_you", "❤️", "With you"),
+        ("amen", "🕊️", "Amen")
+    ]
 
     var body: some View {
         ZStack {
@@ -1215,6 +1232,44 @@ private struct PrayerRequestDetailView: View {
                                 .font(IlluminedTheme.font(size: 17))
                                 .lineSpacing(5)
                                 .foregroundStyle(IlluminedTheme.ink)
+                        }
+
+                        Divider()
+
+                        Text("Prayer acknowledgements")
+                            .font(IlluminedTheme.font(size: 15, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.ink)
+
+                        HStack(spacing: 8) {
+                            ForEach(reactionOptions, id: \.0) { option in
+                                let selected = request.reactionMap[currentUserId] == option.0
+                                let count = request.reactionMap.values.filter { $0 == option.0 }.count
+                                Button {
+                                    guard !isUpdatingReaction else { return }
+                                    isUpdatingReaction = true
+                                    Task {
+                                        _ = await prayerRequestService.setReaction(selected ? nil : option.0, for: request)
+                                        isUpdatingReaction = false
+                                    }
+                                } label: {
+                                    VStack(spacing: 4) {
+                                        Text(option.1)
+                                        Text("\(option.2)\(count > 0 ? " · \(count)" : "")")
+                                            .font(IlluminedTheme.font(size: 12, weight: .semibold))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 9)
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(selected ? IlluminedTheme.blue : IlluminedTheme.gold)
+                                .disabled(request.requesterId == currentUserId || isUpdatingReaction)
+                            }
+                        }
+
+                        if request.requesterId == currentUserId {
+                            Text("Classmates can acknowledge this request. \(request.reactionMap.count) response\(request.reactionMap.count == 1 ? "" : "s") received.")
+                                .font(IlluminedTheme.font(size: 12))
+                                .foregroundStyle(IlluminedTheme.secondaryText)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

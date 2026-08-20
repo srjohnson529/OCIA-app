@@ -9,6 +9,7 @@ struct PrayerRequest: Identifiable, Codable, Equatable {
     var requesterId: String
     var requesterName: String
     var requesterEmail: String
+    var reactions: [String: String]?
     var createdAt: Timestamp?
     var expiresAt: Timestamp?
 
@@ -22,5 +23,9 @@ struct PrayerRequest: Identifiable, Codable, Equatable {
 
     var isActive: Bool {
         expirationDate > Date()
+    }
+
+    var reactionMap: [String: String] {
+        reactions ?? [:]
     }
 }
