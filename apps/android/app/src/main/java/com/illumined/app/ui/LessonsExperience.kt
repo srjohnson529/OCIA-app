@@ -365,6 +365,7 @@ private fun LessonDetail(
             IosCard {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     details.embedUrl?.let { embedUrl ->
+                        val playerHtml = remember(embedUrl) { youtubePlayerHtml(embedUrl) }
                         AndroidView(
                             modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
                             factory = { webContext ->
@@ -374,11 +375,15 @@ private fun LessonDetail(
                                     settings.domStorageEnabled = true
                                     settings.mediaPlaybackRequiresUserGesture = true
                                     webViewClient = WebViewClient()
-                                    loadUrl(embedUrl)
+                                    tag = embedUrl
+                                    loadDataWithBaseURL("https://illumined.net", playerHtml, "text/html", "UTF-8", null)
                                 }
                             },
                             update = { webView ->
-                                if (webView.url != embedUrl) webView.loadUrl(embedUrl)
+                                if (webView.tag != embedUrl) {
+                                    webView.tag = embedUrl
+                                    webView.loadDataWithBaseURL("https://illumined.net", playerHtml, "text/html", "UTF-8", null)
+                                }
                             },
                         )
                     }
@@ -430,6 +435,19 @@ private fun LessonDetail(
 }
 
 private data class LessonVideoDetails(val embedUrl: String?, val externalUrl: String)
+
+private fun youtubePlayerHtml(embedUrl: String): String {
+    val playerUrl = "$embedUrl?playsinline=1&origin=https%3A%2F%2Fillumined.net"
+    return """
+        <!doctype html>
+        <html><head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#222;overflow:hidden}</style>
+        </head><body>
+        <iframe src="$playerUrl" title="Lesson video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </body></html>
+    """.trimIndent()
+}
 
 private fun lessonVideoDetails(rawValue: String?): LessonVideoDetails? {
     val value = rawValue?.trim()?.takeIf { it.isNotEmpty() } ?: return null

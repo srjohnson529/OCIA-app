@@ -430,8 +430,19 @@ private struct LessonYouTubeView: UIViewRepresentable {
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
-        guard webView.url != url else { return }
-        webView.load(URLRequest(url: url))
+        guard webView.accessibilityIdentifier != url.absoluteString else { return }
+        webView.accessibilityIdentifier = url.absoluteString
+        let playerURL = "\(url.absoluteString)?playsinline=1&origin=https%3A%2F%2Fillumined.net"
+        let html = """
+        <!doctype html>
+        <html><head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#222;overflow:hidden}</style>
+        </head><body>
+        <iframe src="\(playerURL)" title="Lesson video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </body></html>
+        """
+        webView.loadHTMLString(html, baseURL: URL(string: "https://illumined.net"))
     }
 
     static func dismantleUIView(_ webView: WKWebView, coordinator: ()) {
