@@ -24,8 +24,8 @@ val hasReleaseSigning = listOf(
     releaseKeyAlias,
     releaseKeyPassword,
 ).all { !it.isNullOrBlank() }
-val releaseVersionCode = providers.gradleProperty("ILLUMINED_VERSION_CODE").orNull?.toIntOrNull() ?: 1
-val releaseVersionName = providers.gradleProperty("ILLUMINED_VERSION_NAME").orNull ?: "0.1.0"
+val releaseVersionCode = providers.gradleProperty("ILLUMINED_VERSION_CODE").orNull?.toIntOrNull() ?: 8
+val releaseVersionName = providers.gradleProperty("ILLUMINED_VERSION_NAME").orNull ?: "1.1"
 if (hasFirebaseConfig) {
     apply(plugin = "com.google.gms.google-services")
 }
@@ -106,6 +106,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-functions")
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.zxing:core:3.5.4")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 

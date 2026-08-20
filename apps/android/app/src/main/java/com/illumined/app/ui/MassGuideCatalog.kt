@@ -59,9 +59,15 @@ internal object MassGuideCatalog {
             People: And grant us your salvation.
         """, textNote = "The absolution that follows is prayed by the priest."),
         prayer("tropes", "Penitential Act: Invocations with Kyrie", "Christ is addressed with brief titles or invocations, and the people respond: Lord, have mercy; Christ, have mercy.", """
+            English:
             Lord, have mercy.
             Christ, have mercy.
             Lord, have mercy.
+
+            Greek:
+            Kyrie eleison.
+            Christe eleison.
+            Kyrie eleison.
 
             At Mass this form may include short invocations such as:
             “You were sent to heal the contrite of heart.”
@@ -97,7 +103,7 @@ internal object MassGuideCatalog {
             in the glory of God the Father. Amen.
         """, textNote = "Use the text provided in the parish missal or worship aid when praying at Mass."),
         placeholder("collect", "The Collect", "The opening prayer proper to the day. The priest gathers the prayer of the Church and directs it to God.", """
-            Full official text for the Collect is not bundled yet. The Collect changes according to the day, feast, season, and Mass being celebrated.
+            The Collect changes according to the day, feast, season, and Mass being celebrated.
 
             What to listen for:
             • The invitation “Let us pray”
@@ -182,8 +188,6 @@ internal object MassGuideCatalog {
             Lord, hear our prayer.
         """, "The deacon, lector, cantor, or another minister may announce the intentions.", "Local petitions are normally prepared for each Mass."),
         placeholder("presentation-gifts", "Preparation of the Gifts", "Bread and wine are prepared at the altar, and the offering of the people is joined to Christ’s sacrifice.", """
-            Full official text for the preparation prayers is not bundled yet.
-
             What is happening:
             • Bread and wine are brought to the altar
             • The priest prepares the gifts
@@ -191,7 +195,7 @@ internal object MassGuideCatalog {
             • The assembly responds before the Prayer over the Offerings
         """, "This moment teaches that our lives, work, joys, and sufferings are offered with Christ.", "Add licensed Roman Missal text here when available."),
         placeholder("prayer-over-offerings", "Prayer over the Offerings", "The priest prays that God receive and sanctify the gifts prepared for the Eucharist.", """
-            Full official text for the Prayer over the Offerings is not bundled yet. This prayer changes according to the day, feast, season, and Mass being celebrated.
+            This prayer changes according to the day, feast, season, and Mass being celebrated.
 
             What to listen for:
             • The offering of bread and wine
@@ -214,12 +218,22 @@ internal object MassGuideCatalog {
         eucharisticPrayer("ep3", "Eucharistic Prayer III", "A fuller prayer often used on Sundays and feasts. It emphasizes the gathered Church, the sacrifice of Christ, and the unity of the faithful.", "Praise of God’s holiness\n• Calling down the Holy Spirit upon the gifts\n• Institution narrative and consecration\n• Memorial acclamation\n• Offering of the living sacrifice\n• Prayer that the faithful become one body and one spirit in Christ\n• Intercessions for the Church and the dead\n• Final doxology and Great Amen", "Frequently used for Sunday parish Masses."),
         eucharisticPrayer("ep4", "Eucharistic Prayer IV", "A longer prayer with a fixed preface that recounts salvation history, from creation and covenant to Christ and the mission of the Spirit.", "Salvation history from creation through Christ\n• Thanksgiving for God’s covenant love\n• Calling down the Holy Spirit upon the gifts\n• Institution narrative and consecration\n• Memorial acclamation\n• Offering and intercessions\n• Final doxology and Great Amen", "Used less often because it has its own preface."),
         prayer("sanctus", "Holy, Holy, Holy", "The acclamation before the Eucharistic Prayer, joining the praise of angels and saints.", """
+            English:
             Holy, Holy, Holy Lord God of hosts.
             Heaven and earth are full of your glory.
             Hosanna in the highest.
 
             Blessed is he who comes in the name of the Lord.
             Hosanna in the highest.
+
+            Latin:
+            Sanctus, Sanctus, Sanctus
+            Dominus Deus Sabaoth.
+            Pleni sunt cæli et terra gloria tua.
+            Hosanna in excelsis.
+
+            Benedictus qui venit in nomine Domini.
+            Hosanna in excelsis.
         """, textNote = "Use the text provided in the parish missal or worship aid when praying at Mass."),
         prayer("memorial-acclamation", "Memorial Acclamations", "The people acclaim the mystery of faith after the consecration.", """
             Common forms include:
@@ -252,8 +266,20 @@ internal object MassGuideCatalog {
             as we forgive those who trespass against us;
             and lead us not into temptation,
             but deliver us from evil.
+
+            Latin:
+            Pater Noster, qui es in caelis,
+            sanctificetur nomen tuum.
+            Adveniat regnum tuum.
+            Fiat voluntas tua, sicut in caelo et in terra.
+
+            Panem nostrum quotidianum da nobis hodie,
+            et dimitte nobis debita nostra sicut et nos dimittimus debitoribus nostris.
+            Et ne nos inducas in tentationem,
+            sed libera nos a malo. Amen.
         """, textNote = "At Mass the priest continues with the embolism, and the people respond with the doxology."),
         prayer("agnus-dei", "Lamb of God", "The litany sung or spoken during the breaking of the bread before Communion.", """
+            English:
             Lamb of God, you take away the sins of the world,
             have mercy on us.
 
@@ -262,17 +288,25 @@ internal object MassGuideCatalog {
 
             Lamb of God, you take away the sins of the world,
             grant us peace.
+
+            Latin:
+            Agnus Dei qui tollis peccata mundi,
+            miserere nobis.
+
+            Agnus Dei, qui tollis peccata mundi,
+            miserere nobis.
+
+            Agnus Dei, qui tollis peccata mundi,
+            dona nobis pacem.
         """, textNote = "The first invocation may be repeated as needed during the fraction rite."),
         placeholder("communion-invitation", "Invitation to Communion", "The priest shows the Eucharist and invites the faithful to the supper of the Lamb.", """
-            Full official text for the Invitation to Communion is not bundled yet.
-
             What to listen for:
             • The priest presents the Lamb of God
             • The faithful acknowledge their unworthiness
             • The Church approaches Communion with humility and faith
         """, textNote = "Add licensed Roman Missal text here when available."),
         placeholder("prayer-after-communion", "Prayer after Communion", "The priest prays that the sacrament received will bear fruit in the lives of the faithful.", """
-            Full official text for the Prayer after Communion is not bundled yet. This prayer changes according to the day, feast, season, and Mass being celebrated.
+            This prayer changes according to the day, feast, season, and Mass being celebrated.
 
             What to listen for:
             • Thanksgiving for the gift received
@@ -280,8 +314,6 @@ internal object MassGuideCatalog {
             • A conclusion through Christ, to which the people respond “Amen”
         """, textNote = "Add licensed Roman Missal Prayer after Communion texts here when available."),
         placeholder("final-blessing", "Final Blessing", "The priest blesses the faithful before they are sent forth.", """
-            Full official text for solemn blessings and prayers over the people is not bundled yet.
-
             The usual pattern:
             • The priest greets the people
             • The people respond
@@ -337,6 +369,6 @@ internal object MassGuideCatalog {
     )
 
     private fun placeholder(id: String, title: String, summary: String, text: String, note: String? = null, textNote: String? = null) = prayer(id, title, summary, text, note, textNote)
-    private fun eucharisticPrayer(id: String, title: String, summary: String, structure: String, note: String) = placeholder(id, title, summary, "Full official text for $title is not bundled yet. Add licensed Roman Missal text here when available.\n\nFollow-along structure:\n• $structure", note, "The full official Eucharistic Prayer is prayed by the priest from the Roman Missal.")
+    private fun eucharisticPrayer(id: String, title: String, summary: String, structure: String, note: String) = placeholder(id, title, summary, "Follow-along structure:\n• $structure", note, "The full official Eucharistic Prayer is prayed by the priest from the Roman Missal.")
     private fun row(title: String, detail: String, posture: String? = null, response: String? = null, prayerIds: List<String> = emptyList()) = MassGuideRow(title, detail, posture, response, prayerIds)
 }

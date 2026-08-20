@@ -40,7 +40,7 @@ internal fun instructorSymbol(systemName: String) = when (systemName) {
 }
 
 internal fun instructorToolSymbol(key: String) = instructorSymbol(when(key){
-    "announcements"->"megaphone";"schedule"->"calendar.badge.clock";"assignments"->"checklist";"discussions"->"text.bubble";"progress"->"chart.bar";else->"key"
+    "classes"->"person.3";"announcements"->"megaphone";"schedule"->"calendar.badge.clock";"assignments"->"checklist";"discussions"->"text.bubble";"progress"->"chart.bar";else->"key"
 })
 
 @Composable internal fun InstructorSymbol(kind: InstructorSymbolKind, color: Color, modifier: Modifier = Modifier) {

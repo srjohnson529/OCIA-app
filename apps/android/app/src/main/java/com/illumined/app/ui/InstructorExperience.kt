@@ -28,7 +28,7 @@ import com.illumined.app.ui.theme.IlluminedThemeTokens
 import java.text.DateFormat
 import java.util.Calendar
 
-private enum class InstructorPage { MENU, ANNOUNCEMENTS, SCHEDULE, ASSIGNMENTS, DISCUSSIONS, PROGRESS, INVITES }
+private enum class InstructorPage { MENU, CLASSES, ANNOUNCEMENTS, SCHEDULE, ASSIGNMENTS, DISCUSSIONS, PROGRESS, INVITES }
 
 private val assignmentReadingsSaver = listSaver<List<AssignmentReading>, String>(
     save = { readings -> readings.flatMap { listOf(it.id, it.title, it.text) } },
@@ -43,6 +43,7 @@ fun InstructorExperience(profile: UserProfile, schedule: List<ScheduleItem>, ass
     }
     when (page) {
         InstructorPage.MENU -> InstructorMenu(profile, onBack) { page = it }
+        InstructorPage.CLASSES -> ClassManager(profile) { page = InstructorPage.MENU }
         InstructorPage.ANNOUNCEMENTS -> AnnouncementManager(profile) { page = InstructorPage.MENU }
         InstructorPage.SCHEDULE -> ScheduleManager(profile, schedule) { page = InstructorPage.MENU }
         InstructorPage.ASSIGNMENTS -> AssignmentManager(profile, assignments, schedule) { page = InstructorPage.MENU }
@@ -55,14 +56,16 @@ fun InstructorExperience(profile: UserProfile, schedule: List<ScheduleItem>, ass
 @Composable
 private fun InstructorMenu(profile: UserProfile, onBack: () -> Unit, select: (InstructorPage) -> Unit) {
     fun destination(key: String) = when (key) {
+        "classes" -> InstructorPage.CLASSES
         "announcements" -> InstructorPage.ANNOUNCEMENTS
         "schedule" -> InstructorPage.SCHEDULE
         "assignments" -> InstructorPage.ASSIGNMENTS
         "discussions" -> InstructorPage.DISCUSSIONS
         "progress" -> InstructorPage.PROGRESS
-        else -> InstructorPage.INVITES
+        "invites" -> InstructorPage.INVITES
+        else -> InstructorPage.MENU
     }
-    val className = profile.classIds.firstOrNull().orEmpty().ifBlank { "your class" }
+    val className = profile.selectedClassId.ifBlank { "your class" }
     LazyColumn(
         Modifier.fillMaxSize().background(instructorBrush()),
         contentPadding = PaddingValues(16.dp),
@@ -107,8 +110,146 @@ private fun InstructorMenu(profile: UserProfile, onBack: () -> Unit, select: (In
 }
 
 @Composable
+private fun ClassManager(profile: UserProfile, onBack: () -> Unit) {
+    val profileRepository = remember { FormationRepository() }
+    val setupRepository = remember { ProfileSetupRepository() }
+    val classRepository = remember { ClassManagementRepository() }
+    var creating by rememberSaveable { mutableStateOf(false) }
+    var newClassId by rememberSaveable { mutableStateOf("") }
+    var workingClassId by remember { mutableStateOf<String?>(null) }
+    var archiveCandidate by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var confirmation by remember { mutableStateOf<String?>(null) }
+    val activeClasses = profile.activeClassIds
+    val archivedClasses = profile.classIds.filter(profile.archivedClassIds::contains)
+
+    LazyColumn(
+        Modifier.fillMaxSize().background(instructorBrush()),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        item {
+            ManagerHeader(
+                "Classes",
+                "Create classes, choose the active class, or archive a class while preserving its records.",
+                onBack,
+                workingClassId == null,
+            ) { creating = true }
+        }
+        if (creating) item {
+            InstructorCard {
+                Text("Create a Class", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                Text("Students will enter this class ID when setting up their accounts.", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                OutlinedTextField(
+                    value = newClassId,
+                    onValueChange = { newClassId = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("New class ID") },
+                    singleLine = true,
+                    enabled = workingClassId == null,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedButton(onClick = { creating = false; newClassId = "" }, modifier = Modifier.weight(1f)) { Text("Cancel") }
+                    Button(
+                        onClick = {
+                            val requestedId = newClassId.trim()
+                            workingClassId = requestedId
+                            setupRepository.createAdditionalInstructorClass(profile, requestedId, success = {
+                                workingClassId = null
+                                creating = false
+                                newClassId = ""
+                                confirmation = "$requestedId was created and is now active."
+                            }, error = {
+                                workingClassId = null
+                                error = it.localizedMessage ?: "The class could not be created."
+                            })
+                        },
+                        modifier = Modifier.weight(1f),
+                        enabled = newClassId.isNotBlank() && workingClassId == null,
+                    ) { Text(if (workingClassId != null) "Creating..." else "Create") }
+                }
+            }
+        }
+        item { Text("Active Classes", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink) }
+        if (activeClasses.isEmpty()) item { InstructorCard { Text("No active classes.", color = IlluminedThemeTokens.SecondaryText) } }
+        items(activeClasses, key = { "active-$it" }) { classId ->
+            InstructorCard {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    InstructorSymbol(InstructorSymbolKind.People, IlluminedThemeTokens.Gold, Modifier.size(22.dp))
+                    Spacer(Modifier.width(10.dp))
+                    Text(classId, modifier = Modifier.weight(1f), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                    if (classId == profile.selectedClassId) Text("Active", color = IlluminedThemeTokens.Blue, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+                if (classId != profile.selectedClassId) OutlinedButton(
+                    onClick = {
+                        workingClassId = classId
+                        profileRepository.setActiveClass(profile, classId, { workingClassId = null }, {
+                            workingClassId = null
+                            error = it.localizedMessage ?: "The active class could not be changed."
+                        })
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = workingClassId == null,
+                ) { Text("Make Active") }
+                TextButton(
+                    onClick = { archiveCandidate = classId },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = activeClasses.size > 1 && workingClassId == null,
+                ) { Text("Archive Class") }
+                if (activeClasses.size <= 1) Text("Create or restore another class before archiving this one.", fontSize = 12.sp, color = IlluminedThemeTokens.SecondaryText)
+            }
+        }
+        if (archivedClasses.isNotEmpty()) {
+            item { Text("Archived Classes", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink) }
+            items(archivedClasses, key = { "archived-$it" }) { classId ->
+                InstructorCard {
+                    Text(classId, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Records are preserved. New class activity is paused.", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                    Button(
+                        onClick = {
+                            workingClassId = classId
+                            classRepository.restoreClass(classId, {
+                                workingClassId = null
+                                confirmation = "$classId was restored."
+                            }, {
+                                workingClassId = null
+                                error = it.localizedMessage ?: "The class could not be restored."
+                            })
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = workingClassId == null,
+                    ) { Text(if (workingClassId == classId) "Restoring..." else "Restore Class") }
+                }
+            }
+        }
+    }
+
+    archiveCandidate?.let { classId ->
+        AlertDialog(
+            onDismissRequest = { archiveCandidate = null },
+            title = { Text("Archive $classId?") },
+            text = { Text("The class will move out of the active list and new activity will pause. All class records will be preserved and the class can be restored later.") },
+            dismissButton = { TextButton(onClick = { archiveCandidate = null }) { Text("Cancel") } },
+            confirmButton = { TextButton(onClick = {
+                archiveCandidate = null
+                workingClassId = classId
+                classRepository.archiveClass(classId, {
+                    workingClassId = null
+                    confirmation = "$classId was archived."
+                }, {
+                    workingClassId = null
+                    error = it.localizedMessage ?: "The class could not be archived."
+                })
+            }) { Text("Archive") } },
+        )
+    }
+    InstructorErrorAlert("Class Error", error) { error = null }
+    confirmation?.let { message -> AlertDialog(onDismissRequest = { confirmation = null }, title = { Text("Classes Updated") }, text = { Text(message) }, confirmButton = { TextButton(onClick = { confirmation = null }) { Text("OK") } }) }
+}
+
+@Composable
 private fun AnnouncementManager(profile: UserProfile, onBack: () -> Unit) {
-    val repository = remember { InstructorRepository() }; val classId = profile.classIds.firstOrNull().orEmpty(); var values by remember { mutableStateOf(emptyList<Announcement>()) }; var editingId by rememberSaveable { mutableStateOf<String?>(null) }; val editing = restoreEditedRecord(values, editingId, Announcement::id); var creating by rememberSaveable { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }; var sentMessage by remember { mutableStateOf<String?>(null) }
+    val repository = remember { InstructorRepository() }; val classId = profile.selectedClassId; var values by remember { mutableStateOf(emptyList<Announcement>()) }; var editingId by rememberSaveable { mutableStateOf<String?>(null) }; val editing = restoreEditedRecord(values, editingId, Announcement::id); var creating by rememberSaveable { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }; var sentMessage by remember { mutableStateOf<String?>(null) }
     BackHandler(enabled = creating || editingId != null) {
         creating = false
         editingId = null
@@ -173,7 +314,7 @@ private fun AnnouncementEditor(value: Announcement?, onCancel: () -> Unit, onSav
 @Composable
 private fun ScheduleManager(profile: UserProfile, schedule: List<ScheduleItem>, onBack: () -> Unit) {
     val repository = remember { InstructorRepository() }
-    val classId = profile.classIds.firstOrNull().orEmpty()
+    val classId = profile.selectedClassId
     var showingEditor by rememberSaveable { mutableStateOf(false) }
     var editingId by rememberSaveable { mutableStateOf<String?>(null) }
     val editing = restoreEditedRecord(schedule, editingId, ScheduleItem::id)
@@ -200,9 +341,15 @@ private fun ScheduleManager(profile: UserProfile, schedule: List<ScheduleItem>, 
             onCancel = { showingEditor = false; editingId = null },
             onSave = { topic, details, date, finished ->
                 val value = editing
-                if (value == null) repository.createSchedule(profile, topic, details, date,
+                val keepsExistingOrder = value?.date?.toDate()?.time?.let { sameScheduleDay(it, date) } == true
+                val sortOrder = if (keepsExistingOrder && value?.sortOrder != null) {
+                    value.sortOrder
+                } else {
+                    nextScheduleSortOrder(schedule, date, value?.id)
+                }
+                if (value == null) repository.createSchedule(profile, topic, details, date, sortOrder,
                     { finished(); showingEditor = false }, { finished(); error = it.message ?: "The class could not be saved." })
-                else repository.updateSchedule(profile, value.id, topic, details, date,
+                else repository.updateSchedule(profile, value.id, topic, details, date, sortOrder,
                     { finished(); showingEditor = false; editingId = null }, { finished(); error = it.message ?: "The class could not be saved." })
             },
             onDelete = editing?.let { value ->
@@ -229,7 +376,7 @@ private fun ScheduleManager(profile: UserProfile, schedule: List<ScheduleItem>, 
                 }
             }
             if (schedule.isEmpty()) item { InstructorCard { InstructorEmptyStateContent(InstructorEmptyStatePresentation.schedule) } }
-            items(schedule.sortedBy { it.date?.seconds ?: Long.MAX_VALUE }, key = { it.id }) { value ->
+            items(schedule.sortedWith(scheduleItemComparator), key = { it.id }) { value ->
                 val dateText = value.date?.toDate()?.let { DateFormat.getDateInstance(DateFormat.FULL).format(it) }.orEmpty()
                 InstructorListCard(
                     onClick = { editingId = value.id; showingEditor = true },
@@ -249,6 +396,22 @@ private fun ScheduleManager(profile: UserProfile, schedule: List<ScheduleItem>, 
         }
     }
     InstructorErrorAlert(InstructorErrorPresentation.ScheduleTitle, error) { error = null }
+}
+
+private fun sameScheduleDay(firstMillis: Long, secondMillis: Long): Boolean {
+    val first = Calendar.getInstance().apply { timeInMillis = firstMillis }
+    val second = Calendar.getInstance().apply { timeInMillis = secondMillis }
+    return first.get(Calendar.ERA) == second.get(Calendar.ERA) &&
+        first.get(Calendar.YEAR) == second.get(Calendar.YEAR) &&
+        first.get(Calendar.DAY_OF_YEAR) == second.get(Calendar.DAY_OF_YEAR)
+}
+
+private fun nextScheduleSortOrder(schedule: List<ScheduleItem>, dateMillis: Long, excludingId: String?): Long {
+    val sameDay = schedule.filter { item ->
+        item.id != excludingId && item.date?.toDate()?.time?.let { sameScheduleDay(it, dateMillis) } == true
+    }
+    val highestOrder = sameDay.mapNotNull { it.sortOrder }.maxOrNull() ?: -1L
+    return maxOf(highestOrder + 1L, sameDay.size.toLong())
 }
 
 @Composable
@@ -330,7 +493,7 @@ private fun ScheduleImportScreen(existing: List<ScheduleItem>, onCancel: () -> U
 
 @Composable
 private fun AssignmentManager(profile: UserProfile, assignments: List<Assignment>, schedule: List<ScheduleItem>, onBack: () -> Unit) {
-    val repository = remember { InstructorRepository() }; val classId = profile.classIds.firstOrNull().orEmpty(); var values by remember { mutableStateOf(assignments) }; var students by remember { mutableStateOf(emptyList<UserProfile>()) }; var completions by remember { mutableStateOf(emptyList<AssignmentCompletion>()) }; var editorId by rememberSaveable { mutableStateOf<String?>(null) }; val editor = restoreEditedRecord(values, editorId, Assignment::id); var creating by rememberSaveable { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }
+    val repository = remember { InstructorRepository() }; val classId = profile.selectedClassId; var values by remember { mutableStateOf(assignments) }; var students by remember { mutableStateOf(emptyList<UserProfile>()) }; var completions by remember { mutableStateOf(emptyList<AssignmentCompletion>()) }; var editorId by rememberSaveable { mutableStateOf<String?>(null) }; val editor = restoreEditedRecord(values, editorId, Assignment::id); var creating by rememberSaveable { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }
     BackHandler(enabled = creating || editorId != null) {
         creating = false
         editorId = null
@@ -453,7 +616,7 @@ private fun AssignmentEditor(value: Assignment?, onCancel: () -> Unit, onSave: (
 @Composable
 private fun DiscussionManager(profile: UserProfile, onBack: () -> Unit) {
     val repository = remember { InstructorRepository() }
-    val classId = profile.classIds.firstOrNull().orEmpty()
+    val classId = profile.selectedClassId
     var prompts by remember { mutableStateOf(emptyList<DiscussionPrompt>()) }
     var editorId by rememberSaveable { mutableStateOf<String?>(null) }
     val editor = restoreEditedRecord(prompts, editorId, DiscussionPrompt::id)
@@ -639,7 +802,7 @@ private fun DiscussionEditor(
 private fun StudentProgressManager(profile: UserProfile, onBack: () -> Unit) {
     val repository = remember { InstructorRepository() }
     val context = LocalContext.current
-    val classId = profile.classIds.firstOrNull().orEmpty()
+    val classId = profile.selectedClassId
     val totalLessons = remember { LessonCatalog.load(context.applicationContext).getOrNull().orEmpty().sumOf { it.lessons.size } }
     val prayerNamesById = remember { CommonPrayerCatalog.namesById(context.applicationContext) }
     var students by remember { mutableStateOf(emptyList<UserProfile>()) }

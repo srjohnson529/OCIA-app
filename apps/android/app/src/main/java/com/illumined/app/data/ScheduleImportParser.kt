@@ -34,7 +34,7 @@ object ScheduleImportParser {
         }
         if (errors.isNotEmpty()) return ScheduleParseResult.Failure(errors.take(6).joinToString("\n"))
         if (parsed.isEmpty()) return ScheduleParseResult.Failure("No class rows were found. Make sure the first columns are date and topic.")
-        return ScheduleParseResult.Success(parsed.sortedBy { it.date })
+        return ScheduleParseResult.Success(parsed.sortedWith(compareBy({ it.date }, { it.rowNumber })))
     }
 
     private fun parseDate(value: String): LocalDate? = formats.firstNotNullOfOrNull { formatter ->

@@ -164,29 +164,114 @@ fun SpiritualFormationExperience(
                 ?: LaunchedEffect(route) { route = destination.back }
         }
         FormationRoute.MYSTERY -> catalog.mysteries.firstOrNull { it.id == destination.id }?.let { mystery ->
-            RosaryMysteryPage(mystery, completed = mystery.id in completedMysteryIds, onBack = { route = destination.back }, onComplete = onCompleteMystery)
+            RosaryMysteryPage(
+                mystery = mystery,
+                completed = mystery.id in completedMysteryIds,
+                onBack = { route = destination.back },
+                onRosaryCompleted = { route = FormationRoute.PRAYER_HUB },
+                onComplete = onCompleteMystery,
+            )
         } ?: LaunchedEffect(route) { route = FormationRoute.ROSARY }
         else -> LaunchedEffect(route) { route = FormationRoute.MENU }
     }
 }
 
-private enum class ExaminationStage { INTRO, PRAYER, CHECKLIST, SUMMARY }
+private enum class ExaminationStage { HUB, INTRO, PRAYER, CHECKLIST, SUMMARY, DAILY_METHODS, DAILY_DETAIL }
+
+private data class DailyExamenMethod(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val introduction: String,
+    val steps: List<String>,
+    val closingPrayer: String,
+)
+
+private object DailyExamenCatalog {
+    val methods = listOf(
+        DailyExamenMethod(
+            "ignatian",
+            "Ignatian Examen",
+            "Gratitude, light, review, mercy, and grace for tomorrow",
+            "Pray slowly through the day in God’s presence. Notice not only failures, but also where God was near and how grace was moving.",
+            listOf(
+                "Become aware of God’s presence and rest quietly before Him.",
+                "Give thanks for the gifts of this day, naming particular people, moments, and graces.",
+                "Ask the Holy Spirit for light to see the day truthfully and with God’s compassion.",
+                "Review the day from beginning to end. Notice consolation, resistance, choices, feelings, and invitations from God.",
+                "Ask forgiveness where needed, receive God’s mercy, and ask for the grace you need tomorrow.",
+            ),
+            "Lord, thank You for remaining with me through this day. Show me how to receive tomorrow as Your gift and to respond more freely to Your grace. Amen.",
+        ),
+        DailyExamenMethod(
+            "francis-de-sales",
+            "St. Francis de Sales Evening Examen",
+            "A gentle review before rest from Introduction to the Devout Life",
+            "St. Francis de Sales recommends recollecting yourself before Christ and closing the day with gratitude, honest review, pardon, and trust.",
+            listOf(
+                "Place yourself in the presence of Christ and briefly renew a grace or holy desire from your morning prayer.",
+                "Thank God for preserving you and accompanying you throughout the day.",
+                "Recall where you were, whom you met, and what you did. Review your conduct with simplicity and honesty.",
+                "Thank God for whatever was good. Ask pardon for faults in thought, word, deed, or omission, and resolve with grace to do better.",
+                "Commend your body and soul, the Church, your family, friends, and all in need to God before resting.",
+            ),
+            "Jesus, receive all that this day has held. Forgive my faults, strengthen every good desire, and keep me and those I love in Your peace. Amen.",
+        ),
+        DailyExamenMethod(
+            "benedictine",
+            "Benedictine Daily Review",
+            "Listen for God through prayer, work, relationships, and humility",
+            "Inspired by the Benedictine call to continual conversion, this review listens for God in the ordinary rhythm of the day.",
+            listOf(
+                "Be still before God and listen: what word, event, or person is He bringing to mind?",
+                "Give thanks for the day’s prayer, work, rest, and encounters.",
+                "Review how you practiced humility, patience, obedience, hospitality, and care for others.",
+                "Notice where self-will, distraction, resentment, or excess disturbed peace and charity.",
+                "Choose one small act of conversion for tomorrow and entrust it to God’s help.",
+            ),
+            "God of peace, gather my work and rest into Your love. Teach me to listen, begin again, and seek You faithfully in the ordinary duties of tomorrow. Amen.",
+        ),
+        DailyExamenMethod(
+            "gospel-love",
+            "Gospel Examen of Love",
+            "Review the day through love of God and neighbor",
+            "Let Jesus’ two great commandments provide a simple lens for seeing the day and choosing a concrete response of love.",
+            listOf(
+                "Thank God for one moment in which you received or gave love today.",
+                "Where did you love God with your attention, trust, prayer, or choices?",
+                "Where did you love your neighbor through patience, truth, mercy, generosity, or service?",
+                "Where did you withhold love or fail to recognize another person’s dignity? Ask for mercy without discouragement.",
+                "Choose one specific way to love God or neighbor tomorrow, and ask for the grace to follow through.",
+            ),
+            "Jesus, form my heart after Your own. Heal what was lacking in love today and make me attentive, courageous, and generous tomorrow. Amen.",
+        ),
+    )
+}
 
 @Composable
 private fun ExaminationExperience(onExit:()->Unit){
-    var stage by remember { mutableStateOf(ExaminationStage.INTRO) }
+    var stage by remember { mutableStateOf(ExaminationStage.HUB) }
+    var selectedDailyMethodId by remember { mutableStateOf<String?>(null) }
     var checked by remember { mutableStateOf(emptySet<String>()) }
     val checkedItems=ExaminationCatalog.sections.flatMapIndexed{sectionIndex,section->section.items.mapIndexed{itemIndex,text->"$sectionIndex-$itemIndex" to text}}.filter{it.first in checked}.map{it.second}
     BackHandler {
         stage = when (stage) {
-            ExaminationStage.INTRO -> { onExit(); ExaminationStage.INTRO }
+            ExaminationStage.HUB -> { onExit(); ExaminationStage.HUB }
+            ExaminationStage.INTRO -> ExaminationStage.HUB
             ExaminationStage.PRAYER -> ExaminationStage.INTRO
             ExaminationStage.CHECKLIST -> ExaminationStage.PRAYER
             ExaminationStage.SUMMARY -> ExaminationStage.CHECKLIST
+            ExaminationStage.DAILY_METHODS -> ExaminationStage.HUB
+            ExaminationStage.DAILY_DETAIL -> ExaminationStage.DAILY_METHODS
         }
     }
     when(stage){
-        ExaminationStage.INTRO -> ExaminationIntroPage(onExit) { stage = ExaminationStage.PRAYER }
+        ExaminationStage.HUB -> ExaminationHubPage(
+            onBack = onExit,
+            onReconciliation = { stage = ExaminationStage.INTRO },
+            onDailyExamen = { stage = ExaminationStage.DAILY_METHODS },
+        )
+        ExaminationStage.INTRO -> ExaminationIntroPage({ stage = ExaminationStage.HUB }) { stage = ExaminationStage.PRAYER }
         ExaminationStage.PRAYER -> ExaminationPrayerPage(
             onBack = { stage = ExaminationStage.INTRO },
             onBegin = { stage = ExaminationStage.CHECKLIST },
@@ -202,6 +287,71 @@ private fun ExaminationExperience(onExit:()->Unit){
             onBack = { stage = ExaminationStage.CHECKLIST },
             onFinish = { checked = emptySet(); onExit() },
         )
+        ExaminationStage.DAILY_METHODS -> DailyExamenMethodsPage(
+            onBack = { stage = ExaminationStage.HUB },
+            onSelect = { method -> selectedDailyMethodId = method.id; stage = ExaminationStage.DAILY_DETAIL },
+        )
+        ExaminationStage.DAILY_DETAIL -> DailyExamenCatalog.methods.firstOrNull { it.id == selectedDailyMethodId }?.let { method ->
+            DailyExamenDetailPage(method, onBack = { stage = ExaminationStage.DAILY_METHODS })
+        } ?: LaunchedEffect(selectedDailyMethodId) { stage = ExaminationStage.DAILY_METHODS }
+    }
+}
+
+@Composable
+private fun ExaminationHubPage(onBack: () -> Unit, onReconciliation: () -> Unit, onDailyExamen: () -> Unit) =
+    FormationCards("Examination of Conscience", onBack) {
+        item {
+            FormationMenuCard(
+                "Daily Examen",
+                "Four prayerful ways to review the day with God",
+                SpiritualFormationSymbolKind.MoonStars,
+                onDailyExamen,
+            )
+        }
+        item {
+            FormationMenuCard(
+                "Preparation for Reconciliation",
+                "A thorough, private examination before Confession",
+                SpiritualFormationSymbolKind.Checklist,
+                onReconciliation,
+            )
+        }
+    }
+
+@Composable
+private fun DailyExamenMethodsPage(onBack: () -> Unit, onSelect: (DailyExamenMethod) -> Unit) =
+    FormationCards("Daily Examen", onBack) {
+        item {
+            ExaminationCard {
+                Text("Review Your Day with God", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                Text("Choose a method and spend a few quiet minutes in gratitude, discernment, mercy, and growth. A daily examen is not a replacement for sacramental Confession.", fontSize = 15.sp, lineHeight = 23.sp, color = IlluminedThemeTokens.SecondaryText)
+            }
+        }
+        items(DailyExamenCatalog.methods, key = { it.id }) { method ->
+            FormationMenuCard(method.title, method.subtitle, SpiritualFormationSymbolKind.Search) { onSelect(method) }
+        }
+    }
+
+@Composable
+private fun DailyExamenDetailPage(method: DailyExamenMethod, onBack: () -> Unit) = FormationCards(null, null) {
+    item { TextButton(onClick = onBack) { Text("‹ Back") } }
+    item {
+        ExaminationCard {
+            Text(method.title, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+            Text(method.introduction, fontSize = 16.sp, lineHeight = 24.sp, color = IlluminedThemeTokens.SecondaryText)
+        }
+    }
+    itemsIndexed(method.steps) { index, step ->
+        ExaminationCard {
+            Text("Step ${index + 1}", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+            Text(step, fontSize = 17.sp, lineHeight = 26.sp, color = IlluminedThemeTokens.Ink)
+        }
+    }
+    item {
+        ExaminationCard {
+            Text("Closing Prayer", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+            Text(method.closingPrayer, fontSize = 18.sp, lineHeight = 28.sp, color = IlluminedThemeTokens.Ink)
+        }
     }
 }
 
@@ -264,7 +414,7 @@ private fun ExaminationSummaryPage(checkedItems: List<String>, onBack: () -> Uni
 private fun FormationMenu(onPrayers: () -> Unit, onExamination: () -> Unit, onMass: () -> Unit, onPractices: () -> Unit) =
     FormationList(null, null, listOf(
         FormationMenuRow("Prayers", "Common prayers, rosary, lectio divina, and the hours", SpiritualFormationSymbolKind.Prayers, onPrayers),
-        FormationMenuRow("Examination of Conscience", "Prayerful review and preparation for confession", SpiritualFormationSymbolKind.Search, onExamination),
+        FormationMenuRow("Examination of Conscience", "Prepare for Reconciliation or pray a daily examen", SpiritualFormationSymbolKind.Search, onExamination),
         FormationMenuRow("Guide to the Mass", "Walk through the order, prayers, readings, and Eucharistic Prayer", SpiritualFormationSymbolKind.Church, onMass),
         FormationMenuRow("Spiritual Practices", "Works of mercy, precepts, habits, and Catholic living", SpiritualFormationSymbolKind.Walking, onPractices),
     ))
@@ -506,13 +656,23 @@ private fun RosaryMysteryPage(
     mystery: RosarySet,
     completed: Boolean,
     onBack: () -> Unit,
+    onRosaryCompleted: () -> Unit,
     onComplete: (String, () -> Unit, () -> Unit) -> Unit,
 ) {
     var started by rememberSaveable(mystery.id) { mutableStateOf(false) }
     val catalogContext = LocalContext.current
     val catalog = remember { runCatching { loadFormationCatalog(catalogContext.resources.openRawResource(R.raw.spiritual_formation).bufferedReader().use { it.readText() }) }.getOrNull() }
     val sequence = remember(mystery.id, catalog) { catalog?.let { buildRosarySequence(it.rosaryPrayers,mystery) }.orEmpty() }
-    if(started && sequence.isNotEmpty()) { GuidedRosaryPage(mystery.id,sequence,onBack={started=false},onComplete=onComplete);return }
+    if(started && sequence.isNotEmpty()) {
+        GuidedRosaryPage(
+            mysteryId = mystery.id,
+            sequence = sequence,
+            onBack = { started = false },
+            onRosaryCompleted = onRosaryCompleted,
+            onComplete = onComplete,
+        )
+        return
+    }
     var working by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().background(formationBrush()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -535,6 +695,7 @@ private fun GuidedRosaryPage(
     mysteryId: String,
     sequence: List<RosaryStep>,
     onBack: () -> Unit,
+    onRosaryCompleted: () -> Unit,
     onComplete: (String, () -> Unit, () -> Unit) -> Unit,
 ) {
     var index by rememberSaveable(mysteryId) { mutableIntStateOf(0) }
@@ -551,7 +712,7 @@ private fun GuidedRosaryPage(
             error = false
             onComplete(
                 mysteryId,
-                { saving = false; index = 0; onBack() },
+                { saving = false; index = 0; onRosaryCompleted() },
                 { saving = false; error = true },
             )
         }
@@ -565,6 +726,14 @@ private fun GuidedRosaryPage(
         TextButton(onClick = onBack, enabled = !saving, modifier = Modifier.align(Alignment.Start)) {
             Text("‹ Back")
         }
+
+        LinearProgressIndicator(
+            progress = { (index + 1).toFloat() / sequence.size.toFloat() },
+            modifier = Modifier.fillMaxWidth().semantics {
+                contentDescription = "Rosary progress, step ${index + 1} of ${sequence.size}"
+            },
+            color = IlluminedThemeTokens.Gold,
+        )
 
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
             val availableHeight = this.maxHeight
@@ -599,7 +768,6 @@ private fun GuidedRosaryPage(
                         step.decadeCount?.let {
                             Text("$it / 10", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Gold)
                         }
-                        Text("Step ${index + 1} of ${sequence.size}", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
                     }
                 }
                 }

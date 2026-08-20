@@ -10,7 +10,7 @@ internal object RoleWritePolicy {
     ): String? = when {
         !authenticated -> signInMessage
         !profile.isInstructor -> roleMessage
-        profile.classIds.firstOrNull().isNullOrBlank() -> classMessage
+        profile.selectedClassId.isBlank() -> classMessage
         else -> null
     }
 

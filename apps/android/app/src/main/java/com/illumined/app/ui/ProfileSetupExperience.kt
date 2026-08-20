@@ -20,9 +20,18 @@ import com.illumined.app.ui.theme.IlluminedThemeTokens
 private enum class SetupMode(val label: String) { STUDENT("Student"), INSTRUCTOR("Co-Instructor"), PARISH("New Parish") }
 
 @Composable
-fun ProfileSetupExperience(onComplete: () -> Unit) {
+internal fun ProfileSetupExperience(inviteLink: IlluminedInviteLink? = null, onComplete: () -> Unit, onSignOut: () -> Unit) {
     val repository = remember { ProfileSetupRepository() }; var mode by rememberSaveable { mutableStateOf(SetupMode.STUDENT) }; var name by rememberSaveable { mutableStateOf("") }; var classId by rememberSaveable { mutableStateOf("") }; var invite by rememberSaveable { mutableStateOf("") }; var parish by rememberSaveable { mutableStateOf("") }; var setupCode by rememberSaveable { mutableStateOf("") }; var working by remember { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }
     val valid = name.isNotBlank() && classId.isNotBlank() && when(mode) { SetupMode.STUDENT -> true; SetupMode.INSTRUCTOR -> invite.isNotBlank(); SetupMode.PARISH -> parish.isNotBlank() && setupCode.isNotBlank() }
+    LaunchedEffect(inviteLink) {
+        inviteLink?.let { link ->
+            when (link.role) {
+                InviteRole.STUDENT -> { mode = SetupMode.STUDENT; classId = link.classId }
+                InviteRole.INSTRUCTOR -> { mode = SetupMode.INSTRUCTOR; classId = link.classId; invite = link.code }
+                InviteRole.PARISH -> { mode = SetupMode.PARISH; setupCode = link.code }
+            }
+        }
+    }
     Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius=1600f)).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement=Arrangement.spacedBy(18.dp)) {
         SetupCard { Text("Set up your profile",fontSize=26.sp,fontWeight=FontWeight.SemiBold);Text("Choose whether you are joining as a student, joining an existing parish as a co-instructor, or starting a new parish/class.",color=IlluminedThemeTokens.SecondaryText,lineHeight=23.sp) }
         SetupCard {
@@ -36,6 +45,13 @@ fun ProfileSetupExperience(onComplete: () -> Unit) {
             Button(onClick={working=true;error=null;val success={working=false;onComplete()};val failure:(Throwable)->Unit={working=false;error=it.message?:"Profile setup could not be completed."};when(mode){SetupMode.STUDENT->repository.joinStudent(name,classId,success,failure);SetupMode.INSTRUCTOR->repository.claimInstructor(name,classId,invite,success,failure);SetupMode.PARISH->repository.startClass(name,parish,classId,setupCode,success,failure)}},enabled=valid&&!working,modifier=Modifier.fillMaxWidth().height(54.dp)){Text(if(working)"Saving…" else when(mode){SetupMode.STUDENT->"Join as Student";SetupMode.INSTRUCTOR->"Join as Instructor";SetupMode.PARISH->"Start New Class"})}
         }
         error?.let { message -> SetupCard { Row(horizontalArrangement=Arrangement.spacedBy(9.dp),verticalAlignment=androidx.compose.ui.Alignment.Top){DiscussionSymbol(DiscussionSymbolKind.Warning,Color.Red,Modifier.size(18.dp));Text(message,fontSize=15.sp,color=Color.Red,modifier=Modifier.weight(1f))} } }
+        SetupCard {
+            Text("Use a different account", fontSize=17.sp, fontWeight=FontWeight.SemiBold)
+            Text("Sign out to return to the Sign In and Create Account page.", fontSize=14.sp, color=IlluminedThemeTokens.SecondaryText)
+            OutlinedButton(onClick=onSignOut, enabled=!working, modifier=Modifier.fillMaxWidth().height(52.dp)) {
+                Text("Sign Out")
+            }
+        }
     }
 }
 

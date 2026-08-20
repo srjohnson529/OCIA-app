@@ -9,7 +9,7 @@ class NotificationChannelPolicyTest {
         assertEquals("illumined_class_updates", NotificationChannelPolicy.ID)
         assertEquals("Class updates", NotificationChannelPolicy.NAME)
         assertEquals(
-            "Announcements, assignments, and discussion activity from Illumined",
+            "Announcements, assignments, prayer requests, and discussion activity from Illumined",
             NotificationChannelPolicy.DESCRIPTION,
         )
     }

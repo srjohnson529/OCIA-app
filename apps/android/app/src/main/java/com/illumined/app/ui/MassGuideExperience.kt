@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -26,21 +27,23 @@ import com.illumined.app.ui.theme.IlluminedThemeTokens
 @Composable
 internal fun MassGuideExperience(onExit: () -> Unit) {
     var stack by rememberSaveable { mutableStateOf(listOf(MassGuideRoute.PARTS)) }
+    val stateHolder = rememberSaveableStateHolder()
     val screen = MassGuideRoute.resolve(stack.last())
     val back = { if (stack.size > 1) stack = stack.dropLast(1) else onExit() }
     BackHandler(onBack = back)
-    // LazyColumn preserves its position at a composition call site. Keying by route creates
-    // a fresh list for every Mass Guide destination, so each page begins at the top.
-    key(stack.last()) {
-        when (screen) {
-            MassGuideDestination.Parts -> MassPartsPage(onBack = back, onPart = { stack = stack + MassGuideRoute.part(it.id) })
-            is MassGuideDestination.Part -> MassPartPage(
-                part = screen.value,
-                onBack = back,
-                onPrayer = { stack = stack + MassGuideRoute.prayer(it.id) },
-                onNext = { stack = stack + MassGuideRoute.part(it.id) },
-            )
-            is MassGuideDestination.Prayer -> MassPrayerPage(screen.value, back)
+    val route = stack.last()
+    stateHolder.SaveableStateProvider(route) {
+        key(route) {
+            when (screen) {
+                MassGuideDestination.Parts -> MassPartsPage(onBack = back, onPart = { stack = stack + MassGuideRoute.part(it.id) })
+                is MassGuideDestination.Part -> MassPartPage(
+                    part = screen.value,
+                    onBack = back,
+                    onPrayer = { stack = stack + MassGuideRoute.prayer(it.id) },
+                    onNext = { stack = stack + MassGuideRoute.part(it.id) },
+                )
+                is MassGuideDestination.Prayer -> MassPrayerPage(screen.value, back)
+            }
         }
     }
 }

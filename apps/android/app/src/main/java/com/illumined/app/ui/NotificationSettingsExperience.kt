@@ -46,11 +46,16 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
     var permissionRequested by remember { mutableStateOf(preferences.getBoolean("permission_requested", false)) }
     var working by remember { mutableStateOf(false) }; var status by remember { mutableStateOf<String?>(null) }; var error by remember { mutableStateOf<String?>(null) }
     var savedAt by remember { mutableStateOf(preferences.getLong("last_registered_at", 0L).takeIf { it > 0L }?.let(::Date)) }
-    fun register() { working = true; registrar.register(profile?.classIds?.firstOrNull().orEmpty(), {
+    val requiresSettings = NotificationPermissionPolicy.showSettings(enabled, permissionRequested, runtimePermissionRequired)
+    fun openSettings() {
+        error = null; status = null
+        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
+    }
+    fun register() { working = true; registrar.register(profile?.selectedClassId.orEmpty(), {
         val registeredAt = Date()
         working = false; enabled = true; savedAt = registeredAt
         preferences.edit().putLong("last_registered_at", registeredAt.time).apply()
-        status = "Notifications are ready for ${profile?.classIds?.firstOrNull() ?: "your class"}."
+        status = "Notifications are ready for ${profile?.selectedClassId?.ifBlank { "your class" } ?: "your class"}."
     }, { working = false; error = "Notification registration could not be saved." }) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         permissionRequested = true
@@ -63,6 +68,11 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+    LaunchedEffect(enabled, profile) {
+        val current = profile ?: return@LaunchedEffect
+        val allMatch = listOf(current.notificationsEnabled, current.notificationNewPrayerRequests, current.notificationNewAssignments, current.notificationAssignmentReminders, current.notificationDiscussionReplies).all { it == enabled }
+        if (!allMatch) registrar.updateAllPreferences(enabled, error = { error = "Notification status could not be synchronized." })
+    }
     Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f))) {
         NotificationPageHeading(onBack)
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -71,13 +81,20 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
                 MoreMenuSymbol(MoreMenuSymbolKind.Notifications, IlluminedThemeTokens.Blue, Modifier.size(24.dp))
                 Text("Notifications", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
             }
-            Text("Receive alerts for class announcements, new assignments, and important discussion activity.", color = IlluminedThemeTokens.SecondaryText)
+            Text("Receive alerts for class announcements, assignments, prayer requests, and discussion activity. All alert types follow the notification status shown below.", color = IlluminedThemeTokens.SecondaryText)
             Row { Text("Status", fontSize = 17.sp, fontWeight = FontWeight.SemiBold); Spacer(Modifier.weight(1f)); Text(NotificationPermissionPolicy.statusText(enabled, permissionRequested), color = if (enabled) IlluminedThemeTokens.Blue else IlluminedThemeTokens.SecondaryText, fontWeight = FontWeight.SemiBold) }
             savedAt?.let { Text("Last registered ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(it)}.", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText) }
         } }
         status?.let { Text(it, Modifier.padding(horizontal = 4.dp), color = IlluminedThemeTokens.Blue, fontSize = 15.sp) }; error?.let { Text(it, Modifier.padding(horizontal = 4.dp), color = Color.Red, fontSize = 15.sp) }
-        Button(onClick = { error = null; status = null; if (runtimePermissionRequired && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) launcher.launch(Manifest.permission.POST_NOTIFICATIONS) else register() }, enabled = profile != null && !working, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text(if (working) "Setting Up…" else if (enabled) "Refresh Notification Setup" else "Turn On Notifications", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
-        if (NotificationPermissionPolicy.showSettings(enabled, permissionRequested, runtimePermissionRequired)) OutlinedButton(onClick = { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text("Open Android Settings", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
+        Button(onClick = {
+            error = null; status = null
+            when {
+                requiresSettings -> openSettings()
+                runtimePermissionRequired && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED -> launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                else -> register()
+            }
+        }, enabled = profile != null && !working, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text(if (working) "Setting Up…" else if (requiresSettings) "Open Android Settings" else if (enabled) "Refresh Notification Setup" else "Turn On Notifications", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
+        if (enabled) OutlinedButton(onClick = ::openSettings, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text("Manage in Android Settings", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
         }
     }
 }

@@ -11,6 +11,7 @@ data class AssignmentCompletion(
     val assignmentItemId: String = "",
     val assignmentItemTitle: String = "",
     val assignmentItemType: String = "",
+    val classId: String = "",
 )
 
 data class AssignmentProgress(

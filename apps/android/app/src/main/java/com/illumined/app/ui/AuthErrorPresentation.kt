@@ -27,4 +27,14 @@ internal object AuthErrorPresentation {
         !isValid -> "Enter a valid email address."
         else -> null
     }
+
+    fun isInvalidCachedSession(problem: Throwable): Boolean =
+        isInvalidCachedSessionCode((problem as? FirebaseAuthException)?.errorCode)
+
+    fun isInvalidCachedSessionCode(code: String?): Boolean = code in setOf(
+        "ERROR_USER_NOT_FOUND",
+        "ERROR_INVALID_USER_TOKEN",
+        "ERROR_USER_TOKEN_EXPIRED",
+        "ERROR_USER_DISABLED",
+    )
 }
