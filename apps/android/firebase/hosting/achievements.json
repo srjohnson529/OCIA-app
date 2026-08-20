@@ -1,0 +1,78 @@
+{
+  "version": "2026.07.09",
+  "source": "Catechism app.html",
+  "badges": [
+    {
+      "id": "foundations-complete",
+      "name": "Foundations Master",
+      "description": "Complete all lessons in 'The Profession of Faith' category.",
+      "imageUrl": "images/badge_foundations.png",
+      "requiredCategory": "The Profession of Faith",
+      "symbolName": "cross.fill"
+    },
+    {
+      "id": "celebration-complete",
+      "name": "Liturgical Expert",
+      "description": "Complete all lessons in 'The Celebration of the Christian Mysteries' category.",
+      "imageUrl": "images/badge_celebration.png",
+      "requiredCategory": "The Celebration of the Christian Mysteries",
+      "symbolName": "sparkles"
+    },
+    {
+      "id": "life-in-christ-complete",
+      "name": "Moral Champion",
+      "description": "Complete all lessons in the 'Life in Christ' category.",
+      "imageUrl": "images/badge_morality.png",
+      "requiredCategory": "Life in Christ",
+      "symbolName": "heart.fill"
+    },
+    {
+      "id": "prayer-complete",
+      "name": "Prayer Warrior",
+      "description": "Complete all lessons in the 'Christian Prayer' category.",
+      "imageUrl": "images/prayer_badge.png",
+      "requiredCategory": "Christian Prayer",
+      "symbolName": "hands.sparkles.fill"
+    },
+    {
+      "id": "illumined-graduate",
+      "name": "Illumined Graduate",
+      "description": "Complete all lessons in the app.",
+      "imageUrl": "images/badge_graduate.png",
+      "requiredCategory": "all",
+      "symbolName": "graduationcap.fill"
+    },
+    {
+      "id": "rosary-joyful",
+      "name": "Joyful Mysteries",
+      "description": "Complete a guided prayer of the Joyful Mysteries.",
+      "imageUrl": "images/badge_joyful.png",
+      "requiredMystery": "joyful",
+      "symbolName": "sun.max.fill"
+    },
+    {
+      "id": "rosary-luminous",
+      "name": "Luminous Mysteries",
+      "description": "Complete a guided prayer of the Luminous Mysteries.",
+      "imageUrl": "images/badge_luminous.png",
+      "requiredMystery": "luminous",
+      "symbolName": "lightbulb.fill"
+    },
+    {
+      "id": "rosary-sorrowful",
+      "name": "Sorrowful Mysteries",
+      "description": "Complete a guided prayer of the Sorrowful Mysteries.",
+      "imageUrl": "images/badge_sorrowful.png",
+      "requiredMystery": "sorrowful",
+      "symbolName": "drop.fill"
+    },
+    {
+      "id": "rosary-glorious",
+      "name": "Glorious Mysteries",
+      "description": "Complete a guided prayer of the Glorious Mysteries.",
+      "imageUrl": "images/badge_glorious.png",
+      "requiredMystery": "glorious",
+      "symbolName": "crown.fill"
+    }
+  ]
+}

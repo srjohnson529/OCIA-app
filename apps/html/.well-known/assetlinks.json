@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.illumined.app",
+      "sha256_cert_fingerprints": [
+        "AF:37:3E:2F:6D:2E:8F:51:13:C8:57:09:72:76:4F:BF:E0:A6:F2:E1:43:2A:40:70:EA:D9:A4:28:58:69:A3:8C",
+        "2C:F2:E3:44:22:79:4D:CD:CB:1C:41:A8:EF:0B:34:A9:3D:AF:E8:8A:DB:2A:CA:AD:60:A6:7B:AB:90:47:56:61"
+      ]
+    }
+  }
+]
