@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Join Illumined</title>
+  <style>
+    :root { color-scheme: light; --blue:#3f78aa; --gold:#bf9847; --ink:#25221e; --cream:#f7f2e8; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at top,#fff 0,var(--cream) 72%); color:var(--ink); font-family:Georgia,"Times New Roman",serif; }
+    main { width:min(100%,560px); background:rgba(255,255,255,.96); border:1px solid rgba(191,152,71,.32); border-radius:20px; box-shadow:0 12px 40px rgba(30,37,42,.12); padding:30px; text-align:center; }
+    .mark { color:var(--gold); font-size:34px; }
+    h1 { color:var(--blue); margin:8px 0 10px; font-size:32px; }
+    p { line-height:1.55; font-size:17px; }
+    .details { margin:22px 0; padding:17px; border-radius:14px; background:#f8f5ee; text-align:left; }
+    .details div { margin:7px 0; overflow-wrap:anywhere; }
+    button, a.button { display:block; width:100%; border:0; border-radius:12px; padding:14px 18px; margin-top:12px; font:600 17px Georgia,serif; text-decoration:none; cursor:pointer; }
+    .primary { background:var(--blue); color:white; }
+    .secondary { background:white; color:var(--blue); border:1px solid rgba(63,120,170,.3) !important; }
+    .downloads { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px; }
+    .downloads a { display:block; padding:12px 10px; border:1px solid rgba(63,120,170,.3); border-radius:12px; color:var(--blue); text-decoration:none; font-weight:600; }
+    #error { color:#9e2d27; }
+    small { display:block; color:#6e6960; margin-top:18px; line-height:1.45; }
+    @media (max-width:480px) { .downloads { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="mark">🔥</div>
+  <h1>Illumined</h1>
+  <p id="intro">You have been invited to Illumined.</p>
+  <div class="details" id="details"></div>
+  <a class="button primary" id="openApp" href="#">Open Illumined</a>
+  <a class="button secondary" id="continueWeb" href="/">Continue in Web App</a>
+  <button class="secondary" id="copy">Copy invitation details</button>
+  <div class="downloads" aria-label="Download Illumined">
+    <a href="https://apps.apple.com/app/id6791602784">Download for iPhone &amp; iPad</a>
+    <a href="https://play.google.com/store/apps/details?id=com.illumined.app">Get it on Google Play</a>
+  </div>
+  <p id="error" hidden>This invitation link is incomplete or invalid. Ask the sender for a new link.</p>
+  <small>If Illumined is not installed, download it above. Keep this page open so you can return to the invitation after installation.</small>
+</main>
+<script>
+  (() => {
+    const params = new URLSearchParams(location.search);
+    const role = (params.get('role') || '').toLowerCase();
+    const classId = (params.get('classId') || '').trim().toUpperCase();
+    const code = (params.get('code') || '').trim().toUpperCase();
+    const valid = ['student','instructor','parish'].includes(role) &&
+      (role === 'parish' ? !!code : !!classId) && (role !== 'instructor' || !!code);
+    const labels = {
+      student: 'You have been invited to join an Illumined class as a student.',
+      instructor: 'You have been invited to join an Illumined class as a co-instructor.',
+      parish: 'You have been invited to set up a new parish classroom in Illumined.'
+    };
+    const details = document.getElementById('details');
+    const add = (label, value) => { if (!value) return; const row=document.createElement('div'); const strong=document.createElement('strong'); strong.textContent=label+': '; row.append(strong,document.createTextNode(value)); details.append(row); };
+    if (!valid) {
+      document.getElementById('error').hidden = false;
+      document.getElementById('openApp').hidden = true;
+      document.getElementById('copy').hidden = true;
+      details.hidden = true;
+      return;
+    }
+    document.getElementById('intro').textContent = labels[role];
+    add('Class ID', classId);
+    add(role === 'parish' ? 'Parish setup code' : 'One-use invite code', code);
+    const app = new URL('illumined://join');
+    app.searchParams.set('role', role);
+    if (classId) app.searchParams.set('classId', classId);
+    if (code) app.searchParams.set('code', code);
+    document.getElementById('openApp').href = app.toString();
+    if (role === 'student') {
+      localStorage.setItem('illumined.pendingInvite', JSON.stringify({ role, classId, code, savedAt: Date.now() }));
+    } else {
+      document.getElementById('continueWeb').hidden = true;
+    }
+    document.getElementById('copy').addEventListener('click', async event => {
+      const text = `${labels[role]}${classId ? ` Class ID: ${classId}.` : ''}${code ? ` One-use code: ${code}.` : ''}`;
+      try { await navigator.clipboard.writeText(text); event.currentTarget.textContent='Copied'; } catch { event.currentTarget.textContent='Select and copy the details above'; }
+    });
+  })();
+</script>
+</body>
+</html>
