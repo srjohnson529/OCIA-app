@@ -25,16 +25,43 @@ service cloud.firestore {
       return hasProfile() && userProfile().isAdmin == true;
     }
 
+    function activeProfileClassId() {
+      return ("activeClassId" in userProfile() &&
+        userProfile().activeClassId in userProfile().classIds)
+        ? userProfile().activeClassId
+        : userProfile().classIds[0];
+    }
+
     function isOwnDocument(userId) {
       return signedIn() && request.auth.uid == userId;
+    }
+
+    function classroomPath(classId) {
+      return /databases/$(database)/documents/classrooms/$(classId);
     }
 
     function isInClass(classId) {
       return hasProfile() && classId in userProfile().classIds;
     }
 
+    function classIsActive(classId) {
+      return !exists(classroomPath(classId)) ||
+        !("isArchived" in get(classroomPath(classId)).data) ||
+        get(classroomPath(classId)).data.isArchived == false;
+    }
+
+    function classWillBeActive(classId) {
+      return !existsAfter(classroomPath(classId)) ||
+        !("isArchived" in getAfter(classroomPath(classId)).data) ||
+        getAfter(classroomPath(classId)).data.isArchived == false;
+    }
+
+    function isInActiveClass(classId) {
+      return isInClass(classId) && classIsActive(classId);
+    }
+
     function isInstructorForClass(classId) {
-      return isInstructor() && isInClass(classId);
+      return isInstructor() && isInActiveClass(classId);
     }
 
     function canReadClass(classId) {
@@ -60,7 +87,8 @@ service cloud.firestore {
         existsAfter(instructorInvitePath(request.resource.data.instructorInviteCode)) &&
         getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.usedBy == request.auth.uid &&
         getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.isActive == false &&
-        getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.classId in request.resource.data.classIds;
+        getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.classId in request.resource.data.classIds &&
+        classWillBeActive(getAfter(instructorInvitePath(request.resource.data.instructorInviteCode)).data.classId);
     }
 
     function validNewClassClaim() {
@@ -73,9 +101,49 @@ service cloud.firestore {
         getAfter(parishSetupPath(request.resource.data.parishSetupCode)).data.classId in request.resource.data.classIds;
     }
 
+    function validActiveClassSelection() {
+      return request.resource.data.classIds is list &&
+        (
+          !("activeClassId" in request.resource.data) ||
+          (
+            request.resource.data.activeClassId is string &&
+            request.resource.data.activeClassId in request.resource.data.classIds
+          )
+        ) &&
+        (
+          !("classId" in request.resource.data) ||
+          (
+            request.resource.data.classId is string &&
+            request.resource.data.classId in request.resource.data.classIds
+          )
+        );
+    }
+
+    function validInstructorCreatedClass() {
+      let newClassId = request.resource.data.activeClassId;
+      return signedIn() &&
+        resource.data.isInstructor == true &&
+        request.resource.data.isInstructor == true &&
+        newClassId is string &&
+        !(newClassId in resource.data.classIds) &&
+        request.resource.data.classIds.size() == resource.data.classIds.size() + 1 &&
+        request.resource.data.classIds.hasAll(resource.data.classIds) &&
+        request.resource.data.classIds.hasAll([newClassId]) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "classIds", "activeClassId", "classId"
+        ]) &&
+        !exists(classroomPath(newClassId)) &&
+        existsAfter(classroomPath(newClassId)) &&
+        getAfter(classroomPath(newClassId)).data.classId == newClassId &&
+        getAfter(classroomPath(newClassId)).data.instructorId == request.auth.uid &&
+        getAfter(classroomPath(newClassId)).data.createdBy == request.auth.uid;
+    }
+
     function validOwnProfileCreate(userId) {
       return isOwnDocument(userId) &&
         request.resource.data.userId == request.auth.uid &&
+        validActiveClassSelection() &&
+        classWillBeActive(request.resource.data.activeClassId) &&
         (!("isAdmin" in request.resource.data) || request.resource.data.isAdmin == false) &&
         (
           request.resource.data.isInstructor == false ||
@@ -87,6 +155,7 @@ service cloud.firestore {
     function validOwnProfileUpdate(userId) {
       return isOwnDocument(userId) &&
         request.resource.data.userId == request.auth.uid &&
+        validActiveClassSelection() &&
         (!("isAdmin" in request.resource.data) || request.resource.data.isAdmin == false) &&
         (
           request.resource.data.isInstructor == false ||
@@ -95,7 +164,8 @@ service cloud.firestore {
             request.resource.data.classIds == resource.data.classIds
           ) ||
           validInstructorInviteClaim() ||
-          validNewClassClaim()
+          validNewClassClaim() ||
+          validInstructorCreatedClass()
         );
     }
 
@@ -106,7 +176,8 @@ service cloud.firestore {
         request.resource.data.isActive == false &&
         request.resource.data.usedBy == request.auth.uid &&
         request.resource.data.usedAt == request.time &&
-        request.resource.data.classId == resource.data.classId;
+        request.resource.data.classId == resource.data.classId &&
+        classIsActive(resource.data.classId);
     }
 
     function validParishSetupClaim() {
@@ -123,6 +194,7 @@ service cloud.firestore {
     function validNewClassCreate(classId) {
       return signedIn() &&
         request.resource.data.instructorId == request.auth.uid &&
+        request.resource.data.createdBy == request.auth.uid &&
         request.resource.data.classId == classId &&
         existsAfter(profilePath()) &&
         getAfter(profilePath()).data.isInstructor == true &&
@@ -134,7 +206,7 @@ service cloud.firestore {
       allow get: if isOwnDocument(userId) || isAdmin() ||
         (isInstructor() && resource.data.classIds.hasAny(userProfile().classIds));
       allow list: if isAdmin() ||
-        (isInstructor() && resource.data.classIds.hasAny(userProfile().classIds));
+        (isInstructor() && resource.data.classIds.hasAny([activeProfileClassId()]));
       allow update: if isAdmin() || validOwnProfileUpdate(userId);
       allow delete: if isAdmin();
     }
@@ -164,7 +236,7 @@ service cloud.firestore {
       allow read: if canReadClass(resource.data.classId);
       allow create: if signedIn() &&
         request.resource.data.senderId == request.auth.uid &&
-        isInClass(request.resource.data.classId);
+        isInActiveClass(request.resource.data.classId);
       allow update: if signedIn() && sameClass() &&
         request.resource.data.senderId == resource.data.senderId &&
         (resource.data.senderId == request.auth.uid || isInstructorForClass(resource.data.classId));
@@ -176,7 +248,7 @@ service cloud.firestore {
       allow read: if canReadClass(resource.data.classId);
       allow create: if signedIn() &&
         request.resource.data.requesterId == request.auth.uid &&
-        isInClass(request.resource.data.classId) &&
+        isInActiveClass(request.resource.data.classId) &&
         request.resource.data.title is string &&
         request.resource.data.details is string &&
         request.resource.data.expiresAt > request.time;
@@ -217,11 +289,11 @@ service cloud.firestore {
         (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
       allow create: if signedIn() &&
         request.resource.data.userId == request.auth.uid &&
-        isInClass(request.resource.data.classId);
+        isInActiveClass(request.resource.data.classId);
       allow update: if signedIn() &&
         resource.data.userId == request.auth.uid &&
         request.resource.data.userId == request.auth.uid &&
-        sameClass() && isInClass(resource.data.classId);
+        sameClass() && isInActiveClass(resource.data.classId);
       allow delete: if signedIn() &&
         (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
     }
@@ -238,7 +310,7 @@ service cloud.firestore {
       allow read: if canReadClass(resource.data.classId);
       allow create: if signedIn() &&
         request.resource.data.authorId == request.auth.uid &&
-        isInClass(request.resource.data.classId) &&
+        isInActiveClass(request.resource.data.classId) &&
         request.resource.data.promptId is string &&
         request.resource.data.lessonId is string &&
         request.resource.data.message is string;
@@ -253,7 +325,7 @@ service cloud.firestore {
       allow read: if canReadClass(resource.data.classId);
       allow create: if signedIn() &&
         request.resource.data.authorId == request.auth.uid &&
-        isInClass(request.resource.data.classId) &&
+        isInActiveClass(request.resource.data.classId) &&
         request.resource.data.postId is string &&
         request.resource.data.promptId is string &&
         request.resource.data.lessonId is string &&
@@ -270,11 +342,11 @@ service cloud.firestore {
         (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
       allow create: if signedIn() &&
         request.resource.data.userId == request.auth.uid &&
-        isInClass(request.resource.data.classId);
+        isInActiveClass(request.resource.data.classId);
       allow update: if signedIn() &&
         resource.data.userId == request.auth.uid &&
         request.resource.data.userId == request.auth.uid &&
-        sameClass() && isInClass(resource.data.classId);
+        sameClass() && isInActiveClass(resource.data.classId);
       allow delete: if signedIn() &&
         (resource.data.userId == request.auth.uid || isInstructorForClass(resource.data.classId));
     }
@@ -286,6 +358,9 @@ service cloud.firestore {
       allow update: if signedIn() &&
         request.resource.data.classId == classId &&
         request.resource.data.instructorId == resource.data.instructorId &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          "isArchived", "archivedAt", "archivedBy"
+        ]) &&
         (resource.data.instructorId == request.auth.uid || isInstructorForClass(classId));
       allow delete: if signedIn() &&
         (resource.data.instructorId == request.auth.uid || isInstructorForClass(classId));
