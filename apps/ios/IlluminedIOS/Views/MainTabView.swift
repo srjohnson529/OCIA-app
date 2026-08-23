@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @EnvironmentObject private var profileService: ProfileService
+    @EnvironmentObject private var notificationService: NotificationService
+    @StateObject private var dailyFormation = DailyFormationService()
     @State private var selectedTab: IlluminedTab = .home
     @State private var homeResetID = UUID()
     @State private var lessonsResetID = UUID()
@@ -45,6 +48,19 @@ struct MainTabView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)) { _ in
             isKeyboardVisible = false
+        }
+        .task(id: profileService.profile) {
+            if let profile = profileService.profile { await dailyFormation.load(profile: profile) }
+        }
+        .task(id: "\(notificationService.dailyFormationOpenRequest):\(profileService.profile?.userId ?? "")") {
+            guard notificationService.dailyFormationOpenRequest > 0,
+                  let profile = profileService.profile else { return }
+            await dailyFormation.load(profile: profile, force: true)
+        }
+        .fullScreenCover(item: $dailyFormation.presentedEntry) { entry in
+            DailyFormationCard(entry: entry) {
+                Task { await dailyFormation.dismiss(entry) }
+            }
         }
     }
 

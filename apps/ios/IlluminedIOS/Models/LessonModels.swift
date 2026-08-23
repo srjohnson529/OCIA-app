@@ -1,5 +1,11 @@
 import Foundation
 
+enum QuizPolicy: String, Codable, Equatable {
+    case required
+    case optional
+    case hidden
+}
+
 struct LessonCategory: Identifiable, Codable, Equatable {
     var id: String { category }
     var category: String
@@ -13,14 +19,16 @@ struct Lesson: Identifiable, Codable, Equatable {
     var contentHTML: String
     var videoURL: String?
     var quiz: [QuizQuestion]
+    var quizPolicy: QuizPolicy
 
-    init(id: String, title: String, category: String, contentHTML: String, videoURL: String?, quiz: [QuizQuestion]) {
+    init(id: String, title: String, category: String, contentHTML: String, videoURL: String?, quiz: [QuizQuestion], quizPolicy: QuizPolicy = .required) {
         self.id = id
         self.title = title
         self.category = category
         self.contentHTML = contentHTML
         self.videoURL = videoURL
         self.quiz = quiz
+        self.quizPolicy = quizPolicy
     }
 
     enum CodingKeys: String, CodingKey {
@@ -30,6 +38,7 @@ struct Lesson: Identifiable, Codable, Equatable {
         case contentHTML
         case videoURL = "videoUrl"
         case quiz
+        case quizPolicy
     }
 
     private struct QuizContainer: Codable, Equatable {
@@ -44,6 +53,7 @@ struct Lesson: Identifiable, Codable, Equatable {
         category = try container.decode(String.self, forKey: .category)
         contentHTML = try container.decode(String.self, forKey: .contentHTML)
         videoURL = try container.decodeIfPresent(String.self, forKey: .videoURL)
+        quizPolicy = try container.decodeIfPresent(QuizPolicy.self, forKey: .quizPolicy) ?? .required
 
         if let questionArray = try? container.decode([QuizQuestion].self, forKey: .quiz) {
             quiz = questionArray

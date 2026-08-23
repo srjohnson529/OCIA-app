@@ -325,17 +325,17 @@ private struct AnnouncementEditorView: View {
             let didSave: Bool
             switch mode {
             case .create(let profile):
-                didSave = await announcementService.createAnnouncement(
-                    title: title,
-                    message: message,
-                    isActive: isActive,
-                    profile: profile
-                )
-
-                if didSave && sendPushNotification {
-                    _ = await notificationService.sendClassNotification(
+                if sendPushNotification {
+                    didSave = await notificationService.sendClassNotification(
                         title: title,
                         body: message,
+                        profile: profile
+                    )
+                } else {
+                    didSave = await announcementService.createAnnouncement(
+                        title: title,
+                        message: message,
+                        isActive: isActive,
                         profile: profile
                     )
                 }

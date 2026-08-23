@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.illumined.app.R
+import com.illumined.app.data.DailyFormationEntry
+import com.illumined.app.data.FormationRepository
+import com.illumined.app.data.UserProfile
 import com.illumined.app.ui.theme.IlluminedThemeTokens
 import org.json.JSONObject
 
@@ -69,6 +72,7 @@ private data class FormationMenuRow(val title: String, val subtitle: String, val
 
 @Composable
 fun SpiritualFormationExperience(
+    profile: UserProfile?,
     memorizedPrayerIds: Set<String>,
     selectedPrayerIds: Set<String>,
     completedMysteryIds: Set<String>,
@@ -95,6 +99,7 @@ fun SpiritualFormationExperience(
     }
     when (destination.kind) {
         FormationRoute.MENU -> FormationMenu(
+            profile = profile,
             onPrayers = { route = FormationRoute.PRAYER_HUB },
             onExamination = { route = FormationRoute.EXAMINATION },
             onMass = { route = FormationRoute.MASS_GUIDE },
@@ -411,13 +416,48 @@ private fun ExaminationSummaryPage(checkedItems: List<String>, onBack: () -> Uni
 @Composable private fun ExaminationIntro(title:String,text:String){Column(verticalArrangement=Arrangement.spacedBy(7.dp)){Text(title,fontSize=18.sp,fontWeight=FontWeight.SemiBold,color=IlluminedThemeTokens.Ink);Text(text,fontSize=16.sp,lineHeight=24.sp,color=IlluminedThemeTokens.SecondaryText)}}
 
 @Composable
-private fun FormationMenu(onPrayers: () -> Unit, onExamination: () -> Unit, onMass: () -> Unit, onPractices: () -> Unit) =
-    FormationList(null, null, listOf(
+private fun FormationMenu(profile: UserProfile?, onPrayers: () -> Unit, onExamination: () -> Unit, onMass: () -> Unit, onPractices: () -> Unit) {
+    val repository = remember { FormationRepository() }
+    var entry by remember { mutableStateOf<DailyFormationEntry?>(null) }
+    var status by remember { mutableStateOf<String?>(null) }
+    val rows = listOf(
         FormationMenuRow("Prayers", "Common prayers, rosary, lectio divina, and the hours", SpiritualFormationSymbolKind.Prayers, onPrayers),
         FormationMenuRow("Examination of Conscience", "Prepare for Reconciliation or pray a daily examen", SpiritualFormationSymbolKind.Search, onExamination),
         FormationMenuRow("Guide to the Mass", "Walk through the order, prayers, readings, and Eucharistic Prayer", SpiritualFormationSymbolKind.Church, onMass),
         FormationMenuRow("Spiritual Practices", "Works of mercy, precepts, habits, and Catholic living", SpiritualFormationSymbolKind.Walking, onPractices),
-    ))
+    )
+    FormationCards(null, null) {
+        items(rows) { row -> FormationMenuCard(row.title, row.subtitle, row.symbol, row.action) }
+        if (profile != null) item {
+            Surface(shape = RoundedCornerShape(16.dp), color = Color.White.copy(.94f), shadowElevation = 6.dp, border = androidx.compose.foundation.BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.22f))) {
+                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        HomeSymbol(HomeSymbolKind.CalendarBadgeClock, IlluminedThemeTokens.Blue, Modifier.size(20.dp))
+                        Text("Daily Formation", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                    }
+                    Text("Open today’s liturgical fact, saint, or note from your class.", fontSize = 16.sp, lineHeight = 24.sp, color = IlluminedThemeTokens.Ink)
+                    Button(onClick = {
+                        repository.loadDailyFormation(profile, force = true, onSuccess = {
+                            entry = it
+                            status = if (it == null) "No Daily Formation card is published for today." else null
+                        }, onError = { status = "Today’s Daily Formation card could not be loaded." })
+                    }, modifier = Modifier.fillMaxWidth().height(54.dp)) {
+                        MassGuideSymbol(MassGuideSymbolKind.ExternalLink, Color.White, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Open Today’s Card", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    status?.let { Text(it, color = IlluminedThemeTokens.SecondaryText, fontSize = 14.sp) }
+                }
+            }
+        }
+    }
+    entry?.let { current ->
+        DailyFormationDialog(current) {
+            entry = null
+            profile?.let { repository.dismissDailyFormation(it, current) }
+        }
+    }
+}
 
 @Composable
 private fun FormationList(title: String?, onBack: (() -> Unit)?, rows: List<FormationMenuRow>) {

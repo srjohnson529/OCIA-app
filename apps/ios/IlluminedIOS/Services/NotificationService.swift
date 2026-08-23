@@ -12,6 +12,7 @@ final class NotificationService: NSObject, ObservableObject {
     @Published private(set) var lastTokenSavedAt: Date?
     @Published var errorMessage: String?
     @Published var statusMessage: String?
+    @Published private(set) var dailyFormationOpenRequest = 0
 
     private let db = Firestore.firestore()
     private var currentProfile: UserProfile?
@@ -99,7 +100,7 @@ final class NotificationService: NSObject, ObservableObject {
             return
         }
 
-        if [profile.notificationsEnabled, profile.notificationNewPrayerRequests, profile.notificationNewAssignments, profile.notificationAssignmentReminders, profile.notificationDiscussionReplies].allSatisfy({ $0 == enabled }) {
+        if [profile.notificationsEnabled, profile.notificationNewPrayerRequests, profile.notificationNewAssignments, profile.notificationAssignmentReminders, profile.notificationDiscussionReplies, profile.notificationDailyFormation].allSatisfy({ $0 == enabled }) {
             return
         }
 
@@ -109,6 +110,7 @@ final class NotificationService: NSObject, ObservableObject {
                 "notificationNewAssignments": enabled,
                 "notificationAssignmentReminders": enabled,
                 "notificationDiscussionReplies": enabled,
+                "notificationDailyFormation": enabled,
                 "notificationsEnabled": enabled,
                 "notificationPreferencesUpdatedAt": FieldValue.serverTimestamp()
             ], merge: true)
@@ -200,5 +202,16 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
         [.banner, .sound, .badge]
+    }
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        let type = response.notification.request.content.userInfo["type"] as? String
+        guard type == "daily_formation" else { return }
+        await MainActor.run {
+            self.dailyFormationOpenRequest += 1
+        }
     }
 }

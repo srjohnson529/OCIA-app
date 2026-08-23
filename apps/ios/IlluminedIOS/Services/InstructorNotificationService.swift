@@ -1,6 +1,6 @@
 import Combine
 import FirebaseAuth
-import FirebaseFirestore
+import FirebaseFunctions
 import Foundation
 
 @MainActor
@@ -8,10 +8,10 @@ final class InstructorNotificationService: ObservableObject {
     @Published var errorMessage: String?
     @Published var statusMessage: String?
 
-    private let db = Firestore.firestore()
+    private let functions = Functions.functions(region: "us-central1")
 
     func sendClassNotification(title: String, body: String, profile: UserProfile) async -> Bool {
-        guard let user = Auth.auth().currentUser else {
+        guard Auth.auth().currentUser != nil else {
             errorMessage = "Please sign in before sending a notification."
             return false
         }
@@ -39,18 +39,14 @@ final class InstructorNotificationService: ObservableObject {
             errorMessage = nil
             statusMessage = nil
 
-            try await db.collection("notificationRequests").addDocument(data: [
+            let result = try await functions.httpsCallable("createClassAnnouncement").call([
                 "classId": classId,
                 "title": cleanedTitle,
-                "body": cleanedBody,
-                "createdBy": user.uid,
-                "createdByName": profile.displayName,
-                "status": "pending",
-                "platform": "all",
-                "createdAt": FieldValue.serverTimestamp()
+                "message": cleanedBody,
+                "isActive": true
             ])
-
-            statusMessage = "Notification queued for \(classId)."
+            let recipients = (result.data as? [String: Any])?["recipientCount"] as? Int ?? 0
+            statusMessage = "Announcement sent to \(recipients) device\(recipients == 1 ? "" : "s")."
             return true
         } catch {
             errorMessage = error.localizedDescription

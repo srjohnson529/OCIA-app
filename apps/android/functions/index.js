@@ -12,6 +12,20 @@ const db = getFirestore();
 const MAX_TITLE_LENGTH = 120;
 const MAX_MESSAGE_LENGTH = 2_000;
 const MAX_AUTH_AGE_SECONDS = 5 * 60;
+const DAILY_FORMATION_COLORS = new Set(["WHITE", "GOLD", "GREEN", "RED", "PURPLE", "ROSE"]);
+
+function localDateParts(date, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date).reduce((result, part) => ({ ...result, [part.type]: part.value }), {});
+  return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
+}
 
 function requiredText(value, field, maximumLength) {
   if (typeof value !== "string" || !value.trim()) {
@@ -281,6 +295,79 @@ export const archiveClass = onCall({ region: "us-central1" }, async (request) =>
 export const restoreClass = onCall({ region: "us-central1" }, async (request) =>
   changeClassArchiveState(request, false));
 
+export const sendDailyFormationNow = onCall({ region: "us-central1" }, async (request) => {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Please sign in first.");
+  const classId = requiredText(request.data?.classId, "Class", 200);
+  const testOnly = request.data?.testOnly === true;
+  const instructor = await db.collection("userProfiles").doc(request.auth.uid).get();
+  if (!instructor.exists || instructor.get("isInstructor") !== true ||
+      !stringArray(instructor.get("classIds")).includes(classId)) {
+    throw new HttpsError("permission-denied", "Only an instructor assigned to this class can send this notification.");
+  }
+
+  const classroom = db.collection("classrooms").doc(classId);
+  const [classroomSnapshot, settingsSnapshot] = await Promise.all([
+    classroom.get(),
+    classroom.collection("settings").doc("dailyFormation").get(),
+  ]);
+  if (classroomSnapshot.get("isArchived") === true) {
+    throw new HttpsError("failed-precondition", "Restore this class before sending notifications.");
+  }
+  const settings = settingsSnapshot.data() || {};
+  if (settings.enabled !== true) throw new HttpsError("failed-precondition", "Enable Daily Formation first.");
+  const timeZone = typeof settings.timeZone === "string" && settings.timeZone ? settings.timeZone : "America/New_York";
+  const { date } = localDateParts(new Date(), timeZone);
+  const entrySnapshot = await classroom.collection("dailyFormation").doc(date).get();
+  const entry = entrySnapshot.data();
+  if (!entrySnapshot.exists || entry?.isPublished === false || !entry?.title || !entry?.details) {
+    throw new HttpsError("failed-precondition", `No published Daily Formation entry exists for ${date}.`);
+  }
+
+  let recipients;
+  let skippedDismissed = 0;
+  if (testOnly) {
+    recipients = [instructor];
+  } else {
+    const members = await db.collection("userProfiles").where("classIds", "array-contains", classId).get();
+    const candidates = members.docs.filter((profile) =>
+      profile.get("isInstructor") !== true &&
+      profile.get("notificationsEnabled") !== false);
+    const receipts = candidates.length ? await db.getAll(...candidates.map((profile) =>
+      db.collection("dailyFormationReceipts").doc(`${classId}_${date}_${profile.id}`))) : [];
+    recipients = candidates.filter((_, index) => {
+      const dismissed = Boolean(receipts[index]?.get("dismissedAt"));
+      if (dismissed) skippedDismissed += 1;
+      return !dismissed;
+    });
+  }
+
+  const delivery = await sendProfileNotifications(recipients, entry.title, entry.details, {
+    type: "daily_formation",
+    classId,
+    date,
+    entryType: typeof entry.type === "string" ? entry.type : "note",
+    colorCode: DAILY_FORMATION_COLORS.has(entry.colorCode) ? entry.colorCode : "GREEN",
+    manual: "true",
+  });
+  if (!testOnly && delivery.tokenCount) {
+    const batch = db.batch();
+    recipients.forEach((profile) => batch.set(
+      db.collection("dailyFormationReceipts").doc(`${classId}_${date}_${profile.id}`),
+      { classId, date, userId: profile.id, notificationSentAt: FieldValue.serverTimestamp(), manualPush: true },
+      { merge: true },
+    ));
+    await batch.commit();
+  }
+  return {
+    testOnly,
+    date,
+    eligibleProfiles: recipients.length,
+    tokenCount: delivery.tokenCount,
+    delivered: delivery.delivered,
+    skippedDismissed,
+  };
+});
+
 /**
  * Creates a visible class announcement and sends a push to enrolled devices.
  * The authorization and FCM credentials remain on Firebase, never in either app.
@@ -301,8 +388,19 @@ export const createClassAnnouncement = onCall({ region: "us-central1" }, async (
     throw new HttpsError("permission-denied", "Only an instructor assigned to this class can send announcements.");
   }
   const classroomSnapshot = await db.collection("classrooms").doc(classId).get();
-  if (!classroomSnapshot.exists || classroomSnapshot.get("isArchived") === true) {
+  if (classroomSnapshot.exists && classroomSnapshot.get("isArchived") === true) {
     throw new HttpsError("failed-precondition", "Restore this class before sending announcements.");
+  }
+  if (!classroomSnapshot.exists) {
+    await db.collection("classrooms").doc(classId).set({
+      id: classId,
+      classId,
+      name: classId,
+      instructorId: request.auth.uid,
+      createdBy: request.auth.uid,
+      isArchived: false,
+      migratedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
   }
 
   const announcement = await db.collection("announcements").add({
@@ -472,6 +570,103 @@ export const sendAssignmentDueReminders = onSchedule(
         assignment.title || "You have an assignment due soon.",
         { type: "assignment_reminder", assignmentId: assignmentDocument.id, classId: assignment.classId },
       );
+    }
+  },
+);
+
+export const sendDailyFormationReminders = onSchedule(
+  { schedule: "every 5 minutes", timeZone: "UTC", region: "us-central1" },
+  async () => {
+    const now = new Date();
+    // Read all classrooms so older records without an isArchived field are not
+    // silently excluded by Firestore's inequality-query semantics.
+    const classrooms = await db.collection("classrooms").get();
+    console.info("daily-formation-scan", { now: now.toISOString(), classroomCount: classrooms.size });
+    for (const classroom of classrooms.docs) {
+      if (classroom.get("isArchived") === true) continue;
+      const settingsSnapshot = await classroom.ref.collection("settings").doc("dailyFormation").get();
+      const settings = settingsSnapshot.data();
+      if (!settingsSnapshot.exists || settings?.enabled !== true) {
+        continue;
+      }
+
+      const timeZone = typeof settings.timeZone === "string" && settings.timeZone ? settings.timeZone : "America/New_York";
+      const notificationTime = typeof settings.notificationTime === "string" ? settings.notificationTime : "09:00";
+      const local = localDateParts(now, timeZone);
+      // The scheduler runs every five minutes and is not guaranteed to execute
+      // on the exact configured minute. Send on the first run at or after the
+      // selected time; notificationSentAt prevents a duplicate later that day.
+      if (local.time < notificationTime) {
+        console.info("daily-formation-waiting", { classId: classroom.id, date: local.date, localTime: local.time, notificationTime });
+        continue;
+      }
+
+      const entrySnapshot = await classroom.ref.collection("dailyFormation").doc(local.date).get();
+      const entry = entrySnapshot.data();
+      if (!entrySnapshot.exists || entry?.isPublished === false || !entry?.title || !entry?.details) {
+        console.info("daily-formation-no-entry", {
+          classId: classroom.id,
+          date: local.date,
+          exists: entrySnapshot.exists,
+          published: entry?.isPublished !== false,
+          hasTitle: Boolean(entry?.title),
+          hasDetails: Boolean(entry?.details),
+        });
+        continue;
+      }
+      const colorCode = DAILY_FORMATION_COLORS.has(entry.colorCode) ? entry.colorCode : "GREEN";
+
+      const members = await db.collection("userProfiles").where("classIds", "array-contains", classroom.id).get();
+      const candidates = members.docs.filter((profile) =>
+        profile.get("isInstructor") !== true &&
+        profile.get("notificationsEnabled") !== false);
+      const receiptRefs = candidates.map((profile) =>
+        db.collection("dailyFormationReceipts").doc(`${classroom.id}_${local.date}_${profile.id}`));
+      const receipts = receiptRefs.length ? await db.getAll(...receiptRefs) : [];
+      const recipients = candidates.filter((_, index) =>
+        !receipts[index]?.get("dismissedAt") && !receipts[index]?.get("notificationSentAt"));
+      if (!recipients.length) {
+        console.info("daily-formation-no-recipients", {
+          classId: classroom.id,
+          date: local.date,
+          memberCount: members.size,
+          candidateCount: candidates.length,
+          dismissedCount: receipts.filter((receipt) => receipt?.get("dismissedAt")).length,
+          alreadySentCount: receipts.filter((receipt) => receipt?.get("notificationSentAt")).length,
+        });
+        continue;
+      }
+
+      const delivery = await sendProfileNotifications(
+        recipients,
+        entry.title,
+        entry.details,
+        {
+          type: "daily_formation",
+          classId: classroom.id,
+          date: local.date,
+          entryType: typeof entry.type === "string" ? entry.type : "note",
+          colorCode,
+        },
+      );
+      console.info("daily-formation-delivery", {
+        classId: classroom.id,
+        date: local.date,
+        recipientCount: recipients.length,
+        tokenCount: delivery.tokenCount,
+        delivered: delivery.delivered,
+      });
+      if (!delivery.tokenCount) continue;
+      const batch = db.batch();
+      recipients.forEach((profile) => {
+        batch.set(db.collection("dailyFormationReceipts").doc(`${classroom.id}_${local.date}_${profile.id}`), {
+          classId: classroom.id,
+          date: local.date,
+          userId: profile.id,
+          notificationSentAt: FieldValue.serverTimestamp(),
+        }, { merge: true });
+      });
+      await batch.commit();
     }
   },
 );

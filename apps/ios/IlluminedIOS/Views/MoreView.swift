@@ -123,7 +123,7 @@ private struct NotificationSettingsView: View {
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Receive alerts for class announcements, assignments, prayer requests, and discussion activity. All alert types follow the notification status shown below.")
+                            Text("Receive alerts for class announcements, assignments, prayer requests, discussion activity, and Daily Formation. All alert types follow the notification status shown below.")
                                 .font(IlluminedTheme.font(size: 16))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
 

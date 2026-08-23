@@ -70,7 +70,7 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
     }
     LaunchedEffect(enabled, profile) {
         val current = profile ?: return@LaunchedEffect
-        val allMatch = listOf(current.notificationsEnabled, current.notificationNewPrayerRequests, current.notificationNewAssignments, current.notificationAssignmentReminders, current.notificationDiscussionReplies).all { it == enabled }
+        val allMatch = listOf(current.notificationsEnabled, current.notificationNewPrayerRequests, current.notificationNewAssignments, current.notificationAssignmentReminders, current.notificationDiscussionReplies, current.notificationDailyFormation).all { it == enabled }
         if (!allMatch) registrar.updateAllPreferences(enabled, error = { error = "Notification status could not be synchronized." })
     }
     Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f))) {
@@ -81,7 +81,7 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
                 MoreMenuSymbol(MoreMenuSymbolKind.Notifications, IlluminedThemeTokens.Blue, Modifier.size(24.dp))
                 Text("Notifications", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
             }
-            Text("Receive alerts for class announcements, assignments, prayer requests, and discussion activity. All alert types follow the notification status shown below.", color = IlluminedThemeTokens.SecondaryText)
+            Text("Receive alerts for class announcements, assignments, prayer requests, discussion activity, and Daily Formation. All alert types follow the notification status shown below.", color = IlluminedThemeTokens.SecondaryText)
             Row { Text("Status", fontSize = 17.sp, fontWeight = FontWeight.SemiBold); Spacer(Modifier.weight(1f)); Text(NotificationPermissionPolicy.statusText(enabled, permissionRequested), color = if (enabled) IlluminedThemeTokens.Blue else IlluminedThemeTokens.SecondaryText, fontWeight = FontWeight.SemiBold) }
             savedAt?.let { Text("Last registered ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(it)}.", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText) }
         } }

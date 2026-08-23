@@ -20,6 +20,21 @@ data class Announcement(
         get() = updatedAt ?: createdAt
 }
 
+data class ManagedDailyFormationSettings(
+    val enabled: Boolean = false,
+    val notificationTime: String = "09:00",
+    val timeZone: String = java.util.TimeZone.getDefault().id,
+)
+
+data class ManagedDailyFormationEntry(
+    val date: String,
+    val type: String,
+    val title: String,
+    val details: String,
+    val colorCode: String,
+    val isPublished: Boolean,
+)
+
 class InstructorRepository(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
@@ -93,6 +108,100 @@ class InstructorRepository(
                 )
             }.sortedByDescending { it.displayTimestamp?.seconds ?: Long.MIN_VALUE })
         }
+
+    fun listenDailyFormationSettings(classId: String, update: (ManagedDailyFormationSettings) -> Unit, error: (Throwable) -> Unit): ListenerRegistration =
+        db.collection("classrooms").document(classId).collection("settings").document("dailyFormation")
+            .addSnapshotListener { document, problem ->
+                if (problem != null) return@addSnapshotListener error(problem)
+                update(ManagedDailyFormationSettings(
+                    enabled = document?.getBoolean("enabled") == true,
+                    notificationTime = document?.getString("notificationTime") ?: "09:00",
+                    timeZone = document?.getString("timeZone") ?: java.util.TimeZone.getDefault().id,
+                ))
+            }
+
+    fun listenDailyFormationEntries(classId: String, update: (List<ManagedDailyFormationEntry>) -> Unit, error: (Throwable) -> Unit): ListenerRegistration =
+        db.collection("classrooms").document(classId).collection("dailyFormation")
+            .addSnapshotListener { snapshot, problem ->
+                if (problem != null) return@addSnapshotListener error(problem)
+                update(snapshot?.documents.orEmpty().map { document ->
+                    ManagedDailyFormationEntry(
+                        date = document.id,
+                        type = document.getString("type") ?: "note",
+                        title = document.getString("title").orEmpty(),
+                        details = document.getString("details").orEmpty(),
+                        colorCode = document.getString("colorCode") ?: "GREEN",
+                        isPublished = document.getBoolean("isPublished") != false,
+                    )
+                }.sortedByDescending { it.date })
+            }
+
+    fun saveDailyFormationSettings(profile: UserProfile, settings: ManagedDailyFormationSettings, success: () -> Unit, error: (Throwable) -> Unit) {
+        val author = creator(profile, "Please sign in before editing Daily Formation.", "Only instructors can edit Daily Formation.", error) ?: return
+        if (!settings.notificationTime.matches(Regex("^(?:[01]\\d|2[0-3]):[0-5]\\d$"))) return error(IllegalArgumentException("Use a reminder time in HH:mm format."))
+        if (settings.timeZone !in java.util.TimeZone.getAvailableIDs().toSet()) return error(IllegalArgumentException("Enter a valid time zone, such as America/New_York."))
+        db.collection("classrooms").document(author.classId).collection("settings").document("dailyFormation").set(
+            mapOf(
+                "enabled" to settings.enabled,
+                "notificationTime" to settings.notificationTime,
+                "timeZone" to settings.timeZone.trim(),
+                "updatedAt" to FieldValue.serverTimestamp(),
+                "updatedBy" to author.userId,
+            ),
+            com.google.firebase.firestore.SetOptions.merge(),
+        ).addOnSuccessListener { success() }.addOnFailureListener(error)
+    }
+
+    fun saveDailyFormationEntry(profile: UserProfile, entry: ManagedDailyFormationEntry, success: () -> Unit, error: (Throwable) -> Unit) {
+        val author = creator(profile, "Please sign in before editing Daily Formation.", "Only instructors can edit Daily Formation.", error) ?: return
+        if (!entry.date.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$"))) return error(IllegalArgumentException("Choose a valid calendar date."))
+        if (entry.title.trim().isBlank() || entry.details.trim().isBlank()) return error(IllegalArgumentException("Add both a title and details."))
+        if (entry.type !in setOf("fact", "saint", "note")) return error(IllegalArgumentException("Choose a valid Daily Formation type."))
+        if (entry.colorCode !in setOf("WHITE", "GOLD", "GREEN", "RED", "PURPLE", "ROSE")) return error(IllegalArgumentException("Choose a valid liturgical color."))
+        db.collection("classrooms").document(author.classId).collection("dailyFormation").document(entry.date).set(mapOf(
+            "classId" to author.classId,
+            "date" to entry.date,
+            "type" to entry.type,
+            "title" to entry.title.trim(),
+            "details" to entry.details.trim(),
+            "colorCode" to entry.colorCode,
+            "isPublished" to entry.isPublished,
+            "updatedAt" to FieldValue.serverTimestamp(),
+            "updatedBy" to author.userId,
+        )).addOnSuccessListener { success() }.addOnFailureListener(error)
+    }
+
+    fun deleteDailyFormationEntry(profile: UserProfile, date: String, success: () -> Unit, error: (Throwable) -> Unit) {
+        val author = creator(profile, "Please sign in before deleting Daily Formation.", "Only instructors can edit Daily Formation.", error) ?: return
+        db.collection("classrooms").document(author.classId).collection("dailyFormation").document(date).delete()
+            .addOnSuccessListener { success() }.addOnFailureListener(error)
+    }
+
+    fun importDailyFormationEntries(profile: UserProfile, rows: List<ImportedDailyFormationRow>, success: () -> Unit, error: (Throwable) -> Unit) {
+        val author = creator(profile, "Please sign in before importing Daily Formation.", "Only instructors can import Daily Formation.", error) ?: return
+        if (rows.isEmpty()) return error(IllegalArgumentException("There are no valid Daily Formation entries to import."))
+        val chunks = rows.chunked(450)
+        fun commit(index: Int) {
+            if (index >= chunks.size) { success(); return }
+            val batch = db.batch()
+            chunks[index].forEach { row ->
+                val document = db.collection("classrooms").document(author.classId).collection("dailyFormation").document(row.date)
+                batch.set(document, mapOf(
+                    "classId" to author.classId,
+                    "date" to row.date,
+                    "type" to row.type,
+                    "title" to row.title.trim(),
+                    "details" to row.details.trim(),
+                    "colorCode" to row.colorCode,
+                    "isPublished" to true,
+                    "updatedAt" to FieldValue.serverTimestamp(),
+                    "updatedBy" to author.userId,
+                ), com.google.firebase.firestore.SetOptions.merge())
+            }
+            batch.commit().addOnSuccessListener { commit(index + 1) }.addOnFailureListener(error)
+        }
+        commit(0)
+    }
 
     fun createAnnouncement(profile: UserProfile, title: String, message: String, success: () -> Unit, error: (Throwable) -> Unit) {
         val creator = creator(profile, "Please sign in before creating an announcement.", "Only instructors can create announcements.", error) ?: return

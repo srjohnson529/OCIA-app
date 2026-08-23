@@ -403,6 +403,31 @@ service cloud.firestore {
       allow create, update, delete: if isInstructorForClass(classId);
     }
 
+    match /classrooms/{classId}/dailyFormation/{date} {
+      allow read: if isInClass(classId);
+      allow create, update: if isInstructorForClass(classId) &&
+        request.resource.data.classId == classId;
+      allow delete: if isInstructorForClass(classId);
+    }
+
+    match /dailyFormationReceipts/{receiptId} {
+      // The suffix check also permits the first get before a student's receipt
+      // exists; resource.data cannot identify the owner of a missing document.
+      allow get: if signedIn() && receiptId.matches('.*_' + request.auth.uid);
+      allow list: if signedIn() &&
+        resource.data.userId == request.auth.uid;
+      allow create: if signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        isInActiveClass(request.resource.data.classId);
+      allow update: if signedIn() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.classId == resource.data.classId &&
+        request.resource.data.date == resource.data.date &&
+        isInActiveClass(resource.data.classId);
+      allow delete: if false;
+    }
+
     match /lessons/{lessonId} {
       allow read: if signedIn();
       allow write: if false;

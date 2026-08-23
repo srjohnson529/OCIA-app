@@ -79,6 +79,7 @@ import com.illumined.app.BuildConfig
 import com.illumined.app.R
 import com.illumined.app.data.FormationOverview
 import com.illumined.app.data.FormationRepository
+import com.illumined.app.data.DailyFormationEntry
 import com.illumined.app.data.Assignment
 import com.illumined.app.data.AssignmentCompletion
 import com.illumined.app.data.AssignmentReading
@@ -202,7 +203,7 @@ private class AuthController(context: Context) {
 }
 
 @Composable
-fun IlluminedApp(inviteUri: String? = null) {
+fun IlluminedApp(inviteUri: String? = null, dailyFormationOpenRequest: Int = 0) {
     IlluminedTheme {
         val context = LocalContext.current
         val controller = remember { AuthController(context.applicationContext) }
@@ -243,6 +244,7 @@ fun IlluminedApp(inviteUri: String? = null) {
                             inviteStore.clear()
                         },
                         onSignOut = { session = controller.signOut() },
+                        dailyFormationOpenRequest = dailyFormationOpenRequest,
                     )
                     else -> SignInScreen(
                         state = current,
@@ -511,7 +513,7 @@ private fun AuthMessageCard(message: String, success: Boolean) {
 }
 
 @Composable
-private fun FormationHome(userId: String, email: String, inviteLink: IlluminedInviteLink?, onInviteConsumed: () -> Unit, onSignOut: () -> Unit) {
+private fun FormationHome(userId: String, email: String, inviteLink: IlluminedInviteLink?, onInviteConsumed: () -> Unit, onSignOut: () -> Unit, dailyFormationOpenRequest: Int = 0) {
     val repository = remember { FormationRepository() }
     val notificationRegistrar = remember { NotificationRegistrar() }
     val notificationContext = LocalContext.current
@@ -523,6 +525,8 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
     var completionWorking by remember { mutableStateOf(false) }
     var completionError by remember { mutableStateOf<String?>(null) }
     var profileReload by remember { mutableIntStateOf(0) }
+    var dailyFormation by remember { mutableStateOf<DailyFormationEntry?>(null) }
+    var loadedDailyFormationKey by remember { mutableStateOf("") }
 
     BackHandler(enabled = selectedAssignmentId != null) {
         if (!completionWorking) {
@@ -557,6 +561,30 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
     LaunchedEffect(userId, notificationClassId, overview?.profile?.isConfigured) {
         val permissionGranted = Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(notificationContext, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         if (overview?.profile?.isConfigured == true && permissionGranted) notificationRegistrar.register(notificationClassId, {}, {})
+    }
+
+    val dailyProfile = overview?.profile
+    val dailyKey = dailyProfile?.let { "${it.userId}:${it.selectedClassId}" }.orEmpty()
+    LaunchedEffect(dailyKey) {
+        val profile = dailyProfile ?: return@LaunchedEffect
+        if (dailyKey.isNotBlank() && loadedDailyFormationKey != dailyKey) {
+            loadedDailyFormationKey = dailyKey
+            repository.loadDailyFormation(profile, onSuccess = { dailyFormation = it }, onError = { /* supplemental startup content */ })
+        }
+    }
+
+    LaunchedEffect(dailyFormationOpenRequest, dailyProfile?.userId) {
+        val profile = dailyProfile ?: return@LaunchedEffect
+        if (dailyFormationOpenRequest > 0) {
+            repository.loadDailyFormation(profile, force = true, onSuccess = { dailyFormation = it }, onError = { /* supplemental content */ })
+        }
+    }
+
+    dailyFormation?.let { entry ->
+        DailyFormationDialog(entry = entry) {
+            dailyFormation = null
+            dailyProfile?.let { repository.dismissDailyFormation(it, entry) }
+        }
     }
 
     val nextScheduleDay = overview?.let { ClassScheduleSelection.nextDay(it.schedule) }
@@ -745,6 +773,7 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
                     },
                 )
                 FormationSection.Formation -> SpiritualFormationExperience(
+                    profile = overview?.profile,
                     memorizedPrayerIds = overview?.profile?.memorizedPrayerIds.orEmpty(),
                     selectedPrayerIds = overview?.profile?.selectedPrayerIds.orEmpty(),
                     completedMysteryIds = overview?.profile?.completedMysteries.orEmpty(),
@@ -817,6 +846,53 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
             if (selectedSection == it) selectedSectionReset += 1 else selectedSection = it
         }
     }
+}
+
+@Composable
+internal fun DailyFormationDialog(entry: DailyFormationEntry, onDismiss: () -> Unit) {
+    val colors = dailyFormationColors(entry.colorCode)
+    val buttonContentColor = dailyFormationButtonContentColor(entry.colorCode)
+    AlertDialog(
+        onDismissRequest = {},
+        containerColor = colors.first,
+        titleContentColor = colors.third,
+        textContentColor = colors.third,
+        title = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(entry.type.replace('_', ' ').uppercase(), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(entry.title, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                Box(Modifier.width(86.dp).height(3.dp).background(colors.second))
+            }
+        },
+        text = { Text(entry.details, fontSize = 18.sp, lineHeight = 27.sp) },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.second,
+                    contentColor = buttonContentColor,
+                ),
+            ) {
+                Text("Dismiss for Today")
+            }
+        },
+    )
+}
+
+private fun dailyFormationButtonContentColor(code: String): Color = when (code.uppercase()) {
+    "RED" -> Color(0xFF7A0D12)
+    "PURPLE" -> Color(0xFF481F61)
+    "ROSE" -> Color.White
+    else -> Color.Black
+}
+
+private fun dailyFormationColors(code: String): Triple<Color, Color, Color> = when (code.uppercase()) {
+    "WHITE" -> Triple(Color.White, Color(0xFFC99B47), Color.Black)
+    "GOLD" -> Triple(Color(0xFFF9EFCF), Color(0xFFA66E14), Color.Black)
+    "RED" -> Triple(Color(0xFF7A0D12), Color.White, Color.White)
+    "PURPLE" -> Triple(Color(0xFF481F61), Color(0xFFE3C4F2), Color.White)
+    "ROSE" -> Triple(Color(0xFFE092A3), Color(0xFF661526), Color.Black)
+    else -> Triple(Color(0xFF1A5C38), Color(0xFFE8C97A), Color.White)
 }
 
 @Composable

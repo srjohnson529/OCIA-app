@@ -24,7 +24,7 @@ val hasReleaseSigning = listOf(
     releaseKeyAlias,
     releaseKeyPassword,
 ).all { !it.isNullOrBlank() }
-val releaseVersionCode = providers.gradleProperty("ILLUMINED_VERSION_CODE").orNull?.toIntOrNull() ?: 10
+val releaseVersionCode = providers.gradleProperty("ILLUMINED_VERSION_CODE").orNull?.toIntOrNull() ?: 13
 val releaseVersionName = providers.gradleProperty("ILLUMINED_VERSION_NAME").orNull ?: "1.2"
 if (hasFirebaseConfig) {
     apply(plugin = "com.google.gms.google-services")
@@ -102,6 +102,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:13.0.0")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-functions")

@@ -46,16 +46,19 @@ final class LessonCatalogService: ObservableObject {
             let (overrideSnapshot, customSnapshot, settingsSnapshot) = try await (overrides, customLessons, settings)
             let hidden = Set(settingsSnapshot.data()?["hiddenCanonicalCategories"] as? [String] ?? [])
             let showClassroomLessons = settingsSnapshot.data()?["showClassroomLessons"] as? Bool ?? true
+            let quizPolicy = QuizPolicy(rawValue: settingsSnapshot.data()?["quizPolicy"] as? String ?? "required") ?? .required
             let overrideData = Dictionary(uniqueKeysWithValues: overrideSnapshot.documents.map { ($0.documentID, $0.data()) })
 
             var merged = canonical
                 .filter { !hidden.contains($0.category) }
                 .map { lesson(from: overrideData[$0.id], id: $0.id, fallback: $0) }
+                .map { lesson in var scoped = lesson; scoped.quizPolicy = quizPolicy; return scoped }
 
             if showClassroomLessons {
                 merged.append(contentsOf: customSnapshot.documents.compactMap {
                     var customLesson = lesson(from: $0.data(), id: $0.documentID, fallback: nil)
                     customLesson.category = classroomCategoryName(for: classId)
+                    customLesson.quizPolicy = customLesson.quiz.isEmpty ? .hidden : quizPolicy
                     return customLesson
                 })
             }

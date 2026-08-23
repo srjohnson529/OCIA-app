@@ -3,11 +3,9 @@ package com.illumined.app.ui
 import android.content.Intent
 import android.graphics.Color as AndroidColor
 import android.net.Uri
-import android.webkit.CookieManager
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
@@ -66,12 +64,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.FullscreenListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.illumined.app.data.CatechismLesson
 import com.illumined.app.data.Assignment
 import com.illumined.app.data.DiscussionPrompt
 import com.illumined.app.data.DiscussionRepository
 import com.illumined.app.data.LessonCatalog
 import com.illumined.app.data.LessonCategory
+import com.illumined.app.data.QuizPolicy
 import com.illumined.app.data.UserProfile
 import com.illumined.app.R
 import com.illumined.app.ui.theme.IlluminedThemeTokens
@@ -160,6 +168,9 @@ fun LessonsExperience(
             isDiscussionCompleted = prompts.firstOrNull { it.lessonId == selectedLesson!!.id }?.let { it.id in completedPromptIds } == true,
             onBack = { selectedLessonId = null },
             onBeginQuiz = { quizLessonId = selectedLesson.id },
+            onCompleteWithoutQuiz = {
+                onMarkComplete(selectedLesson.id, lessonCompletionBadges(selectedLesson, selectedCategory!!, categories, completedLessonIds), {}, {})
+            },
             onReviewQuiz = { reviewLessonId = selectedLesson.id },
             onOpenDiscussion = { selectedDiscussionId = it.id },
         )
@@ -238,6 +249,9 @@ fun AssignedLessonExperience(
             isDiscussionCompleted = prompt?.let { it.id in completedPromptIds } == true,
             onBack = onBack,
             onBeginQuiz = { showingQuiz = true },
+            onCompleteWithoutQuiz = {
+                onMarkComplete(lesson.id, lessonCompletionBadges(lesson, category, categories, completedLessonIds), {}, {})
+            },
             onReviewQuiz = { reviewingQuiz = true },
             onOpenDiscussion = { selectedDiscussionId = it.id },
         )
@@ -325,6 +339,7 @@ private fun LessonDetail(
     isDiscussionCompleted: Boolean = false,
     onBack: () -> Unit,
     onBeginQuiz: () -> Unit,
+    onCompleteWithoutQuiz: () -> Unit,
     onReviewQuiz: () -> Unit = {},
     onOpenDiscussion: (DiscussionPrompt) -> Unit = {},
 ) {
@@ -369,85 +384,12 @@ private fun LessonDetail(
         video?.let { details ->
             IosCard {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    details.embedUrl?.let { embedUrl ->
-                        val playerHtml = remember(embedUrl) { youtubePlayerHtml(embedUrl) }
-                        var playerLoading by remember(embedUrl) { mutableStateOf(true) }
-                        var playerFailed by remember(embedUrl) { mutableStateOf(false) }
-                        Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(Color(0xFF222222))) {
-                            if (!playerFailed) {
-                                AndroidView(
-                                    modifier = Modifier.fillMaxSize(),
-                                    factory = { webContext ->
-                                        WebView(webContext).apply playerWebView@{
-                                            setBackgroundColor(AndroidColor.BLACK)
-                                            settings.javaScriptEnabled = true
-                                            settings.domStorageEnabled = true
-                                            settings.mediaPlaybackRequiresUserGesture = true
-                                            settings.loadWithOverviewMode = true
-                                            settings.useWideViewPort = true
-                                            CookieManager.getInstance().apply {
-                                                setAcceptCookie(true)
-                                                setAcceptThirdPartyCookies(this@playerWebView, true)
-                                            }
-                                            webChromeClient = object : WebChromeClient() {
-                                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                                    if (newProgress >= 100) playerLoading = false
-                                                }
-                                            }
-                                            webViewClient = object : WebViewClient() {
-                                                override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-                                                    if (request.url.host.orEmpty().contains("youtube")) {
-                                                        playerLoading = false
-                                                        playerFailed = true
-                                                    }
-                                                }
-
-                                                override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
-                                                    if (request.url.host.orEmpty().contains("youtube") && response.statusCode >= 400) {
-                                                        playerLoading = false
-                                                        playerFailed = true
-                                                    }
-                                                }
-                                            }
-                                            tag = embedUrl
-                                            loadDataWithBaseURL("https://illumined.net/", playerHtml, "text/html", "UTF-8", null)
-                                        }
-                                    },
-                                    update = { webView ->
-                                        if (webView.tag != embedUrl) {
-                                            playerLoading = true
-                                            playerFailed = false
-                                            webView.tag = embedUrl
-                                            webView.loadDataWithBaseURL("https://illumined.net/", playerHtml, "text/html", "UTF-8", null)
-                                        }
-                                    },
-                                    onRelease = { webView ->
-                                        webView.stopLoading()
-                                        webView.loadUrl("about:blank")
-                                        webView.destroy()
-                                    },
-                                )
-                            }
-                            if (playerLoading && !playerFailed) {
-                                CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
-                            }
-                            if (playerFailed) {
-                                Column(
-                                    Modifier.align(Alignment.Center).padding(20.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    Text("Video preview unavailable", color = Color.White, fontWeight = FontWeight.SemiBold)
-                                    Text("Use Open on YouTube below.", color = Color.White.copy(alpha = .8f))
-                                }
-                            }
-                        }
-                    }
+                    details.videoId?.let { videoId -> LessonYouTubePlayer(videoId) }
                     TextButton(
                         onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(details.externalUrl))) },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(if (details.embedUrl == null) "Open video" else "Open on YouTube")
+                        Text(if (details.videoId == null) "Open video" else "Open on YouTube")
                     }
                 }
             }
@@ -459,7 +401,7 @@ private fun LessonDetail(
                     Spacer(Modifier.size(7.dp))
                     Text("Lesson completed", color = Color(0xFF2E8B57), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                 }
-                if (lesson.quiz.isNotEmpty()) {
+                if (lesson.quiz.isNotEmpty() && lesson.quizPolicy != QuizPolicy.HIDDEN) {
                     Button(
                         onClick = onReviewQuiz,
                         modifier = Modifier.fillMaxWidth().height(54.dp),
@@ -473,39 +415,129 @@ private fun LessonDetail(
                 }
                 linkedPrompt?.let { LessonDiscussionProgressCard(it, isDiscussionCompleted, onOpenDiscussion) }
             }
-            lesson.quiz.isEmpty() -> Text("No Quiz Available", color = IlluminedThemeTokens.SecondaryText,
+            lesson.quiz.isEmpty() && lesson.quizPolicy == QuizPolicy.REQUIRED -> Text("No Quiz Available", color = IlluminedThemeTokens.SecondaryText,
                 modifier = Modifier.align(Alignment.CenterHorizontally))
-            else -> Button(
-                onClick = onBeginQuiz,
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = IlluminedThemeTokens.Blue),
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                LessonSymbol(LessonSymbolKind.PlayCircle, Color.White, Modifier.size(21.dp), IlluminedThemeTokens.Blue)
-                Spacer(Modifier.size(8.dp))
-                Text("Begin Quiz", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            else -> {
+                if (lesson.quizPolicy != QuizPolicy.HIDDEN && lesson.quiz.isNotEmpty()) {
+                    Button(
+                        onClick = onBeginQuiz,
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = IlluminedThemeTokens.Blue),
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        LessonSymbol(LessonSymbolKind.PlayCircle, Color.White, Modifier.size(21.dp), IlluminedThemeTokens.Blue)
+                        Spacer(Modifier.size(8.dp))
+                        Text(if (lesson.quizPolicy == QuizPolicy.OPTIONAL) "Begin Quiz" else "Begin Quiz", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                if (lesson.quizPolicy != QuizPolicy.REQUIRED) {
+                    Button(
+                        onClick = onCompleteWithoutQuiz,
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = IlluminedThemeTokens.Blue),
+                        shape = RoundedCornerShape(14.dp),
+                    ) { Text("Mark Lesson Completed", fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
+                }
             }
         }
         Spacer(Modifier.height(16.dp))
     }
 }
 
-private data class LessonVideoDetails(val embedUrl: String?, val externalUrl: String)
+@Composable
+private fun LessonYouTubePlayer(videoId: String) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var loading by remember(videoId) { mutableStateOf(true) }
+    var failed by remember(videoId) { mutableStateOf(false) }
+    var fullscreenView by remember(videoId) { mutableStateOf<View?>(null) }
+    var exitFullscreen by remember(videoId) { mutableStateOf<(() -> Unit)?>(null) }
 
-private fun youtubePlayerHtml(embedUrl: String): String {
-    val identity = "https%3A%2F%2Fillumined.net"
-    val playerUrl = "$embedUrl?playsinline=1&enablejsapi=1&origin=$identity&widget_referrer=$identity"
-    return """
-        <!doctype html>
-        <html><head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="referrer" content="strict-origin-when-cross-origin">
-        <style>html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#222;overflow:hidden}</style>
-        </head><body>
-        <iframe src="$playerUrl" title="Lesson video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </body></html>
-    """.trimIndent()
+    Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(Color(0xFF222222))) {
+        if (!failed) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = { playerContext ->
+                    YouTubePlayerView(playerContext).apply {
+                        lifecycleOwner.lifecycle.addObserver(this)
+                        enableAutomaticInitialization = false
+                        addFullscreenListener(object : FullscreenListener {
+                            override fun onEnterFullscreen(fullscreenPlayerView: View, exitFullscreenAction: () -> Unit) {
+                                fullscreenView = fullscreenPlayerView
+                                exitFullscreen = exitFullscreenAction
+                            }
+
+                            override fun onExitFullscreen() {
+                                fullscreenView = null
+                                exitFullscreen = null
+                            }
+                        })
+                        val listener = object : AbstractYouTubePlayerListener() {
+                            override fun onReady(youTubePlayer: YouTubePlayer) {
+                                loading = false
+                                youTubePlayer.cueVideo(videoId, 0f)
+                            }
+
+                            override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {
+                                loading = false
+                                failed = true
+                            }
+                        }
+                        val options = IFramePlayerOptions.Builder(playerContext)
+                            .controls(1)
+                            .fullscreen(1)
+                            .build()
+                        initialize(listener, true, options)
+                    }
+                },
+                onRelease = { playerView ->
+                    lifecycleOwner.lifecycle.removeObserver(playerView)
+                    playerView.release()
+                },
+            )
+        }
+        if (loading && !failed) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
+        }
+        if (failed) {
+            Column(
+                Modifier.align(Alignment.Center).padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("Video preview unavailable", color = Color.White, fontWeight = FontWeight.SemiBold)
+                Text("Use Open on YouTube below.", color = Color.White.copy(alpha = .8f))
+            }
+        }
+    }
+
+    fullscreenView?.let { playerView ->
+        Dialog(
+            onDismissRequest = { exitFullscreen?.invoke() },
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        ) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize().background(Color.Black),
+                factory = { dialogContext ->
+                    FrameLayout(dialogContext).apply {
+                        (playerView.parent as? ViewGroup)?.removeView(playerView)
+                        addView(
+                            playerView,
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            ),
+                        )
+                    }
+                },
+                onRelease = { container ->
+                    if (playerView.parent === container) container.removeView(playerView)
+                },
+            )
+        }
+    }
 }
+
+private data class LessonVideoDetails(val videoId: String?, val externalUrl: String)
 
 private fun lessonVideoDetails(rawValue: String?): LessonVideoDetails? {
     val value = rawValue?.trim()?.takeIf { it.isNotEmpty() } ?: return null
@@ -526,11 +558,11 @@ private fun lessonVideoDetails(rawValue: String?): LessonVideoDetails? {
 
     return if (videoId?.matches(Regex("^[A-Za-z0-9_-]{11}$")) == true) {
         LessonVideoDetails(
-            embedUrl = "https://www.youtube-nocookie.com/embed/$videoId",
+            videoId = videoId,
             externalUrl = "https://www.youtube.com/watch?v=$videoId",
         )
     } else {
-        LessonVideoDetails(embedUrl = null, externalUrl = uri.toString())
+        LessonVideoDetails(videoId = null, externalUrl = uri.toString())
     }
 }
 
@@ -858,6 +890,19 @@ private fun categoryBadge(name: String): String? = when (name) {
     "Life in Christ" -> "life-in-christ-complete"
     "Christian Prayer" -> "prayer-complete"
     else -> null
+}
+
+private fun lessonCompletionBadges(
+    lesson: CatechismLesson,
+    category: LessonCategory,
+    allCategories: List<LessonCategory>,
+    completedLessonIds: Set<String>,
+): List<String> {
+    val completed = completedLessonIds + lesson.id
+    return buildList {
+        if (category.lessons.all { it.id in completed }) categoryBadge(category.name)?.let(::add)
+        if (allCategories.flatMap { it.lessons }.isNotEmpty() && allCategories.flatMap { it.lessons }.all { it.id in completed }) add("illumined-graduate")
+    }
 }
 
 private fun parchmentBrush(): Brush = Brush.radialGradient(

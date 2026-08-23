@@ -19,7 +19,10 @@ data class CatechismLesson(
     val contentHtml: String,
     val videoUrl: String?,
     val quiz: List<QuizQuestion>,
+    val quizPolicy: QuizPolicy = QuizPolicy.REQUIRED,
 )
+
+enum class QuizPolicy { REQUIRED, OPTIONAL, HIDDEN }
 
 data class QuizQuestion(
     val id: String,
@@ -59,17 +62,24 @@ object LessonCatalog {
         var customLessons: List<Pair<String, Map<String, Any>>>? = null
         var hiddenCategories: Set<String>? = null
         var showClassroomLessons: Boolean? = null
+        var quizPolicy: QuizPolicy? = null
 
         fun publish() {
             val overrideData = overrides ?: return
             val customData = customLessons ?: return
             val hidden = hiddenCategories ?: return
             val showCustom = showClassroomLessons ?: return
+            val policy = quizPolicy ?: return
             val merged = canonical.filterNot { it.category in hidden }.map { lesson ->
                 overrideData[lesson.id]?.toLesson(lesson.id, lesson) ?: lesson
-            }.toMutableList()
+            }.map { it.copy(quizPolicy = policy) }.toMutableList()
             if (showCustom) customData.mapNotNullTo(merged) { (id, data) ->
-                data.toLesson(id, null)?.copy(category = classroomCategoryName(classId))
+                data.toLesson(id, null)?.let { lesson ->
+                    lesson.copy(
+                        category = classroomCategoryName(classId),
+                        quizPolicy = if (lesson.quiz.isEmpty()) QuizPolicy.HIDDEN else policy,
+                    )
+                }
             }
             onUpdate(Result.success(grouped(merged)))
         }
@@ -93,6 +103,11 @@ object LessonCatalog {
             if (error != null) return@addSnapshotListener fail(error)
             hiddenCategories = (snapshot?.get("hiddenCanonicalCategories") as? List<*>)?.filterIsInstance<String>()?.toSet().orEmpty()
             showClassroomLessons = snapshot?.getBoolean("showClassroomLessons") ?: true
+            quizPolicy = when (snapshot?.getString("quizPolicy")) {
+                "optional" -> QuizPolicy.OPTIONAL
+                "hidden" -> QuizPolicy.HIDDEN
+                else -> QuizPolicy.REQUIRED
+            }
             publish()
         }
         return AutoCloseable { listeners.forEach(ListenerRegistration::remove) }

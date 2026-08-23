@@ -3,6 +3,7 @@ import CoreImage.CIFilterBuiltins
 import FirebaseFirestore
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 struct InstructorDashboardView: View {
     @EnvironmentObject private var profileService: ProfileService
@@ -83,6 +84,18 @@ struct InstructorDashboardView: View {
                                 InstructorToolCard(
                                     title: "Class Schedule",
                                     subtitle: "Update the next class date and topic.",
+                                    systemImage: "calendar.badge.clock",
+                                    status: "Open"
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink {
+                                InstructorDailyFormationView()
+                            } label: {
+                                InstructorToolCard(
+                                    title: "Daily Formation",
+                                    subtitle: "Create and schedule liturgical facts, saints, and notes.",
                                     systemImage: "calendar.badge.clock",
                                     status: "Open"
                                 )
@@ -692,6 +705,383 @@ struct InviteShareControls: View {
         let scaled = output.transformed(by: CGAffineTransform(scaleX: 12, y: 12))
         guard let cgImage = CIContext().createCGImage(scaled, from: scaled.extent) else { return nil }
         return UIImage(cgImage: cgImage)
+    }
+}
+
+private struct InstructorDailyFormationEditorTarget: Identifiable {
+    let id = UUID()
+    let entry: ManagedDailyFormationEntry?
+}
+
+private struct InstructorDailyFormationView: View {
+    @EnvironmentObject private var profileService: ProfileService
+    @StateObject private var service = InstructorDailyFormationService()
+    @State private var enabled = false
+    @State private var reminderTime = "09:00"
+    @State private var timeZone = TimeZone.current.identifier
+    @State private var editorTarget: InstructorDailyFormationEditorTarget?
+    @State private var showingCSVImport = false
+
+    var body: some View {
+        ZStack {
+            IlluminedBackground()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    IlluminedCard {
+                        VStack(alignment: .leading, spacing: 16) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Label("Daily Formation", systemImage: "calendar.badge.clock")
+                                    .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.blue)
+                                Text("Create entries one at a time, or import a full liturgical calendar from a spreadsheet.")
+                                    .font(IlluminedTheme.font(size: 15))
+                                    .foregroundStyle(IlluminedTheme.secondaryText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+
+                            HStack(spacing: 10) {
+                                Button {
+                                    editorTarget = InstructorDailyFormationEditorTarget(entry: nil)
+                                } label: {
+                                    Label("New Entry", systemImage: "plus.circle.fill")
+                                        .font(IlluminedTheme.font(size: 15, weight: .semibold))
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(IlluminedPrimaryButtonStyle())
+                                .disabled(profileService.profile?.primaryClassId.isEmpty != false)
+
+                                Button {
+                                    showingCSVImport = true
+                                } label: {
+                                    Label("Import", systemImage: "square.and.arrow.down")
+                                        .font(IlluminedTheme.font(size: 15, weight: .semibold))
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(IlluminedSecondaryButtonStyle())
+                                .disabled(profileService.profile?.primaryClassId.isEmpty != false)
+                            }
+                        }
+                    }
+                    IlluminedCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text("Settings")
+                                .font(IlluminedTheme.font(size: 19, weight: .semibold))
+                            Toggle("Enable Daily Formation", isOn: $enabled)
+                            Text("Choose when the daily reminder should be sent to users who have not already opened and dismissed today’s card. The time zone determines how that reminder time is interpreted.")
+                                .font(IlluminedTheme.font(size: 13))
+                                .foregroundStyle(IlluminedTheme.secondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Daily reminder time")
+                                    .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                                TextField("HH:mm", text: $reminderTime)
+                                    .textFieldStyle(.roundedBorder)
+                            }
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Time zone")
+                                    .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                                TextField("America/New_York", text: $timeZone)
+                                    .textFieldStyle(.roundedBorder)
+                            }
+                            Button {
+                                Task { await service.saveSettings(ManagedDailyFormationSettings(enabled: enabled, notificationTime: reminderTime, timeZone: timeZone)) }
+                            } label: {
+                                Text("Save Settings")
+                                    .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(IlluminedPrimaryButtonStyle())
+                        }
+                    }
+                    if let message = service.statusMessage {
+                        Text(message).font(IlluminedTheme.font(size: 14)).foregroundStyle(IlluminedTheme.blue)
+                    }
+                    if let error = service.errorMessage {
+                        Text(error).font(IlluminedTheme.font(size: 14)).foregroundStyle(.red)
+                    }
+                    if service.entries.isEmpty {
+                        IlluminedCard {
+                            ContentUnavailableView(
+                                "No Daily Formation Entries",
+                                systemImage: "calendar.badge.clock",
+                                description: Text("Create or import the first daily card for this group.")
+                            )
+                        }
+                    }
+                    ForEach(service.entries) { entry in
+                        Button {
+                            editorTarget = InstructorDailyFormationEditorTarget(entry: entry)
+                        } label: {
+                            IlluminedCard {
+                                HStack(alignment: .top, spacing: 14) {
+                                    Image(systemName: "calendar")
+                                        .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                                        .foregroundStyle(IlluminedTheme.gold)
+                                        .frame(width: 44, height: 44)
+                                        .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        Text(entry.title).font(IlluminedTheme.font(size: 18, weight: .semibold)).foregroundStyle(IlluminedTheme.ink)
+                                        Text(entry.date)
+                                            .font(IlluminedTheme.font(size: 13, weight: .semibold)).foregroundStyle(IlluminedTheme.blue)
+                                        Text("\(entry.type.capitalized) · \(entry.colorCode) · \(entry.isPublished ? "Published" : "Draft")")
+                                            .font(IlluminedTheme.font(size: 13)).foregroundStyle(IlluminedTheme.secondaryText)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(IlluminedTheme.font(size: 13, weight: .semibold))
+                                        .foregroundStyle(IlluminedTheme.secondaryText)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding()
+            }
+        }
+        .illuminedBrandHeader()
+        .illuminedNavigation()
+        .task(id: profileService.profile?.primaryClassId) {
+            if let profile = profileService.profile { service.start(profile: profile) }
+        }
+        .onReceive(service.$settings) { settings in
+            enabled = settings.enabled
+            reminderTime = settings.notificationTime
+            timeZone = settings.timeZone
+        }
+        .sheet(item: $editorTarget) { target in
+            InstructorDailyFormationEditor(service: service, entry: target.entry)
+        }
+        .sheet(isPresented: $showingCSVImport) {
+            InstructorDailyFormationCSVImportView(service: service)
+        }
+    }
+}
+
+private struct InstructorDailyFormationCSVImportView: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var service: InstructorDailyFormationService
+    @State private var csvText = """
+date,type,title,details,color
+2026-09-03,saint,Saint Gregory the Great,"Pope and Doctor of the Church, remembered for pastoral leadership and sacred music.",WHITE
+2026-09-04,note,Friday Penance,Offer prayer or another act of penance today.,GREEN
+"""
+    @State private var preview: DailyFormationImportPreview?
+    @State private var showingFileImporter = false
+    @State private var fileError: String?
+    @State private var importing = false
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                IlluminedBackground()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        IlluminedCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Label("Import Daily Formation", systemImage: "square.and.arrow.down")
+                                    .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.blue)
+                                Text("Use this when you already have your liturgical calendar in Numbers, Excel, or Google Sheets. Choose the CSV file or paste its rows below, preview the cards, then publish them.")
+                                    .font(IlluminedTheme.font(size: 15))
+                                    .foregroundStyle(IlluminedTheme.secondaryText)
+
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("Expected columns")
+                                        .font(IlluminedTheme.font(size: 15, weight: .semibold))
+                                        .foregroundStyle(IlluminedTheme.ink)
+                                    Text("date, type, title, details, color")
+                                        .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                                        .foregroundStyle(IlluminedTheme.gold)
+                                    Text("Use YYYY-MM-DD dates; fact, saint, or note types; and WHITE, GOLD, GREEN, RED, PURPLE, or ROSE colors.")
+                                        .font(IlluminedTheme.font(size: 13))
+                                        .foregroundStyle(IlluminedTheme.secondaryText)
+                                }
+                            }
+                        }
+                        IlluminedCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Choose or Paste Calendar")
+                                    .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.ink)
+                                Button { showingFileImporter = true } label: {
+                                    Label("Choose CSV File", systemImage: "doc.badge.plus")
+                                        .font(IlluminedTheme.font(size: 16, weight: .semibold))
+                                        .frame(maxWidth: .infinity)
+                                }
+                                    .buttonStyle(IlluminedSecondaryButtonStyle())
+                                TextEditor(text: $csvText)
+                                    .font(.system(.body, design: .monospaced))
+                                    .foregroundStyle(IlluminedTheme.ink)
+                                    .tint(IlluminedTheme.blue)
+                                    .scrollContentBackground(.hidden)
+                                    .frame(minHeight: 170)
+                                    .padding(10)
+                                    .background(IlluminedTheme.cream, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .stroke(IlluminedTheme.gold.opacity(0.22), lineWidth: 1)
+                                    )
+                                    .onChange(of: csvText) { _ in preview = nil }
+                                Button { preview = service.parseCSV(csvText) } label: {
+                                    Text("Preview Calendar")
+                                        .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                                        .frame(maxWidth: .infinity)
+                                }
+                                    .buttonStyle(IlluminedSecondaryButtonStyle())
+                                    .disabled(csvText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                if let fileError { Text(fileError).foregroundStyle(.red).font(IlluminedTheme.font(size: 13)) }
+                            }
+                        }
+                        if let preview {
+                            IlluminedCard {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Preview")
+                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                        .foregroundStyle(IlluminedTheme.ink)
+                                    Text("\(preview.validRows.count) valid of \(preview.totalRows) entries ready to publish.")
+                                        .font(IlluminedTheme.font(size: 14))
+                                        .foregroundStyle(IlluminedTheme.secondaryText)
+                                    if !preview.issues.isEmpty {
+                                        ForEach(preview.issues.prefix(12)) { issue in
+                                            Text("Row \(issue.rowNumber): \(issue.message)")
+                                                .font(IlluminedTheme.font(size: 13, weight: .semibold))
+                                                .foregroundStyle(.red)
+                                        }
+                                    }
+                                    ForEach(preview.validRows.prefix(20)) { row in
+                                        HStack(alignment: .top, spacing: 12) {
+                                            Image(systemName: "calendar")
+                                                .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                                                .foregroundStyle(IlluminedTheme.gold)
+                                                .frame(width: 34, height: 34)
+                                                .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(row.title).font(IlluminedTheme.font(size: 15, weight: .semibold)).foregroundStyle(IlluminedTheme.ink)
+                                                Text(row.date).font(IlluminedTheme.font(size: 13, weight: .semibold)).foregroundStyle(IlluminedTheme.blue)
+                                                Text("Row \(row.rowNumber) · \(row.type.capitalized) · \(row.colorCode)")
+                                                    .font(IlluminedTheme.font(size: 12)).foregroundStyle(IlluminedTheme.secondaryText)
+                                            }
+                                            Spacer(minLength: 0)
+                                        }
+                                        .padding(10)
+                                        .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                    }
+                                    if preview.validRows.count > 20 {
+                                        Text("Plus \(preview.validRows.count - 20) more valid entries.")
+                                            .font(IlluminedTheme.font(size: 13)).foregroundStyle(IlluminedTheme.secondaryText)
+                                    }
+                                    Text("An imported row replaces the entry with the same date in this classroom only.")
+                                        .font(IlluminedTheme.font(size: 13)).foregroundStyle(IlluminedTheme.secondaryText)
+                                }
+                            }
+                            Button {
+                                Task {
+                                    importing = true
+                                    if await service.importCSVRows(preview.validRows) { dismiss() }
+                                    importing = false
+                                }
+                            } label: {
+                                Text(importing ? "Publishing…" : "Publish Calendar")
+                                    .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(IlluminedPrimaryButtonStyle())
+                            .disabled(importing || preview.validRows.isEmpty)
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .illuminedBrandHeader()
+            .illuminedNavigation()
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(importing) } }
+            .fileImporter(isPresented: $showingFileImporter, allowedContentTypes: [.commaSeparatedText, .plainText]) { result in
+                do {
+                    let url = try result.get()
+                    let accessed = url.startAccessingSecurityScopedResource()
+                    defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+                    csvText = try String(contentsOf: url, encoding: .utf8)
+                    preview = nil
+                    fileError = nil
+                } catch {
+                    fileError = "The CSV file could not be opened: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+}
+
+private struct InstructorDailyFormationEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var service: InstructorDailyFormationService
+    let originalEntry: ManagedDailyFormationEntry?
+    @State private var date: Date
+    @State private var type: String
+    @State private var title: String
+    @State private var details: String
+    @State private var colorCode: String
+    @State private var isPublished: Bool
+    @State private var saving = false
+    @State private var confirmingDelete = false
+
+    init(service: InstructorDailyFormationService, entry: ManagedDailyFormationEntry?) {
+        _service = ObservedObject(wrappedValue: service)
+        self.originalEntry = entry
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        _date = State(initialValue: entry.flatMap { formatter.date(from: $0.date) } ?? Date())
+        _type = State(initialValue: entry?.type ?? "saint")
+        _title = State(initialValue: entry?.title ?? "")
+        _details = State(initialValue: entry?.details ?? "")
+        _colorCode = State(initialValue: entry?.colorCode ?? "WHITE")
+        _isPublished = State(initialValue: entry?.isPublished ?? true)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                DatePicker("Date", selection: $date, displayedComponents: .date).disabled(originalEntry != nil)
+                Picker("Type", selection: $type) {
+                    Text("Fact").tag("fact"); Text("Saint").tag("saint"); Text("Liturgical Note").tag("note")
+                }
+                TextField("Title", text: $title)
+                Section("Details") { TextEditor(text: $details).frame(minHeight: 180) }
+                Picker("Liturgical Color", selection: $colorCode) {
+                    ForEach(["WHITE", "GOLD", "GREEN", "RED", "PURPLE", "ROSE"], id: \.self) { Text($0.capitalized).tag($0) }
+                }
+                Toggle("Published", isOn: $isPublished)
+                if let error = service.errorMessage { Text(error).foregroundStyle(.red) }
+                if originalEntry != nil {
+                    Button("Delete Entry", role: .destructive) { confirmingDelete = true }
+                }
+            }
+            .navigationTitle(originalEntry == nil ? "New Entry" : "Edit Entry")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(saving ? "Saving…" : "Save") { Task { await save() } }
+                        .disabled(saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || details.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .confirmationDialog("Delete this Daily Formation entry?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+                Button("Delete", role: .destructive) { Task { if let originalEntry, await service.deleteEntry(originalEntry) { dismiss() } } }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This removes the entry from this classroom.")
+            }
+        }
+    }
+
+    private func save() async {
+        saving = true
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        let entry = ManagedDailyFormationEntry(date: originalEntry?.date ?? formatter.string(from: date), type: type, title: title, details: details, colorCode: colorCode, isPublished: isPublished)
+        if await service.saveEntry(entry) { dismiss() }
+        saving = false
     }
 }
 

@@ -11,6 +11,10 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 data class UserProfile(
     val displayName: String,
@@ -32,7 +36,11 @@ data class UserProfile(
     val notificationNewAssignments: Boolean = true,
     val notificationAssignmentReminders: Boolean = true,
     val notificationDiscussionReplies: Boolean = true,
+    val notificationDailyFormation: Boolean = true,
     val notificationsEnabled: Boolean = true,
+    val dailyFormationEnabled: Boolean = true,
+    val dailyFormationStartupEnabled: Boolean = true,
+    val dailyFormationPushEnabled: Boolean = true,
 ) {
     val activeClassIds: List<String>
         get() = classIds.filterNot(archivedClassIds::contains)
@@ -52,6 +60,14 @@ data class Assignment(
     val readings: List<AssignmentReading>,
     val isActive: Boolean,
     val dueAt: Timestamp?,
+)
+
+data class DailyFormationEntry(
+    val date: String,
+    val type: String,
+    val title: String,
+    val details: String,
+    val colorCode: String,
 )
 
 data class AssignmentLessonLink(
@@ -195,7 +211,11 @@ private fun DocumentSnapshot?.toUserProfile(): UserProfile {
         notificationNewAssignments = document?.getBoolean("notificationNewAssignments") != false,
         notificationAssignmentReminders = document?.getBoolean("notificationAssignmentReminders") != false,
         notificationDiscussionReplies = document?.getBoolean("notificationDiscussionReplies") != false,
+        notificationDailyFormation = document?.getBoolean("notificationDailyFormation") != false,
         notificationsEnabled = document?.getBoolean("notificationsEnabled") != false,
+        dailyFormationEnabled = document?.getBoolean("dailyFormationEnabled") != false,
+        dailyFormationStartupEnabled = document?.getBoolean("dailyFormationStartupEnabled") != false,
+        dailyFormationPushEnabled = document?.getBoolean("dailyFormationPushEnabled") != false,
     )
 }
 
@@ -312,6 +332,69 @@ class FormationRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
 ) {
+    fun loadDailyFormation(
+        profile: UserProfile,
+        force: Boolean = false,
+        onSuccess: (DailyFormationEntry?) -> Unit,
+        onError: (Throwable) -> Unit,
+    ) {
+        val uid = auth.currentUser?.uid ?: return onSuccess(null)
+        val classId = profile.selectedClassId
+        if (classId.isBlank()) return onSuccess(null)
+        val classroom = firestore.collection("classrooms").document(classId)
+        classroom.collection("settings").document("dailyFormation").get()
+            .addOnSuccessListener { settings ->
+                if (settings.getBoolean("enabled") == false) return@addOnSuccessListener onSuccess(null)
+                val zone = runCatching { TimeZone.getTimeZone(settings.getString("timeZone") ?: TimeZone.getDefault().id) }
+                    .getOrDefault(TimeZone.getDefault())
+                val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply { timeZone = zone }.format(Date())
+                val receiptId = "${classId}_${date}_${uid}"
+                fun loadEntry() {
+                        classroom.collection("dailyFormation").document(date).get()
+                            .addOnSuccessListener entry@{ document ->
+                                if (!document.exists() || document.getBoolean("isPublished") == false) return@entry onSuccess(null)
+                                val entry = DailyFormationEntry(
+                                    date = date,
+                                    type = document.getString("type") ?: "note",
+                                    title = document.getString("title") ?: "Daily Formation",
+                                    details = document.getString("details").orEmpty(),
+                                    colorCode = document.getString("colorCode") ?: "GREEN",
+                                )
+                                firestore.collection("dailyFormationReceipts").document(receiptId).set(
+                                    mapOf("userId" to uid, "classId" to classId, "date" to date, "displayedAt" to FieldValue.serverTimestamp()),
+                                    SetOptions.merge(),
+                                )
+                                onSuccess(entry)
+                            }.addOnFailureListener(onError)
+                }
+                if (force) {
+                    loadEntry()
+                } else {
+                    firestore.collection("dailyFormationReceipts").document(receiptId).get()
+                        .addOnSuccessListener receipt@{ receipt ->
+                            if (receipt.getTimestamp("dismissedAt") != null) return@receipt onSuccess(null)
+                            loadEntry()
+                        }.addOnFailureListener(onError)
+                }
+            }.addOnFailureListener(onError)
+    }
+
+    fun dismissDailyFormation(profile: UserProfile, entry: DailyFormationEntry) {
+        val uid = auth.currentUser?.uid ?: return
+        val classId = profile.selectedClassId
+        firestore.collection("dailyFormationReceipts").document("${classId}_${entry.date}_${uid}").set(
+            mapOf("userId" to uid, "classId" to classId, "date" to entry.date, "dismissedAt" to FieldValue.serverTimestamp()),
+            SetOptions.merge(),
+        )
+    }
+
+    fun updateDailyFormationPreferences(enabled: Boolean, startup: Boolean, onSuccess: () -> Unit = {}, onError: (Throwable) -> Unit = {}) {
+        val uid = auth.currentUser?.uid ?: return
+        firestore.collection("userProfiles").document(uid).set(
+            mapOf("dailyFormationEnabled" to enabled, "dailyFormationStartupEnabled" to startup),
+            SetOptions.merge(),
+        ).addOnSuccessListener { onSuccess() }.addOnFailureListener(onError)
+    }
     fun setActiveClass(profile: UserProfile, classId: String, onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onError(IllegalStateException("Please sign in before switching classes."))
         val selected = classId.trim()
@@ -430,7 +513,11 @@ class FormationRepository(
                     notificationNewAssignments = profileDocument.getBoolean("notificationNewAssignments") != false,
                     notificationAssignmentReminders = profileDocument.getBoolean("notificationAssignmentReminders") != false,
                     notificationDiscussionReplies = profileDocument.getBoolean("notificationDiscussionReplies") != false,
+                    notificationDailyFormation = profileDocument.getBoolean("notificationDailyFormation") != false,
                     notificationsEnabled = profileDocument.getBoolean("notificationsEnabled") != false,
+                    dailyFormationEnabled = profileDocument.getBoolean("dailyFormationEnabled") != false,
+                    dailyFormationStartupEnabled = profileDocument.getBoolean("dailyFormationStartupEnabled") != false,
+                    dailyFormationPushEnabled = profileDocument.getBoolean("dailyFormationPushEnabled") != false,
                 )
 
                 if (classIds.isEmpty()) {

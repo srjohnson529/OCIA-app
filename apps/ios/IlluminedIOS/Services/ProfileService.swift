@@ -132,6 +132,19 @@ final class ProfileService: ObservableObject {
         }
     }
 
+    func updateDailyFormationPreferences(enabled: Bool, startup: Bool) async {
+        guard let user = Auth.auth().currentUser else { return }
+        do {
+            try await db.collection("userProfiles").document(user.uid).setData([
+                "dailyFormationEnabled": enabled,
+                "dailyFormationStartupEnabled": startup
+            ], merge: true)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func createAdditionalInstructorClass(classId: String) async {
         guard let user = Auth.auth().currentUser, let profile, profile.isInstructor else {
             errorMessage = "Instructor access is required to create another class."

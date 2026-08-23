@@ -114,6 +114,8 @@ private struct RosaryMystery: Identifiable, Decodable {
 }
 
 private struct SpiritualFormationMenuView: View {
+    @EnvironmentObject private var profileService: ProfileService
+    @StateObject private var dailyFormation = DailyFormationService()
     let formation: SpiritualFormationCatalog
 
     var body: some View {
@@ -146,8 +148,38 @@ private struct SpiritualFormationMenuView: View {
                     SpiritualMenuRow(title: "Spiritual Practices", subtitle: "Works of mercy, precepts, habits, and Catholic living", systemImage: "figure.walk")
                 }
                 .buttonStyle(.plain)
+
+                IlluminedCard {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Label("Daily Formation", systemImage: "calendar.badge.clock")
+                            .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.blue)
+                        Text("Open today’s liturgical fact, saint, or note from your class.")
+                            .font(IlluminedTheme.font(size: 16))
+                            .foregroundStyle(IlluminedTheme.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button {
+                            guard let profile = profileService.profile else { return }
+                            Task { await dailyFormation.load(profile: profile, force: true) }
+                        } label: {
+                            Label("Open Today’s Card", systemImage: "arrow.up.right.square")
+                                .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(IlluminedPrimaryButtonStyle())
+                        .disabled(profileService.profile == nil)
+                        if let message = dailyFormation.statusMessage {
+                            Text(message)
+                                .font(IlluminedTheme.font(size: 14))
+                                .foregroundStyle(IlluminedTheme.secondaryText)
+                        }
+                    }
+                }
             }
             .padding()
+        }
+        .fullScreenCover(item: $dailyFormation.presentedEntry) { entry in
+            DailyFormationCard(entry: entry) { Task { await dailyFormation.dismiss(entry) } }
         }
     }
 }

@@ -20,6 +20,7 @@ class NotificationRegistrar(
                 "notificationNewAssignments" to enabled,
                 "notificationAssignmentReminders" to enabled,
                 "notificationDiscussionReplies" to enabled,
+                "notificationDailyFormation" to enabled,
                 "notificationsEnabled" to enabled,
                 "notificationPreferencesUpdatedAt" to FieldValue.serverTimestamp(),
             ),

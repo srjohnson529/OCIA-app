@@ -22,7 +22,11 @@ struct UserProfile: Identifiable, Codable, Equatable {
     var notificationNewAssignments: Bool
     var notificationAssignmentReminders: Bool
     var notificationDiscussionReplies: Bool
+    var notificationDailyFormation: Bool
     var notificationsEnabled: Bool
+    var dailyFormationEnabled: Bool
+    var dailyFormationStartupEnabled: Bool
+    var dailyFormationPushEnabled: Bool
 
     var primaryClassId: String {
         activeClassIds.contains(activeClassId) ? activeClassId : (activeClassIds.first ?? "")
@@ -52,7 +56,11 @@ struct UserProfile: Identifiable, Codable, Equatable {
         case notificationNewAssignments
         case notificationAssignmentReminders
         case notificationDiscussionReplies
+        case notificationDailyFormation
         case notificationsEnabled
+        case dailyFormationEnabled
+        case dailyFormationStartupEnabled
+        case dailyFormationPushEnabled
     }
 
     init(
@@ -75,7 +83,11 @@ struct UserProfile: Identifiable, Codable, Equatable {
         notificationNewAssignments: Bool = true,
         notificationAssignmentReminders: Bool = true,
         notificationDiscussionReplies: Bool = true,
-        notificationsEnabled: Bool = true
+        notificationDailyFormation: Bool = true,
+        notificationsEnabled: Bool = true,
+        dailyFormationEnabled: Bool = true,
+        dailyFormationStartupEnabled: Bool = true,
+        dailyFormationPushEnabled: Bool = true
     ) {
         self.userId = userId
         self.email = email
@@ -96,7 +108,11 @@ struct UserProfile: Identifiable, Codable, Equatable {
         self.notificationNewAssignments = notificationNewAssignments
         self.notificationAssignmentReminders = notificationAssignmentReminders
         self.notificationDiscussionReplies = notificationDiscussionReplies
+        self.notificationDailyFormation = notificationDailyFormation
         self.notificationsEnabled = notificationsEnabled
+        self.dailyFormationEnabled = dailyFormationEnabled
+        self.dailyFormationStartupEnabled = dailyFormationStartupEnabled
+        self.dailyFormationPushEnabled = dailyFormationPushEnabled
     }
 
     init(from decoder: Decoder) throws {
@@ -121,7 +137,11 @@ struct UserProfile: Identifiable, Codable, Equatable {
         notificationNewAssignments = try container.decodeIfPresent(Bool.self, forKey: .notificationNewAssignments) ?? true
         notificationAssignmentReminders = try container.decodeIfPresent(Bool.self, forKey: .notificationAssignmentReminders) ?? true
         notificationDiscussionReplies = try container.decodeIfPresent(Bool.self, forKey: .notificationDiscussionReplies) ?? true
+        notificationDailyFormation = try container.decodeIfPresent(Bool.self, forKey: .notificationDailyFormation) ?? true
         notificationsEnabled = try container.decodeIfPresent(Bool.self, forKey: .notificationsEnabled) ?? true
+        dailyFormationEnabled = try container.decodeIfPresent(Bool.self, forKey: .dailyFormationEnabled) ?? true
+        dailyFormationStartupEnabled = try container.decodeIfPresent(Bool.self, forKey: .dailyFormationStartupEnabled) ?? true
+        dailyFormationPushEnabled = try container.decodeIfPresent(Bool.self, forKey: .dailyFormationPushEnabled) ?? true
     }
 
     static func new(uid: String, email: String, displayName: String, classId: String) -> UserProfile {

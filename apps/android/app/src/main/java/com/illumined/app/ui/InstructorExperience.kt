@@ -1,6 +1,8 @@
 package com.illumined.app.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,9 +28,11 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.illumined.app.data.*
 import com.illumined.app.ui.theme.IlluminedThemeTokens
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
-private enum class InstructorPage { MENU, CLASSES, ANNOUNCEMENTS, SCHEDULE, ASSIGNMENTS, DISCUSSIONS, PROGRESS, INVITES }
+private enum class InstructorPage { MENU, CLASSES, ANNOUNCEMENTS, SCHEDULE, ASSIGNMENTS, DISCUSSIONS, PROGRESS, DAILY_FORMATION, INVITES }
 
 private val assignmentReadingsSaver = listSaver<List<AssignmentReading>, String>(
     save = { readings -> readings.flatMap { listOf(it.id, it.title, it.text) } },
@@ -49,6 +53,7 @@ fun InstructorExperience(profile: UserProfile, schedule: List<ScheduleItem>, ass
         InstructorPage.ASSIGNMENTS -> AssignmentManager(profile, assignments, schedule) { page = InstructorPage.MENU }
         InstructorPage.DISCUSSIONS -> DiscussionManager(profile) { page = InstructorPage.MENU }
         InstructorPage.PROGRESS -> StudentProgressManager(profile) { page = InstructorPage.MENU }
+        InstructorPage.DAILY_FORMATION -> DailyFormationManager(profile) { page = InstructorPage.MENU }
         InstructorPage.INVITES -> AccessCodeExperience(profile, parishMode = false) { page = InstructorPage.MENU }
     }
 }
@@ -62,6 +67,7 @@ private fun InstructorMenu(profile: UserProfile, onBack: () -> Unit, select: (In
         "assignments" -> InstructorPage.ASSIGNMENTS
         "discussions" -> InstructorPage.DISCUSSIONS
         "progress" -> InstructorPage.PROGRESS
+        "daily-formation" -> InstructorPage.DAILY_FORMATION
         "invites" -> InstructorPage.INVITES
         else -> InstructorPage.MENU
     }
@@ -910,6 +916,233 @@ private fun ManagerHeader(
         )
     }
 }
+@Composable
+private fun DailyFormationManager(profile: UserProfile, onBack: () -> Unit) {
+    val repository = remember { InstructorRepository() }
+    val classId = profile.selectedClassId
+    var settings by remember { mutableStateOf(ManagedDailyFormationSettings()) }
+    var entries by remember { mutableStateOf(emptyList<ManagedDailyFormationEntry>()) }
+    var creating by rememberSaveable { mutableStateOf(false) }
+    var editingDate by rememberSaveable { mutableStateOf<String?>(null) }
+    var importingCSV by rememberSaveable { mutableStateOf(false) }
+    var status by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    DisposableEffect(classId) {
+        val listener = repository.listenDailyFormationSettings(classId, { settings = it }, { error = it.localizedMessage })
+        onDispose { listener.remove() }
+    }
+    DisposableEffect(classId) {
+        val listener = repository.listenDailyFormationEntries(classId, { entries = it }, { error = it.localizedMessage })
+        onDispose { listener.remove() }
+    }
+
+    val editing = entries.firstOrNull { it.date == editingDate }
+    if (importingCSV) {
+        DailyFormationCsvImportScreen(profile, onCancel = { importingCSV = false }, onImported = { count ->
+            importingCSV = false; status = "$count Daily Formation entries published."
+        })
+        return
+    }
+    if (creating || editing != null) {
+        DailyFormationEntryEditor(profile, editing, onCancel = { creating = false; editingDate = null }, onSaved = {
+            creating = false; editingDate = null; status = "Daily Formation entry saved."
+        })
+        return
+    }
+
+    var enabled by remember(settings) { mutableStateOf(settings.enabled) }
+    var reminderTime by remember(settings) { mutableStateOf(settings.notificationTime) }
+    var timeZone by remember(settings) { mutableStateOf(settings.timeZone) }
+    LazyColumn(
+        Modifier.fillMaxSize().background(instructorBrush()),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        item {
+            TextButton(onClick = onBack) { Text("‹ Back") }
+            InstructorCard {
+                Text("Daily Formation", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                Text("Create entries one at a time, or import a full liturgical calendar from a spreadsheet.", color = IlluminedThemeTokens.SecondaryText)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(onClick = { creating = true }, enabled = classId.isNotBlank(), modifier = Modifier.weight(1f)) { Text("New Entry") }
+                    OutlinedButton(onClick = { importingCSV = true }, enabled = classId.isNotBlank(), modifier = Modifier.weight(1f)) { Text("Import") }
+                }
+            }
+        }
+        item {
+            InstructorCard {
+                Text("Settings", fontSize = 19.sp, fontWeight = FontWeight.SemiBold)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Enable Daily Formation", Modifier.weight(1f))
+                    Switch(checked = enabled, onCheckedChange = { enabled = it })
+                }
+                Text("Choose when the daily reminder should be sent to users who have not already opened and dismissed today’s card. The time zone determines how that reminder time is interpreted.", color = IlluminedThemeTokens.SecondaryText, fontSize = 13.sp)
+                OutlinedTextField(reminderTime, { reminderTime = it }, Modifier.fillMaxWidth(), label = { Text("Daily reminder time (HH:mm)") }, singleLine = true)
+                OutlinedTextField(timeZone, { timeZone = it }, Modifier.fillMaxWidth(), label = { Text("Time zone") }, singleLine = true)
+                Button(onClick = {
+                    repository.saveDailyFormationSettings(profile, ManagedDailyFormationSettings(enabled, reminderTime.trim(), timeZone.trim()), {
+                        status = "Daily Formation settings saved."
+                    }, { error = it.localizedMessage })
+                }, modifier = Modifier.fillMaxWidth()) { Text("Save Settings") }
+            }
+        }
+        status?.let { item { Text(it, color = IlluminedThemeTokens.Blue) } }
+        if (entries.isEmpty()) item { InstructorCard { Text("No Daily Formation entries yet.", color = IlluminedThemeTokens.SecondaryText) } }
+        items(entries, key = { it.date }) { entry ->
+            InstructorListCard(onClick = { editingDate = entry.date }, description = "${entry.title}. ${entry.date}. ${if (entry.isPublished) "Published" else "Draft"}.") {
+                Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                    InstructorSymbol(InstructorSymbolKind.Calendar, IlluminedThemeTokens.Gold, Modifier.size(32.dp))
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(entry.title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                        Text("${entry.date} · ${entry.type.replaceFirstChar { it.uppercase() }} · ${entry.colorCode}", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                        Text(if (entry.isPublished) "Published" else "Draft", fontSize = 13.sp, color = IlluminedThemeTokens.Blue)
+                    }
+                    InstructorSymbol(InstructorSymbolKind.Chevron, IlluminedThemeTokens.SecondaryText, Modifier.size(10.dp, 18.dp))
+                }
+            }
+        }
+    }
+    InstructorErrorAlert("Daily Formation Error", error) { error = null }
+}
+
+@Composable
+private fun DailyFormationCsvImportScreen(profile: UserProfile, onCancel: () -> Unit, onImported: (Int) -> Unit) {
+    val repository = remember { InstructorRepository() }
+    val context = LocalContext.current
+    var csv by rememberSaveable { mutableStateOf("date,type,title,details,color\n2026-09-03,saint,Saint Gregory the Great,\"Pope and Doctor of the Church, remembered for pastoral leadership and sacred music.\",WHITE\n2026-09-04,note,Friday Penance,Offer prayer or another act of penance today.,GREEN") }
+    var preview by remember { mutableStateOf<DailyFormationCsvPreview?>(null) }
+    var fileError by remember { mutableStateOf<String?>(null) }
+    var saving by remember { mutableStateOf(false) }
+    val fileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                    ?: error("The selected file could not be read.")
+            }.onSuccess {
+                csv = it; preview = null; fileError = null
+            }.onFailure {
+                fileError = "The CSV file could not be opened: ${it.localizedMessage ?: "Unknown error"}"
+            }
+        }
+    }
+    BackHandler { if (!saving) onCancel() }
+    LazyColumn(
+        Modifier.fillMaxSize().background(instructorBrush()),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        item { TextButton(onClick = onCancel, enabled = !saving) { Text("‹ Cancel") } }
+        item {
+            InstructorCard {
+                Text("Import Daily Formation", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                Text("Use this when you already have your liturgical calendar in Excel, Google Sheets, or another spreadsheet. Choose the CSV file or paste its rows below, preview the cards, then publish them.", color = IlluminedThemeTokens.SecondaryText)
+                Text("Expected columns", fontWeight = FontWeight.SemiBold)
+                Text("date, type, title, details, color", color = IlluminedThemeTokens.Gold, fontWeight = FontWeight.SemiBold)
+                Text("Use YYYY-MM-DD dates; fact, saint, or note types; and WHITE, GOLD, GREEN, RED, PURPLE, or ROSE colors.", color = IlluminedThemeTokens.SecondaryText, fontSize = 13.sp)
+            }
+        }
+        item {
+            InstructorCard {
+                Text("Choose or Paste Calendar", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                OutlinedButton(onClick = { fileLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain")) }, enabled = !saving, modifier = Modifier.fillMaxWidth()) { Text("Choose CSV File") }
+                OutlinedTextField(csv, { csv = it; preview = null }, Modifier.fillMaxWidth().heightIn(min = 190.dp), textStyle = LocalTextStyle.current.copy(fontSize = 14.sp), minLines = 8, enabled = !saving)
+                OutlinedButton(onClick = { preview = DailyFormationCsvParser.parse(csv) }, enabled = csv.isNotBlank() && !saving, modifier = Modifier.fillMaxWidth()) { Text("Preview Calendar") }
+                fileError?.let { Text(it, color = Color.Red, fontSize = 13.sp) }
+            }
+        }
+        preview?.let { result ->
+            item {
+                InstructorCard {
+                    Text("Preview", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Text("${result.validRows.size} valid of ${result.totalRows} entries ready to publish.", color = IlluminedThemeTokens.SecondaryText)
+                    result.issues.take(12).forEach { issue -> Text("Row ${issue.rowNumber}: ${issue.message}", color = Color.Red, fontSize = 13.sp, fontWeight = FontWeight.SemiBold) }
+                    result.validRows.take(20).forEach { row ->
+                        Surface(shape = RoundedCornerShape(10.dp), color = Color.White.copy(.72f)) {
+                            Column(Modifier.fillMaxWidth().padding(10.dp)) {
+                                Text(row.title, fontWeight = FontWeight.SemiBold)
+                                Text("Row ${row.rowNumber} · ${row.date} · ${row.type.replaceFirstChar { it.uppercase() }} · ${row.colorCode}", color = IlluminedThemeTokens.SecondaryText, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                    if (result.validRows.size > 20) Text("Plus ${result.validRows.size - 20} more valid entries.", color = IlluminedThemeTokens.SecondaryText, fontSize = 13.sp)
+                    Text("An imported row replaces the entry with the same date in this classroom only.", color = IlluminedThemeTokens.SecondaryText, fontSize = 13.sp)
+                }
+            }
+            item {
+                Button(onClick = {
+                    saving = true
+                    repository.importDailyFormationEntries(profile, result.validRows, { onImported(result.validRows.size) }, {
+                        saving = false; fileError = it.localizedMessage
+                    })
+                }, enabled = !saving && result.validRows.isNotEmpty(), modifier = Modifier.fillMaxWidth()) { Text(if (saving) "Publishing…" else "Publish Calendar") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DailyFormationEntryEditor(profile: UserProfile, value: ManagedDailyFormationEntry?, onCancel: () -> Unit, onSaved: () -> Unit) {
+    val repository = remember { InstructorRepository() }
+    val context = LocalContext.current
+    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.US) }
+    var date by remember(value?.date) { mutableStateOf(value?.date ?: dateFormatter.format(java.util.Date())) }
+    var type by remember(value?.date) { mutableStateOf(value?.type ?: "saint") }
+    var title by remember(value?.date) { mutableStateOf(value?.title.orEmpty()) }
+    var details by remember(value?.date) { mutableStateOf(value?.details.orEmpty()) }
+    var color by remember(value?.date) { mutableStateOf(value?.colorCode ?: "WHITE") }
+    var published by remember(value?.date) { mutableStateOf(value?.isPublished ?: true) }
+    var saving by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    LazyColumn(Modifier.fillMaxSize().background(instructorBrush()), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        item { TextButton(onClick = onCancel, enabled = !saving) { Text("‹ Cancel") }; Text(if (value == null) "New Daily Formation Entry" else "Edit Daily Formation Entry", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue) }
+        item {
+            InstructorCard {
+                OutlinedButton(onClick = {
+                    val calendar = Calendar.getInstance()
+                    runCatching { dateFormatter.parse(date) }.getOrNull()?.let { calendar.time = it }
+                    DatePickerDialog(context, { _, year, month, day ->
+                        calendar.set(year, month, day, 0, 0, 0); calendar.set(Calendar.MILLISECOND, 0); date = dateFormatter.format(calendar.time)
+                    }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+                }, enabled = value == null && !saving, modifier = Modifier.fillMaxWidth()) { Text("Date · $date") }
+                DailyFormationChoice("Type", type, listOf("fact", "saint", "note"), !saving) { type = it }
+                OutlinedTextField(title, { title = it }, Modifier.fillMaxWidth(), label = { Text("Title") }, singleLine = true, enabled = !saving)
+                OutlinedTextField(details, { details = it }, Modifier.fillMaxWidth(), label = { Text("Details") }, minLines = 6, maxLines = 12, enabled = !saving)
+                DailyFormationChoice("Liturgical color", color, listOf("WHITE", "GOLD", "GREEN", "RED", "PURPLE", "ROSE"), !saving) { color = it }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Text("Published", Modifier.weight(1f)); Switch(checked = published, onCheckedChange = { published = it }, enabled = !saving) }
+                Button(onClick = {
+                    saving = true
+                    repository.saveDailyFormationEntry(profile, ManagedDailyFormationEntry(date, type, title, details, color, published), onSaved, {
+                        saving = false; error = it.localizedMessage
+                    })
+                }, enabled = !saving && title.isNotBlank() && details.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text(if (saving) "Saving…" else "Save Entry") }
+                if (value != null) OutlinedButton(onClick = { confirmingDelete = true }, enabled = !saving, modifier = Modifier.fillMaxWidth()) { Text("Delete Entry", color = Color.Red) }
+            }
+        }
+    }
+    if (confirmingDelete && value != null) AlertDialog(
+        onDismissRequest = { confirmingDelete = false },
+        title = { Text("Delete this Daily Formation entry?") },
+        text = { Text("The entry for ${value.date} will be removed from this classroom.") },
+        confirmButton = { TextButton(onClick = { saving = true; confirmingDelete = false; repository.deleteDailyFormationEntry(profile, value.date, onSaved, { saving = false; error = it.localizedMessage }) }) { Text("Delete", color = Color.Red) } },
+        dismissButton = { TextButton(onClick = { confirmingDelete = false }) { Text("Cancel") } },
+    )
+    InstructorErrorAlert("Daily Formation Error", error) { error = null }
+}
+
+@Composable
+private fun DailyFormationChoice(label: String, value: String, choices: List<String>, enabled: Boolean, select: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { expanded = true }, enabled = enabled, modifier = Modifier.fillMaxWidth()) { Text("$label · ${value.replaceFirstChar { it.uppercase() }}") }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            choices.forEach { choice -> DropdownMenuItem(text = { Text(choice.replaceFirstChar { it.uppercase() }) }, onClick = { select(choice); expanded = false }) }
+        }
+    }
+}
+
 @Composable
 private fun InstructorListCard(onClick: () -> Unit, description: String, content: @Composable () -> Unit) {
     Surface(

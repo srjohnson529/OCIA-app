@@ -255,6 +255,7 @@ struct LessonDetailScreen: View {
     let allCategories: [LessonCategory]
 
     @State private var htmlHeight: CGFloat = 500
+    @State private var isSavingWithoutQuiz = false
 
     private var isCompleted: Bool {
         profileService.profile?.completedLessons.contains(lesson.id) == true
@@ -296,7 +297,7 @@ struct LessonDetailScreen: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.vertical)
 
-                        if !lesson.quiz.isEmpty {
+                        if !lesson.quiz.isEmpty && lesson.quizPolicy != .hidden {
                             NavigationLink {
                                 QuizReviewView(lesson: lesson)
                             } label: {
@@ -313,19 +314,33 @@ struct LessonDetailScreen: View {
                                 isDiscussionCompleted: isLinkedDiscussionCompleted
                             )
                         }
-                    } else if lesson.quiz.isEmpty {
+                    } else if lesson.quiz.isEmpty && lesson.quizPolicy == .required {
                         ContentUnavailableView("No Quiz Available", systemImage: "questionmark.circle")
                     } else {
-                        NavigationLink {
-                            QuizTakingView(lesson: lesson, category: category, allCategories: allCategories)
-                        } label: {
-                            Label("Begin Quiz", systemImage: "play.circle.fill")
+                        if lesson.quizPolicy != .hidden && !lesson.quiz.isEmpty {
+                            NavigationLink {
+                                QuizTakingView(lesson: lesson, category: category, allCategories: allCategories)
+                            } label: {
+                                Label(lesson.quizPolicy == .optional ? "Begin Quiz" : "Begin Quiz", systemImage: "play.circle.fill")
                                     .foregroundStyle(.white)
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
-                                    .frame(maxWidth: .infinity)                        }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-                        .tint(IlluminedTheme.blue)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            .tint(IlluminedTheme.blue)
+                        }
+
+                        if lesson.quizPolicy != .required {
+                            Button {
+                                completeWithoutQuiz()
+                            } label: {
+                                Label(isSavingWithoutQuiz ? "Saving..." : "Mark Lesson Completed", systemImage: "checkmark.circle.fill")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(IlluminedPrimaryButtonStyle())
+                            .disabled(isSavingWithoutQuiz)
+                        }
                     }
                 }
                 .padding()
@@ -348,6 +363,32 @@ struct LessonDetailScreen: View {
         .onDisappear {
             discussionPromptService.stopPromptListening()
             discussionPromptService.stopParticipationListening()
+        }
+    }
+
+    private func completeWithoutQuiz() {
+        guard lesson.quizPolicy != .required, !isSavingWithoutQuiz else { return }
+        isSavingWithoutQuiz = true
+        Task {
+            var completed = Set(profileService.profile?.completedLessons ?? [])
+            completed.insert(lesson.id)
+            var badges: [String] = []
+            if category.lessons.allSatisfy({ completed.contains($0.id) }) {
+                switch category.category {
+                case "Profession of Faith": badges.append("foundations-complete")
+                case "Celebration of the Christian Mysteries": badges.append("celebration-complete")
+                case "Life in Christ": badges.append("life-in-christ-complete")
+                case "Christian Prayer": badges.append("prayer-complete")
+                default: break
+                }
+            }
+            let visibleLessons = allCategories.flatMap(\.lessons)
+            if !visibleLessons.isEmpty && visibleLessons.allSatisfy({ completed.contains($0.id) }) {
+                badges.append("illumined-graduate")
+            }
+            await profileService.markLessonCompleted(lesson.id)
+            await profileService.awardBadges(badges)
+            isSavingWithoutQuiz = false
         }
     }
 }
