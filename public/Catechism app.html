@@ -2618,7 +2618,7 @@ nav button:focus-visible {
         </div>
         <div id="instructor-summary" class="instructor-summary"></div>
         <div class="instructor-tabs" role="tablist">
-            <button data-instructor-tab="lessons">Lessons</button><button data-instructor-tab="classes">Classrooms</button><button data-instructor-tab="announcements">Announcements</button><button data-instructor-tab="prayers">Prayer requests</button><button data-instructor-tab="progress">Student progress</button><button data-instructor-tab="schedule">Schedule</button>
+            <button data-instructor-tab="lessons">Lessons</button><button data-instructor-tab="daily">Daily Formation</button><button data-instructor-tab="classes">Classrooms</button><button data-instructor-tab="announcements">Announcements</button><button data-instructor-tab="prayers">Prayer requests</button><button data-instructor-tab="progress">Student progress</button><button data-instructor-tab="schedule">Schedule</button>
         </div>
         <div id="instructor-panel" class="instructor-panel"></div>
         <button class="button-theme" id="instructor-back-button">Back to dashboard</button>
@@ -2677,6 +2677,7 @@ nav button:focus-visible {
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-functions-compat.js"></script>
 
     <script>
         // Firebase Initialization
@@ -2693,6 +2694,7 @@ nav button:focus-visible {
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(app);
         const auth = firebase.auth(app);
+        const cloudFunctions = firebase.app().functions('us-central1');
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -4775,6 +4777,32 @@ async function signOut() {
     }
 }
 
+let dailyFormationCardDate = '';
+async function showTodayDailyFormation(force = false) {
+    if (!currentUser || !userProfile?.classId || userProfile.dailyFormationEnabled === false || userProfile.dailyFormationStartupEnabled === false) return;
+    const classroom = db.collection('classrooms').doc(userProfile.classId);
+    try {
+        const settingsSnapshot = await classroom.collection('settings').doc('dailyFormation').get();
+        const settings = settingsSnapshot.data() || {};
+        if (settings.enabled !== true) return;
+        const timeZone = settings.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const date = new Intl.DateTimeFormat('en-CA', { timeZone, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+        if (!force && dailyFormationCardDate === date) return;
+        const receiptId = `${userProfile.classId}_${date}_${currentUser.uid}`;
+        const [entrySnapshot, receiptSnapshot] = await Promise.all([
+            classroom.collection('dailyFormation').doc(date).get(),
+            db.collection('dailyFormationReceipts').doc(receiptId).get()
+        ]);
+        if (!entrySnapshot.exists || entrySnapshot.data().isPublished === false || (!force && receiptSnapshot.data()?.dismissedAt)) return;
+        const entry = entrySnapshot.data(),palette={WHITE:['#fffdf7','#a87823','#211b13','#211b13'],GOLD:['#fff8e5','#c99c4a','#211b13','#211b13'],GREEN:['#eef7ef','#2f6b3c','#17351d','#fff'],RED:['#fff0ef','#9f2f2f','#471515','#fff'],PURPLE:['#f5effa','#67418a','#321f45','#fff'],ROSE:['#fff0f4','#b75f78','#572b38','#211b13']},colors=palette[entry.colorCode]||palette.GREEN;
+        dailyFormationCardDate = date;
+        await db.collection('dailyFormationReceipts').doc(receiptId).set({classId:userProfile.classId,date,userId:currentUser.uid,displayedAt:instructorTimestamp()},{merge:true});
+        document.getElementById('daily-formation-modal')?.remove();
+        const modal=document.createElement('div');modal.id='daily-formation-modal';modal.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(20,25,30,.62);display:grid;place-items:center;padding:20px';modal.innerHTML=`<article role="dialog" aria-modal="true" aria-labelledby="daily-formation-title" style="width:min(620px,100%);max-height:90vh;overflow:auto;background:${colors[0]};color:${colors[2]};border:4px solid ${colors[1]};border-radius:24px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.35)"><div style="color:${colors[1]};font-weight:800;letter-spacing:.12em;text-transform:uppercase">${esc(entry.type==='saint'?'Saint of the Day':entry.type==='fact'?'Fact of the Day':'Liturgical Note')} · ${esc(entry.colorCode||'GREEN')}</div><h2 id="daily-formation-title" style="color:${colors[2]};margin:12px 0">${esc(entry.title)}</h2><p style="font-size:1.12rem;line-height:1.6;white-space:pre-wrap">${esc(entry.details)}</p><button class="button-theme" id="dismiss-daily-formation" style="background:${colors[1]};color:${colors[3]}">Dismiss for Today</button></article>`;document.body.appendChild(modal);
+        modal.querySelector('#dismiss-daily-formation').onclick=async()=>{await db.collection('dailyFormationReceipts').doc(receiptId).set({classId:userProfile.classId,date,userId:currentUser.uid,dismissedAt:instructorTimestamp()},{merge:true});modal.remove();};
+    } catch(error) { console.warn('Daily Formation unavailable.', error); }
+}
+
 // Load User Profile - Updated to properly map displayName
 async function loadUserProfile() {
     try {
@@ -4802,7 +4830,10 @@ async function loadUserProfile() {
                     memorizedPrayerIds: profileData.memorizedPrayerIds || [],
                     currentLessonIndex: profileData.currentLessonIndex || 0,
                     email: profileData.email,
-                    isInstructor: profileData.isInstructor || false
+                    isInstructor: profileData.isInstructor || false,
+                    dailyFormationEnabled: profileData.dailyFormationEnabled !== false,
+                    dailyFormationStartupEnabled: profileData.dailyFormationStartupEnabled !== false,
+                    dailyFormationPushEnabled: profileData.dailyFormationPushEnabled !== false
                 };
                 
                 console.log('Profile updated:', userProfile);
@@ -4813,6 +4844,7 @@ async function loadUserProfile() {
                 setupChatListener();
                 setupPrayerRequestListener();
                 setupStudentDashboardListeners();
+                showTodayDailyFormation();
                 const visibleSection = currentVisibleSectionId();
                 if (!visibleSection || visibleSection === 'profile-setup') {
                     showSection('main-menu-section');
@@ -5847,7 +5879,7 @@ async function submitPrayerRequest() {
                 ]) : [{docs:[]},{docs:[]},{docs:[]}];
                 const studentCount=students.docs.filter(d=>d.data().isInstructor!==true).length;
                 document.getElementById('instructor-summary').innerHTML=[['Class ID',instructorClassId||'—'],['Students',studentCount],['Sessions',schedule.size||0],['Prayer requests',prayers.size||0]].map(([l,v])=>`<div class="instructor-stat"><strong>${esc(v)}</strong>${esc(l)}</div>`).join('');
-                await ({lessons:renderInstructorLessons,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
+                await ({lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
             } catch(error) { panel.innerHTML=`<p class="student-firestore-empty">${esc(error.message)}</p>`; }
         }
         async function renderInstructorLessons(panel) {
@@ -5892,6 +5924,30 @@ async function submitPrayerRequest() {
             panel.querySelector('#lesson-editor').addEventListener('submit', updateQuizEditor, true);
             updateQuizEditor();
         };
+
+        function parseDailyFormationCsv(text) {
+            const rows=[]; let row=[],cell='',quoted=false;
+            for(let i=0;i<text.length;i++){const char=text[i],next=text[i+1];if(char==='"'&&quoted&&next==='"'){cell+='"';i++;}else if(char==='"'){quoted=!quoted;}else if(char===','&&!quoted){row.push(cell);cell='';}else if((char==='\n'||char==='\r')&&!quoted){if(char==='\r'&&next==='\n')i++;row.push(cell);if(row.some(value=>value.trim()))rows.push(row);row=[];cell='';}else cell+=char;}
+            row.push(cell);if(row.some(value=>value.trim()))rows.push(row);if(rows.length<2)return [];
+            const headers=rows.shift().map(value=>value.trim().toLowerCase());
+            return rows.map(values=>Object.fromEntries(headers.map((header,index)=>[header,(values[index]||'').trim()])));
+        }
+
+        async function renderInstructorDailyFormation(panel) {
+            if(!instructorClassId){panel.innerHTML='<p class="student-firestore-empty">Select a classroom before managing Daily Formation.</p>';return;}
+            const classroom=db.collection('classrooms').doc(instructorClassId),settingsRef=classroom.collection('settings').doc('dailyFormation');
+            const [settingsSnapshot,entriesSnapshot]=await Promise.all([settingsRef.get(),classroom.collection('dailyFormation').orderBy(firebase.firestore.FieldPath.documentId()).limit(60).get()]);
+            const settings=settingsSnapshot.data()||{},entries=entriesSnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+            panel.innerHTML=`<div class="lesson-library"><div class="lesson-library-header"><div><div class="student-firestore-kicker">Liturgical calendar</div><h3>Daily Formation for ${esc(instructorClassId)}</h3><p class="muted">Publish a fact, saint, or liturgical note for each day. Students control their own startup-card and notification preferences.</p></div></div><div class="instructor-grid"><form id="daily-settings" class="instructor-form"><h3>Classroom settings</h3><label><input id="daily-enabled" type="checkbox" ${settings.enabled===true?'checked':''}> Enable Daily Formation</label><label>Reminder time<input id="daily-time" type="time" value="${esc(settings.notificationTime||'09:00')}" required></label><label>Classroom time zone<input id="daily-timezone" value="${esc(settings.timeZone||Intl.DateTimeFormat().resolvedOptions().timeZone||'America/New_York')}" required></label><button class="button-theme">Save settings</button></form><div class="instructor-form"><h3>Manual push</h3><p class="muted">Send today’s published entry immediately. Test mode sends only to your signed-in instructor devices. Class mode respects student push settings and dismissals.</p><label><input id="daily-push-test-only" type="checkbox" checked> Test mode — instructor only</label><button class="button-theme" id="daily-push-now" type="button">Send today’s push now</button><div id="daily-push-result" class="muted" aria-live="polite"></div></div><form id="daily-entry" class="instructor-form"><h3>Add or replace one day</h3><input id="daily-date" type="date" required><select id="daily-type"><option value="fact">Fact of the Day</option><option value="saint">Saint of the Day</option><option value="note">Liturgical Note</option></select><input id="daily-title" placeholder="Title" required><textarea id="daily-details" rows="5" placeholder="Details" required></textarea><select id="daily-color"><option>WHITE</option><option>GOLD</option><option selected>GREEN</option><option>RED</option><option>PURPLE</option><option>ROSE</option></select><label><input id="daily-published" type="checkbox" checked> Published</label><button class="button-theme">Save calendar entry</button></form></div><div class="instructor-form"><h3>CSV import</h3><p class="muted">Required columns: <code>date,type,title,details,color</code>. Valid types are fact, saint, and note. Valid colors are WHITE, GOLD, GREEN, RED, PURPLE, and ROSE.</p><input id="daily-csv-file" type="file" accept=".csv,text/csv"><textarea id="daily-csv-text" rows="8" placeholder="Paste CSV here or choose a file"></textarea><button class="secondary-action" id="daily-preview" type="button">Preview CSV</button><div id="daily-preview-results"></div><button class="button-theme" id="daily-publish-csv" type="button" disabled>Publish valid entries</button></div><div class="instructor-list"><h3>Calendar entries</h3>${entries.map(entry=>instructorCard(entry.title,`${entry.id} · ${entry.type||'note'} · ${entry.colorCode||'GREEN'}${entry.isPublished===false?' · Draft':''}`,entry.details,`<button data-edit-daily="${entry.id}">Edit</button><button class="danger" data-delete-daily="${entry.id}">Delete</button>`)).join('')||'<p class="muted">No Daily Formation entries yet.</p>'}</div></div>`;
+            panel.querySelector('#daily-settings').onsubmit=async event=>{event.preventDefault();await settingsRef.set({enabled:panel.querySelector('#daily-enabled').checked,notificationTime:formValue('daily-time'),timeZone:formValue('daily-timezone'),updatedAt:instructorTimestamp(),updatedBy:currentUser.uid},{merge:true});showCustomAlert('Daily Formation settings saved.');};
+            panel.querySelector('#daily-push-now').onclick=async()=>{const button=panel.querySelector('#daily-push-now'),result=panel.querySelector('#daily-push-result'),testOnly=panel.querySelector('#daily-push-test-only').checked;if(!testOnly&&!confirm(`Send today's Daily Formation push to eligible students in ${instructorClassId}?`))return;button.disabled=true;result.textContent='Sending…';try{const response=await cloudFunctions.httpsCallable('sendDailyFormationNow')({classId:instructorClassId,testOnly}),data=response.data||{};result.textContent=data.tokenCount===0?'No registered notification tokens were found.':`Delivered to ${data.delivered||0} of ${data.tokenCount||0} registered devices${data.skippedDismissed?`; ${data.skippedDismissed} dismissed today’s card`:''}.`; }catch(error){result.textContent=error.message||'The push could not be sent.';}finally{button.disabled=false;}};
+            panel.querySelector('#daily-entry').onsubmit=async event=>{event.preventDefault();const date=formValue('daily-date');await classroom.collection('dailyFormation').doc(date).set({classId:instructorClassId,date,type:formValue('daily-type'),title:formValue('daily-title'),details:formValue('daily-details'),colorCode:formValue('daily-color'),isPublished:panel.querySelector('#daily-published').checked,updatedAt:instructorTimestamp(),updatedBy:currentUser.uid},{merge:true});await renderInstructorDailyFormation(panel);};
+            panel.querySelector('#daily-csv-file').onchange=async event=>{const file=event.target.files?.[0];if(file)panel.querySelector('#daily-csv-text').value=await file.text();};
+            let validRows=[];panel.querySelector('#daily-preview').onclick=()=>{const colors=new Set(['WHITE','GOLD','GREEN','RED','PURPLE','ROSE']),types=new Set(['fact','saint','note']),parsed=parseDailyFormationCsv(panel.querySelector('#daily-csv-text').value);validRows=[];const results=parsed.map((row,index)=>{const color=(row.color||row.colorcode||'').toUpperCase(),date=row.date||'',type=(row.type||'').toLowerCase(),problems=[];if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||Number.isNaN(Date.parse(`${date}T00:00:00`)))problems.push('invalid date');if(!types.has(type))problems.push('invalid type');if(!row.title)problems.push('missing title');if(!row.details)problems.push('missing details');if(!colors.has(color))problems.push('invalid color');if(!problems.length)validRows.push({...row,date,type,colorCode:color});return `<tr><td>${index+2}</td><td>${esc(date)}</td><td>${esc(row.title||'')}</td><td>${problems.length?`<span style="color:#a22">${esc(problems.join(', '))}</span>`:'Valid'}</td></tr>`;});panel.querySelector('#daily-preview-results').innerHTML=`<p><strong>${validRows.length}</strong> valid of ${parsed.length} entries.</p><div style="overflow:auto"><table><thead><tr><th>Row</th><th>Date</th><th>Title</th><th>Status</th></tr></thead><tbody>${results.join('')}</tbody></table></div>`;panel.querySelector('#daily-publish-csv').disabled=!validRows.length;};
+            panel.querySelector('#daily-publish-csv').onclick=async()=>{if(!validRows.length)return;const batch=db.batch();validRows.forEach(row=>batch.set(classroom.collection('dailyFormation').doc(row.date),{classId:instructorClassId,date:row.date,type:row.type,title:row.title,details:row.details,colorCode:row.colorCode,isPublished:true,updatedAt:instructorTimestamp(),updatedBy:currentUser.uid},{merge:true}));await batch.commit();await renderInstructorDailyFormation(panel);showCustomAlert(`${validRows.length} Daily Formation entries published.`);};
+            panel.querySelectorAll('[data-edit-daily]').forEach(button=>button.onclick=()=>{const entry=entries.find(item=>item.id===button.dataset.editDaily);panel.querySelector('#daily-date').value=entry.id;panel.querySelector('#daily-type').value=entry.type||'note';panel.querySelector('#daily-title').value=entry.title||'';panel.querySelector('#daily-details').value=entry.details||'';panel.querySelector('#daily-color').value=entry.colorCode||'GREEN';panel.querySelector('#daily-published').checked=entry.isPublished!==false;panel.querySelector('#daily-date').scrollIntoView({behavior:'smooth'});});
+            panel.querySelectorAll('[data-delete-daily]').forEach(button=>button.onclick=async()=>{if(!confirm('Delete this Daily Formation entry?'))return;await classroom.collection('dailyFormation').doc(button.dataset.deleteDaily).delete();await renderInstructorDailyFormation(panel);});
+        }
 
         async function renderInstructorClasses(panel) {
             const ids=instructorClasses(); const snaps=await Promise.all(ids.map(id=>db.collection('classrooms').doc(id).get()));
