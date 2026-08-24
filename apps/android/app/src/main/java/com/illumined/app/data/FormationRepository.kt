@@ -221,6 +221,12 @@ private fun DocumentSnapshot?.toUserProfile(): UserProfile {
 
 private fun QuerySnapshot.toAssignments(): List<Assignment> = documents
     .filter { it.getBoolean("isActive") != false }
+    .sortedByDescending { document ->
+        document.getTimestamp("createdAt")?.seconds
+            ?: document.getTimestamp("updatedAt")?.seconds
+            ?: document.getTimestamp("dueAt")?.seconds
+            ?: Long.MIN_VALUE
+    }
     .map { document ->
         val parsedLessonLinks = (document.get("lessonLinks") as? List<*>)
             .orEmpty()
@@ -263,7 +269,6 @@ private fun QuerySnapshot.toAssignments(): List<Assignment> = documents
             dueAt = document.getTimestamp("dueAt"),
         )
     }
-    .sortedBy { it.dueAt?.seconds ?: Long.MAX_VALUE }
 
 private fun QuerySnapshot.toAssignmentCompletions(): List<AssignmentCompletion> = documents.map { document ->
     AssignmentCompletion(

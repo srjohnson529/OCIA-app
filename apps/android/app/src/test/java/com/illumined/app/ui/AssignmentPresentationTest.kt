@@ -11,10 +11,10 @@ class AssignmentPresentationTest {
     private fun assignment(id: String, lessons: List<AssignmentLessonLink> = emptyList(), readings: List<AssignmentReading> = emptyList()) =
         Assignment(id, "class", id, "", "", lessons, "", readings, true, null)
 
-    @Test fun homePreviewMatchesIosFiveItemLimitAndRemainder() {
+    @Test fun homePreviewMatchesIosThreeItemLimitAndRemainder() {
         val assignments = (1..7).map { assignment("a$it") }
-        assertEquals(listOf("a1", "a2", "a3", "a4", "a5"), homeAssignmentPreview(assignments).map { it.id })
-        assertEquals(2, remainingHomeAssignmentCount(assignments))
+        assertEquals(listOf("a1", "a2", "a3"), homeAssignmentPreview(assignments).map { it.id })
+        assertEquals(4, remainingHomeAssignmentCount(assignments))
         assertEquals(0, remainingHomeAssignmentCount(assignments.take(3)))
     }
 

@@ -8,5 +8,5 @@ internal fun Assignment.homeContentLabel(): String? = when {
     else -> null
 }
 
-internal fun homeAssignmentPreview(assignments: List<Assignment>) = assignments.take(5)
-internal fun remainingHomeAssignmentCount(assignments: List<Assignment>) = (assignments.size - 5).coerceAtLeast(0)
+internal fun homeAssignmentPreview(assignments: List<Assignment>) = assignments.take(3)
+internal fun remainingHomeAssignmentCount(assignments: List<Assignment>) = (assignments.size - 3).coerceAtLeast(0)

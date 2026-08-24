@@ -86,7 +86,7 @@ struct DashboardView: View {
                             AnnouncementBoardCard(announcements: announcementService.activeAnnouncements)
 
                             AssignmentsCard(
-                                assignments: assignmentService.upcomingActiveAssignments,
+                                assignments: assignmentService.activeAssignmentsNewestFirst,
                                 completedAssignmentIds: assignmentCompletionService.completedAssignmentIds,
                                 lessonCategories: lessonService.categories,
                                 profile: profile,
@@ -316,7 +316,7 @@ private struct AssignmentsCard: View {
     @ObservedObject var assignmentCompletionService: AssignmentCompletionService
 
     private var visibleAssignments: [Assignment] {
-        Array(assignments.prefix(5))
+        Array(assignments.prefix(3))
     }
 
     var body: some View {

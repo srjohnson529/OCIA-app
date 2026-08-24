@@ -19,6 +19,14 @@ final class AssignmentService: ObservableObject {
         activeAssignments.sorted { $0.dueDate < $1.dueDate }
     }
 
+    var activeAssignmentsNewestFirst: [Assignment] {
+        activeAssignments.sorted {
+            let leftDate = $0.createdAt?.dateValue() ?? $0.updatedAt?.dateValue() ?? $0.dueAt?.dateValue() ?? .distantPast
+            let rightDate = $1.createdAt?.dateValue() ?? $1.updatedAt?.dateValue() ?? $1.dueAt?.dateValue() ?? .distantPast
+            return leftDate > rightDate
+        }
+    }
+
     func listen(classId: String) {
         stopListening()
 
