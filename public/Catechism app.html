@@ -3553,9 +3553,11 @@ nav button:focus-visible {
                     });
 
                     assignments.sort((a, b) => {
-                        const aDate = a.dueAt && a.dueAt.toDate ? a.dueAt.toDate() : new Date(8640000000000000);
-                        const bDate = b.dueAt && b.dueAt.toDate ? b.dueAt.toDate() : new Date(8640000000000000);
-                        return aDate - bDate;
+                        const aStamp = a.createdAt || a.updatedAt || a.dueAt;
+                        const bStamp = b.createdAt || b.updatedAt || b.dueAt;
+                        const aDate = aStamp && aStamp.toDate ? aStamp.toDate() : new Date(0);
+                        const bDate = bStamp && bStamp.toDate ? bStamp.toDate() : new Date(0);
+                        return bDate - aDate;
                     });
 
                     dashboardAssignments = assignments.filter(item => item.isActive !== false);
@@ -3702,14 +3704,14 @@ nav button:focus-visible {
             button.appendChild(title);
             button.appendChild(meta);
 
-            assignments.slice(0, 5).forEach(assignment => {
+            assignments.slice(0, 3).forEach(assignment => {
                 button.appendChild(buildAssignmentSummaryRow(assignment));
             });
 
-            if (assignments.length > 5) {
+            if (assignments.length > 3) {
                 const more = document.createElement('div');
                 more.className = 'student-firestore-meta';
-                more.textContent = `+ ${assignments.length - 5} more`;
+                more.textContent = `+ ${assignments.length - 3} more`;
                 button.appendChild(more);
             }
 
