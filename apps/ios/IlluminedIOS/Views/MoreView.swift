@@ -14,6 +14,19 @@ struct MoreView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         VStack(spacing: 14) {
+                            if profileService.profile?.isInstructor == true {
+                                NavigationLink {
+                                    InstructorDashboardView()
+                                } label: {
+                                    MoreMenuCard(
+                                        title: "Instructor Tools",
+                                        subtitle: "Manage announcements, schedule, assignments, and student progress.",
+                                        systemImage: "person.text.rectangle"
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+
                             NavigationLink {
                                 AchievementsView()
                             } label: {
@@ -70,19 +83,6 @@ struct MoreView: View {
                                 )
                             }
                             .buttonStyle(.plain)
-
-                            if profileService.profile?.isInstructor == true {
-                                NavigationLink {
-                                    InstructorDashboardView()
-                                } label: {
-                                    MoreMenuCard(
-                                        title: "Instructor Tools",
-                                        subtitle: "Manage announcements, schedule, assignments, and student progress.",
-                                        systemImage: "person.text.rectangle"
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                            }
 
                             if profileService.profile?.isAdmin == true {
                                 NavigationLink {

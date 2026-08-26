@@ -39,7 +39,10 @@ struct DiscussionBoardView: View {
     @FocusState private var focusedField: DiscussionFocusField?
 
     private var matchingAssignments: [Assignment] {
-        assignmentService.activeAssignments.filter { assignment in
+        if let assignmentId = prompt.assignmentId, !assignmentId.isEmpty {
+            return assignmentService.activeAssignments.filter { $0.id == assignmentId }
+        }
+        return assignmentService.activeAssignments.filter { assignment in
             assignment.linkedLessons.contains { $0.lessonId == prompt.lessonId }
         }
     }
@@ -66,7 +69,7 @@ struct DiscussionBoardView: View {
                                     .font(IlluminedTheme.font(size: 21, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text(prompt.lessonTitle)
+                                Text(prompt.linkedContentTitle)
                                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.gold)
 
@@ -75,7 +78,7 @@ struct DiscussionBoardView: View {
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .lineSpacing(4)
 
-                                if prompt.requiredForAssignment {
+                                if prompt.requiredForAssignment && !matchingAssignments.isEmpty {
                                     Label("Post a response to complete the discussion assignment.", systemImage: "checkmark.seal")
                                         .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
@@ -289,6 +292,11 @@ struct DiscussionBoardView: View {
         Task {
             let didDelete = await discussionService.deletePost(post, prompt: prompt)
             if didDelete {
+                if let profile = profileService.profile {
+                    for assignment in matchingAssignments {
+                        await completionService.setCompleted(false, assignment: assignment, profile: profile)
+                    }
+                }
                 editDrafts[postId] = nil
                 replyDrafts[postId] = nil
                 if editingPostId == postId {

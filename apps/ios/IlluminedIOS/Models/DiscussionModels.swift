@@ -8,6 +8,8 @@ struct DiscussionPrompt: Identifiable, Codable, Equatable, Hashable {
     var title: String
     var prompt: String
     var requiredForAssignment: Bool
+    var assignmentId: String?
+    var assignmentTitle: String?
     var classId: String?
     var createdBy: String?
     var createdByName: String?
@@ -21,6 +23,17 @@ struct DiscussionPrompt: Identifiable, Codable, Equatable, Hashable {
 
     var isInstructorCreated: Bool {
         classId != nil
+    }
+
+    var linkedContentTitle: String {
+        let assignment = (assignmentTitle ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !assignment.isEmpty { return assignment }
+        let lesson = lessonTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        return lesson.isEmpty ? "Discussion Activity" : lesson
+    }
+
+    var isAssignmentLinked: Bool {
+        !(assignmentId ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
 

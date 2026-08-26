@@ -183,11 +183,8 @@ final class AssignmentCompletionService: ObservableObject {
             errorMessage = nil
             try await db.collection("assignmentCompletions").document(documentId).setData(data, merge: true)
 
-            let otherReadingsCompleted = assignment.assignedReadings
-                .filter { $0.id != reading.id }
-                .allSatisfy { isReadingCompleted(assignment: assignment, reading: $0) }
-            let shouldCompleteAssignment = isCompleted && otherReadingsCompleted
-            await setCompleted(shouldCompleteAssignment, assignment: assignment, profile: profile)
+            // Reading progress is an item-level step. The assignment itself is
+            // completed only after every reading, lesson, and linked discussion.
         } catch {
             errorMessage = error.localizedDescription
         }

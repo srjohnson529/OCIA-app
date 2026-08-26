@@ -5,6 +5,7 @@ import SwiftUI
 
 struct DailyFormationEntry: Identifiable {
     let id: String
+    let classId: String
     let date: String
     let type: String
     let title: String
@@ -322,18 +323,35 @@ final class DailyFormationService: ObservableObject {
     @Published var presentedEntry: DailyFormationEntry?
     @Published var statusMessage: String?
     private let db = Firestore.firestore()
-    private var classId = ""
+    private var loadGeneration = 0
 
-    func load(profile: UserProfile, force: Bool = false) async {
-        guard !profile.primaryClassId.isEmpty, let uid = Auth.auth().currentUser?.uid else {
+    func load(
+        profile: UserProfile,
+        force: Bool = false,
+        requestedClassId: String? = nil,
+        requestedDate: String? = nil
+    ) async {
+        loadGeneration += 1
+        let generation = loadGeneration
+        let requestedClass = requestedClassId?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let classId: String
+        if let requestedClass,
+           !requestedClass.contains("/"),
+           profile.activeClassIds.contains(requestedClass) {
+            classId = requestedClass
+        } else {
+            classId = profile.primaryClassId
+        }
+
+        guard !classId.isEmpty, let uid = Auth.auth().currentUser?.uid else {
             presentedEntry = nil
             if force { statusMessage = "Join a class before opening today’s card." }
             return
         }
-        classId = profile.primaryClassId
         do {
             let settings = try await db.collection("classrooms").document(classId)
                 .collection("settings").document("dailyFormation").getDocument()
+            guard generation == loadGeneration else { return }
             guard settings.get("enabled") as? Bool != false else {
                 if force { statusMessage = "Daily Formation is not enabled for this class." }
                 return
@@ -342,20 +360,30 @@ final class DailyFormationService: ObservableObject {
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = TimeZone(identifier: zoneName) ?? .current
             let parts = calendar.dateComponents([.year, .month, .day], from: Date())
-            let date = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+            let currentDate = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+            let date: String
+            if let requestedDate,
+               requestedDate.range(of: "^\\d{4}-\\d{2}-\\d{2}$", options: .regularExpression) != nil {
+                date = requestedDate
+            } else {
+                date = currentDate
+            }
             let receiptId = "\(classId)_\(date)_\(uid)"
             if !force {
                 let receipt = try await db.collection("dailyFormationReceipts").document(receiptId).getDocument()
+                guard generation == loadGeneration else { return }
                 guard receipt.get("dismissedAt") == nil else { return }
             }
             let document = try await db.collection("classrooms").document(classId)
                 .collection("dailyFormation").document(date).getDocument()
+            guard generation == loadGeneration else { return }
             guard document.exists, document.get("isPublished") as? Bool != false else {
                 if force { statusMessage = "No Daily Formation card is published for today." }
                 return
             }
             let entry = DailyFormationEntry(
-                id: date,
+                id: "\(classId)_\(date)",
+                classId: classId,
                 date: date,
                 type: document.get("type") as? String ?? "note",
                 title: document.get("title") as? String ?? "Daily Formation",
@@ -366,20 +394,23 @@ final class DailyFormationService: ObservableObject {
                 "userId": uid, "classId": classId, "date": date,
                 "displayedAt": FieldValue.serverTimestamp()
             ], merge: true)
+            guard generation == loadGeneration else { return }
             statusMessage = nil
             presentedEntry = entry
         } catch {
             // Daily formation is supplemental and must never block app startup.
-            if force { statusMessage = "Today’s Daily Formation card could not be loaded." }
+            if generation == loadGeneration, force {
+                statusMessage = "Today’s Daily Formation card could not be loaded."
+            }
         }
     }
 
     func dismiss(_ entry: DailyFormationEntry) async {
         presentedEntry = nil
-        guard let uid = Auth.auth().currentUser?.uid, !classId.isEmpty else { return }
+        guard let uid = Auth.auth().currentUser?.uid, !entry.classId.isEmpty else { return }
         try? await db.collection("dailyFormationReceipts")
-            .document("\(classId)_\(entry.date)_\(uid)").setData([
-                "userId": uid, "classId": classId, "date": entry.date,
+            .document("\(entry.classId)_\(entry.date)_\(uid)").setData([
+                "userId": uid, "classId": entry.classId, "date": entry.date,
                 "dismissedAt": FieldValue.serverTimestamp()
             ], merge: true)
     }

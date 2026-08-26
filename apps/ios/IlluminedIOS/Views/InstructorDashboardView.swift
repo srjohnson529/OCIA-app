@@ -775,13 +775,31 @@ private struct InstructorDailyFormationView: View {
                                 Text("Daily reminder time")
                                     .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                 TextField("HH:mm", text: $reminderTime)
-                                    .textFieldStyle(.roundedBorder)
+                                    .textFieldStyle(.plain)
+                                    .foregroundStyle(IlluminedTheme.ink)
+                                    .tint(IlluminedTheme.blue)
+                                    .padding(.horizontal, 12)
+                                    .frame(minHeight: 46)
+                                    .background(Color.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                            .stroke(IlluminedTheme.gold.opacity(0.24), lineWidth: 1)
+                                    )
                             }
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Time zone")
                                     .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                 TextField("America/New_York", text: $timeZone)
-                                    .textFieldStyle(.roundedBorder)
+                                    .textFieldStyle(.plain)
+                                    .foregroundStyle(IlluminedTheme.ink)
+                                    .tint(IlluminedTheme.blue)
+                                    .padding(.horizontal, 12)
+                                    .frame(minHeight: 46)
+                                    .background(Color.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                            .stroke(IlluminedTheme.gold.opacity(0.24), lineWidth: 1)
+                                    )
                             }
                             Button {
                                 Task { await service.saveSettings(ManagedDailyFormationSettings(enabled: enabled, notificationTime: reminderTime, timeZone: timeZone)) }

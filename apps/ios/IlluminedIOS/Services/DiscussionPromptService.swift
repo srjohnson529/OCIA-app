@@ -84,7 +84,20 @@ final class DiscussionPromptService: ObservableObject {
     }
 
     func prompt(for lessonId: String) -> DiscussionPrompt? {
-        prompts.first { $0.lessonId == lessonId && $0.isVisible }
+        prompts.first { $0.lessonId == lessonId && !$0.isAssignmentLinked && $0.isVisible }
+    }
+
+    func prompt(for assignment: Assignment) -> DiscussionPrompt? {
+        guard let assignmentId = assignment.id else { return nil }
+        if let linked = prompts.first(where: { $0.assignmentId == assignmentId && $0.isVisible }) {
+            return linked
+        }
+
+        // Compatibility for prompts created before assignment-level linking existed.
+        return prompts.first { candidate in
+            !candidate.isAssignmentLinked && candidate.isVisible &&
+            assignment.linkedLessons.contains { $0.lessonId == candidate.lessonId }
+        }
     }
 
     func listenParticipation(classId: String) {
@@ -179,7 +192,7 @@ final class DiscussionPromptService: ObservableObject {
     func createPrompt(
         title: String,
         prompt: String,
-        lesson: Lesson,
+        assignment: Assignment?,
         requiredForAssignment: Bool,
         isActive: Bool,
         profile: UserProfile
@@ -208,13 +221,16 @@ final class DiscussionPromptService: ObservableObject {
         }
 
         let promptId = "discussion-\(UUID().uuidString)"
+        let assignmentId = assignment?.id ?? ""
 
         do {
             errorMessage = nil
             try await db.collection("discussionPrompts").document(promptId).setData([
                 "id": promptId,
-                "lessonId": lesson.id,
-                "lessonTitle": lesson.title,
+                "assignmentId": assignmentId,
+                "assignmentTitle": assignment?.title ?? "",
+                "lessonId": "",
+                "lessonTitle": "",
                 "title": cleanedTitle,
                 "prompt": cleanedPrompt,
                 "requiredForAssignment": requiredForAssignment,
@@ -236,7 +252,7 @@ final class DiscussionPromptService: ObservableObject {
         _ discussionPrompt: DiscussionPrompt,
         title: String,
         prompt: String,
-        lesson: Lesson,
+        assignment: Assignment?,
         requiredForAssignment: Bool,
         isActive: Bool
     ) async -> Bool {
@@ -253,11 +269,15 @@ final class DiscussionPromptService: ObservableObject {
             return false
         }
 
+        let assignmentId = assignment?.id ?? ""
+
         do {
             errorMessage = nil
             try await db.collection("discussionPrompts").document(discussionPrompt.id).updateData([
-                "lessonId": lesson.id,
-                "lessonTitle": lesson.title,
+                "assignmentId": assignmentId,
+                "assignmentTitle": assignment?.title ?? "",
+                "lessonId": "",
+                "lessonTitle": "",
                 "title": cleanedTitle,
                 "prompt": cleanedPrompt,
                 "requiredForAssignment": requiredForAssignment,
@@ -319,6 +339,7 @@ final class DiscussionPromptService: ObservableObject {
             try await db.collection("discussionPosts").addDocument(data: [
                 "promptId": prompt.id,
                 "lessonId": prompt.lessonId,
+                "assignmentId": prompt.assignmentId ?? "",
                 "classId": profile.primaryClassId,
                 "authorId": user.uid,
                 "authorName": profile.displayName,
@@ -329,6 +350,7 @@ final class DiscussionPromptService: ObservableObject {
             try await db.collection("discussionParticipation").document("\(prompt.id)_\(user.uid)").setData([
                 "promptId": prompt.id,
                 "lessonId": prompt.lessonId,
+                "assignmentId": prompt.assignmentId ?? "",
                 "classId": profile.primaryClassId,
                 "userId": user.uid,
                 "studentName": profile.displayName,

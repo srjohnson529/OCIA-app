@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var profileService: ProfileService
     @EnvironmentObject private var notificationService: NotificationService
     @StateObject private var dailyFormation = DailyFormationService()
@@ -27,6 +28,7 @@ struct MainTabView: View {
                         .id(discussionResetID)
                 case .formation:
                     SpiritualFormationView()
+                        .environmentObject(dailyFormation)
                         .id(formationResetID)
                 case .more:
                     MoreView()
@@ -52,10 +54,17 @@ struct MainTabView: View {
         .task(id: profileService.profile) {
             if let profile = profileService.profile { await dailyFormation.load(profile: profile) }
         }
-        .task(id: "\(notificationService.dailyFormationOpenRequest):\(profileService.profile?.userId ?? "")") {
-            guard notificationService.dailyFormationOpenRequest > 0,
+        .task(id: "\(notificationService.dailyFormationOpenRequest?.id.uuidString ?? "none"):\(profileService.profile?.userId ?? ""):\(scenePhase)") {
+            guard scenePhase == .active,
+                  let request = notificationService.dailyFormationOpenRequest,
                   let profile = profileService.profile else { return }
-            await dailyFormation.load(profile: profile, force: true)
+            await dailyFormation.load(
+                profile: profile,
+                force: true,
+                requestedClassId: request.classId,
+                requestedDate: request.date
+            )
+            notificationService.consumeDailyFormationOpenRequest(id: request.id)
         }
         .fullScreenCover(item: $dailyFormation.presentedEntry) { entry in
             DailyFormationCard(entry: entry) {

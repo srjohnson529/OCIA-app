@@ -6,13 +6,27 @@ import Foundation
 import UIKit
 import UserNotifications
 
+struct DailyFormationNotificationRequest: Identifiable, Equatable, Sendable {
+    let id = UUID()
+    let classId: String?
+    let date: String?
+
+    init?(userInfo: [AnyHashable: Any]) {
+        guard userInfo["type"] as? String == "daily_formation" else { return nil }
+        let rawClassId = (userInfo["classId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let rawDate = (userInfo["date"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        classId = rawClassId?.isEmpty == false ? rawClassId : nil
+        date = rawDate?.isEmpty == false ? rawDate : nil
+    }
+}
+
 @MainActor
 final class NotificationService: NSObject, ObservableObject {
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
     @Published private(set) var lastTokenSavedAt: Date?
     @Published var errorMessage: String?
     @Published var statusMessage: String?
-    @Published private(set) var dailyFormationOpenRequest = 0
+    @Published private(set) var dailyFormationOpenRequest: DailyFormationNotificationRequest?
 
     private let db = Firestore.firestore()
     private var currentProfile: UserProfile?
@@ -59,7 +73,7 @@ final class NotificationService: NSObject, ObservableObject {
         refreshAuthorizationStatus()
 
         if notificationsAreEnabled {
-            UIApplication.shared.registerForRemoteNotifications()
+            registerForRemoteNotificationsOnMainThread()
             fetchAndSaveCurrentToken()
         }
     }
@@ -79,7 +93,7 @@ final class NotificationService: NSObject, ObservableObject {
                 return
             }
 
-            UIApplication.shared.registerForRemoteNotifications()
+            registerForRemoteNotificationsOnMainThread()
             fetchAndSaveCurrentToken()
             await updateAllPreferences(enabled: true)
             statusMessage = "Notifications are ready for \(profile.primaryClassId.isEmpty ? "your class" : profile.primaryClassId)."
@@ -92,7 +106,18 @@ final class NotificationService: NSObject, ObservableObject {
         statusMessage = nil
         errorMessage = nil
         guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
-        UIApplication.shared.open(settingsURL)
+        DispatchQueue.main.async {
+            UIApplication.shared.open(settingsURL)
+        }
+    }
+
+    func consumeDailyFormationOpenRequest(id: UUID) {
+        guard dailyFormationOpenRequest?.id == id else { return }
+        dailyFormationOpenRequest = nil
+    }
+
+    private func queueDailyFormationOpen(_ request: DailyFormationNotificationRequest) {
+        dailyFormationOpenRequest = request
     }
 
     private func updateAllPreferences(enabled: Bool) async {
@@ -121,16 +146,23 @@ final class NotificationService: NSObject, ObservableObject {
     }
 
     private func refreshAuthorizationStatus() {
-        Task {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
             let settings = await UNUserNotificationCenter.current().notificationSettings()
-            await MainActor.run {
-                self.authorizationStatus = settings.authorizationStatus
-            }
+            self.authorizationStatus = settings.authorizationStatus
             await updateAllPreferences(enabled: notificationsAreEnabled)
             if notificationsAreEnabled {
-                UIApplication.shared.registerForRemoteNotifications()
+                registerForRemoteNotificationsOnMainThread()
                 fetchAndSaveCurrentToken()
             }
+        }
+    }
+
+    private func registerForRemoteNotificationsOnMainThread() {
+        // UIApplication enforces the physical main thread at runtime. Dispatching
+        // explicitly also protects callers that resume from an async system API.
+        DispatchQueue.main.async {
+            UIApplication.shared.registerForRemoteNotifications()
         }
     }
 
@@ -199,19 +231,33 @@ extension NotificationService: MessagingDelegate {
 extension NotificationService: UNUserNotificationCenterDelegate {
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification
-    ) async -> UNNotificationPresentationOptions {
-        [.banner, .sound, .badge]
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound, .badge])
     }
 
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
-        let type = response.notification.request.content.userInfo["type"] as? String
-        guard type == "daily_formation" else { return }
-        await MainActor.run {
-            self.dailyFormationOpenRequest += 1
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let request = DailyFormationNotificationRequest(
+            userInfo: response.notification.request.content.userInfo
+        )
+
+        // Complete the notification callback immediately. This deliberately avoids
+        // the async delegate bridge, which can resume on a cooperative thread while
+        // UIKit is restoring the application after a notification tap.
+        completionHandler()
+
+        guard let request else { return }
+
+        // Return from the delegate and allow UIKit's restoration transaction to
+        // settle before publishing state. MainTabView waits for an active scene
+        // before loading or presenting the card.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+            self?.queueDailyFormationOpen(request)
         }
     }
 }

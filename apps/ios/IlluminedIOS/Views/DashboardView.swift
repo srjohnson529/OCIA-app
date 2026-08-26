@@ -561,6 +561,7 @@ private struct AssignmentDetailView: View {
     let lessonCategories: [LessonCategory]
     let profile: UserProfile
     @ObservedObject var assignmentCompletionService: AssignmentCompletionService
+    @StateObject private var discussionService = DiscussionPromptService()
     @State private var isSaving = false
 
     private var liveCompleted: Bool {
@@ -576,6 +577,29 @@ private struct AssignmentDetailView: View {
             }
             return nil
         }
+    }
+
+    private var linkedDiscussion: DiscussionPrompt? {
+        discussionService.prompt(for: assignment)
+    }
+
+    private var readingsCompleted: Bool {
+        assignment.assignedReadings.allSatisfy {
+            assignmentCompletionService.isReadingCompleted(assignment: assignment, reading: $0)
+        }
+    }
+
+    private var lessonsCompleted: Bool {
+        assignment.linkedLessons.allSatisfy { profile.completedLessons.contains($0.lessonId) }
+    }
+
+    private var prerequisitesCompleted: Bool {
+        readingsCompleted && lessonsCompleted
+    }
+
+    private var discussionCompleted: Bool {
+        guard let linkedDiscussion else { return true }
+        return discussionService.completedPromptIds.contains(linkedDiscussion.id)
     }
 
     private static let dateFormatter: DateFormatter = {
@@ -621,7 +645,7 @@ private struct AssignmentDetailView: View {
                     if assignment.hasAssignedReading {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Assigned Readings")
+                                Text("Step 1 · Assigned Readings")
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -645,7 +669,7 @@ private struct AssignmentDetailView: View {
                     if !linkedLessonMatches.isEmpty {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Lesson Links")
+                                Text("Step \(assignment.hasAssignedReading ? 2 : 1) · Lessons")
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -690,7 +714,43 @@ private struct AssignmentDetailView: View {
                         }
                     }
 
-                    if !assignment.hasAssignedReading {
+                    if let discussion = linkedDiscussion {
+                        IlluminedCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Step \((assignment.hasAssignedReading ? 1 : 0) + (!linkedLessonMatches.isEmpty ? 1 : 0) + 1) · Discussion")
+                                    .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                    .foregroundStyle(IlluminedTheme.ink)
+
+                                NavigationLink {
+                                    DiscussionBoardView(prompt: discussion)
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: discussionCompleted ? "checkmark.circle.fill" : (prerequisitesCompleted ? "text.bubble.fill" : "lock.fill"))
+                                            .foregroundStyle(discussionCompleted ? .green : IlluminedTheme.blue)
+                                            .frame(width: 34, height: 34)
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(discussion.title)
+                                                .font(IlluminedTheme.font(size: 15, weight: .semibold))
+                                                .foregroundStyle(IlluminedTheme.ink)
+                                            Text(discussionCompleted ? "Completed" : (prerequisitesCompleted ? "Ready after the readings and lessons" : "Complete the readings and lessons first"))
+                                                .font(IlluminedTheme.font(size: 12))
+                                                .foregroundStyle(IlluminedTheme.secondaryText)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundStyle(IlluminedTheme.secondaryText)
+                                    }
+                                    .padding(10)
+                                    .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(!prerequisitesCompleted)
+                                .opacity(prerequisitesCompleted ? 1 : 0.68)
+                            }
+                        }
+                    }
+
+                    if linkedDiscussion == nil {
                         Button {
                             isSaving = true
                             Task {
@@ -703,7 +763,7 @@ private struct AssignmentDetailView: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(IlluminedPrimaryButtonStyle())
-                        .disabled(isSaving)
+                        .disabled(isSaving || !prerequisitesCompleted)
                     }
                 }
                 .padding()
@@ -711,6 +771,15 @@ private struct AssignmentDetailView: View {
         }
         .illuminedBrandHeader()
         .illuminedNavigation()
+        .task(id: profile.primaryClassId) {
+            discussionService.loadPrompts()
+            discussionService.listenPrompts(classId: profile.primaryClassId)
+            discussionService.listenParticipation(classId: profile.primaryClassId)
+        }
+        .onDisappear {
+            discussionService.stopPromptListening()
+            discussionService.stopParticipationListening()
+        }
     }
 }
 

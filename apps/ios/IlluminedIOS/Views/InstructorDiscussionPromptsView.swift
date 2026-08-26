@@ -3,6 +3,7 @@ import SwiftUI
 struct InstructorDiscussionPromptsView: View {
     @EnvironmentObject private var profileService: ProfileService
     @StateObject private var discussionService = DiscussionPromptService()
+    @StateObject private var assignmentService = AssignmentService()
     @State private var isShowingEditor = false
     @State private var selectedPrompt: DiscussionPrompt?
 
@@ -23,7 +24,7 @@ struct InstructorDiscussionPromptsView: View {
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Create discussion prompts and connect them to lessons.")
+                                Text("Create discussion prompts and place them as the final step of an assignment.")
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -46,7 +47,7 @@ struct InstructorDiscussionPromptsView: View {
                             ContentUnavailableView(
                                 "No Discussion Boards",
                                 systemImage: "text.bubble",
-                                description: Text("Create your first lesson-linked discussion prompt.")
+                                description: Text("Create your first assignment-linked discussion prompt.")
                             )
                         }
                     } else {
@@ -73,14 +74,17 @@ struct InstructorDiscussionPromptsView: View {
         .task(id: profileService.profile?.primaryClassId) {
             if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
                 discussionService.listenPrompts(classId: classId, includeHidden: true)
+                assignmentService.listen(classId: classId)
             } else {
                 discussionService.stopPromptListening()
+                assignmentService.stopListening()
             }
         }
         .sheet(isPresented: $isShowingEditor) {
             if let profile = profileService.profile {
                 DiscussionPromptEditorView(
                     mode: .create(profile),
+                    assignments: assignmentService.activeAssignmentsNewestFirst,
                     discussionService: discussionService,
                     isPresented: $isShowingEditor
                 )
@@ -89,6 +93,7 @@ struct InstructorDiscussionPromptsView: View {
         .sheet(item: $selectedPrompt) { prompt in
             DiscussionPromptEditorView(
                 mode: .edit(prompt),
+                assignments: assignmentService.activeAssignmentsNewestFirst,
                 discussionService: discussionService,
                 isPresented: Binding(
                     get: { selectedPrompt != nil },
@@ -124,7 +129,7 @@ private struct InstructorDiscussionPromptCard: View {
                             .foregroundStyle(IlluminedTheme.ink)
                             .lineLimit(2)
 
-                        Label(prompt.lessonTitle, systemImage: "book.closed")
+                        Label(prompt.linkedContentTitle, systemImage: "checklist")
                             .font(IlluminedTheme.font(size: 13))
                             .foregroundStyle(IlluminedTheme.gold)
                             .lineLimit(2)
@@ -157,15 +162,13 @@ private struct DiscussionPromptEditorView: View {
     }
 
     let mode: Mode
+    let assignments: [Assignment]
     @ObservedObject var discussionService: DiscussionPromptService
     @Binding var isPresented: Bool
 
-    @StateObject private var lessonService = LessonCatalogService()
     @State private var title: String
     @State private var promptText: String
-    @State private var selectedLessonId: String
-    @State private var expandedCategoryIds: Set<String> = []
-    @State private var requiredForAssignment: Bool
+    @State private var selectedAssignmentId: String
     @State private var isActive: Bool
     @State private var isSaving = false
     @State private var isConfirmingDelete = false
@@ -179,16 +182,27 @@ private struct DiscussionPromptEditorView: View {
         }
     }
 
-    private var allLessons: [Lesson] {
-        lessonService.categories.flatMap(\.lessons)
+    private var selectedAssignment: Assignment? {
+        assignments.first { $0.id == selectedAssignmentId }
     }
 
-    private var selectedLesson: Lesson? {
-        allLessons.first { $0.id == selectedLessonId }
+    private var assignmentHasAnotherDiscussion: Bool {
+        guard !selectedAssignmentId.isEmpty else { return false }
+        let editingId: String?
+        switch mode {
+        case .create:
+            editingId = nil
+        case .edit(let prompt):
+            editingId = prompt.id
+        }
+        return discussionService.prompts.contains {
+            $0.id != editingId && $0.assignmentId == selectedAssignmentId
+        }
     }
 
-    init(mode: Mode, discussionService: DiscussionPromptService, isPresented: Binding<Bool>) {
+    init(mode: Mode, assignments: [Assignment], discussionService: DiscussionPromptService, isPresented: Binding<Bool>) {
         self.mode = mode
+        self.assignments = assignments
         self.discussionService = discussionService
         self._isPresented = isPresented
 
@@ -196,14 +210,12 @@ private struct DiscussionPromptEditorView: View {
         case .create:
             _title = State(initialValue: "")
             _promptText = State(initialValue: "")
-            _selectedLessonId = State(initialValue: "")
-            _requiredForAssignment = State(initialValue: true)
+            _selectedAssignmentId = State(initialValue: "")
             _isActive = State(initialValue: true)
         case .edit(let prompt):
             _title = State(initialValue: prompt.title)
             _promptText = State(initialValue: prompt.prompt)
-            _selectedLessonId = State(initialValue: prompt.lessonId)
-            _requiredForAssignment = State(initialValue: prompt.requiredForAssignment)
+            _selectedAssignmentId = State(initialValue: prompt.assignmentId ?? "")
             _isActive = State(initialValue: prompt.isVisible)
         }
     }
@@ -238,47 +250,70 @@ private struct DiscussionPromptEditorView: View {
 
                                 Divider()
 
-                                Text("Linked Lesson")
+                                Text("Linked Assignment")
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
-                                if let loadingError = lessonService.loadingError {
-                                    Text(loadingError)
-                                        .font(IlluminedTheme.font(size: 13))
-                                        .foregroundStyle(.red)
-                                } else if allLessons.isEmpty {
-                                    ProgressView("Loading lessons...")
-                                        .font(IlluminedTheme.font(size: 14))
-                                } else {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        if let selectedLesson {
-                                            Label(selectedLesson.title, systemImage: "book.closed")
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Button {
+                                        selectedAssignmentId = ""
+                                    } label: {
+                                        HStack(spacing: 10) {
+                                            Image(systemName: selectedAssignmentId.isEmpty ? "checkmark.circle.fill" : "circle")
+                                                .foregroundStyle(IlluminedTheme.blue)
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                Text("Discussion Activity")
+                                                    .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                                                    .foregroundStyle(IlluminedTheme.ink)
+                                                Text("Available immediately and not part of an assignment.")
+                                                    .font(IlluminedTheme.font(size: 12))
+                                                    .foregroundStyle(IlluminedTheme.secondaryText)
+                                            }
+                                            Spacer()
+                                        }
+                                        .padding(12)
+                                        .background(IlluminedTheme.cream, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    if !assignments.isEmpty {
+                                        if let selectedAssignment {
+                                            Label(selectedAssignment.title, systemImage: "checklist")
                                                 .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                                 .foregroundStyle(IlluminedTheme.blue)
                                                 .lineLimit(2)
                                         } else {
-                                            Text("Choose one lesson for this discussion.")
+                                            Text("Choose the assignment this discussion completes.")
                                                 .font(IlluminedTheme.font(size: 13))
                                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                         }
 
-                                        ForEach(lessonService.categories) { category in
-                                            SingleLessonCategoryPickerSection(
-                                                category: category,
-                                                isExpanded: expandedCategoryIds.contains(category.id),
-                                                selectedLessonId: $selectedLessonId,
-                                                onToggleExpanded: {
-                                                    toggleCategoryExpansion(category.id)
+                                        if assignmentHasAnotherDiscussion {
+                                            Text("That assignment already has a discussion step.")
+                                                .font(IlluminedTheme.font(size: 12, weight: .semibold))
+                                                .foregroundStyle(.red)
+                                        }
+
+                                        ForEach(assignments) { assignment in
+                                            Button {
+                                                selectedAssignmentId = assignment.id ?? ""
+                                            } label: {
+                                                HStack(spacing: 10) {
+                                                    Image(systemName: selectedAssignmentId == assignment.id ? "checkmark.circle.fill" : "circle")
+                                                        .foregroundStyle(IlluminedTheme.blue)
+                                                    Text(assignment.title)
+                                                        .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                                                        .foregroundStyle(IlluminedTheme.ink)
+                                                        .multilineTextAlignment(.leading)
+                                                    Spacer()
                                                 }
-                                            )
+                                                .padding(12)
+                                                .background(IlluminedTheme.cream, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            }
+                                            .buttonStyle(.plain)
                                         }
                                     }
                                 }
-
-                                Toggle("Required for Assignment", isOn: $requiredForAssignment)
-                                    .font(IlluminedTheme.font(size: 16, weight: .semibold))
-                                    .foregroundStyle(IlluminedTheme.ink)
-                                    .tint(IlluminedTheme.blue)
 
                                 Toggle("Visible to Students", isOn: $isActive)
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
@@ -295,7 +330,7 @@ private struct DiscussionPromptEditorView: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(IlluminedPrimaryButtonStyle())
-                        .disabled(isSaving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || promptText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedLesson == nil)
+                        .disabled(isSaving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || promptText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || assignmentHasAnotherDiscussion)
 
                         if case .edit = mode {
                             Button(role: .destructive) {
@@ -328,14 +363,10 @@ private struct DiscussionPromptEditorView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
-            .task {
-                lessonService.loadLessons()
-            }
         }
     }
 
     private func save() {
-        guard let selectedLesson else { return }
         isSaving = true
 
         Task {
@@ -346,8 +377,8 @@ private struct DiscussionPromptEditorView: View {
                 didSave = await discussionService.createPrompt(
                     title: title,
                     prompt: promptText,
-                    lesson: selectedLesson,
-                    requiredForAssignment: requiredForAssignment,
+                    assignment: selectedAssignment,
+                    requiredForAssignment: selectedAssignment != nil,
                     isActive: isActive,
                     profile: profile
                 )
@@ -356,8 +387,8 @@ private struct DiscussionPromptEditorView: View {
                     prompt,
                     title: title,
                     prompt: promptText,
-                    lesson: selectedLesson,
-                    requiredForAssignment: requiredForAssignment,
+                    assignment: selectedAssignment,
+                    requiredForAssignment: selectedAssignment != nil,
                     isActive: isActive
                 )
             }
@@ -383,13 +414,6 @@ private struct DiscussionPromptEditorView: View {
         }
     }
 
-    private func toggleCategoryExpansion(_ categoryId: String) {
-        if expandedCategoryIds.contains(categoryId) {
-            expandedCategoryIds.remove(categoryId)
-        } else {
-            expandedCategoryIds.insert(categoryId)
-        }
-    }
 }
 
 private struct SingleLessonCategoryPickerSection: View {

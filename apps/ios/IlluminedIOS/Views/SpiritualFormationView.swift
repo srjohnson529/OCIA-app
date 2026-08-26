@@ -115,7 +115,7 @@ private struct RosaryMystery: Identifiable, Decodable {
 
 private struct SpiritualFormationMenuView: View {
     @EnvironmentObject private var profileService: ProfileService
-    @StateObject private var dailyFormation = DailyFormationService()
+    @EnvironmentObject private var dailyFormation: DailyFormationService
     let formation: SpiritualFormationCatalog
 
     var body: some View {
@@ -177,9 +177,6 @@ private struct SpiritualFormationMenuView: View {
                 }
             }
             .padding()
-        }
-        .fullScreenCover(item: $dailyFormation.presentedEntry) { entry in
-            DailyFormationCard(entry: entry) { Task { await dailyFormation.dismiss(entry) } }
         }
     }
 }

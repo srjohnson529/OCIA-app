@@ -35,6 +35,18 @@ struct IlluminedIOSTests {
         #expect(!savedProfile.notificationDiscussionReplies)
     }
 
+    @Test func dailyFormationNotificationRequestsPreserveRoutingData() {
+        let request = DailyFormationNotificationRequest(userInfo: [
+            "type": "daily_formation",
+            "classId": "OCIA TOTC",
+            "date": "2026-08-26"
+        ])
+
+        #expect(request?.classId == "OCIA TOTC")
+        #expect(request?.date == "2026-08-26")
+        #expect(DailyFormationNotificationRequest(userInfo: ["type": "announcement"]) == nil)
+    }
+
     @Test func partiallyCreatedProfilesDecodeWithoutAnEmbeddedUserId() throws {
         let data = Data(#"{"displayName":"New Student","classIds":["ocia"]}"#.utf8)
         let profile = try JSONDecoder().decode(UserProfile.self, from: data)
