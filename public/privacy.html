@@ -130,6 +130,26 @@
       padding: 0.8rem 1.2rem;
       text-decoration: none;
     }
+
+    .language-control {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+      color: var(--muted);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 700;
+    }
+
+    .language-control select {
+      border: 1px solid rgba(59, 111, 160, 0.35);
+      border-radius: 999px;
+      background: white;
+      color: var(--ink);
+      font: inherit;
+      padding: 0.55rem 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -145,69 +165,186 @@
   </header>
 
   <main>
-    <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: July 27, 2026</p>
+    <div class="language-control">
+      <label id="language-label" for="privacy-language">Language</label>
+      <select id="privacy-language" aria-labelledby="language-label">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
 
-    <p>
+    <h1 id="policy-title">Privacy Policy</h1>
+    <p class="updated" id="policy-updated">Last updated: July 27, 2026</p>
+
+    <p id="policy-intro">
       Illumined is a Catholic OCIA formation app and website that helps students and instructors participate in lessons, assignments, discussion, prayer, and class communication. This policy explains what information Illumined collects and how it is used.
     </p>
 
-    <h2>Information We Collect</h2>
-    <p>Illumined may collect and store the following information when you create an account or use the app:</p>
+    <h2 id="collect-title">Information We Collect</h2>
+    <p id="collect-intro">Illumined may collect and store the following information when you create an account or use the app:</p>
     <ul>
-      <li>Account information, such as your email address, username, display name, and class ID.</li>
-      <li>Class participation data, such as lesson progress, quiz completion, assignment completion, discussion posts, replies, achievements, and memorized prayers.</li>
-      <li>User-submitted content, such as prayer requests, classroom chat messages, discussion responses, and assignment responses.</li>
-      <li>Notification information, such as a device push notification token if you choose to enable notifications in the mobile app.</li>
-      <li>Basic technical information handled by Firebase services to keep the app secure, authenticated, and functioning.</li>
+      <li id="collect-account">Account information, such as your email address, username, display name, and class ID.</li>
+      <li id="collect-participation">Class participation data, such as lesson progress, quiz completion, assignment completion, discussion posts, replies, achievements, and memorized prayers.</li>
+      <li id="collect-content">User-submitted content, such as prayer requests, classroom chat messages, discussion responses, and assignment responses.</li>
+      <li id="collect-notifications">Notification information, such as a device push notification token if you choose to enable notifications in the mobile app.</li>
+      <li id="collect-technical">Basic technical information handled by Firebase services to keep the app secure, authenticated, and functioning.</li>
     </ul>
 
-    <h2>How We Use Information</h2>
-    <p>We use this information to:</p>
+    <h2 id="use-title">How We Use Information</h2>
+    <p id="use-intro">We use this information to:</p>
     <ul>
-      <li>Create and manage student, instructor, and class accounts.</li>
-      <li>Show lesson progress, assignments, announcements, discussions, and prayer requests.</li>
-      <li>Allow instructors to view student progress and class readiness.</li>
-      <li>Send class-related notifications when notifications are enabled.</li>
-      <li>Maintain the security and reliability of the app.</li>
+      <li id="use-accounts">Create and manage student, instructor, and class accounts.</li>
+      <li id="use-features">Show lesson progress, assignments, announcements, discussions, and prayer requests.</li>
+      <li id="use-instructors">Allow instructors to view student progress and class readiness.</li>
+      <li id="use-notifications">Send class-related notifications when notifications are enabled.</li>
+      <li id="use-security">Maintain the security and reliability of the app.</li>
     </ul>
 
-    <h2>Sharing of Information</h2>
-    <p>
+    <h2 id="sharing-title">Sharing of Information</h2>
+    <p id="sharing-body">
       Illumined does not sell personal information. Student activity and submitted content may be visible to instructors or class members when that visibility is part of the app feature, such as classroom discussion, chat, prayer requests, assignments, and progress tracking.
     </p>
 
-    <h2>Third-Party Services</h2>
-    <p>
+    <h2 id="services-title">Third-Party Services</h2>
+    <p id="services-body">
       Illumined uses Firebase services, including Firebase Authentication, Cloud Firestore, Cloud Functions, and Firebase Cloud Messaging. These services help provide account sign-in, cloud storage, app data synchronization, backend functions, and push notifications.
     </p>
 
-    <h2>Prayer Requests and Discussion Content</h2>
-    <p>
+    <h2 id="content-title">Prayer Requests and Discussion Content</h2>
+    <p id="content-body">
       Prayer requests, chat messages, discussion posts, replies, and assignment responses are user-submitted content. Please do not submit sensitive personal information that you do not want shared with your class or instructor.
     </p>
 
-    <h2>Data Retention</h2>
-    <p>
+    <h2 id="retention-title">Data Retention</h2>
+    <p id="retention-body">
       Illumined keeps account and class participation data as needed to provide the app’s formation features. Some content may be removed automatically, such as prayer requests that expire after their active period. Instructors or administrators may also manage certain class content.
     </p>
 
-    <h2>Children</h2>
-    <p>
+    <h2 id="children-title">Children</h2>
+    <p id="children-body">
       Illumined is intended for parish faith formation use. If a parish uses Illumined with minors, the parish or instructor is responsible for obtaining any required parent or guardian permission.
     </p>
 
-    <h2>Your Choices</h2>
-    <p>
+    <h2 id="choices-title">Your Choices</h2>
+    <p id="choices-body">
       You may choose whether to enable push notifications. You may also sign out of the app at any time. For questions about your account or class data, contact your instructor or parish app administrator.
     </p>
 
-    <h2>Changes to This Policy</h2>
-    <p>
+    <h2 id="changes-title">Changes to This Policy</h2>
+    <p id="changes-body">
       This privacy policy may be updated as Illumined changes. Any updates will be posted on this page.
     </p>
 
-    <a class="home-link" href="/">Return to Illumined</a>
+    <a class="home-link" id="return-link" href="/">Return to Illumined</a>
   </main>
+
+  <script>
+    const privacyTranslations = {
+      en: {
+        pageTitle: 'Illumined Privacy Policy',
+        languageLabel: 'Language',
+        policyTitle: 'Privacy Policy',
+        policyUpdated: 'Last updated: July 27, 2026',
+        policyIntro: 'Illumined is a Catholic OCIA formation app and website that helps students and instructors participate in lessons, assignments, discussion, prayer, and class communication. This policy explains what information Illumined collects and how it is used.',
+        collectTitle: 'Information We Collect',
+        collectIntro: 'Illumined may collect and store the following information when you create an account or use the app:',
+        collectAccount: 'Account information, such as your email address, username, display name, and class ID.',
+        collectParticipation: 'Class participation data, such as lesson progress, quiz completion, assignment completion, discussion posts, replies, achievements, and memorized prayers.',
+        collectContent: 'User-submitted content, such as prayer requests, classroom chat messages, discussion responses, and assignment responses.',
+        collectNotifications: 'Notification information, such as a device push notification token if you choose to enable notifications in the mobile app.',
+        collectTechnical: 'Basic technical information handled by Firebase services to keep the app secure, authenticated, and functioning.',
+        useTitle: 'How We Use Information',
+        useIntro: 'We use this information to:',
+        useAccounts: 'Create and manage student, instructor, and class accounts.',
+        useFeatures: 'Show lesson progress, assignments, announcements, discussions, and prayer requests.',
+        useInstructors: 'Allow instructors to view student progress and class readiness.',
+        useNotifications: 'Send class-related notifications when notifications are enabled.',
+        useSecurity: 'Maintain the security and reliability of the app.',
+        sharingTitle: 'Sharing of Information',
+        sharingBody: 'Illumined does not sell personal information. Student activity and submitted content may be visible to instructors or class members when that visibility is part of the app feature, such as classroom discussion, chat, prayer requests, assignments, and progress tracking.',
+        servicesTitle: 'Third-Party Services',
+        servicesBody: 'Illumined uses Firebase services, including Firebase Authentication, Cloud Firestore, Cloud Functions, and Firebase Cloud Messaging. These services help provide account sign-in, cloud storage, app data synchronization, backend functions, and push notifications.',
+        contentTitle: 'Prayer Requests and Discussion Content',
+        contentBody: 'Prayer requests, chat messages, discussion posts, replies, and assignment responses are user-submitted content. Please do not submit sensitive personal information that you do not want shared with your class or instructor.',
+        retentionTitle: 'Data Retention',
+        retentionBody: 'Illumined keeps account and class participation data as needed to provide the app’s formation features. Some content may be removed automatically, such as prayer requests that expire after their active period. Instructors or administrators may also manage certain class content.',
+        childrenTitle: 'Children',
+        childrenBody: 'Illumined is intended for parish faith formation use. If a parish uses Illumined with minors, the parish or instructor is responsible for obtaining any required parent or guardian permission.',
+        choicesTitle: 'Your Choices',
+        choicesBody: 'You may choose whether to enable push notifications. You may also sign out of the app at any time. For questions about your account or class data, contact your instructor or parish app administrator.',
+        changesTitle: 'Changes to This Policy',
+        changesBody: 'This privacy policy may be updated as Illumined changes. Any updates will be posted on this page.',
+        returnLink: 'Return to Illumined'
+      },
+      es: {
+        pageTitle: 'Política de privacidad de Illumined',
+        languageLabel: 'Idioma',
+        policyTitle: 'Política de privacidad',
+        policyUpdated: 'Última actualización: 27 de julio de 2026',
+        policyIntro: 'Illumined es una aplicación y un sitio web católicos de formación para la OICA que ayudan a estudiantes e instructores a participar en lecciones, tareas, conversaciones, oración y comunicación de la clase. Esta política explica qué información recopila Illumined y cómo se utiliza.',
+        collectTitle: 'Información que recopilamos',
+        collectIntro: 'Illumined puede recopilar y almacenar la siguiente información cuando creas una cuenta o utilizas la aplicación:',
+        collectAccount: 'Información de la cuenta, como tu dirección de correo electrónico, nombre de usuario, nombre para mostrar e ID de clase.',
+        collectParticipation: 'Datos de participación en la clase, como el progreso de las lecciones, la realización de cuestionarios y tareas, publicaciones y respuestas en conversaciones, logros y oraciones memorizadas.',
+        collectContent: 'Contenido enviado por el usuario, como peticiones de oración, mensajes del chat de la clase, respuestas en conversaciones y respuestas a tareas.',
+        collectNotifications: 'Información de notificaciones, como el identificador del dispositivo para notificaciones push si decides activar las notificaciones en la aplicación móvil.',
+        collectTechnical: 'Información técnica básica gestionada por los servicios de Firebase para mantener la seguridad, la autenticación y el funcionamiento de la aplicación.',
+        useTitle: 'Cómo utilizamos la información',
+        useIntro: 'Utilizamos esta información para:',
+        useAccounts: 'Crear y administrar cuentas de estudiantes, instructores y clases.',
+        useFeatures: 'Mostrar el progreso de las lecciones, tareas, anuncios, conversaciones y peticiones de oración.',
+        useInstructors: 'Permitir que los instructores consulten el progreso de los estudiantes y la preparación de la clase.',
+        useNotifications: 'Enviar notificaciones relacionadas con la clase cuando estén activadas.',
+        useSecurity: 'Mantener la seguridad y la confiabilidad de la aplicación.',
+        sharingTitle: 'Divulgación de información',
+        sharingBody: 'Illumined no vende información personal. La actividad del estudiante y el contenido enviado pueden ser visibles para los instructores o miembros de la clase cuando esa visibilidad forme parte de la función de la aplicación, como las conversaciones de la clase, el chat, las peticiones de oración, las tareas y el seguimiento del progreso.',
+        servicesTitle: 'Servicios de terceros',
+        servicesBody: 'Illumined utiliza servicios de Firebase, incluidos Firebase Authentication, Cloud Firestore, Cloud Functions y Firebase Cloud Messaging. Estos servicios proporcionan el inicio de sesión, el almacenamiento en la nube, la sincronización de datos, las funciones del servidor y las notificaciones push.',
+        contentTitle: 'Peticiones de oración y contenido de conversaciones',
+        contentBody: 'Las peticiones de oración, los mensajes del chat, las publicaciones y respuestas en conversaciones y las respuestas a tareas son contenido enviado por los usuarios. No envíes información personal sensible que no desees compartir con tu clase o instructor.',
+        retentionTitle: 'Conservación de datos',
+        retentionBody: 'Illumined conserva los datos de la cuenta y de participación en la clase según sea necesario para ofrecer las funciones de formación de la aplicación. Algunos contenidos pueden eliminarse automáticamente, como las peticiones de oración que vencen después de su período activo. Los instructores o administradores también pueden gestionar ciertos contenidos de la clase.',
+        childrenTitle: 'Menores de edad',
+        childrenBody: 'Illumined está destinado a la formación en la fe en las parroquias. Si una parroquia utiliza Illumined con menores, la parroquia o el instructor son responsables de obtener cualquier autorización necesaria del padre, la madre o el tutor legal.',
+        choicesTitle: 'Tus opciones',
+        choicesBody: 'Puedes decidir si deseas activar las notificaciones push. También puedes cerrar sesión en la aplicación en cualquier momento. Si tienes preguntas sobre tu cuenta o los datos de tu clase, comunícate con tu instructor o con el administrador parroquial de la aplicación.',
+        changesTitle: 'Cambios en esta política',
+        changesBody: 'Esta política de privacidad puede actualizarse a medida que Illumined cambie. Las actualizaciones se publicarán en esta página.',
+        returnLink: 'Volver a Illumined'
+      }
+    };
+
+    const privacyElementIds = {
+      languageLabel: 'language-label', policyTitle: 'policy-title', policyUpdated: 'policy-updated', policyIntro: 'policy-intro',
+      collectTitle: 'collect-title', collectIntro: 'collect-intro', collectAccount: 'collect-account', collectParticipation: 'collect-participation',
+      collectContent: 'collect-content', collectNotifications: 'collect-notifications', collectTechnical: 'collect-technical', useTitle: 'use-title',
+      useIntro: 'use-intro', useAccounts: 'use-accounts', useFeatures: 'use-features', useInstructors: 'use-instructors',
+      useNotifications: 'use-notifications', useSecurity: 'use-security', sharingTitle: 'sharing-title', sharingBody: 'sharing-body',
+      servicesTitle: 'services-title', servicesBody: 'services-body', contentTitle: 'content-title', contentBody: 'content-body',
+      retentionTitle: 'retention-title', retentionBody: 'retention-body', childrenTitle: 'children-title', childrenBody: 'children-body',
+      choicesTitle: 'choices-title', choicesBody: 'choices-body', changesTitle: 'changes-title', changesBody: 'changes-body', returnLink: 'return-link'
+    };
+
+    function applyPrivacyLanguage(language) {
+      const locale = privacyTranslations[language] ? language : 'en';
+      const text = privacyTranslations[locale];
+      document.documentElement.lang = locale;
+      document.title = text.pageTitle;
+      Object.entries(privacyElementIds).forEach(([key, id]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = text[key];
+      });
+      document.getElementById('privacy-language').value = locale;
+      try { localStorage.setItem('illumined.uiLanguage', locale); } catch {}
+    }
+
+    let storedLanguage = null;
+    try { storedLanguage = localStorage.getItem('illumined.uiLanguage'); } catch {}
+    const initialLanguage = privacyTranslations[storedLanguage]
+      ? storedLanguage
+      : (navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en');
+    document.getElementById('privacy-language').addEventListener('change', event => applyPrivacyLanguage(event.target.value));
+    applyPrivacyLanguage(initialLanguage);
+  </script>
 </body>
 </html>
