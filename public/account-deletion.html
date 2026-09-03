@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Instructions for permanently deleting an Illumined account and its associated personal data.">
+  <title>Delete Your Illumined Account</title>
+  <style>
+    :root {
+      --blue: #3b6fa0;
+      --blue-dark: #274e73;
+      --gold: #bf944a;
+      --ink: #1e1c1a;
+      --muted: #625f59;
+      --paper: #fff;
+      --page: #f2f1ec;
+      --border: rgba(191, 148, 74, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(circle at top, #faf9f5 0, var(--page) 65%, #deddd5 100%);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--blue);
+      color: #fff;
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      max-width: 860px;
+      margin: auto;
+    }
+
+    .brand img { width: 62px; height: 62px; object-fit: contain; }
+    .brand-name { display: block; font-size: 2rem; font-weight: 700; }
+    .brand-tagline { color: #e0b565; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+
+    main {
+      width: min(860px, calc(100% - 2rem));
+      margin: 2rem auto;
+      padding: clamp(1.4rem, 4vw, 2.6rem);
+      background: rgba(255, 255, 255, 0.97);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.11);
+    }
+
+    h1, h2 { line-height: 1.2; }
+    h1 { margin: 0 0 0.35rem; color: var(--blue-dark); font-size: clamp(2rem, 6vw, 3rem); }
+    h2 { margin: 2rem 0 0.6rem; color: var(--blue-dark); font-size: 1.45rem; }
+    p, li { max-width: 72ch; }
+    ol, ul { padding-left: 1.45rem; }
+    li + li { margin-top: 0.55rem; }
+
+    .updated { margin-top: 0; color: var(--muted); font-family: system-ui, sans-serif; font-size: 0.88rem; }
+    .notice { margin: 1.5rem 0; padding: 1rem 1.15rem; background: #f7f2e7; border-left: 5px solid var(--gold); border-radius: 8px; }
+    .language-control { display: flex; justify-content: flex-end; align-items: center; gap: 0.6rem; margin-bottom: 1rem; font-family: system-ui, sans-serif; font-size: 0.9rem; font-weight: 700; }
+    .language-control select { border: 1px solid rgba(59, 111, 160, 0.35); border-radius: 999px; background: #fff; color: var(--ink); font: inherit; padding: 0.5rem 0.85rem; }
+
+    .links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2rem; }
+    .links a { display: inline-block; padding: 0.7rem 1rem; border-radius: 999px; font-family: system-ui, sans-serif; font-weight: 700; text-decoration: none; }
+    .primary-link { background: var(--blue); color: #fff; }
+    .secondary-link { border: 1px solid rgba(59, 111, 160, 0.35); color: var(--blue-dark); background: #fff; }
+
+    @media (max-width: 520px) {
+      body { font-size: 17px; }
+      .brand-name { font-size: 1.65rem; }
+      .brand-tagline { font-size: 0.64rem; }
+      .links a { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand" aria-label="Illumined">
+      <img src="images/illumined-logo.png" alt="">
+      <div>
+        <span class="brand-name">Illumined</span>
+        <span class="brand-tagline">Being • Truth • Goodness</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="language-control">
+      <label id="language-label" for="language">Language</label>
+      <select id="language" aria-labelledby="language-label">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+
+    <h1 id="page-title">Delete Your Illumined Account</h1>
+    <p class="updated" id="updated">Last updated: September 3, 2026</p>
+    <p id="intro">Illumined allows every signed-in user to permanently delete their account and associated personal data directly in the mobile app.</p>
+
+    <div class="notice" id="warning"><strong>This action cannot be undone.</strong> You will lose access to your Illumined profile and its saved progress and participation.</div>
+
+    <h2 id="steps-title">How to delete your account</h2>
+    <ol>
+      <li id="step-one">Open Illumined and sign in to the account you want to delete.</li>
+      <li id="step-two">Open <strong>More</strong>, then select <strong>Account</strong>.</li>
+      <li id="step-three">Under <strong>Delete Account</strong>, select <strong>Delete My Account</strong>.</li>
+      <li id="step-four">Enter your password and select <strong>Delete Permanently</strong> to confirm.</li>
+    </ol>
+
+    <h2 id="deleted-title">Data that is deleted</h2>
+    <p id="deleted-intro">After confirmation, Illumined deletes the account and personal data from its active systems, including:</p>
+    <ul>
+      <li id="deleted-account">Your sign-in account and profile information.</li>
+      <li id="deleted-progress">Lesson, quiz, assignment, achievement, and prayer progress associated with your profile.</li>
+      <li id="deleted-content">Your chat messages, discussion posts and replies, assignment participation, and prayer requests.</li>
+      <li id="deleted-notifications">Notification registration information stored with your profile.</li>
+    </ul>
+
+    <h2 id="retained-title">Data that may be retained</h2>
+    <p id="retained-body">Class-wide materials created by an instructor—such as assignments, schedules, announcements, and discussion prompts—may remain available to the class after the instructor deletes the account. Illumined removes the deleted instructor’s identity from those shared records. Illumined does not intentionally retain the deleted user’s personal account data in active systems. Limited security logs or encrypted service backups may remain temporarily under Firebase’s standard retention processes or where required by law.</p>
+
+    <h2 id="help-title">If you cannot access your account</h2>
+    <p id="help-body">If you cannot sign in, first use the password-reset option on the Illumined sign-in screen. After resetting your password, sign in and follow the deletion steps above. Your parish instructor cannot delete the account for you or view your password.</p>
+
+    <div class="links">
+      <a class="primary-link" id="return-link" href="/">Return to Illumined</a>
+      <a class="secondary-link" id="privacy-link" href="/privacy">View Privacy Policy</a>
+    </div>
+  </main>
+
+  <script>
+    const translations = {
+      en: {
+        pageTitle: 'Delete Your Illumined Account', languageLabel: 'Language', updated: 'Last updated: September 3, 2026',
+        intro: 'Illumined allows every signed-in user to permanently delete their account and associated personal data directly in the mobile app.',
+        warning: '<strong>This action cannot be undone.</strong> You will lose access to your Illumined profile and its saved progress and participation.',
+        stepsTitle: 'How to delete your account', stepOne: 'Open Illumined and sign in to the account you want to delete.',
+        stepTwo: 'Open <strong>More</strong>, then select <strong>Account</strong>.', stepThree: 'Under <strong>Delete Account</strong>, select <strong>Delete My Account</strong>.',
+        stepFour: 'Enter your password and select <strong>Delete Permanently</strong> to confirm.', deletedTitle: 'Data that is deleted',
+        deletedIntro: 'After confirmation, Illumined deletes the account and personal data from its active systems, including:',
+        deletedAccount: 'Your sign-in account and profile information.', deletedProgress: 'Lesson, quiz, assignment, achievement, and prayer progress associated with your profile.',
+        deletedContent: 'Your chat messages, discussion posts and replies, assignment participation, and prayer requests.',
+        deletedNotifications: 'Notification registration information stored with your profile.', retainedTitle: 'Data that may be retained',
+        retainedBody: 'Class-wide materials created by an instructor—such as assignments, schedules, announcements, and discussion prompts—may remain available to the class after the instructor deletes the account. Illumined removes the deleted instructor’s identity from those shared records. Illumined does not intentionally retain the deleted user’s personal account data in active systems. Limited security logs or encrypted service backups may remain temporarily under Firebase’s standard retention processes or where required by law.',
+        helpTitle: 'If you cannot access your account', helpBody: 'If you cannot sign in, first use the password-reset option on the Illumined sign-in screen. After resetting your password, sign in and follow the deletion steps above. Your parish instructor cannot delete the account for you or view your password.',
+        returnLink: 'Return to Illumined', privacyLink: 'View Privacy Policy'
+      },
+      es: {
+        pageTitle: 'Elimina tu cuenta de Illumined', languageLabel: 'Idioma', updated: 'Última actualización: 3 de septiembre de 2026',
+        intro: 'Illumined permite que cada usuario que haya iniciado sesión elimine permanentemente su cuenta y los datos personales asociados directamente en la aplicación móvil.',
+        warning: '<strong>Esta acción no se puede deshacer.</strong> Perderás el acceso a tu perfil de Illumined, su progreso guardado y tu participación.',
+        stepsTitle: 'Cómo eliminar tu cuenta', stepOne: 'Abre Illumined e inicia sesión en la cuenta que deseas eliminar.',
+        stepTwo: 'Abre <strong>Más</strong> y selecciona <strong>Cuenta</strong>.', stepThree: 'En <strong>Eliminar cuenta</strong>, selecciona <strong>Eliminar mi cuenta</strong>.',
+        stepFour: 'Escribe tu contraseña y selecciona <strong>Eliminar permanentemente</strong> para confirmar.', deletedTitle: 'Datos que se eliminan',
+        deletedIntro: 'Después de la confirmación, Illumined elimina la cuenta y los datos personales de sus sistemas activos, incluidos:',
+        deletedAccount: 'Tu cuenta de inicio de sesión y la información de tu perfil.', deletedProgress: 'El progreso de lecciones, cuestionarios, tareas, logros y oraciones asociado con tu perfil.',
+        deletedContent: 'Tus mensajes del chat, publicaciones y respuestas en conversaciones, participación en tareas y peticiones de oración.',
+        deletedNotifications: 'La información de registro de notificaciones almacenada con tu perfil.', retainedTitle: 'Datos que pueden conservarse',
+        retainedBody: 'Los materiales de toda la clase creados por un instructor, como tareas, horarios, anuncios y temas de conversación, pueden seguir disponibles para la clase después de que el instructor elimine la cuenta. Illumined elimina la identidad del instructor de esos registros compartidos. Illumined no conserva intencionalmente los datos personales de la cuenta eliminada en sus sistemas activos. Algunos registros de seguridad o copias de respaldo cifradas del servicio pueden permanecer temporalmente conforme a los procesos normales de conservación de Firebase o cuando la ley lo exija.',
+        helpTitle: 'Si no puedes acceder a tu cuenta', helpBody: 'Si no puedes iniciar sesión, usa primero la opción para restablecer la contraseña en la pantalla de inicio de sesión de Illumined. Después, inicia sesión y sigue los pasos de eliminación anteriores. Tu instructor parroquial no puede eliminar la cuenta por ti ni ver tu contraseña.',
+        returnLink: 'Volver a Illumined', privacyLink: 'Ver la Política de privacidad'
+      }
+    };
+
+    const elementIds = {
+      languageLabel: 'language-label', pageTitle: 'page-title', updated: 'updated', intro: 'intro', warning: 'warning',
+      stepsTitle: 'steps-title', stepOne: 'step-one', stepTwo: 'step-two', stepThree: 'step-three', stepFour: 'step-four',
+      deletedTitle: 'deleted-title', deletedIntro: 'deleted-intro', deletedAccount: 'deleted-account', deletedProgress: 'deleted-progress',
+      deletedContent: 'deleted-content', deletedNotifications: 'deleted-notifications', retainedTitle: 'retained-title', retainedBody: 'retained-body',
+      helpTitle: 'help-title', helpBody: 'help-body', returnLink: 'return-link', privacyLink: 'privacy-link'
+    };
+
+    const richTextKeys = new Set(['warning', 'stepTwo', 'stepThree', 'stepFour']);
+
+    function applyLanguage(language) {
+      const locale = translations[language] ? language : 'en';
+      const text = translations[locale];
+      document.documentElement.lang = locale;
+      document.title = text.pageTitle;
+      Object.entries(elementIds).forEach(([key, id]) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+        if (richTextKeys.has(key)) element.innerHTML = text[key];
+        else element.textContent = text[key];
+      });
+      document.getElementById('language').value = locale;
+      try { localStorage.setItem('illumined.uiLanguage', locale); } catch {}
+    }
+
+    let storedLanguage = null;
+    try { storedLanguage = localStorage.getItem('illumined.uiLanguage'); } catch {}
+    const initialLanguage = translations[storedLanguage] ? storedLanguage : (navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en');
+    document.getElementById('language').addEventListener('change', event => applyLanguage(event.target.value));
+    applyLanguage(initialLanguage);
+  </script>
+</body>
+</html>
