@@ -193,7 +193,7 @@
     padding: 0.18rem 0.55rem;
 }
 
-body.auth-locked nav,
+body.auth-locked > nav,
 body.auth-locked #user-info-display {
     display: none !important;
 }
@@ -284,6 +284,348 @@ body.auth-locked #user-info-display {
     font-weight: 700;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+body.auth-locked .main-content-container {
+    max-width: 1220px;
+    margin-top: 0;
+}
+
+#profile-setup {
+    width: min(1180px, calc(100% - 2rem));
+    max-width: 1180px;
+    margin: 1.25rem auto 2.5rem;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.landing-shell {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    color: #1e1c1a;
+    text-align: left;
+}
+
+.landing-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(191,148,74,.25);
+    border-radius: 18px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+.landing-nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+
+.landing-nav a {
+    color: #354c61;
+    border-radius: 999px;
+    padding: 0.55rem 0.75rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.landing-nav a:hover,
+.landing-nav a:focus-visible {
+    background: rgba(59,111,160,.09);
+    color: #274e73;
+    outline: none;
+}
+
+.landing-nav .landing-nav-signin {
+    background: #3b6fa0;
+    color: #fff;
+    padding-inline: 1rem;
+}
+
+.landing-nav .landing-nav-signin:hover,
+.landing-nav .landing-nav-signin:focus-visible {
+    background: #2f5d87;
+    color: #fff;
+}
+
+.landing-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(320px, .88fr);
+    gap: 1.25rem;
+    align-items: stretch;
+}
+
+.landing-hero-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 490px;
+    padding: clamp(2rem, 6vw, 4.5rem);
+    overflow: hidden;
+    position: relative;
+    border-radius: 24px;
+    color: #fff;
+    background: linear-gradient(140deg, #234a70 0%, #3b6fa0 62%, #557fa7 100%);
+    box-shadow: 0 18px 40px rgba(31,58,83,.22);
+}
+
+.landing-hero-copy::after {
+    content: "";
+    position: absolute;
+    width: 330px;
+    height: 330px;
+    right: -135px;
+    bottom: -170px;
+    border: 1px solid rgba(224,181,101,.42);
+    border-radius: 50%;
+    box-shadow: 0 0 0 38px rgba(255,255,255,.035), 0 0 0 78px rgba(224,181,101,.06);
+}
+
+.landing-eyebrow {
+    color: #efd090;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.landing-hero-copy h1 {
+    margin: .35rem 0 .85rem;
+    color: #fff;
+    font-size: clamp(3.4rem, 9vw, 6.2rem);
+    line-height: .96;
+}
+
+.landing-hero-copy p {
+    max-width: 610px;
+    margin: 0;
+    color: rgba(255,255,255,.9);
+    font-size: clamp(1.05rem, 2.1vw, 1.3rem);
+    line-height: 1.55;
+}
+
+.landing-actions {
+    display: flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.landing-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: .75rem 1.15rem;
+    border-radius: 12px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.landing-button-primary { background: #fff; color: #274e73; }
+.landing-button-secondary { border: 1px solid rgba(255,255,255,.5); color: #fff; }
+
+.landing-signin-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+    padding: clamp(1.35rem, 3vw, 2rem);
+}
+
+.landing-signin-card h2 {
+    margin: 0 0 .2rem;
+    color: #274e73;
+    font-size: 1.75rem;
+}
+
+.landing-signin-card > p {
+    margin: 0 0 1rem;
+    color: #625f59;
+}
+
+#profile-setup .auth-field {
+    max-width: none;
+    min-height: 50px;
+    padding: .8rem .9rem;
+    border-color: rgba(59,111,160,.25);
+}
+
+#profile-setup .auth-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+#profile-setup .auth-actions button {
+    margin: 0;
+    min-height: 48px;
+    padding: .7rem .85rem;
+}
+
+#profile-setup .auth-actions .auth-primary {
+    grid-column: 1 / -1;
+    background: #3b6fa0;
+    color: #fff;
+}
+
+#profile-setup .auth-actions .auth-primary:hover {
+    background: #2f5d87;
+}
+
+.landing-section {
+    margin-top: 1.25rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 1px solid rgba(191,148,74,.22);
+    border-radius: 22px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 10px 30px rgba(0,0,0,.09);
+}
+
+.landing-section-heading {
+    max-width: 720px;
+    margin-bottom: 1.5rem;
+}
+
+.landing-section-heading h2 {
+    margin: .25rem 0 .45rem;
+    color: #274e73;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+.landing-section-heading p { margin: 0; color: #625f59; }
+
+.landing-walkthrough {
+    display: grid;
+    gap: 1rem;
+}
+
+.landing-walkthrough-step {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 1.15rem;
+    padding: clamp(1.2rem, 3vw, 1.75rem);
+    border: 1px solid rgba(59,111,160,.14);
+    border-radius: 18px;
+    background: linear-gradient(145deg, #fff 0%, #f7f7f5 100%);
+}
+
+.landing-walkthrough-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    color: #fff;
+    background: #3b6fa0;
+    box-shadow: 0 8px 18px rgba(39,78,115,.2);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: .9rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+}
+
+.landing-walkthrough-copy h3 {
+    margin: .1rem 0 .45rem;
+    color: #274e73;
+    font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+}
+
+.landing-walkthrough-copy > p {
+    margin: 0;
+    color: #625f59;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.landing-walkthrough-media:not(:empty) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1.15rem;
+}
+
+.landing-walkthrough-media figure { margin: 0; min-width: 0; }
+
+.landing-walkthrough-media img,
+.landing-walkthrough-media video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border: 6px solid #18232d;
+    border-radius: 22px;
+    background: #18232d;
+    box-shadow: 0 12px 26px rgba(25,39,51,.18);
+}
+
+.landing-walkthrough-media figcaption {
+    margin-top: .75rem;
+    color: #354c61;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: .86rem;
+    font-weight: 750;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.landing-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.15rem .4rem 0;
+    color: #625f59;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: .86rem;
+}
+
+.landing-footer-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+.landing-footer a { color: #274e73; font-weight: 700; }
+
+@media (max-width: 860px) {
+    .landing-hero { grid-template-columns: 1fr; }
+    .landing-hero-copy { min-height: 410px; }
+}
+
+@media (max-width: 650px) {
+    #profile-setup { width: min(100% - 1rem, 1180px); margin-top: .5rem; }
+    .landing-topbar { align-items: flex-start; }
+    .landing-nav { gap: .05rem; }
+    .landing-nav a:not(.landing-nav-signin) { display: none; }
+    .landing-hero-copy { min-height: 390px; padding: 2rem 1.4rem; }
+    .landing-hero-copy h1 { font-size: clamp(3.2rem, 19vw, 4.4rem); }
+    .landing-actions { flex-direction: column; align-items: stretch; }
+    #profile-setup .auth-actions { grid-template-columns: 1fr; }
+    #profile-setup .auth-actions .auth-primary { grid-column: auto; }
+    .landing-walkthrough-step { grid-template-columns: 1fr; gap: .75rem; }
+    .landing-walkthrough-number { width: 48px; height: 48px; }
+}
+
 .account-grid {
     display: grid;
     gap: 0.75rem;
@@ -303,7 +645,7 @@ body.auth-locked #user-info-display {
 }
 
         /* Navigation Bar */
-         nav {
+         body > nav {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -314,7 +656,7 @@ body.auth-locked #user-info-display {
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-     nav button {
+     body > nav button {
     background: var(--primary-color);
     color: var(--text-color);
     border: none;
@@ -332,16 +674,16 @@ body.auth-locked #user-info-display {
     outline: none;
 }
 
-nav button:hover {
+body > nav button:hover {
     background: var(--primary-color-hover, #0056b3); /* fallback if not set */
     transform: translateY(-2px);
 }
 
-nav button:active {
+body > nav button:active {
     transform: scale(0.97);
 }
 
-nav button:focus-visible {
+body > nav button:focus-visible {
     outline: 2px solid var(--focus-color, #ffc107);
     outline-offset: 3px;
 }
@@ -1258,11 +1600,11 @@ nav button:focus-visible {
 
         /* Responsiveness */
         @media (max-width: 768px) {
-            nav {
+            body > nav {
                 flex-direction: column;
             }
 
-            nav button {
+            body > nav button {
                 width: 100%;
             }
 
@@ -2613,24 +2955,44 @@ nav button:focus-visible {
         </section>
 
 <section id="profile-setup" class="hidden">
-    <div class="auth-shell">
-        <div class="auth-brand">
-            <div class="auth-kicker" data-i18n="Welcome to">Welcome to</div>
-            <h2>Illumined</h2>
-            <p data-i18n="Sign in to continue your OCIA formation, track your lessons, complete assignments, and participate with your class.">Sign in to continue your OCIA formation, track your lessons, complete assignments, and participate with your class.</p>
+    <div class="auth-shell landing-shell">
+        <div class="landing-topbar">
+            <nav class="landing-nav" aria-label="Landing page navigation">
+                <a href="#landing-about" data-i18n="How It Works">How It Works</a>
+                <a href="#landing-learn-more" data-i18n="Learn More">Learn More</a>
+                <a href="mailto:illumined2026@gmail.com" data-i18n="Contact Us">Contact Us</a>
+                <a href="/privacy" data-i18n="Privacy">Privacy</a>
+                <a class="landing-nav-signin" href="#landing-signin" data-i18n="Sign In">Sign In</a>
+            </nav>
         </div>
 
-        <div class="auth-card">
-            <h3 data-i18n="Sign In">Sign In</h3>
-            <input type="email" id="auth-email" class="auth-field" autocomplete="email" placeholder="Email" data-i18n-placeholder="Email">
-            <input type="password" id="auth-password" class="auth-field" autocomplete="current-password" placeholder="Password" data-i18n-placeholder="Password">
-            <div class="auth-actions">
-                <button id="login-button" class="button-theme auth-primary" data-i18n="Sign In">Sign In</button>
-                <button id="signup-button" class="button-theme" data-i18n="Create Student Account">Create Student Account</button>
-                <button id="forgot-password-button" class="button-theme" type="button" data-i18n="Forgot Password">Forgot Password</button>
+        <div class="landing-hero">
+            <div class="landing-hero-copy">
+                <div class="landing-eyebrow" data-i18n="Catholic formation, connected">Catholic formation, connected</div>
+                <h1>Illumined</h1>
+                <p data-i18n="Extend the OCIA experience beyond the classroom. Illumined connects pastors, catechists, and students through a comprehensive, personalized journey of faith formation.">A shared place for parishes, instructors, and students to continue OCIA formation through lessons, prayer, discussion, and community.</p>
+                <div class="landing-actions">
+                    <a class="landing-button landing-button-primary" href="#landing-learn-more" data-i18n="Learn More">Learn More</a>
+                    <a class="landing-button landing-button-secondary" href="#landing-signin" data-i18n="Sign In">Sign In</a>
+                </div>
             </div>
-            <div id="auth-status-message" class="auth-message" aria-live="polite"></div>
-            <p class="auth-note" data-i18n="Student and instructor accounts use the same secure Illumined sign-in. Instructor tools appear automatically for authorized profiles.">Student and instructor accounts use the same secure Illumined sign-in. Instructor tools appear automatically for authorized profiles.</p>
+
+            <div id="landing-signin" class="auth-card landing-signin-card">
+                <div class="auth-kicker" data-i18n="Welcome back">Welcome back</div>
+                <h2 data-i18n="Sign In">Sign In</h2>
+                <p data-i18n="Continue your formation and reconnect with your class.">Continue your formation and reconnect with your class.</p>
+                <label class="sr-only" for="auth-email" data-i18n="Email">Email</label>
+                <input type="email" id="auth-email" class="auth-field" autocomplete="email" placeholder="Email" data-i18n-placeholder="Email">
+                <label class="sr-only" for="auth-password" data-i18n="Password">Password</label>
+                <input type="password" id="auth-password" class="auth-field" autocomplete="current-password" placeholder="Password" data-i18n-placeholder="Password">
+                <div class="auth-actions">
+                    <button id="login-button" class="button-theme auth-primary" data-i18n="Sign In">Sign In</button>
+                    <button id="signup-button" class="button-theme" data-i18n="Create Student Account">Create Student Account</button>
+                    <button id="forgot-password-button" class="button-theme" type="button" data-i18n="Forgot Password">Forgot Password</button>
+                </div>
+                <div id="auth-status-message" class="auth-message" aria-live="polite"></div>
+                <p class="auth-note" data-i18n="Students and instructors use the same secure sign-in. Instructor tools appear automatically for authorized profiles.">Students and instructors use the same secure sign-in. Instructor tools appear automatically for authorized profiles.</p>
+            </div>
         </div>
 
         <div id="profile-details-card" class="auth-card hidden">
@@ -2643,6 +3005,82 @@ nav button:focus-visible {
                 <button id="profile-signout-button" class="button-theme" type="button" data-i18n="Sign Out">Sign Out</button>
             </div>
         </div>
+
+        <div id="landing-about" class="landing-section">
+            <div class="landing-section-heading">
+                <div class="landing-eyebrow" data-i18n="A guided tour of Illumined">A guided tour of Illumined</div>
+                <h2 data-i18n="Build a formation journey that belongs to your parish">Build a formation journey that belongs to your parish</h2>
+                <p data-i18n="From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students while preserving the pastoral character of each class. Explore the experience step by step.">From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students while preserving the pastoral character of each class. Explore the experience step by step.</p>
+            </div>
+            <div class="landing-walkthrough">
+                <article class="landing-walkthrough-step">
+                    <div class="landing-walkthrough-number">01</div>
+                    <div class="landing-walkthrough-copy">
+                        <h3 data-i18n="Begin with a home page shaped for your class">Begin with a home page shaped for your class</h3>
+                        <p data-i18n="Welcome students into a focused class experience. Highlight current announcements, upcoming assignments, prayer intentions, schedules, and the next formation topic so everyone immediately knows where to begin.">Welcome students into a focused class experience. Highlight current announcements, upcoming assignments, prayer intentions, schedules, and the next formation topic so everyone immediately knows where to begin.</p>
+                        <div class="landing-walkthrough-media" data-walkthrough-media="home"></div>
+                    </div>
+                </article>
+                <article class="landing-walkthrough-step">
+                    <div class="landing-walkthrough-number">02</div>
+                    <div class="landing-walkthrough-copy">
+                        <h3 data-i18n="Teach from a rich, adaptable lesson library">Teach from a rich, adaptable lesson library</h3>
+                        <p data-i18n="Use the included Catholic lesson and quiz library as your foundation, then edit existing material or create your own. Instructors decide which lessons a class receives and whether each quiz is required, optional, or hidden.">Use the included Catholic lesson and quiz library as your foundation, then edit existing material or create your own. Instructors decide which lessons a class receives and whether each quiz is required, optional, or hidden.</p>
+                        <div class="landing-walkthrough-media" data-walkthrough-media="lessons"></div>
+                    </div>
+                </article>
+                <article class="landing-walkthrough-step">
+                    <div class="landing-walkthrough-number">03</div>
+                    <div class="landing-walkthrough-copy">
+                        <h3 data-i18n="Create a purposeful path through every assignment">Create a purposeful path through every assignment</h3>
+                        <p data-i18n="Bring readings, lessons, and discussion together in one progressive plan. Students move through each stage in order, building knowledge and reflection before entering the concluding class conversation.">Bring readings, lessons, and discussion together in one progressive plan. Students move through each stage in order, building knowledge and reflection before entering the concluding class conversation.</p>
+                        <div class="landing-walkthrough-media" data-walkthrough-media="assignments"></div>
+                    </div>
+                </article>
+                <article class="landing-walkthrough-step">
+                    <div class="landing-walkthrough-number">04</div>
+                    <div class="landing-walkthrough-copy">
+                        <h3 data-i18n="Invite students into the prayer of the Church">Invite students into the prayer of the Church</h3>
+                        <p data-i18n="Introduce the lived faith through guided spiritual formation tools, including common prayers, the Rosary, Lectio Divina, the Daily Gospel, liturgical living, and Daily Formation shaped around the Church calendar.">Introduce the lived faith through guided spiritual formation tools, including common prayers, the Rosary, Lectio Divina, the Daily Gospel, liturgical living, and Daily Formation shaped around the Church calendar.</p>
+                        <div class="landing-walkthrough-media" data-walkthrough-media="formation"></div>
+                    </div>
+                </article>
+                <article class="landing-walkthrough-step">
+                    <div class="landing-walkthrough-number">05</div>
+                    <div class="landing-walkthrough-copy">
+                        <h3 data-i18n="Keep formation connected between meetings">Keep formation connected between meetings</h3>
+                        <p data-i18n="Continue the parish conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students remain present to the community throughout the week.">Continue the parish conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students remain present to the community throughout the week.</p>
+                        <div class="landing-walkthrough-media" data-walkthrough-media="community"></div>
+                    </div>
+                </article>
+                <article class="landing-walkthrough-step">
+                    <div class="landing-walkthrough-number">06</div>
+                    <div class="landing-walkthrough-copy">
+                        <h3 data-i18n="Curate the entire OCIA experience with instructor tools">Curate the entire OCIA experience with instructor tools</h3>
+                        <p data-i18n="Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation, guide discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.">Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation, guide discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.</p>
+                        <div class="landing-walkthrough-media" data-walkthrough-media="instructor"></div>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div id="landing-learn-more" class="landing-section">
+            <div class="landing-section-heading">
+                <div class="landing-eyebrow" data-i18n="For parishes and formation teams">For parishes and formation teams</div>
+                <h2 data-i18n="One place to guide the OCIA journey">One place to guide the OCIA journey</h2>
+                <p data-i18n="If you are an OCIA director, pastor, or member of a parish formation team and would like to learn more about Illumined, please contact us directly. We can help you get started, provide training and ongoing support, and enroll your parish at no cost. Illumined is currently free to use as we continue developing and expanding the platform’s tools and features.">Instructors can create and edit lessons, organize progressive assignments, manage discussions and announcements, publish Daily Formation, and follow student progress while keeping each class separate.</p>
+            </div>
+            <a class="landing-button landing-button-primary" href="mailto:illumined2026@gmail.com?subject=Learning%20more%20about%20Illumined" style="background:#3b6fa0;color:#fff" data-i18n="Ask about Illumined">Ask about Illumined</a>
+        </div>
+
+        <footer class="landing-footer">
+            <span data-i18n="Catholic faith formation for parish communities.">Catholic faith formation for parish communities.</span>
+            <div class="landing-footer-links">
+                <a href="/privacy" data-i18n="Privacy Policy">Privacy Policy</a>
+                <a href="/account-deletion" data-i18n="Account Deletion">Account Deletion</a>
+                <a href="mailto:illumined2026@gmail.com" data-i18n="Contact Us">Contact Us</a>
+            </div>
+        </footer>
     </div>
 </section>
 
@@ -2716,6 +3154,76 @@ nav button:focus-visible {
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-functions-compat.js"></script>
 
     <script>
+        // Landing-page media settings. Add a public file path to imageSrc or videoSrc
+        // when a screenshot or recording is ready. Empty sources stay completely hidden.
+        const LANDING_WALKTHROUGH_MEDIA = {
+            home: {
+                imageSrc: '', imageAlt: 'Illumined class home page', imageCaption: 'Your class at a glance',
+                videoSrc: '', videoPoster: '', videoCaption: 'Explore the class home page'
+            },
+            lessons: {
+                imageSrc: '', imageAlt: 'Illumined lesson library', imageCaption: 'Lessons and quizzes built for formation',
+                videoSrc: '', videoPoster: '', videoCaption: 'Explore lessons and quizzes'
+            },
+            assignments: {
+                imageSrc: '', imageAlt: 'Illumined progressive assignment', imageCaption: 'A clear path from reading to discussion',
+                videoSrc: '', videoPoster: '', videoCaption: 'Follow a progressive assignment'
+            },
+            formation: {
+                imageSrc: '', imageAlt: 'Illumined spiritual formation tools', imageCaption: 'Prayer and formation for daily life',
+                videoSrc: '', videoPoster: '', videoCaption: 'Explore spiritual formation'
+            },
+            community: {
+                imageSrc: '', imageAlt: 'Illumined class community tools', imageCaption: 'Stay connected between class meetings',
+                videoSrc: '', videoPoster: '', videoCaption: 'Explore community tools'
+            },
+            instructor: {
+                imageSrc: '', imageAlt: 'Illumined instructor workspace', imageCaption: 'One organized workspace for formation teams',
+                videoSrc: '', videoPoster: '', videoCaption: 'Tour the instructor tools'
+            }
+        };
+
+        function appendLandingMediaFigure(container, media, captionText) {
+            const figure = document.createElement('figure');
+            figure.appendChild(media);
+            if (captionText) {
+                const caption = document.createElement('figcaption');
+                caption.textContent = uiText(captionText);
+                figure.appendChild(caption);
+            }
+            container.appendChild(figure);
+        }
+
+        function renderLandingWalkthroughMedia() {
+            document.querySelectorAll('[data-walkthrough-media]').forEach(container => {
+                container.replaceChildren();
+                const settings = LANDING_WALKTHROUGH_MEDIA[container.dataset.walkthroughMedia];
+                if (!settings) return;
+                if (settings.imageSrc) {
+                    const link = document.createElement('a');
+                    link.href = settings.imageSrc;
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    const image = document.createElement('img');
+                    image.src = settings.imageSrc;
+                    image.loading = 'lazy';
+                    image.alt = uiText(settings.imageAlt || 'Illumined app screenshot');
+                    link.appendChild(image);
+                    appendLandingMediaFigure(container, link, settings.imageCaption);
+                }
+                if (settings.videoSrc) {
+                    const video = document.createElement('video');
+                    video.src = settings.videoSrc;
+                    if (settings.videoPoster) video.poster = settings.videoPoster;
+                    video.controls = true;
+                    video.preload = 'metadata';
+                    video.playsInline = true;
+                    video.setAttribute('aria-label', uiText(settings.videoCaption || 'Illumined app walkthrough'));
+                    appendLandingMediaFigure(container, video, settings.videoCaption);
+                }
+            });
+        }
+
         const UI_LANGUAGE_STORAGE_KEY = 'illumined.uiLanguage';
         const UI_TRANSLATIONS = {
             es: {
@@ -2746,6 +3254,82 @@ nav button:focus-visible {
                 "Create Student Account": "Crear cuenta de estudiante",
                 "Forgot Password": "Olvidé mi contraseña",
                 "Student and instructor accounts use the same secure Illumined sign-in. Instructor tools appear automatically for authorized profiles.": "Las cuentas de estudiantes e instructores usan el mismo inicio de sesión seguro de Illumined. Las herramientas del instructor aparecen automáticamente para los perfiles autorizados.",
+                "About": "Acerca de",
+                "How It Works": "Cómo funciona",
+                "See the App": "Ver la aplicación",
+                "Learn More": "Más información",
+                "Contact Us": "Contáctanos",
+                "Privacy": "Privacidad",
+                "Catholic formation, connected": "Formación católica conectada",
+                "A shared place for parishes, instructors, and students to continue OCIA formation through lessons, prayer, discussion, and community.": "Un espacio compartido para que parroquias, instructores y estudiantes continúen la formación de OICA mediante lecciones, oración, conversación y comunidad.",
+                "Welcome back": "Te damos la bienvenida de nuevo",
+                "Continue your formation and reconnect with your class.": "Continúa tu formación y vuelve a conectarte con tu clase.",
+                "Students and instructors use the same secure sign-in. Instructor tools appear automatically for authorized profiles.": "Los estudiantes e instructores usan el mismo inicio de sesión seguro. Las herramientas del instructor aparecen automáticamente para los perfiles autorizados.",
+                "About Illumined": "Acerca de Illumined",
+                "A guided tour of Illumined": "Un recorrido guiado por Illumined",
+                "Build a formation journey that belongs to your parish": "Crea un camino de formación propio de tu parroquia",
+                "From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students while preserving the pastoral character of each class. Explore the experience step by step.": "Desde la primera bienvenida hasta la conversación final, Illumined ofrece a los equipos de formación una manera clara de guiar a los estudiantes sin perder el carácter pastoral de cada clase. Descubre la experiencia paso a paso.",
+                "Begin with a home page shaped for your class": "Comienza con una página de inicio preparada para tu clase",
+                "Welcome students into a focused class experience. Highlight current announcements, upcoming assignments, prayer intentions, schedules, and the next formation topic so everyone immediately knows where to begin.": "Recibe a los estudiantes con una experiencia centrada en su clase. Destaca los anuncios actuales, las próximas tareas, las intenciones de oración, los horarios y el siguiente tema de formación para que todos sepan de inmediato por dónde comenzar.",
+                "Teach from a rich, adaptable lesson library": "Enseña con una biblioteca de lecciones amplia y adaptable",
+                "Use the included Catholic lesson and quiz library as your foundation, then edit existing material or create your own. Instructors decide which lessons a class receives and whether each quiz is required, optional, or hidden.": "Utiliza como base la biblioteca incluida de lecciones y cuestionarios católicos; luego edita el material existente o crea el tuyo. Los instructores deciden qué lecciones recibe cada clase y si cada cuestionario es obligatorio, opcional u oculto.",
+                "Create a purposeful path through every assignment": "Crea un camino con propósito en cada tarea",
+                "Bring readings, lessons, and discussion together in one progressive plan. Students move through each stage in order, building knowledge and reflection before entering the concluding class conversation.": "Reúne lecturas, lecciones y conversación en un único plan progresivo. Los estudiantes avanzan por cada etapa en orden, desarrollando conocimiento y reflexión antes de participar en la conversación final de la clase.",
+                "Invite students into the prayer of the Church": "Invita a los estudiantes a entrar en la oración de la Iglesia",
+                "Introduce the lived faith through guided spiritual formation tools, including common prayers, the Rosary, Lectio Divina, the Daily Gospel, liturgical living, and Daily Formation shaped around the Church calendar.": "Presenta la fe vivida mediante herramientas guiadas de formación espiritual, entre ellas las oraciones comunes, el Rosario, la Lectio Divina, el Evangelio diario, la vida litúrgica y la Formación diaria organizada según el calendario de la Iglesia.",
+                "Keep formation connected between meetings": "Mantén conectada la formación entre reuniones",
+                "Continue the parish conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students remain present to the community throughout the week.": "Continúa la conversación parroquial mediante anuncios, conversaciones de clase, peticiones de oración, recursos compartidos y notificaciones oportunas. Illumined ayuda a los estudiantes a mantenerse presentes en la comunidad durante toda la semana.",
+                "Curate the entire OCIA experience with instructor tools": "Da forma a toda la experiencia de OICA con las herramientas del instructor",
+                "Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation, guide discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.": "Administra varias clases, prepara horarios, crea lecciones y tareas, publica la Formación diaria, guía conversaciones, envía anuncios y sigue el progreso de los estudiantes desde un espacio de trabajo organizado, en la web o en las aplicaciones móviles.",
+                "Illumined class home page": "Página de inicio de la clase en Illumined",
+                "Your class at a glance": "Tu clase de un vistazo",
+                "Explore the class home page": "Explora la página de inicio de la clase",
+                "Illumined lesson library": "Biblioteca de lecciones de Illumined",
+                "Lessons and quizzes built for formation": "Lecciones y cuestionarios preparados para la formación",
+                "Explore lessons and quizzes": "Explora las lecciones y los cuestionarios",
+                "Illumined progressive assignment": "Tarea progresiva de Illumined",
+                "A clear path from reading to discussion": "Un camino claro desde la lectura hasta la conversación",
+                "Follow a progressive assignment": "Sigue una tarea progresiva",
+                "Illumined spiritual formation tools": "Herramientas de formación espiritual de Illumined",
+                "Prayer and formation for daily life": "Oración y formación para la vida diaria",
+                "Explore spiritual formation": "Explora la formación espiritual",
+                "Illumined class community tools": "Herramientas comunitarias de la clase en Illumined",
+                "Stay connected between class meetings": "Mantente conectado entre las reuniones de clase",
+                "Explore community tools": "Explora las herramientas comunitarias",
+                "Illumined instructor workspace": "Espacio de trabajo del instructor en Illumined",
+                "One organized workspace for formation teams": "Un espacio de trabajo organizado para los equipos de formación",
+                "Tour the instructor tools": "Recorre las herramientas del instructor",
+                "Illumined app screenshot": "Captura de pantalla de la aplicación Illumined",
+                "Illumined app walkthrough": "Recorrido por la aplicación Illumined",
+                "Formation that continues beyond the classroom": "Formación que continúa más allá del aula",
+                "Illumined is a powerful tool for OCIA Director and Parish Pastors. It works by connecting students to their faith formation team. Instructors can use the features of Illumined to curate lesson plans, upload readings, publish announcements, post course schedule, and more. With Illumined students can walk step by step with their instructors and classmates through the fundamentals of the faith through a paced and customizable digital platform": "Illumined acompaña el camino parroquial de fe con una experiencia conectada de aprendizaje, reflexión, oración y conversación.",
+                "Learn with purpose": "Aprende con propósito",
+                "Move through readings, lessons, quizzes, and assignments in a clear formation path shaped by your instructor.": "Avanza por lecturas, lecciones, cuestionarios y tareas en un camino claro de formación preparado por tu instructor.",
+                "Pray with the Church": "Ora con la Iglesia",
+                "Build lasting spiritual practices with guided prayer, the Rosary, Lectio Divina, and liturgically oriented Daily Formation.": "Cultiva prácticas espirituales duraderas con oración guiada, el Rosario, la Lectio Divina y la Formación diaria de orientación litúrgica.",
+                "Grow in community": "Crece en comunidad",
+                "Stay connected through parish announcements, class discussion, prayer intentions, schedules, and shared resources.": "Mantente conectado mediante anuncios parroquiales, conversaciones de clase, intenciones de oración, horarios y recursos compartidos.",
+                "See Illumined in action": "Mira Illumined en acción",
+                "A clear path for learning, prayer, and community": "Un camino claro para aprender, orar y vivir en comunidad",
+                "Explore a few of the ways Illumined helps students follow their formation and stay connected with their parish class.": "Descubre algunas de las maneras en que Illumined ayuda a los estudiantes a seguir su formación y mantenerse conectados con su clase parroquial.",
+                "Illumined app screenshots": "Capturas de pantalla de la aplicación Illumined",
+                "Illumined assignments screen showing current assignments": "Pantalla de tareas de Illumined que muestra las tareas actuales",
+                "Current assignments at a glance": "Tareas actuales de un vistazo",
+                "Illumined assignment screen with assigned readings": "Pantalla de una tarea de Illumined con lecturas asignadas",
+                "Readings organized in one place": "Lecturas organizadas en un solo lugar",
+                "Illumined lesson links and progress screen": "Pantalla de enlaces de lecciones y progreso de Illumined",
+                "A progressive lesson path": "Un camino progresivo de lecciones",
+                "Illumined class discussion screen": "Pantalla de conversación de clase de Illumined",
+                "Class discussion and reflection": "Conversación y reflexión en clase",
+                "Illumined prayer request screen": "Pantalla de petición de oración de Illumined",
+                "Prayer shared with the community": "Oración compartida con la comunidad",
+                "For parishes and formation teams": "Para parroquias y equipos de formación",
+                "One place to guide the OCIA journey": "Un solo lugar para acompañar el camino de OICA",
+                "Instructors can create and edit lessons, organize progressive assignments, manage discussions and announcements, publish Daily Formation, and follow student progress while keeping each class separate.": "Los instructores pueden crear y editar lecciones, organizar tareas progresivas, administrar conversaciones y anuncios, publicar la Formación diaria y seguir el progreso de los estudiantes manteniendo cada clase separada.",
+                "Ask about Illumined": "Pregunta por Illumined",
+                "Catholic faith formation for parish communities.": "Formación en la fe católica para comunidades parroquiales.",
+                "Privacy Policy": "Política de privacidad",
+                "Account Deletion": "Eliminación de la cuenta",
                 "Finish Student Profile": "Completar perfil del estudiante",
                 "Enter the name you want classmates and instructors to see, then add the class ID given by your instructor.": "Escribe el nombre que deseas que vean tus compañeros e instructores y añade el ID de clase proporcionado por tu instructor.",
                 "Display Name": "Nombre para mostrar",
@@ -3199,6 +3783,7 @@ nav button:focus-visible {
             document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.placeholder = uiText(element.dataset.i18nPlaceholder); });
             document.querySelectorAll('[data-i18n-title]').forEach(element => { element.title = uiText(element.dataset.i18nTitle); });
             document.querySelectorAll('[data-i18n-aria-label]').forEach(element => { element.setAttribute('aria-label', uiText(element.dataset.i18nAriaLabel)); });
+            document.querySelectorAll('[data-i18n-alt]').forEach(element => { element.alt = uiText(element.dataset.i18nAlt); });
             const picker = document.getElementById('language-select');
             if (picker) picker.value = uiLanguage;
             applyInstructorTranslations(document.getElementById('instructor-panel'));
@@ -3207,6 +3792,7 @@ nav button:focus-visible {
             uiLanguage = language === 'es' ? 'es' : 'en';
             try { localStorage.setItem(UI_LANGUAGE_STORAGE_KEY, uiLanguage); }
             catch { /* The selection still applies for this session when storage is unavailable. */ }
+            renderLandingWalkthroughMedia();
             applyUiLanguage();
             refreshLocalizedDynamicUi();
         }
@@ -7289,6 +7875,7 @@ async function submitPrayerRequest() {
        window.addEventListener('DOMContentLoaded', async () => {
             const languageSelect = document.getElementById('language-select');
             languageSelect.addEventListener('change', event => setUiLanguage(event.target.value));
+            renderLandingWalkthroughMedia();
             applyUiLanguage();
             const instructorPanel = document.getElementById('instructor-panel');
             new MutationObserver(() => applyInstructorTranslations(instructorPanel)).observe(instructorPanel, { childList: true, subtree: true });
