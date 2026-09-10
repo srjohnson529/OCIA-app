@@ -2376,6 +2376,7 @@ body > nav button:focus-visible {
                 </div>
             </div>
 
+            <div id="rite-preparation-dashboard"></div>
             <div class="prayer-request-board">
                 <div class="prayer-request-header">
                     <div>
@@ -3092,6 +3093,7 @@ body > nav button:focus-visible {
         </div>
         <div id="instructor-summary" class="instructor-summary"></div>
         <div class="instructor-tabs" role="tablist">
+            <button data-instructor-tab="rites" data-i18n="Rite and Sacrament Preparation">Rite and Sacrament Preparation</button>
             <button data-instructor-tab="lessons" data-i18n="Lessons">Lessons</button><button data-instructor-tab="daily" data-i18n="Daily Formation">Daily Formation</button><button data-instructor-tab="classes" data-i18n="Classrooms">Classrooms</button><button data-instructor-tab="announcements" data-i18n="Announcements">Announcements</button><button data-instructor-tab="prayers" data-i18n="Prayer requests">Prayer requests</button><button data-instructor-tab="progress" data-i18n="Student progress">Student progress</button><button data-instructor-tab="schedule" data-i18n="Schedule">Schedule</button>
         </div>
         <div id="instructor-panel" class="instructor-panel"></div>
@@ -3133,9 +3135,14 @@ body > nav button:focus-visible {
 
 
         <!-- Student Resources Section -->
+        <section id="my-guides-section" class="hidden">
+            <button class="button-theme" onclick="showSection('student-resources-section')" data-i18n="Resources">Resources</button>
+            <div id="my-guides-list"></div>
+        </section>
         <section id="student-resources-section" class="hidden">
             <h2 data-i18n="Student Resources">Student Resources</h2>
             <p data-i18n="Access helpful resources for your faith journey.">Access helpful resources for your faith journey.</p>
+            <button class="button-theme" onclick="showSection('my-guides-section')" data-i18n="My Guides">My Guides</button>
             <button class="button-theme" onclick="window.open('https://bible.usccb.org/bible?gad_source=1&gad_campaignid=254779705&gbraid=0AAAAADj1rl_dCFDp8XqzY97AKytvIKod9&gclid=Cj0KCQjwndHEBhDVARIsAGh0g3Ay_17I7nbJ4rjnQ0Bmedkg7d7PsHcKvXpOViH-MTCcZzoT-T64Vy4aAmt0EALw_wcB&utm_source=google-adwords&utm_medium=cpc&utm_content=newamericanbible&utm_campaign=NABRE', '_blank')" data-i18n="Holy Bible">Holy Bible</button>
             <button class="button-theme" onclick="window.open('https://usccb.cld.bz/Catechism-of-the-Catholic-Church/', '_blank')" data-i18n="Catechism of the Catholic Church">Catechism of the Catholic Church</button>
             <button class="button-theme" onclick="window.open('https://www.triumphofthecross.org/', '_blank')" data-i18n="Parish Information">Parish Information</button>
@@ -3153,6 +3160,12 @@ body > nav button:focus-visible {
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-functions-compat.js"></script>
 
+    <script src="rite-preparation-catalog.js"></script>
+    <script src="parish-time-controls.js"></script>
+    <script src="rite-guide-templates.js"></script>
+    <script src="sacrament-guide-templates.js"></script>
+    <script src="additional-guide-templates.js"></script>
+    <script src="rite-preparation.js"></script>
     <script>
         // Landing-page media settings. Add a public file path to imageSrc or videoSrc
         // when a screenshot or recording is ready. Empty sources stay completely hidden.
@@ -3234,6 +3247,7 @@ body > nav button:focus-visible {
                 "Home": "Inicio",
                 "Lessons & Quizzes": "Lecciones y cuestionarios",
                 "Lessons": "Lecciones",
+                "Rite and Sacrament Preparation": "Preparación para ritos y sacramentos",
                 "Discussion": "Discusión",
                 "Spiritual Formation": "Formación espiritual",
                 "Chat": "Chat",
@@ -3258,6 +3272,7 @@ body > nav button:focus-visible {
                 "How It Works": "Cómo funciona",
                 "See the App": "Ver la aplicación",
                 "Learn More": "Más información",
+                "My Guides": "Mis guías",
                 "Contact Us": "Contáctanos",
                 "Privacy": "Privacidad",
                 "Catholic formation, connected": "Formación católica conectada",
@@ -4816,6 +4831,7 @@ body > nav button:focus-visible {
         }
 
         function stopStudentDashboardListeners() {
+            RitePrep.stop();
             if (announcementsListener) {
                 announcementsListener();
                 announcementsListener = null;
@@ -4853,6 +4869,8 @@ body > nav button:focus-visible {
             }
 
             setupDiscussionPromptsListener();
+
+            RitePrep.start(userProfile.classId);
 
             announcementsListener = db.collection('announcements')
                 .where('classId', '==', userProfile.classId)
@@ -7307,7 +7325,7 @@ async function submitPrayerRequest() {
                 ]) : [{docs:[]},{docs:[]},{docs:[]}];
                 const studentCount=students.docs.filter(d=>d.data().isInstructor!==true).length;
                 document.getElementById('instructor-summary').innerHTML=[['Class ID',instructorClassId||'—'],['Students',studentCount],['Sessions',schedule.size||0],['Prayer requests',prayers.size||0]].map(([l,v])=>`<div class="instructor-stat"><strong>${esc(v)}</strong>${esc(uiText(l))}</div>`).join('');
-                await ({lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
+                await ({rites:RitePrep.manager,lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
             } catch(error) { panel.innerHTML=`<p class="student-firestore-empty">${esc(error.message)}</p>`; }
         }
         async function renderInstructorLessons(panel) {
@@ -7515,7 +7533,7 @@ async function submitPrayerRequest() {
                             <h3>${uiText('Classroom settings')}</h3>
                             <label><input id="daily-enabled" type="checkbox" ${settings.enabled === true ? 'checked' : ''}> ${uiText('Enable Daily Formation')}</label>
                             <label>${uiText('Reminder time')}<input id="daily-time" type="time" value="${esc(settings.notificationTime || '09:00')}" required></label>
-                            <label>${uiText('Classroom time zone')}<input id="daily-timezone" value="${esc(settings.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York')}" required></label>
+                            <label>${uiLanguage === 'es' ? 'Zona horaria de la parroquia' : 'Parish time zone'}<input id="daily-timezone" value="${esc(settings.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York')}" required></label>
                             <button class="button-theme">${uiText('Save settings')}</button>
                         </form>
                         <div class="instructor-form">
@@ -7552,6 +7570,12 @@ async function submitPrayerRequest() {
                     <div class="instructor-list"><h3>${uiText('Calendar entries')}</h3>${entryCards}</div>
                 </div>`;
 
+            ParishTimeControls.enhance(panel.querySelector('#daily-timezone'));
+            ParishTimeControls.styleInput(panel.querySelector('#daily-time'));
+            ParishTimeControls.styleInput(panel.querySelector('#daily-date'));
+            const reminderHelp=document.createElement('p');reminderHelp.className='muted';
+            reminderHelp.textContent=uiLanguage==='es'?'El recordatorio se envía a esta hora en la zona horaria de la parroquia. Los cambios de horario de verano se aplican automáticamente.':'The reminder uses this time in your parish’s time zone. Daylight saving changes are handled automatically.';
+            panel.querySelector('#daily-timezone').parentElement.after(reminderHelp);
             panel.querySelector('#daily-settings').onsubmit = async event => {
                 event.preventDefault();
                 await settingsRef.set({
