@@ -179,6 +179,61 @@ service cloud.firestore {
       allow create, update, delete: if canTeachClass(classId);
     }
 
+
+    // Rite preparations are class-scoped. A receipt is not sacramental attendance.
+    function riteMember(classId) {
+      return isInClass(classId) &&
+        (!exists(/databases/$(database)/documents/classrooms/$(classId)) ||
+         get(/databases/$(database)/documents/classrooms/$(classId)).data.get('isArchived', false) == false);
+    }
+    function riteTeacher(classId) { return isInstructor() && riteMember(classId); }
+    function validRite() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['title','meaning','context','studentActions','ministerActions','preparation',
+        'riteDate','timeZone','expiresAt','published','revision','createdBy','updatedBy','updatedAt',
+        'meaningHeading','contextHeading','studentActionsHeading','ministerActionsHeading','preparationHeading','deleted']) &&
+        (!('deleted' in d) || (d.deleted is bool && (!d.deleted || d.published == false))) &&
+        (!('meaningHeading' in d) || (d.meaningHeading is string && d.meaningHeading.size() > 0 && d.meaningHeading.size() <= 160)) &&
+        (!('contextHeading' in d) || (d.contextHeading is string && d.contextHeading.size() > 0 && d.contextHeading.size() <= 160)) &&
+        (!('studentActionsHeading' in d) || (d.studentActionsHeading is string && d.studentActionsHeading.size() > 0 && d.studentActionsHeading.size() <= 160)) &&
+        (!('ministerActionsHeading' in d) || (d.ministerActionsHeading is string && d.ministerActionsHeading.size() > 0 && d.ministerActionsHeading.size() <= 160)) &&
+        (!('preparationHeading' in d) || (d.preparationHeading is string && d.preparationHeading.size() > 0 && d.preparationHeading.size() <= 160)) &&
+        d.title is string && d.title.size() > 0 && d.title.size() <= 160 &&
+        d.meaning is string && d.meaning.size() > 0 && d.meaning.size() <= 12000 &&
+        d.context is string && d.context.size() > 0 && d.context.size() <= 12000 &&
+        d.studentActions is string && d.studentActions.size() > 0 && d.studentActions.size() <= 12000 &&
+        d.ministerActions is string && d.ministerActions.size() > 0 && d.ministerActions.size() <= 12000 &&
+        d.preparation is string && d.preparation.size() > 0 && d.preparation.size() <= 12000 &&
+        d.riteDate is string && d.riteDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}') &&
+        d.timeZone is string && d.timeZone.size() > 0 && d.timeZone.size() <= 100 &&
+        d.expiresAt is timestamp && d.published is bool &&
+        (!d.published || d.expiresAt > request.time) &&
+        d.revision is string && d.revision.size() > 0 && d.revision.size() <= 100 &&
+        d.updatedBy == request.auth.uid && d.updatedAt == request.time;
+    }
+    match /classrooms/{classId}/ritePreparations/{riteId} {
+      allow read: if riteTeacher(classId) || (riteMember(classId) && resource.data.published == true);
+      allow create: if riteTeacher(classId) && validRite() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if riteTeacher(classId) && validRite() &&
+        resource.data.get('deleted', false) == false &&
+        request.resource.data.createdBy == resource.data.createdBy &&
+        request.resource.data.revision != resource.data.revision;
+      allow delete: if false; // Unpublish instead; preserve acknowledgment records.
+      match /acknowledgments/{userId} {
+        allow get: if riteTeacher(classId) || (riteMember(classId) && isOwnDocument(userId));
+        allow list: if riteTeacher(classId);
+        allow create, update: if riteMember(classId) && isOwnDocument(userId) &&
+          request.resource.data.keys().hasOnly(['userId','revision','acknowledgedAt']) &&
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.acknowledgedAt == request.time &&
+          get(/databases/$(database)/documents/classrooms/$(classId)/ritePreparations/$(riteId)).data.published == true &&
+          get(/databases/$(database)/documents/classrooms/$(classId)/ritePreparations/$(riteId)).data.expiresAt > request.time &&
+          request.resource.data.revision ==
+            get(/databases/$(database)/documents/classrooms/$(classId)/ritePreparations/$(riteId)).data.revision;
+        allow delete: if false;
+      }
+    }
+
     match /lessons/{lessonId} {
       allow read: if signedIn();
       allow write: if false;
