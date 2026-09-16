@@ -1100,6 +1100,10 @@ body > nav button:focus-visible {
 }
 
 /* Quiz Option Styling */
+#quiz-questions-container .quiz-question {
+    scroll-margin-top: 1.5rem;
+}
+
 #quiz-questions-container label {
     display: flex;
     align-items: center;
@@ -3094,7 +3098,7 @@ body > nav button:focus-visible {
         <div id="instructor-summary" class="instructor-summary"></div>
         <div class="instructor-tabs" role="tablist">
             <button data-instructor-tab="rites" data-i18n="Rite and Sacrament Preparation">Rite and Sacrament Preparation</button>
-            <button data-instructor-tab="lessons" data-i18n="Lessons">Lessons</button><button data-instructor-tab="daily" data-i18n="Daily Formation">Daily Formation</button><button data-instructor-tab="classes" data-i18n="Classrooms">Classrooms</button><button data-instructor-tab="announcements" data-i18n="Announcements">Announcements</button><button data-instructor-tab="prayers" data-i18n="Prayer requests">Prayer requests</button><button data-instructor-tab="progress" data-i18n="Student progress">Student progress</button><button data-instructor-tab="schedule" data-i18n="Schedule">Schedule</button>
+            <button data-instructor-tab="lessons" data-i18n="Lessons">Lessons</button><button data-instructor-tab="daily" data-i18n="Daily Formation">Daily Formation</button><button data-instructor-tab="classes" data-i18n="Classrooms">Classrooms</button><button data-instructor-tab="announcements" data-i18n="Announcements">Announcements</button><button data-instructor-tab="prayers" data-i18n="Prayer requests">Prayer requests</button><button data-instructor-tab="progress" data-i18n="Student Details">Student Details</button><button data-instructor-tab="schedule" data-i18n="Schedule">Schedule</button>
         </div>
         <div id="instructor-panel" class="instructor-panel"></div>
         <button class="button-theme" id="instructor-back-button" data-i18n="Back to dashboard">Back to dashboard</button>
@@ -3358,7 +3362,7 @@ body > nav button:focus-visible {
                 "Classrooms": "Clases",
                 "Announcements": "Anuncios",
                 "Prayer requests": "Peticiones de oración",
-                "Student progress": "Progreso de estudiantes",
+                "Student Details": "Detalles de estudiantes",
                 "Schedule": "Horario",
                 "Back to dashboard": "Volver al panel",
                 "Back to Dashboard": "Volver al panel",
@@ -4258,18 +4262,6 @@ body > nav button:focus-visible {
             );
         }
 
-        function isDiscussionPromptUnlocked(prompt) {
-            const matches = getAssignmentsForDiscussionPrompt(prompt);
-            if (!matches.length) {
-                return !String(prompt?.assignmentId || '').trim() && !String(prompt?.lessonId || '').trim();
-            }
-            const completedLessons = new Set(Array.isArray(userProfile?.completedLessons) ? userProfile.completedLessons : []);
-            return matches.some(assignment => {
-                const readingsReady = getAssignmentReadings(assignment).every(reading => isReadingCompleted(assignment, reading));
-                const lessonsReady = getAssignmentLessonLinks(assignment).every(link => completedLessons.has(link.lessonId));
-                return readingsReady && lessonsReady;
-            });
-        }
 
         function showDiscussionList() {
             if (!currentUser || !userProfile || !userProfile.classId) {
@@ -4300,9 +4292,7 @@ body > nav button:focus-visible {
                 const item = document.createElement('button');
                 item.type = 'button';
                 item.className = 'student-firestore-item discussion-list-item';
-                const unlocked = isDiscussionPromptUnlocked(prompt);
-                item.disabled = !unlocked;
-                if (unlocked) item.addEventListener('click', () => openDiscussionPrompt(prompt));
+                item.addEventListener('click', () => openDiscussionPrompt(prompt));
 
                 const title = document.createElement('div');
                 title.className = 'student-firestore-title';
@@ -4319,12 +4309,6 @@ body > nav button:focus-visible {
                 item.appendChild(title);
                 item.appendChild(meta);
                 item.appendChild(details);
-                if (!unlocked) {
-                    const note = document.createElement('div');
-                    note.className = 'student-firestore-meta';
-                    note.textContent = uiText('Locked — available when the assignment readings and lessons are completed.');
-                    item.appendChild(note);
-                }
                 list.appendChild(item);
             });
         }
@@ -4871,6 +4855,7 @@ body > nav button:focus-visible {
             setupDiscussionPromptsListener();
 
             RitePrep.start(userProfile.classId);
+            firebase.functions().httpsCallable('refreshAssignmentProgress')().catch(error => console.warn('Assignment progress refresh unavailable:', error.code));
 
             announcementsListener = db.collection('announcements')
                 .where('classId', '==', userProfile.classId)
@@ -5230,13 +5215,14 @@ body > nav button:focus-visible {
                 content.appendChild(card);
             }
 
-            const linkedDiscussion = getDiscussionPromptForAssignment(assignment);
+            const directDiscussions = discussionPrompts.filter(prompt => String(prompt.assignmentId || '').trim() === assignment.id);
+            const linkedDiscussions = directDiscussions.length ? directDiscussions : discussionPrompts.filter(prompt => !String(prompt.assignmentId || '').trim() && getAssignmentLessonLinks(assignment).some(link => link.lessonId === prompt.lessonId));
             const readingsCompleted = readings.every(reading => isReadingCompleted(assignment, reading));
             const completedLessons = new Set(Array.isArray(userProfile?.completedLessons) ? userProfile.completedLessons : []);
             const lessonsCompleted = lessonLinks.every(link => completedLessons.has(link.lessonId));
             const prerequisitesCompleted = readingsCompleted && lessonsCompleted;
 
-            if (linkedDiscussion) {
+            for (const linkedDiscussion of linkedDiscussions) {
                 const card = document.createElement('div');
                 card.className = 'student-firestore-item';
                 const heading = document.createElement('div');
@@ -5245,13 +5231,11 @@ body > nav button:focus-visible {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'assignment-open-row';
-                button.disabled = !prerequisitesCompleted;
-                button.style.opacity = prerequisitesCompleted ? '1' : '0.65';
                 const row = document.createElement('div');
                 row.className = 'assignment-link-row';
                 const icon = document.createElement('div');
                 icon.className = 'assignment-link-icon';
-                icon.textContent = prerequisitesCompleted ? '💬' : '🔒';
+                icon.textContent = '💬';
                 const body = document.createElement('div');
                 body.className = 'assignment-link-body';
                 const discussionTitle = document.createElement('div');
@@ -5259,7 +5243,7 @@ body > nav button:focus-visible {
                 discussionTitle.textContent = linkedDiscussion.title || uiText('Discussion');
                 const status = document.createElement('div');
                 status.className = 'assignment-link-meta';
-                status.textContent = uiText(prerequisitesCompleted ? 'Ready to discuss' : 'Complete the readings and lessons first');
+                status.textContent = uiText('Ready to discuss');
                 body.appendChild(discussionTitle);
                 body.appendChild(status);
                 row.appendChild(icon);
@@ -5271,7 +5255,7 @@ body > nav button:focus-visible {
                 content.appendChild(card);
             }
 
-            if (!linkedDiscussion) {
+            if (!linkedDiscussions.some(prompt => prompt.requiredForAssignment !== false) && !readings.length && !lessonLinks.length) {
                 const completion = userAssignmentCompletions.get(assignment.id);
                 const isCompleted = Boolean(completion && completion.isCompleted);
                 const completeButton = document.createElement('button');
@@ -5281,6 +5265,10 @@ body > nav button:focus-visible {
                 completeButton.disabled = !prerequisitesCompleted;
                 completeButton.addEventListener('click', () => toggleAssignmentCompletion(assignment, !isCompleted));
                 content.appendChild(completeButton);
+            } else {
+                const note = document.createElement('p');
+                note.textContent = uiLanguage === 'es' ? 'La tarea se completa automáticamente al terminar todas las lecturas, lecciones y respuestas de discusión requeridas.' : 'The assignment completes automatically when every required reading, lesson, and discussion response is finished.';
+                content.appendChild(note);
             }
 
             showSection('assignment-detail-section');
@@ -5311,6 +5299,7 @@ body > nav button:focus-visible {
 
             body.appendChild(title);
             body.appendChild(preview);
+            body.appendChild(buildAssignmentItemProgress(isReadingCompleted(assignment, reading)));
             row.appendChild(icon);
             row.appendChild(body);
             row.appendChild(chevron);
@@ -5342,10 +5331,26 @@ body > nav button:focus-visible {
 
             body.appendChild(title);
             body.appendChild(meta);
+            body.appendChild(buildAssignmentItemProgress((userProfile?.completedLessons || []).includes(link.lessonId)));
             row.appendChild(icon);
             row.appendChild(body);
             row.appendChild(chevron);
             return row;
+        }
+
+        function buildAssignmentItemProgress(completed) {
+            const status = document.createElement('div');
+            status.className = 'assignment-link-meta';
+            status.style.color = completed ? '#2e6b33' : '#595959';
+            status.style.fontWeight = '600';
+            const mark = document.createElement('span');
+            mark.setAttribute('aria-hidden', 'true');
+            mark.textContent = completed ? '✓ ' : '○ ';
+            status.appendChild(mark);
+            const label = document.createElement('span');
+            label.textContent = completed ? (uiLanguage === 'es' ? 'Completado' : 'Completed') : (uiLanguage === 'es' ? 'Pendiente' : 'To do');
+            status.appendChild(label);
+            return status;
         }
 
         function openAssignmentReading(assignment, reading) {
@@ -5512,10 +5517,6 @@ body > nav button:focus-visible {
                 return;
             }
 
-            if (!isDiscussionPromptUnlocked(prompt)) {
-                showCustomAlert('Complete the assignment readings and lessons before opening its discussion.');
-                return;
-            }
 
             currentDiscussionPrompt = prompt;
             document.getElementById('discussion-title').textContent = prompt.title || uiText('Discussion');
@@ -5756,31 +5757,13 @@ body > nav button:focus-visible {
                 }, { merge: true });
 
                 input.value = '';
-                await completeAssignmentsForDiscussion(currentDiscussionPrompt);
+                // Shared completion tracking evaluates all required assignment parts.
             } catch (error) {
                 console.error('Discussion post error:', error);
                 showCustomAlert(`Could not post discussion response: ${error.message}`);
             }
         }
 
-        async function completeAssignmentsForDiscussion(prompt) {
-            const snapshot = await db.collection('assignments')
-                .where('classId', '==', userProfile.classId)
-                .get();
-
-            const writes = [];
-            snapshot.forEach(doc => {
-                const assignment = { id: doc.id, ...doc.data() };
-                if (assignment.isActive === false) return;
-                const directlyLinked = String(prompt.assignmentId || '').trim() === assignment.id;
-                const legacyLinked = !String(prompt.assignmentId || '').trim() &&
-                    getAssignmentLessonLinks(assignment).some(link => link.lessonId === prompt.lessonId);
-                if (!directlyLinked && !legacyLinked) return;
-                writes.push(toggleAssignmentCompletion(assignment, true));
-            });
-
-            await Promise.all(writes);
-        }
 
         function renderDashboardBoardError(listId, message) {
             const list = document.getElementById(listId);
@@ -6114,6 +6097,7 @@ async function saveProfile() {
             displayName: username, // This should be the user's chosen name, not email
             isInstructor: false,
             classIds: [classId], // Array to match SwiftUI structure
+            activeClassId: classId, // Required by the shared profile-creation rules
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             // Keep web app specific fields for backward compatibility
             completedLessons: [],
@@ -6138,6 +6122,8 @@ async function saveProfile() {
         userProfile = {
             username: username, // This will be the display name
             classId: classId,
+            classIds: [classId],
+            activeClassId: classId,
             completedLessons: [],
             earnedBadges: [],
             completedMysteries: [],
@@ -6255,6 +6241,9 @@ async function loadUserProfile() {
                 };
                 
                 console.log('Profile updated:', userProfile);
+                if (selectedAssignment && !document.getElementById('assignment-detail-section')?.classList.contains('hidden')) {
+                    openAssignmentDetail(selectedAssignment);
+                }
                 loadSharedLessons().then(updateDashboard);
                 showProfileDetailsCard(false);
                 updateUIForAuthenticatedUser();
@@ -6785,6 +6774,15 @@ async function submitPrayerRequest() {
             if (discussionPrompt) openDiscussionPrompt(discussionPrompt);
         }
 
+        function scrollToNextQuizQuestion(questionIndex, container) {
+            const nextQuestion = container.children[questionIndex + 1];
+            if (!nextQuestion) return;
+            nextQuestion.scrollIntoView({
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+                block: 'start'
+            });
+        }
+
         function startQuiz() {
             const localizedQuiz = lessonDisplayQuiz(currentLesson);
             if (!currentLesson || localizedQuiz.length === 0) {
@@ -6809,6 +6807,9 @@ async function submitPrayerRequest() {
                     input.type = 'radio';
                     input.name = `quiz-answer-${questionIndex}`; // Unique name for each question group
                     input.value = optionIndex;
+                    input.addEventListener('change', () => {
+                        if (input.checked) scrollToNextQuizQuestion(questionIndex, quizQuestionsContainer);
+                    });
                     label.appendChild(input);
                     label.appendChild(document.createTextNode(option));
                     questionDiv.appendChild(label);
@@ -7323,7 +7324,7 @@ async function submitPrayerRequest() {
                 const [students, schedule, prayers] = instructorClassId ? await Promise.all([
                     db.collection('userProfiles').where('classIds','array-contains',instructorClassId).get(), db.collection('classSchedule').where('classId','==',instructorClassId).get(), db.collection('prayerRequests').where('classId','==',instructorClassId).get()
                 ]) : [{docs:[]},{docs:[]},{docs:[]}];
-                const studentCount=students.docs.filter(d=>d.data().isInstructor!==true).length;
+                const studentCount=students.docs.filter(d=>d.data().isInstructor!==true && d.data().isAdmin!==true && !(d.data().inactiveClassIds||[]).includes(instructorClassId)).length;
                 document.getElementById('instructor-summary').innerHTML=[['Class ID',instructorClassId||'—'],['Students',studentCount],['Sessions',schedule.size||0],['Prayer requests',prayers.size||0]].map(([l,v])=>`<div class="instructor-stat"><strong>${esc(v)}</strong>${esc(uiText(l))}</div>`).join('');
                 await ({rites:RitePrep.manager,lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
             } catch(error) { panel.innerHTML=`<p class="student-firestore-empty">${esc(error.message)}</p>`; }
@@ -7722,7 +7723,11 @@ async function submitPrayerRequest() {
             bindInstructorDeletes(panel);
         }
         async function renderInstructorPrayers(panel){const snap=await db.collection('prayerRequests').where('classId','==',instructorClassId).get();const rows=snap.docs.map(d=>({id:d.id,...d.data()}));panel.innerHTML=`<h3>${uiText('Prayer request moderation')}</h3><div class="instructor-list">${rows.map(x=>instructorCard(x.title||uiText('Prayer request'),x.requesterName||uiText('Class member'),x.details,`<button data-toggle-prayer="${x.id}">${uiText(x.isHidden?'Restore':'Hide')}</button><button class="danger" data-delete-doc="prayerRequests:${x.id}">${uiText('Delete')}</button>`)).join('')||`<p class="muted">${uiText('No prayer requests in this class.')}</p>`}</div>`;panel.querySelectorAll('[data-toggle-prayer]').forEach(b=>b.onclick=async()=>{const ref=db.collection('prayerRequests').doc(b.dataset.togglePrayer),s=await ref.get();await ref.update({isHidden:s.data()?.isHidden!==true,moderatedAt:instructorTimestamp(),moderatedBy:currentUser.uid});await renderInstructorWorkspace();});bindInstructorDeletes(panel);}
-        async function renderInstructorProgress(panel){const snap=await db.collection('userProfiles').where('classIds','array-contains',instructorClassId).get();const total=lessonsData.reduce((n,c)=>n+c.lessons.length,0);const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>!x.isInstructor);panel.innerHTML=`<h3>${uiText('Student lesson progress')}</h3><div class="instructor-list">${rows.map(x=>{const done=(x.completedLessons||[]).length,p=total?Math.min(100,Math.round(done/total*100)):0;return `<article class="instructor-card"><h4>${esc(x.displayName||x.username||x.email||uiText('Student'))}</h4><div class="muted">${uiText(`${done} of ${total} lessons complete · ${p}%`)}</div><div class="progress-meter"><span style="width:${p}%"></span></div></article>`}).join('')||`<p class="muted">${uiText('No students have joined this classroom.')}</p>`}</div>`;}
+        async function renderInstructorProgress(panel) {
+            if (!window.StudentDetails) await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='student-details.js';script.onload=resolve;script.onerror=reject;document.head.append(script);});
+            const classId = instructorClassId;
+            return window.StudentDetails.render(panel, {db, firebase, classId, instructorId: currentUser.uid, lessons: lessonsData.flatMap(c=>c.lessons), spanish: uiLanguage==='es', isCurrent:()=>instructorClassId===classId && instructorTab==='progress'});
+        }
         async function renderInstructorSchedule(panel){const snap=await db.collection('classSchedule').where('classId','==',instructorClassId).get();const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));const displayLocale=uiLanguage==='es'?'es-US':'en-US';const cards=rows.map(x=>instructorCard(x.topic,x.date?.toDate?x.date.toDate().toLocaleString(displayLocale):uiText('Date pending'),x.notes||x.location||'',`<button data-edit-schedule="${x.id}">${uiText('Edit')}</button><button class="danger" data-delete-doc="classSchedule:${x.id}">${uiText('Delete')}</button>`)).join('')||`<p class="muted">${uiText('No sessions scheduled.')}</p>`;panel.innerHTML=`<div class="instructor-grid"><form id="schedule-editor" class="instructor-form"><h3>${uiText('Add or edit session')}</h3><input type="hidden" id="schedule-id"><input id="schedule-topic" placeholder="${uiText('Topic')}" required><label>${uiText('Date and time')}<input id="schedule-date" type="datetime-local" required></label><textarea id="schedule-notes" rows="4" placeholder="${uiText('Notes or location')}"></textarea><button class="button-theme">${uiText('Save session')}</button></form><div class="instructor-list"><h3>${uiText('Course schedule')}</h3>${cards}</div></div>`;panel.querySelector('form').onsubmit=async e=>{e.preventDefault();const id=formValue('schedule-id'),ref=id?db.collection('classSchedule').doc(id):db.collection('classSchedule').doc();await ref.set({classId:instructorClassId,topic:formValue('schedule-topic'),date:firebase.firestore.Timestamp.fromDate(new Date(document.getElementById('schedule-date').value)),notes:formValue('schedule-notes'),createdBy:currentUser.uid,updatedAt:instructorTimestamp()},{merge:true});await renderInstructorWorkspace();};panel.querySelectorAll('[data-edit-schedule]').forEach(b=>b.onclick=()=>{const x=rows.find(r=>r.id===b.dataset.editSchedule);document.getElementById('schedule-id').value=x.id;document.getElementById('schedule-topic').value=x.topic||'';document.getElementById('schedule-notes').value=x.notes||'';if(x.date?.toDate){const d=x.date.toDate(),local=new Date(d-d.getTimezoneOffset()*60000);document.getElementById('schedule-date').value=local.toISOString().slice(0,16);}});bindInstructorDeletes(panel);}
         function bindInstructorDeletes(panel){panel.querySelectorAll('[data-delete-doc]').forEach(b=>b.onclick=async()=>{const [collection,id]=b.dataset.deleteDoc.split(':');if(!confirm(uiText('Delete this item? This cannot be undone.')))return;await db.collection(collection).doc(id).delete();await renderInstructorWorkspace();});}
 
