@@ -1,20 +1,23 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const csv=require('./public/schedule-csv.js');
-test('imports BOM, CRLF, quoted commas, escaped quotes and multiline notes',()=>{
- const rows=csv.validate('\uFEFFtopic,date,time,notes,location\r\n"Faith, hope",2026-10-01,19:00,"Bring ""Bible""\nNext line",Hall\r\n');
- assert.equal(rows.length,1);assert.equal(rows[0].topic,'Faith, hope');assert.equal(rows[0].notes,'Bring "Bible"\nNext line');assert.equal(rows[0].date.getHours(),19);
+test('ISO and US dates use local start of day and blank details',()=>{
+ for(const date of ['2026-10-01','10/01/2026','10/1/2026']){
+  const [x]=csv.validate('date,topic,details\n'+date+',Welcome,');
+  assert.equal(x.date.getFullYear(),2026);assert.equal(x.date.getMonth(),9);assert.equal(x.date.getDate(),1);assert.equal(x.date.getHours(),0);assert.equal(x.details,'');
+ }
 });
-test('optional columns and reordered headers work',()=>{
- const [x]=csv.validate('time,topic,date\n09:30,Welcome,2026-10-02');assert.equal(x.location,'');assert.equal(x.notes,'');
+test('quoted commas, escaped quotes and multiline details survive',()=>{
+ const [x]=csv.validate('\uFEFFdate,topic,details\r\n2026-10-01,"Faith, hope","Bring ""Bible""\nNext line"\r\n');
+ assert.equal(x.topic,'Faith, hope');assert.equal(x.details,'Bring "Bible"\nNext line');
 });
-test('rejects malformed files before saving any sessions',()=>{
- for(const text of ['topic,date\nx,2026-10-01','topic,date,time\nx,2026-02-30,12:00','topic,date,time\nx,2026-10-01,25:00','topic,date,time\n,2026-10-01,12:00','topic,date,time\n"x,2026-10-01,12:00','topic,date,time\nx,2026-10-01,12:00,extra','topic,date,time\n'])assert.throws(()=>csv.validate(text));
+test('rejects bad dates, blank topics, malformed CSV and old headers',()=>{
+ for(const row of ['2026-02-30,x,','02/29/2026,x,','13/01/2026,x,','10/01/026,x,','2026-10-01,,','"2026-10-01,x,','2026-10-01,x,extra,extra'])assert.throws(()=>csv.validate('date,topic,details\n'+row));
+ assert.throws(()=>csv.validate('date,topic,details\n'));
+ assert.throws(()=>csv.validate('topic,date,time\nx,2026-10-01,12:00'),/headers/);
+ assert.equal(csv.validate('date,topic,details\n02/29/2028,Leap year,').length,1);
 });
-test('rejects duplicate sessions and oversized imports',()=>{
- assert.throws(()=>csv.validate('topic,date,time\nWelcome,2026-10-01,19:00\n welcome ,2026-10-01,19:00'),/duplicate/);
- assert.throws(()=>csv.validate('topic,date,time\n'+Array.from({length:201},(_,i)=>`Session ${i},2026-10-01,19:00`).join('\n')),/200/);
-});
-test('session identity distinguishes dates and ignores topic case',()=>{
- const date=new Date(2026,9,1,19);assert.equal(csv.identity({topic:' Welcome ',date}),csv.identity({topic:'welcome',date}));
+test('rejects duplicate sessions across date formats and oversized imports',()=>{
+ assert.throws(()=>csv.validate('date,topic,details\n2026-10-01,Welcome,\n10/01/2026, welcome ,'),/duplicate/);
+ assert.throws(()=>csv.validate('date,topic,details\n'+Array.from({length:201},(_,i)=>'2026-10-01,Session '+i+',').join('\n')),/200/);
 });
