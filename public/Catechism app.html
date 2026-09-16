@@ -2485,8 +2485,10 @@ body > nav button:focus-visible {
         <!-- Quiz Section -->
         <section id="quiz-section" class="hidden">
             <h2 id="quiz-title"></h2>
+            <p id="quiz-draft-status" role="status"></p>
             <div id="quiz-questions-container"></div>
             <button class="button-theme" id="submit-quiz-button" data-i18n="Submit Quiz">Submit Quiz</button>
+            <div id="quiz-results" class="student-firestore-item" role="status" tabindex="-1" hidden></div>
             <button class="button-theme" id="back-to-lesson-from-quiz-button" data-i18n="Back to Lesson">Back to Lesson</button>
         </section>
 
@@ -3170,6 +3172,8 @@ body > nav button:focus-visible {
     <script src="sacrament-guide-templates.js"></script>
     <script src="additional-guide-templates.js"></script>
     <script src="rite-preparation.js"></script>
+    <script src="learning-progress.js"></script>
+    <script src="schedule-csv.js"></script>
     <script>
         // Landing-page media settings. Add a public file path to imageSrc or videoSrc
         // when a screenshot or recording is ready. Empty sources stay completely hidden.
@@ -3410,6 +3414,7 @@ body > nav button:focus-visible {
                 "Back to Categories": "Volver a las categorías",
                 "Open video": "Abrir video",
                 "Take Quiz": "Hacer cuestionario",
+                "Continue Quiz": "Continuar cuestionario",
                 "Mark Lesson Completed": "Marcar lección como completada",
                 "Back to Lessons": "Volver a las lecciones",
                 "Submit Quiz": "Enviar cuestionario",
@@ -5222,6 +5227,8 @@ body > nav button:focus-visible {
             const lessonsCompleted = lessonLinks.every(link => completedLessons.has(link.lessonId));
             const prerequisitesCompleted = readingsCompleted && lessonsCompleted;
 
+            renderAssignmentContinue(content, assignment, readings, lessonLinks, linkedDiscussions);
+
             for (const linkedDiscussion of linkedDiscussions) {
                 const card = document.createElement('div');
                 card.className = 'student-firestore-item';
@@ -5272,6 +5279,46 @@ body > nav button:focus-visible {
             }
 
             showSection('assignment-detail-section');
+        }
+
+        async function renderAssignmentContinue(content, assignment, readings, lessons, discussions) {
+            const card = document.createElement('div');
+            card.className = 'student-firestore-item';
+            content.prepend(card);
+            const uid = currentUser?.uid, classId = userProfile?.classId;
+            const t = (en, es) => uiLanguage === 'es' ? es : en;
+            card.textContent = t('Loading assignment progress…', 'Cargando el progreso de la tarea…');
+            try {
+                const snapshot = await db.collection('discussionPosts').where('classId', '==', classId).get();
+                if (!card.isConnected || currentUser?.uid !== uid || userProfile?.classId !== classId) return;
+                const prompts = new Set(snapshot.docs.filter(d => d.data().authorId === uid).map(d => d.data().promptId));
+                const state = LearningProgress.nextActivity(readings, lessons, discussions,
+                    new Set(readings.filter(r => isReadingCompleted(assignment, r)).map(r => r.id)),
+                    new Set(userProfile?.completedLessons || []), prompts);
+                card.textContent = '';
+                if (!state.total) { card.remove(); return; }
+                const progress = document.createElement('p');
+                progress.textContent = uiLanguage === 'es' ? `${state.completed} de ${state.total} actividades completadas` : `${state.completed} of ${state.total} activities completed`;
+                card.appendChild(progress);
+                if (!state.next) return;
+                const button = document.createElement('button');
+                button.className = 'button-theme';
+                button.textContent = t('Continue Assignment', 'Continuar tarea');
+                button.onclick = () => {
+                    if (state.next.kind === 'reading') openAssignmentReading(assignment, readings.find(r => r.id === state.next.id));
+                    else if (state.next.kind === 'discussion') openDiscussionPrompt(discussions.find(d => d.id === state.next.id));
+                    else {
+                        const match = findLessonById(state.next.id);
+                        if (!match) { showCustomAlert(uiText('This lesson could not be found in the published lesson catalog.')); return; }
+                        currentCategory = match.category.category;
+                        loadLessonContent(match.lesson);
+                    }
+                };
+                card.appendChild(button);
+            } catch (error) {
+                if (!card.isConnected) return;
+                card.textContent = t('Progress could not be loaded. You can still open the activities below.', 'No se pudo cargar el progreso. Puedes abrir las actividades a continuación.');
+            }
         }
 
         function buildReadingLinkRow(assignment, reading) {
@@ -6750,7 +6797,10 @@ async function submitPrayerRequest() {
             const quizPolicy = effectiveQuizPolicy(lesson);
             takeQuizBtn.style.display = quizPolicy === 'hidden' ? 'none' : 'inline-block';
             takeQuizBtn.disabled = isCompleted;
-            takeQuizBtn.textContent = uiText(isCompleted ? 'Lesson Completed' : quizPolicy === 'optional' ? 'Take Optional Quiz' : 'Take Quiz');
+            const hasSavedQuiz = !isCompleted && LearningProgress.read(quizDraftStorage(), LearningProgress.key(currentUser?.uid, userProfile?.classId, lesson.id), lessonDisplayQuiz(lesson)).some(answer => answer >= 0);
+            const quizButtonLabel = isCompleted ? 'Lesson Completed' : hasSavedQuiz ? 'Continue Quiz' : quizPolicy === 'optional' ? 'Take Optional Quiz' : 'Take Quiz';
+            takeQuizBtn.dataset.i18n = quizButtonLabel;
+            takeQuizBtn.textContent = uiText(quizButtonLabel);
             completeWithoutQuizBtn.style.display = !isCompleted && quizPolicy !== 'required' ? 'inline-block' : 'none';
             if (isCompleted) {
                 takeQuizBtn.classList.add('quiz-completed');
@@ -6783,13 +6833,24 @@ async function submitPrayerRequest() {
             });
         }
 
+        let activeQuizDraft = null;
+        function quizDraftStorage() { try { return window.localStorage; } catch { return null; } }
         function startQuiz() {
+            document.getElementById('quiz-results').hidden = true;
             const localizedQuiz = lessonDisplayQuiz(currentLesson);
             if (!currentLesson || localizedQuiz.length === 0) {
                 showCustomAlert("No quiz available for this lesson.");
                 return;
             }
             currentQuiz = localizedQuiz;
+            const key = LearningProgress.key(currentUser?.uid, userProfile?.classId, currentLesson.id);
+            const storage = quizDraftStorage();
+            if (userProfile?.completedLessons?.includes(currentLesson.id)) LearningProgress.clear(storage, key);
+            const restored = LearningProgress.read(storage, key, currentQuiz);
+            activeQuizDraft = { key, answers: currentQuiz.map((q, i) => restored[i] ?? -1) };
+            const draftStatus = document.getElementById('quiz-draft-status');
+            draftStatus.textContent = restored.some(a => a >= 0)
+                ? (uiLanguage === 'es' ? 'Respuestas guardadas restauradas en este navegador.' : 'Saved answers restored on this browser.') : '';
             showSection('quiz-section');
             document.getElementById('quiz-title').textContent = uiLanguage === 'es' ? `Cuestionario: ${lessonDisplayTitle(currentLesson)}` : `Quiz: ${lessonDisplayTitle(currentLesson)}`;
             const quizQuestionsContainer = document.getElementById('quiz-questions-container');
@@ -6807,7 +6868,14 @@ async function submitPrayerRequest() {
                     input.type = 'radio';
                     input.name = `quiz-answer-${questionIndex}`; // Unique name for each question group
                     input.value = optionIndex;
+                    input.checked = activeQuizDraft.answers[questionIndex] === optionIndex;
                     input.addEventListener('change', () => {
+                        document.getElementById('quiz-results').hidden = true;
+                        activeQuizDraft.answers[questionIndex] = optionIndex;
+                        const saved = LearningProgress.save(quizDraftStorage(), activeQuizDraft.key, currentQuiz, activeQuizDraft.answers);
+                        draftStatus.textContent = saved
+                            ? (uiLanguage === 'es' ? 'Respuestas guardadas en este navegador.' : 'Answers saved on this browser.')
+                            : (uiLanguage === 'es' ? 'No se pudieron guardar las respuestas en este navegador. Mantén esta página abierta.' : 'Answers could not be saved on this browser. Keep this page open.');
                         if (input.checked) scrollToNextQuizQuestion(questionIndex, quizQuestionsContainer);
                     });
                     label.appendChild(input);
@@ -6849,19 +6917,28 @@ async function submitPrayerRequest() {
             const passingScore = totalQuestions; // Require 100% to pass
 
             if (score >= passingScore) {
-                triggerFireworks(); 
+                const draftKey = activeQuizDraft?.key;
+                const uid = currentUser?.uid;
+                const lessonId = currentLesson.id;
+                const submitButton = document.getElementById('submit-quiz-button');
+                submitButton.disabled = true;
+                try {
+                    await db.collection('userProfiles').doc(uid).update({
+                        completedLessons: firebase.firestore.FieldValue.arrayUnion(lessonId)
+                    });
+                } catch (error) {
+                    submitButton.disabled = false;
+                    showCustomAlert(uiLanguage === 'es' ? 'No se pudo guardar la finalización. Tus respuestas se conservan; inténtalo de nuevo.' : 'Completion could not be saved. Your answers are kept; please try again.');
+                    return;
+                }
+                LearningProgress.clear(quizDraftStorage(), draftKey);
+                if (currentUser?.uid !== uid || currentLesson?.id !== lessonId) return;
+                if (!userProfile.completedLessons.includes(lessonId)) userProfile.completedLessons.push(lessonId);
+                await checkAndAwardBadges();
+                triggerFireworks();
                 showCustomAlert(uiLanguage === 'es'
                     ? `¡Correcto! Obtuviste ${score}/${totalQuestions} y aprobaste esta lección.`
                     : `Correct! You scored ${score}/${totalQuestions} and passed this lesson.`);
-                document.getElementById('submit-quiz-button').disabled = true;
-
-                if (userProfile && userProfile.completedLessons && !userProfile.completedLessons.includes(currentLesson.id)) {
-                    userProfile.completedLessons.push(currentLesson.id);
-                    await db.collection('userProfiles').doc(currentUser.uid).update({
-                        completedLessons: userProfile.completedLessons
-                    });
-                    await checkAndAwardBadges(); 
-                }
                 updateDashboard(); // Update dashboard after passing a quiz
                 loadLessonsForCategory(currentCategory);
                 const discussionPrompt = getDiscussionPromptForLesson(currentLesson.id);
@@ -6879,7 +6956,25 @@ async function submitPrayerRequest() {
                         ? `\n\nRespondiste incorrectamente las siguientes preguntas: ${incorrectQuestions.join(', ')}.`
                         : `\n\nYou answered the following questions incorrectly: ${incorrectQuestions.join(', ')}.`;
                 }
-                showCustomAlert(failureMessage);
+                const results = document.getElementById('quiz-results');
+                results.replaceChildren();
+                const summary = document.createElement('p');
+                summary.textContent = failureMessage;
+                summary.style.whiteSpace = 'pre-line';
+                results.appendChild(summary);
+                const missed = document.createElement('ul');
+                incorrectQuestions.forEach(number => {
+                    const item = document.createElement('li');
+                    item.textContent = `${uiLanguage === 'es' ? 'Pregunta' : 'Question'} ${number}: ${currentQuiz[number - 1].question}`;
+                    missed.appendChild(item);
+                });
+                results.appendChild(missed);
+                results.hidden = false;
+                requestAnimationFrame(() => {
+                    if (results.hidden || document.getElementById('quiz-section').classList.contains('hidden')) return;
+                    results.focus({ preventScroll: true });
+                    results.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+                });
             }
         }
         
@@ -7327,6 +7422,19 @@ async function submitPrayerRequest() {
                 const studentCount=students.docs.filter(d=>d.data().isInstructor!==true && d.data().isAdmin!==true && !(d.data().inactiveClassIds||[]).includes(instructorClassId)).length;
                 document.getElementById('instructor-summary').innerHTML=[['Class ID',instructorClassId||'—'],['Students',studentCount],['Sessions',schedule.size||0],['Prayer requests',prayers.size||0]].map(([l,v])=>`<div class="instructor-stat"><strong>${esc(v)}</strong>${esc(uiText(l))}</div>`).join('');
                 await ({rites:RitePrep.manager,lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
+                if(instructorTab==='schedule') {
+                    const classId=instructorClassId,uid=currentUser?.uid;
+                    const isCurrent=()=>instructorClassId===classId&&currentUser?.uid===uid&&instructorTab==='schedule';
+                    ScheduleCsv.mount(panel,{classId,es:uiLanguage==='es',isCurrent,onSaved:renderInstructorWorkspace,save:async entries=>{
+                        const existing=await db.collection('classSchedule').where('classId','==',classId).get();
+                        if(!isCurrent())throw Error(uiLanguage==='es'?'La clase ha cambiado. Vuelve a seleccionar el archivo.':'Class changed. Please select the file again.');
+                        const keys=new Set(existing.docs.flatMap(d=>{const x=d.data();return x.date?.toDate&&x.topic?[ScheduleCsv.identity({topic:x.topic,date:x.date.toDate()})]:[];}));
+                        if(entries.some(x=>keys.has(ScheduleCsv.identity(x))))throw Error(uiLanguage==='es'?'Una sesión ya existe con el mismo tema y fecha. Elimínala del CSV.':'A session with the same topic and date already exists. Remove it from the CSV.');
+                        const batch=db.batch();
+                        entries.forEach(x=>batch.set(db.collection('classSchedule').doc(),{...x,date:firebase.firestore.Timestamp.fromDate(x.date),classId,createdBy:uid,updatedAt:instructorTimestamp()}));
+                        await batch.commit();
+                    }});
+                }
             } catch(error) { panel.innerHTML=`<p class="student-firestore-empty">${esc(error.message)}</p>`; }
         }
         async function renderInstructorLessons(panel) {

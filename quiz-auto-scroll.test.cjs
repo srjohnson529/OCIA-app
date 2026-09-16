@@ -20,7 +20,9 @@ test('last question and single-question quizzes do not jump or submit',()=>{
 });
 test('reduced motion avoids animated scrolling',()=>assert.equal(run(0,2,true)[0].behavior,'instant'));
 test('scrolling runs on a checked answer change rather than focus or rendering',()=>{
- assert.match(html,/input\.addEventListener\('change', \(\) => \{\s*if \(input.checked\) scrollToNextQuizQuestion\(questionIndex, quizQuestionsContainer\);/);
+ const quiz=html.slice(html.indexOf('        function startQuiz()'),html.indexOf('        function submitQuiz'));
+ assert.match(quiz,/input\.addEventListener\('change', \(\) => \{/);
+ assert.match(quiz,/if \(input.checked\) scrollToNextQuizQuestion\(questionIndex, quizQuestionsContainer\);/);
 });
 test('all inline scripts remain valid JavaScript',()=>{
  for(const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)){if(m[1].trim())new vm.Script(m[1]);}
