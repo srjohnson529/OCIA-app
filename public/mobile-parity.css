@@ -1,0 +1,52 @@
+/* Shared mobile-parity components; keep marketing and payment flows unchanged. */
+#lesson-tracker.web-lesson-tracker {
+  display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 760px;
+  margin: 0 auto 26px; padding: 24px; box-sizing: border-box; text-align: left;
+  border: 1px solid #b9955055; border-radius: 20px; background: #fff;
+  color: #222; font-family: inherit; font-size: 1rem; cursor: pointer;
+  box-shadow: 0 8px 24px #19395118; transition: background .15s;
+}
+#lesson-tracker[hidden] { display: none; }
+#lesson-tracker:hover:not(:disabled) { background: #f7f9fc; }
+#lesson-tracker:focus-visible { outline: 3px solid #b99550; outline-offset: 4px; }
+#lesson-tracker:disabled { cursor: default; opacity: 1; }
+.tracker-heading { display: flex; justify-content: space-between; gap: 16px; font-size: 1.3em; font-weight: bold; }
+#tracker-count, #tracker-next { color: #3e719b; }
+#tracker-next { overflow-wrap: anywhere; }
+#tracker-progress { width: 100%; height: 9px; accent-color: #b99550; border: 0; }
+#tracker-progress::-webkit-progress-bar { background: #eee; border-radius: 8px; }
+#tracker-progress::-webkit-progress-value { background: #b99550; border-radius: 8px; }
+.tracker-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tracker-stats > span { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 14px; background: #edf2f7; }
+.tracker-stats > span:last-child { background: #f8f4e9; }
+.tracker-stats strong { font-size: 1.7em; color: #3e719b; }
+.tracker-stats > span:last-child strong { color: #a17a36; }
+@media(max-width: 380px) { .tracker-stats { grid-template-columns: 1fr; } #lesson-tracker.web-lesson-tracker { padding: 18px; } }
+
+/* Account and notifications stay independent of the centered brand. */
+.parity-header { position: absolute; right: 16px; top: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; max-width: 180px; }
+header .parity-avatar { width: 46px; height: 46px; padding: 0; margin: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: white; font: inherit; font-size: 12px; cursor: pointer; overflow: hidden; }
+.parity-avatar img { width: 100%; height: 100%; object-fit: cover; }
+header .parity-badge { padding: 5px 8px; margin: 0; border: 2px solid white; border-radius: 16px; background: #b92338; color: white; font: bold 12px system-ui; cursor: pointer; }
+.parity-badge[hidden] { display: none; }
+#parity-class-photo:empty { display: none; }
+#parity-class-photo { max-width: 760px; margin: 0 auto 20px; }
+#parity-class-photo img { display: block; width: 100%; max-height: 280px; object-fit: cover; border-radius: 20px; }
+.parity-photo-editor { padding: 20px 0; text-align: left; }
+.parity-photo-editor h3 { color: #3e719b; }
+.parity-photo-editor img { display: block; object-fit: cover; margin-bottom: 16px; }
+.parity-personal { width: 96px; height: 96px; border-radius: 50%; }
+.parity-classroom { width: 100%; max-width: 480px; max-height: 240px; border-radius: 16px; }
+.parity-photo-editor input { display: block; width: 100%; box-sizing: border-box; margin: 16px 0; }
+.parity-action { padding: 12px 18px; margin: 4px; border: 1px solid #3e719b40; border-radius: 12px; background: #edf2f7; color: #315c80; font: inherit; cursor: pointer; box-shadow: none; }
+.parity-action:hover { background: #e1ebf4; }
+.parity-action:disabled { cursor: default; opacity: .5; }
+.parity-action:focus-visible,.parity-avatar:focus-visible,.parity-badge:focus-visible { outline: 3px solid #d6b363; outline-offset: 3px; }
+.parity-tool-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin: 20px 0; }
+.parity-tool-grid .parity-action { margin: 0; text-align: left; }
+@media(max-width: 700px) {
+ header:has(.parity-header) { padding-bottom: 48px; }
+ .parity-header { top: auto; bottom: 5px; right: 12px; max-width: calc(100% - 24px); }
+ header .parity-avatar { width: 36px; height: 36px; }
+ .parity-tool-grid { grid-template-columns: 1fr; }
+}

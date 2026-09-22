@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "appAssociation": "NONE",
     "public": "public",
     "ignore": [
       "firebase.json",
@@ -7,6 +8,9 @@
       "**/node_modules/**"
     ],
     "rewrites": [
+      {"source": "/join", "destination": "/join.html"},
+      {"source": "/.well-known/assetlinks.json", "destination": "/android-app-links.json"},
+      {"source": "/.well-known/apple-app-site-association", "destination": "/apple-app-links.json"},
       {
         "source": "/privacy",
         "destination": "/privacy.html"

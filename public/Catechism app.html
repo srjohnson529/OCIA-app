@@ -2318,6 +2318,8 @@ body > nav button:focus-visible {
         <button id="resources-nav-button" data-i18n="Resources">Resources</button>
         <button id="achievements-nav-button" data-i18n="Achievements">Achievements</button>
         <button id="instructor-nav-button" class="hidden" data-i18n="Instructor Tools">Instructor Tools</button>
+        <button id="instructor-updates-nav" class="hidden" onclick="openInstructorUpdates()">Instructor Updates</button>
+        <button id="admin-support-nav" class="hidden" onclick="AdminSupport.open()">Parish & Account Support</button>
         <button id="quit-nav-button" data-i18n="Account">Account</button>
     </nav>
 
@@ -2336,14 +2338,6 @@ body > nav button:focus-visible {
             <div id="dashboard-user-welcome" class="hidden" style="text-align: center; margin: 20px 0; font-size: 1.1em;"></div>
             
             <div id="dashboard-container">
-                <div class="dashboard-item">
-                    <span id="lessons-completed-stat">0</span>
-                    <p data-i18n="Lessons Completed">Lessons Completed</p>
-                </div>
-                <div class="dashboard-item">
-                    <span id="lessons-left-stat">0</span>
-                    <p data-i18n="Lessons Left">Lessons Left</p>
-                </div>
                 <div class="dashboard-item">
                     <span id="upcoming-topic-stat" data-i18n="Loading...">Loading...</span>
                     <p data-i18n="Next Class Topic">Next Class Topic</p>
@@ -2458,6 +2452,12 @@ body > nav button:focus-visible {
 
         <!-- Lessons List Section -->
       <section id="lessons-list-section" class="hidden">
+    <button id="lesson-tracker" type="button" class="web-lesson-tracker">
+        <span class="tracker-heading"><span id="tracker-title">Lesson Tracker</span><span id="tracker-count">0/0</span></span>
+        <progress id="tracker-progress" max="1" value="0" aria-label="Lesson progress"></progress>
+        <span class="tracker-stats"><span><strong id="lessons-completed-stat">0</strong><span id="tracker-completed-label">Completed</span></span><span><strong id="lessons-left-stat">0</strong><span id="tracker-remaining-label">Remaining</span></span></span>
+        <span id="tracker-next"></span>
+    </button>
     <h2 data-i18n="Lesson Categories">Lesson Categories</h2>
     <div id="categories-container">
         <button class="button-theme category-button" data-i18n="The Profession of Faith">The Profession of Faith</button>
@@ -2962,6 +2962,7 @@ body > nav button:focus-visible {
         </section>
 
 <section id="profile-setup" class="hidden">
+    <div id="web-onboarding" aria-live="polite"></div>
     <div class="auth-shell landing-shell">
         <div class="landing-topbar">
             <nav class="landing-nav" aria-label="Landing page navigation">
@@ -3006,7 +3007,7 @@ body > nav button:focus-visible {
             <h3 data-i18n="Finish Student Profile">Finish Student Profile</h3>
             <p data-i18n="Enter the name you want classmates and instructors to see, then add the class ID given by your instructor.">Enter the name you want classmates and instructors to see, then add the class ID given by your instructor.</p>
             <input type="text" id="username-input" class="auth-field" autocomplete="name" placeholder="Display Name" data-i18n-placeholder="Display Name">
-            <input type="text" id="class-input" class="auth-field" autocapitalize="characters" placeholder="Class ID" data-i18n-placeholder="Class ID">
+            <input type="text" id="class-input" class="auth-field" autocapitalize="characters" placeholder="Student invitation code" data-i18n-placeholder="Student invitation code">
             <div class="auth-actions">
                 <button id="save-profile-button" class="button-theme auth-primary" data-i18n="Save Profile">Save Profile</button>
                 <button id="profile-signout-button" class="button-theme" type="button" data-i18n="Sign Out">Sign Out</button>
@@ -3091,6 +3092,10 @@ body > nav button:focus-visible {
     </div>
 </section>
 
+<section id="instructor-updates-section" class="hidden">
+    <button class="back-button" onclick="showSection('main-menu-section')">← <span data-i18n="Back">Back</span></button>
+    <div id="instructor-updates-panel"></div>
+</section>
 <section id="instructor-section" class="hidden">
     <div class="instructor-shell">
         <div class="instructor-hero">
@@ -3098,9 +3103,10 @@ body > nav button:focus-visible {
             <div class="instructor-class-picker"><label for="instructor-class-select" data-i18n="Active classroom">Active classroom</label><select id="instructor-class-select"></select><button class="button-theme" id="instructor-open-chat" data-i18n="Open classroom chat">Open classroom chat</button></div>
         </div>
         <div id="instructor-summary" class="instructor-summary"></div>
+        <article class="instructor-card"><button id="instructor-tour-open" class="button-theme" onclick="InstructorTour.open()">Explore Illumined</button><div id="instructor-tour-offer"></div></article>
         <div class="instructor-tabs" role="tablist">
             <button data-instructor-tab="rites" data-i18n="Rite and Sacrament Preparation">Rite and Sacrament Preparation</button>
-            <button data-instructor-tab="lessons" data-i18n="Lessons">Lessons</button><button data-instructor-tab="daily" data-i18n="Daily Formation">Daily Formation</button><button data-instructor-tab="classes" data-i18n="Classrooms">Classrooms</button><button data-instructor-tab="announcements" data-i18n="Announcements">Announcements</button><button data-instructor-tab="prayers" data-i18n="Prayer requests">Prayer requests</button><button data-instructor-tab="progress" data-i18n="Student Details">Student Details</button><button data-instructor-tab="schedule" data-i18n="Schedule">Schedule</button>
+            <button data-instructor-tab="lessons" data-i18n="Lessons">Lessons</button><button data-instructor-tab="daily" data-i18n="Daily Formation">Daily Formation</button><button data-instructor-tab="classes" data-i18n="Classroom Management">Classroom Management</button><button data-instructor-tab="announcements" data-i18n="Announcements">Announcements</button><button data-instructor-tab="prayers" data-i18n="Prayer requests">Prayer requests</button><button data-instructor-tab="progress" data-i18n="Student Details" hidden>Student Details</button><button data-instructor-tab="schedule" data-i18n="Schedule">Schedule</button>
         </div>
         <div id="instructor-panel" class="instructor-panel"></div>
         <button class="button-theme" id="instructor-back-button" data-i18n="Back to dashboard">Back to dashboard</button>
@@ -3364,6 +3370,7 @@ body > nav button:focus-visible {
                 "Open classroom chat": "Abrir chat de la clase",
                 "Daily Formation": "Formación diaria",
                 "Classrooms": "Clases",
+                "Classroom Management": "Administración del aula",
                 "Announcements": "Anuncios",
                 "Prayer requests": "Peticiones de oración",
                 "Student Details": "Detalles de estudiantes",
@@ -3415,6 +3422,7 @@ body > nav button:focus-visible {
                 "Open video": "Abrir video",
                 "Take Quiz": "Hacer cuestionario",
                 "Continue Quiz": "Continuar cuestionario",
+                "Student invitation code": "Código de invitación de estudiante",
                 "Mark Lesson Completed": "Marcar lección como completada",
                 "Back to Lessons": "Volver a las lecciones",
                 "Submit Quiz": "Enviar cuestionario",
@@ -3968,6 +3976,15 @@ body > nav button:focus-visible {
             showProfileDetailsCard(false);
             setAuthenticatedShell(false);
             document.getElementById('instructor-nav-button')?.classList.add('hidden');
+            document.getElementById('instructor-updates-nav')?.classList.add('hidden');
+            document.getElementById('admin-support-nav')?.classList.add('hidden');
+            document.getElementById('admin-support-section')?.remove();
+            document.getElementById('update-management-section')?.remove();
+            document.getElementById('update-preview-modal')?.remove();
+            document.getElementById('instructor-tour-section')?.remove();
+            document.getElementById('instructor-updates-panel').replaceChildren();
+            document.getElementById('instructor-startup-modal')?.remove();
+            startupUpdateCheckedFor = '';
         }
 
         function appendTextWithLineBreaks(parent, text) {
@@ -4732,6 +4749,8 @@ body > nav button:focus-visible {
                 }
             });
                         window.scrollTo(0, 0); // Add this line to scroll to the top
+            window.InstructorTour?.onSection(sectionId);
+            window.WebParity?.onSection(sectionId);
         }
 
         function triggerFireworks() {
@@ -4773,7 +4792,8 @@ body > nav button:focus-visible {
         }
          function updateDashboard() {
             const totalLessons = lessonsData.reduce((sum, category) => sum + category.lessons.length, 0);
-            const completedCount = (userProfile && userProfile.completedLessons) ? userProfile.completedLessons.length : 0;
+            const knownLessons = new Set(lessonsData.flatMap(category => category.lessons).map(lesson => lesson.id));
+            const completedCount = [...new Set(userProfile?.completedLessons || [])].filter(id => knownLessons.has(id)).length;
             const lessonsLeft = totalLessons - completedCount;
             const badgesEarned = (userProfile && userProfile.earnedBadges) ? userProfile.earnedBadges.length : 0; // FIX: Add this line
 
@@ -4782,6 +4802,7 @@ body > nav button:focus-visible {
             document.getElementById('badges-earned-stat').textContent = badgesEarned; // ADD THIS LINE
 
             updateNextClassTopic();
+            updateLessonTracker();
         }
 
         function updateNextClassTopic() {
@@ -5975,6 +5996,7 @@ auth.onAuthStateChanged(async (user) => {
         // User not authenticated - cleanup listeners
         currentUser = null;
         userProfile = null;
+        window.WebParity?.reset();
         resetStudentUIForSignOut();
         setAuthStatus('Sign in or create a student account to begin.');
         
@@ -6030,7 +6052,12 @@ function renderAuthenticatedWelcome() {
 // Helper function to update UI for authenticated users
 function updateUIForAuthenticatedUser() {
     if (!userProfile) return;
+    window.WebParity?.sync();
     document.getElementById('instructor-nav-button')?.classList.toggle('hidden', userProfile.isInstructor !== true);
+    document.getElementById('instructor-updates-nav')?.classList.toggle('hidden', !(userProfile.isInstructor || userProfile.isAdmin));
+    document.getElementById('instructor-updates-nav').textContent = uiLanguage === 'es' ? 'Novedades para instructores' : 'Instructor Updates';
+    document.getElementById('admin-support-nav').classList.toggle('hidden', userProfile.isAdmin !== true);
+    document.getElementById('admin-support-nav').textContent = uiLanguage === 'es' ? 'Parroquias y soporte de cuentas' : 'Parish & Account Support';
     setAuthenticatedShell(true);
     setAuthStatus('');
     
@@ -6118,84 +6145,23 @@ async function sendPasswordReset() {
 
 // Save Profile - Updated to properly set displayName
 async function saveProfile() {
-    const username = document.getElementById('username-input').value.trim();
-    const classId = document.getElementById('class-input').value.trim();
-    
-    console.log('SaveProfile called - currentUser:', currentUser);
-    console.log('SaveProfile called - username:', username, 'classId:', classId);
-    
-    if (!username || !classId) {
-        showCustomAlert('Please enter both username and class ID.');
-        return;
-    }
-    
-    if (!currentUser) {
-        showCustomAlert('Please sign in first before saving your profile.');
-        return;
-    }
-    
+    const displayName = document.getElementById('username-input').value.trim();
+    const code = document.getElementById('class-input').value.trim();
+    if (!currentUser) { showCustomAlert(uiText('Please sign in first before saving your profile.')); return; }
+    const button = document.getElementById('save-profile-button');
+    button.disabled = true;
     try {
-        console.log('Starting profile save process...');
-        
-        // Structure to match SwiftUI UserProfile model
-        const profileData = {
-            userId: currentUser.uid,
-            email: currentUser.email || '',
-            displayName: username, // This should be the user's chosen name, not email
-            isInstructor: false,
-            classIds: [classId], // Array to match SwiftUI structure
-            activeClassId: classId, // Required by the shared profile-creation rules
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            // Keep web app specific fields for backward compatibility
-            completedLessons: [],
-            earnedBadges: [], 
-            completedMysteries: [],
-            memorizedPrayerIds: [],
-            currentLessonIndex: 0,
-            // Also store username separately for web app compatibility
-            username: username,
-            classId: classId
-        };
-        
-        console.log('Profile data to save:', profileData);
-        
-        // Use userProfiles collection to match SwiftUI app
-        const userDocRef = db.collection('userProfiles').doc(currentUser.uid);
-        await userDocRef.set(profileData, { merge: true });
-        
-        console.log('Profile saved to Firestore successfully');
-
-        // Update local userProfile to match web app structure
-        userProfile = {
-            username: username, // This will be the display name
-            classId: classId,
-            classIds: [classId],
-            activeClassId: classId,
-            completedLessons: [],
-            earnedBadges: [],
-            completedMysteries: [],
-            memorizedPrayerIds: [],
-            currentLessonIndex: 0,
-            email: currentUser.email || '',
-            isInstructor: false
-        };
-        
-        console.log('Local userProfile updated:', userProfile);
-        
-        showCustomAlert('Profile saved successfully!');
-        showSection('main-menu-section'); // Go to main menu after profile setup
-        
-        // Update UI immediately
-        updateUIForAuthenticatedUser();
-        
+        await firebase.functions().httpsCallable('joinStudentClass')({displayName, code});
+        // The profile listener loads the authoritative membership and preserves saved progress.
+        showCustomAlert(uiLanguage === 'es' ? 'Te has unido a la clase.' : 'You have joined the classroom.');
     } catch (error) {
-        console.error('Save profile error:', error);
-        showCustomAlert(`Failed to save profile: ${error.message}`);
-    }
+        showCustomAlert(error.message);
+    } finally { button.disabled = false; }
 }
 
 // Sign Out Function
 async function signOut() {
+    window.InstructorTour?.reset();
     try {
         // Clean up the user profile listener
         if (userProfileListener) {
@@ -6225,6 +6191,44 @@ async function signOut() {
     }
 }
 
+let startupUpdateCheckedFor = '';
+async function showInstructorStartupUpdate() {
+    if (!currentUser || !userProfile?.isInstructor || startupUpdateCheckedFor === currentUser.uid) return;
+    const uid = currentUser.uid; startupUpdateCheckedFor = uid;
+    try {
+        const snapshot = await db.collection('instructorUpdates').orderBy('createdAt','desc').limit(1).get();
+        const doc = snapshot.docs[0];
+        if (!doc || doc.data().showOnStartup !== true) return;
+        if (doc.data().withdrawn === true || (doc.data().expiresAtMs && doc.data().expiresAtMs <= Date.now())) return;
+        const receipt = db.collection('userProfiles').doc(uid).collection('instructorUpdateReceipts').doc(doc.id);
+        if ((await receipt.get()).exists) return;
+        if (document.getElementById('daily-formation-modal')) await new Promise(resolve => {
+            const observer = new MutationObserver(() => { if (!document.getElementById('daily-formation-modal')) { observer.disconnect(); resolve(); } });
+            observer.observe(document.body, {childList:true});
+        });
+        if (currentUser?.uid !== uid || !userProfile?.isInstructor) return;
+        const liveUpdate = await doc.ref.get();
+        if (!liveUpdate.exists || liveUpdate.data().withdrawn === true || (liveUpdate.data().expiresAtMs && liveUpdate.data().expiresAtMs <= Date.now())) return;
+        const t = (en,es) => uiLanguage === 'es' ? es : en;
+        const update = doc.data(), previousFocus = document.activeElement;
+        const modal = document.createElement('div'); modal.id = 'instructor-startup-modal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(20,25,30,.62);display:grid;place-items:center;padding:20px';
+        modal.innerHTML = `<article role="dialog" aria-modal="true" aria-labelledby="startup-update-title" style="width:min(620px,100%);max-height:90vh;overflow:auto;background:#3b6fa0;color:white;border:3px solid #bf944a;border-radius:24px;padding:30px;font-family:system-ui,sans-serif;text-shadow:none"><div style="text-align:center;font-weight:700;letter-spacing:.12em">${t('ILLUMINED UPDATE','NOVEDADES DE ILLUMINED')}</div><h2 id="startup-update-title" style="color:white;text-align:center;font:700 2rem/1.2 system-ui,sans-serif;margin:22px 0">${esc(update.title)}</h2><div style="width:90px;height:3px;background:#bf944a;margin:22px auto"></div><p style="font:1.2rem/1.6 system-ui,sans-serif;white-space:pre-wrap;color:white">${esc(update.message)}</p><p role="status"></p><button id="startup-update-ack" style="background:#bf944a;color:black">${t('Got it','Entendido')}</button><button id="startup-update-close" style="background:transparent;color:white">${t('Close for now','Cerrar por ahora')}</button></article>`;
+        document.body.appendChild(modal);
+        const close = () => { modal.remove(); previousFocus?.focus(); };
+        const ack = modal.querySelector('#startup-update-ack'), later = modal.querySelector('#startup-update-close');
+        later.onclick = close; ack.focus();
+        modal.onkeydown = event => {
+            if (event.key === 'Escape') close();
+            if (event.key === 'Tab') { event.preventDefault(); (document.activeElement === ack ? later : ack).focus(); }
+        };
+        ack.onclick = async () => {
+            ack.disabled = true;
+            try { await receipt.set({dismissedAt:firebase.firestore.FieldValue.serverTimestamp()}); close(); }
+            catch (_) { modal.querySelector('[role="status"]').textContent = t('Could not save. Try again or close for now.','No se pudo guardar. Inténtalo de nuevo o cierra por ahora.'); ack.disabled = false; }
+        };
+    } catch (_) { /* Supplemental content must not block sign-in. */ }
+}
 let dailyFormationCardDate = '';
 async function showTodayDailyFormation(force = false) {
     if (!currentUser || !userProfile?.classId || userProfile.dailyFormationEnabled === false || userProfile.dailyFormationStartupEnabled === false) return;
@@ -6267,13 +6271,13 @@ async function loadUserProfile() {
         
         // Set up real-time listener for cross-device synchronization
         userProfileListener = userDocRef.onSnapshot((doc) => {
-            if (doc.exists) {
+            if (doc.exists && (doc.data().classIds?.length || doc.data().classId)) {
                 const profileData = doc.data();
                 
                 // Map SwiftUI profile structure to web app structure
                 userProfile = {
                     username: profileData.displayName || profileData.username || 'User', // Use displayName first, then username
-                    classId: profileData.classIds && profileData.classIds.length > 0 ? profileData.classIds[0] : profileData.classId || '',
+                    classId: profileData.activeClassId || (profileData.classIds && profileData.classIds.length > 0 ? profileData.classIds[0] : profileData.classId || ''),
                     classIds: profileData.classIds || (profileData.classId ? [profileData.classId] : []),
                     completedLessons: profileData.completedLessons || [],
                     earnedBadges: profileData.earnedBadges || [],
@@ -6298,7 +6302,7 @@ async function loadUserProfile() {
                 setupChatListener();
                 setupPrayerRequestListener();
                 setupStudentDashboardListeners();
-                showTodayDailyFormation();
+                InstructorTour.runStartup(() => showTodayDailyFormation().then(showInstructorStartupUpdate));
                 const visibleSection = currentVisibleSectionId();
                 if (!visibleSection || visibleSection === 'profile-setup') {
                     showSection('main-menu-section');
@@ -6341,7 +6345,7 @@ function setupChatListener() {
     chatMessagesListener = db.collection('chatMessages')
         .where("classId", "==", userProfile.classId)
         .orderBy('timestamp', 'asc')
-        .limit(50)
+        .limitToLast(50)
         .onSnapshot(snapshot => {
             const messagesArea = document.getElementById('messages-area');
             messagesArea.innerHTML = '';
@@ -6370,6 +6374,7 @@ function setupChatListener() {
             messages.forEach(message => {
                 displayMessage(message);
             });
+            window.WebParity?.displayed(messages);
             
             setTimeout(() => {
                 messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -6724,7 +6729,35 @@ async function submitPrayerRequest() {
 }
 
         // Lessons Logic
+        function updateLessonTracker() {
+            const tracker = document.getElementById('lesson-tracker');
+            if (!tracker) return;
+            const spanish = document.documentElement.lang?.startsWith('es');
+            const completed = new Set(userProfile?.completedLessons || []);
+            const lessons = lessonsData.flatMap(category => category.lessons);
+            const count = lessons.filter(lesson => completed.has(lesson.id)).length;
+            const next = LearningProgress.nextLesson(lessonsData, completed, quizDraftStorage(), currentUser?.uid, userProfile?.classId, lessonDisplayQuiz);
+            document.getElementById('tracker-title').textContent = spanish ? 'Seguimiento de lecciones' : 'Lesson Tracker';
+            document.getElementById('tracker-count').textContent = count + '/' + lessons.length;
+            document.getElementById('lessons-completed-stat').textContent = count;
+            document.getElementById('lessons-left-stat').textContent = lessons.length - count;
+            document.getElementById('tracker-completed-label').textContent = spanish ? 'Completadas' : 'Completed';
+            document.getElementById('tracker-remaining-label').textContent = spanish ? 'Restantes' : 'Remaining';
+            document.getElementById('tracker-progress').max = Math.max(1, lessons.length);
+            document.getElementById('tracker-progress').value = count;
+            document.getElementById('tracker-progress').setAttribute('aria-label', spanish ? 'Progreso de lecciones' : 'Lesson progress');
+            document.getElementById('tracker-next').textContent = next ? (spanish ? 'Continuar: ' : 'Continue: ') + lessonDisplayTitle(next) : lessons.length ? (spanish ? 'Todas las lecciones completadas.' : 'All lessons completed.') : (spanish ? 'No hay lecciones disponibles.' : 'No lessons available.');
+            tracker.disabled = !next || !currentUser || !userProfile;
+            tracker.onclick = () => {
+                if (!next || !currentUser || !userProfile) return;
+                const category = lessonsData.find(group => group.lessons.some(lesson => lesson.id === next.id));
+                if (category) loadLessonsForCategory(category.category);
+                loadLessonContent(next);
+            };
+        }
         function loadCategories() {
+            document.getElementById('lesson-tracker').hidden = false;
+            updateLessonTracker();
             const container = document.getElementById('categories-container');
             container.innerHTML = '';
             const uniqueCategories = [...new Set(lessonsData.map(data => data.category))]; // Extract unique categories
@@ -6741,6 +6774,7 @@ async function submitPrayerRequest() {
         }
 
         function loadLessonsForCategory(categoryName) {
+            document.getElementById('lesson-tracker').hidden = true;
             currentCategory = categoryName; // <-- ADD THIS LINE to store the current category
             const categoryData = lessonsData.find(data => data.category === categoryName);
             if (!categoryData) {
@@ -6767,6 +6801,9 @@ async function submitPrayerRequest() {
         }
 
          function loadLessonContent(lesson) {
+            if (!userProfile?.completedLessons?.includes(lesson.id)) {
+                LearningProgress.rememberLesson(quizDraftStorage(), currentUser?.uid, userProfile?.classId, lesson.id);
+            }
             currentLesson = lesson; // Set current lesson
             showSection('lesson-content-section');
             document.getElementById('current-lesson-title').textContent = lessonDisplayTitle(lesson);
@@ -6834,8 +6871,27 @@ async function submitPrayerRequest() {
         }
 
         let activeQuizDraft = null;
+        let quizCorrectionMode = false;
+        function markIncorrectQuizQuestions() {
+            const pending = [];
+            document.querySelectorAll('#quiz-questions-container .quiz-question').forEach((card, i) => {
+                const wrong = activeQuizDraft.answers[i] !== currentQuiz[i].correct;
+                card.querySelector('.quiz-error').hidden = !wrong;
+                if (wrong) pending.push(i);
+            });
+            return pending;
+        }
+        function scrollToQuizCorrection(index) {
+            const target = index == null ? document.getElementById('submit-quiz-button') : document.getElementById('quiz-questions-container').children[index];
+            requestAnimationFrame(() => {
+                if (!target?.isConnected || document.getElementById('quiz-section').classList.contains('hidden')) return;
+                target.focus({preventScroll:true});
+                target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
+            });
+        }
         function quizDraftStorage() { try { return window.localStorage; } catch { return null; } }
         function startQuiz() {
+            quizCorrectionMode = false;
             document.getElementById('quiz-results').hidden = true;
             const localizedQuiz = lessonDisplayQuiz(currentLesson);
             if (!currentLesson || localizedQuiz.length === 0) {
@@ -6859,7 +6915,13 @@ async function submitPrayerRequest() {
             currentQuiz.forEach((questionData, questionIndex) => {
                 const questionDiv = document.createElement('div');
                 questionDiv.classList.add('quiz-question');
+                questionDiv.tabIndex = -1;
                 questionDiv.innerHTML = `<p><strong>${uiLanguage === 'es' ? 'Pregunta' : 'Question'} ${questionIndex + 1}:</strong> ${questionData.question}</p>`;
+                const feedback = document.createElement('p');
+                feedback.className = 'quiz-error';feedback.hidden = true;
+                feedback.setAttribute('role','status');feedback.style.color = '#b3261e';feedback.style.fontWeight = '600';
+                feedback.textContent = uiLanguage === 'es' ? 'Incorrecto. Inténtalo de nuevo.' : 'Incorrect. Try again.';
+                questionDiv.appendChild(feedback);
 
                 questionData.options.forEach((option, optionIndex) => {
                     const label = document.createElement('label');
@@ -6876,7 +6938,10 @@ async function submitPrayerRequest() {
                         draftStatus.textContent = saved
                             ? (uiLanguage === 'es' ? 'Respuestas guardadas en este navegador.' : 'Answers saved on this browser.')
                             : (uiLanguage === 'es' ? 'No se pudieron guardar las respuestas en este navegador. Mantén esta página abierta.' : 'Answers could not be saved on this browser. Keep this page open.');
-                        if (input.checked) scrollToNextQuizQuestion(questionIndex, quizQuestionsContainer);
+                        if (quizCorrectionMode) {
+                            const pending = markIncorrectQuizQuestions();
+                            if (optionIndex === questionData.correct) scrollToQuizCorrection(pending.find(i => i > questionIndex) ?? pending[0] ?? null);
+                        } else if (input.checked) scrollToNextQuizQuestion(questionIndex, quizQuestionsContainer);
                     });
                     label.appendChild(input);
                     label.appendChild(document.createTextNode(option));
@@ -6951,30 +7016,16 @@ async function submitPrayerRequest() {
                 let failureMessage = uiLanguage === 'es'
                     ? `Obtuviste ${score}/${totalQuestions}. Revisa el material e inténtalo de nuevo.`
                     : `You scored ${score}/${totalQuestions}. Please review the material and try again.`;
-                if (incorrectQuestions.length > 0) {
-                    failureMessage += uiLanguage === 'es'
-                        ? `\n\nRespondiste incorrectamente las siguientes preguntas: ${incorrectQuestions.join(', ')}.`
-                        : `\n\nYou answered the following questions incorrectly: ${incorrectQuestions.join(', ')}.`;
-                }
+                quizCorrectionMode = true;
+                const pending = markIncorrectQuizQuestions();
                 const results = document.getElementById('quiz-results');
                 results.replaceChildren();
                 const summary = document.createElement('p');
                 summary.textContent = failureMessage;
                 summary.style.whiteSpace = 'pre-line';
                 results.appendChild(summary);
-                const missed = document.createElement('ul');
-                incorrectQuestions.forEach(number => {
-                    const item = document.createElement('li');
-                    item.textContent = `${uiLanguage === 'es' ? 'Pregunta' : 'Question'} ${number}: ${currentQuiz[number - 1].question}`;
-                    missed.appendChild(item);
-                });
-                results.appendChild(missed);
                 results.hidden = false;
-                requestAnimationFrame(() => {
-                    if (results.hidden || document.getElementById('quiz-section').classList.contains('hidden')) return;
-                    results.focus({ preventScroll: true });
-                    results.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
-                });
+                scrollToQuizCorrection(pending[0] ?? null);
             }
         }
         
@@ -7399,6 +7450,44 @@ async function submitPrayerRequest() {
 
 
         let instructorTab = 'lessons';
+        async function openInstructorUpdates() {
+            if (!currentUser || !(userProfile?.isInstructor || userProfile?.isAdmin)) return;
+            const uid = currentUser.uid;
+            const t = (en, es) => uiLanguage === 'es' ? es : en;
+            const panel = document.getElementById('instructor-updates-panel');
+            showSection('instructor-updates-section');
+            panel.innerHTML = `<article class="instructor-card"><h2>${t('Instructor Updates','Novedades para instructores')}</h2><p>${t('App news and information from Illumined. Push alerts follow your notification settings.','Noticias e información de Illumined. Las alertas respetan tus ajustes de notificaciones.')}</p>${userProfile.isAdmin ? `<form id="instructor-update-form"><h3>${t('Admin: Send an update','Administrador: Enviar una novedad')}</h3><label>${t('Title','Título')}<input name="title" maxlength="120" required></label><label>${t('Message','Mensaje')}<textarea name="message" maxlength="2000" rows="6" required></textarea></label><label><input type="checkbox" name="showOnStartup" checked>${t('Show at instructor startup','Mostrar al iniciar para instructores')}</label><label><input type="checkbox" name="sendPush" checked>${t('Send push notification','Enviar notificación push')}</label><button type="submit">${t('Send to all instructors','Enviar a todos los instructores')}</button></form>` : ''}<p id="instructor-update-status" role="status"></p></article><div id="instructor-update-list"></div>`;
+            const list = panel.querySelector('#instructor-update-list');
+            if (userProfile.isAdmin) { const manage = document.createElement('button'); manage.textContent = t('Update Management · Drafts & Scheduling','Gestión de novedades · Borradores y programación'); manage.onclick = () => UpdateManagement.open(); panel.prepend(manage); }
+            const status = panel.querySelector('#instructor-update-status');
+            async function refresh() {
+                try {
+                    const snapshot = await db.collection('instructorUpdates').orderBy('createdAt','desc').limit(100).get();
+                    if (currentUser?.uid !== uid || !list.isConnected) return;
+                    list.innerHTML = snapshot.docs.map(doc => {
+                        const value = doc.data();
+                        const date = value.createdAt?.toDate()?.toLocaleDateString(uiLanguage === 'es' ? 'es' : 'en');
+                        return `<article class="instructor-card"><h3>${esc(value.title)}</h3><p class="muted">${esc(date || '')}</p><p style="white-space:pre-wrap">${esc(value.message)}</p>${userProfile.isAdmin ? `<p>${t('Push status:','Estado de envío:')} ${esc(value.status)}</p>` : ''}</article>`;
+                    }).join('') || `<p>${t('No instructor updates yet.','Aún no hay novedades.')}</p>`;
+                } catch(error) { status.textContent = error.message; }
+            }
+            let requestId = crypto.randomUUID();
+            panel.querySelector('form')?.addEventListener('submit', async event => {
+                event.preventDefault();
+                const form = event.currentTarget;
+                const title = form.elements.title.value.trim(), message = form.elements.message.value.trim();
+                if (!title || !message || !window.confirm(t('Send this update to all registered instructors?','¿Enviar esta novedad a todos los instructores registrados?') + '\n\n' + title + '\n\n' + message)) return;
+                const button = form.querySelector('button'); button.disabled = true;
+                try {
+                    const result = await firebase.functions().httpsCallable('publishInstructorUpdate')({title,message,requestId,showOnStartup:form.elements.showOnStartup.checked,sendPush:form.elements.sendPush.checked});
+                    if (currentUser?.uid !== uid || !form.isConnected) return;
+                    status.textContent = result.data.status === 'inbox-only' ? t('Published without a push notification.','Publicado sin notificación push.') : result.data.status === 'sent' ? t('Published. Push requests accepted.','Publicado. Solicitudes de envío aceptadas.') : t('Published to the inbox. Push delivery may be incomplete; do not resend.','Publicado en la bandeja. El envío puede estar incompleto; no lo repitas.');
+                    form.reset(); requestId = crypto.randomUUID(); await refresh();
+                } catch(error) { status.textContent = error.message; }
+                finally { button.disabled = false; }
+            });
+            await refresh();
+        }
         let instructorClassId = '';
         const esc = value => String(value ?? '').replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
         const instructorTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
@@ -7410,7 +7499,7 @@ async function submitPrayerRequest() {
             if (!requireInstructor()) return;
             const ids = instructorClasses(); instructorClassId = instructorClassId && ids.includes(instructorClassId) ? instructorClassId : (userProfile.classId || ids[0] || '');
             const picker = document.getElementById('instructor-class-select'); picker.innerHTML = ids.map(id => `<option ${id===instructorClassId?'selected':''}>${esc(id)}</option>`).join('') || `<option value="">${uiText('Create a classroom')}</option>`;
-            instructorTab = tab; showSection('instructor-section'); await renderInstructorWorkspace();
+            instructorTab = tab; showSection('instructor-section'); InstructorTour.offer(); await renderInstructorWorkspace();
         }
         async function renderInstructorWorkspace() {
             document.querySelectorAll('[data-instructor-tab]').forEach(b => b.classList.toggle('active', b.dataset.instructorTab===instructorTab));
@@ -7422,6 +7511,7 @@ async function submitPrayerRequest() {
                 const studentCount=students.docs.filter(d=>d.data().isInstructor!==true && d.data().isAdmin!==true && !(d.data().inactiveClassIds||[]).includes(instructorClassId)).length;
                 document.getElementById('instructor-summary').innerHTML=[['Class ID',instructorClassId||'—'],['Students',studentCount],['Sessions',schedule.size||0],['Prayer requests',prayers.size||0]].map(([l,v])=>`<div class="instructor-stat"><strong>${esc(v)}</strong>${esc(uiText(l))}</div>`).join('');
                 await ({rites:RitePrep.manager,lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
+                if(instructorTab==='classes') window.WebParity?.enhanceClasses(panel);
                 if(instructorTab==='schedule') {
                     const classId=instructorClassId,uid=currentUser?.uid;
                     const isCurrent=()=>instructorClassId===classId&&currentUser?.uid===uid&&instructorTab==='schedule';
@@ -7798,6 +7888,32 @@ async function submitPrayerRequest() {
             });
         }
 
+        function mountStudentInvitation(panel,classId) {
+            const t=(en,es)=>uiLanguage==='es'?es:en;
+            const card=document.createElement('section');card.className='instructor-form';
+            const title=document.createElement('h3');title.textContent=t('Student invitation','Invitación de estudiantes');card.append(title);
+            const info=document.createElement('p');info.textContent=t('Codes expire after 90 days. Replacing or disabling a code does not remove enrolled students.','Los códigos vencen a los 90 días. Reemplazar o desactivar un código no retira a los estudiantes inscritos.');card.append(info);
+            const output=document.createElement('p');output.setAttribute('role','status');card.append(output);
+            const copy=document.createElement('button');copy.type='button';copy.textContent=t('Copy student code','Copiar código de estudiante');copy.disabled=true;card.append(copy);
+            const link=document.createElement('button');link.type='button';link.textContent=t('Copy invitation link','Copiar enlace de invitación');link.disabled=true;card.append(link);
+            let code='';
+            async function copyText(value){try{await navigator.clipboard.writeText(value);}catch{window.prompt(t('Copy invitation','Copiar invitación'),value);}}
+            copy.onclick=()=>copyText(code);
+            link.onclick=()=>copyText('https://ocia-application.web.app/join?role=student&classId='+encodeURIComponent(classId)+'&code='+encodeURIComponent(code));
+            const actions=[];
+            for(const [action,label] of [['get',t('Show student code','Mostrar código de estudiante')],['regenerate',t('Generate new code','Generar nuevo código')],['disable',t('Disable invitation','Desactivar invitación')]]){
+                const button=document.createElement('button');button.type='button';button.textContent=label;actions.push(button);card.append(button);
+                button.onclick=async()=>{
+                    if(instructorClassId!==classId)return;
+                    if(action!=='get'&&!window.confirm(t('The previous invitation will stop working. Continue?','La invitación anterior dejará de funcionar. ¿Continuar?')))return;
+                    actions.forEach(b=>b.disabled=true);copy.disabled=link.disabled=true;
+                    try{const result=await firebase.functions().httpsCallable('manageStudentInvitation')({classId,action});code=result.data.code||'';output.textContent=code||t('Invitation disabled or expired. Generate a new code.','Invitación desactivada o vencida. Genera un código nuevo.');}
+                    catch(e){code='';output.textContent=e.message;}
+                    finally{actions.forEach(b=>b.disabled=false);copy.disabled=link.disabled=!code;}
+                };
+            }
+            panel.prepend(card);
+        }
         async function renderInstructorClasses(panel) {
             const ids=instructorClasses(); const snaps=await Promise.all(ids.map(id=>db.collection('classrooms').doc(id).get()));
             panel.innerHTML=`<div class="instructor-grid"><form id="class-editor" class="instructor-form"><h3>${uiText('Create classroom')}</h3><input id="class-id-new" placeholder="${uiText('Class ID (for example STMARK2026)')}" required><input id="class-name-new" placeholder="${uiText('Classroom or parish name')}" required><button class="button-theme">${uiText('Create classroom')}</button></form><div class="instructor-list"><h3>${uiText('Your classrooms')}</h3>${snaps.map((s,i)=>{const x=s.data()||{};return instructorCard(x.name||ids[i],uiText(`Class ID: ${ids[i]}`),uiText(x.isArchived?'Archived':'Active'),`<button data-select-class="${esc(ids[i])}">${uiText('Manage')}</button><button data-toggle-archive="${esc(ids[i])}">${uiText(x.isArchived?'Restore':'Archive')}</button>`)}).join('')||`<p class="muted">${uiText('No classrooms yet.')}</p>`}</div></div>`;
@@ -7987,6 +8103,8 @@ async function submitPrayerRequest() {
             
             // Chat Buttons/Inputs
             document.getElementById('save-profile-button').addEventListener('click', saveProfile);
+            const studentInviteParams=new URLSearchParams(window.location.search);
+            if(studentInviteParams.get('role')==='student')document.getElementById('class-input').value=studentInviteParams.get('code')||'';
             document.getElementById('message-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     sendMessage();
@@ -8033,5 +8151,13 @@ document.getElementById('login-button').addEventListener('click', signIn);
 document.getElementById('forgot-password-button').addEventListener('click', sendPasswordReset);
         });
     </script>
+<script src="admin-support.js"></script>
+<script src="update-management.js"></script>
+<script src="instructor-tour.js"></script>
+<link rel="stylesheet" href="web-onboarding.css">
+<link rel="stylesheet" href="mobile-parity.css">
+<script src="web-parity.js"></script>
+<script src="web-onboarding.js"></script>
+<script>window.WebOnboarding = createWebOnboarding({auth, db, call: async (name, data = {}) => (await firebase.functions().httpsCallable(name)(data)).data, friendlyAuthError});</script>
 </body>
 </html>

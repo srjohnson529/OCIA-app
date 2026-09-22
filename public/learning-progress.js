@@ -16,7 +16,19 @@
    ...discussions.filter(d=>d.requiredForAssignment!==false).map(d=>({kind:'discussion',id:d.id,complete:completedPrompts.has(d.id)}))];
   return {next:activities.find(a=>!a.complete)||null,completed:activities.filter(a=>a.complete).length,total:activities.length};
  }
- const api={key,signature,validate,read,save,clear,nextActivity};
+ const resumeKey=(uid,classId)=>uid&&classId?'illumined.lessonResume.v1:'+JSON.stringify([uid,classId]):null;
+ function rememberLesson(storage,uid,classId,lessonId){
+  const k=resumeKey(uid,classId);try{if(k&&lessonId)storage.setItem(k,lessonId);}catch{}
+ }
+ function nextLesson(categories,completed,storage,uid,classId,quizFor=lesson=>lesson.quiz||[]){
+  const lessons=categories.flatMap(category=>category.lessons||[]);
+  const remaining=lessons.filter(lesson=>!completed.has(lesson.id));
+  let saved=null;try{const k=resumeKey(uid,classId);if(k)saved=storage.getItem(k);}catch{}
+  return remaining.find(lesson=>lesson.id===saved) ||
+   remaining.find(lesson=>read(storage,key(uid,classId,lesson.id),quizFor(lesson)).some(answer=>answer>=0)) ||
+   remaining[0] || null;
+ }
+ const api={key,signature,validate,read,save,clear,nextActivity,resumeKey,rememberLesson,nextLesson};
  if(typeof module!=='undefined')module.exports=api;
  root.LearningProgress=api;
 })(typeof window!=='undefined'?window:globalThis);
