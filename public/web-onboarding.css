@@ -1,0 +1,30 @@
+.web-onboarding-ready #profile-setup > .landing-shell .landing-hero,
+.web-onboarding-ready #profile-setup #profile-details-card {display:none!important}
+#web-onboarding {background:#3b6fa0;color:#fff;border-radius:28px;padding:clamp(24px,5vw,64px);width:min(1080px,100%);box-sizing:border-box;margin:0 auto 32px;text-shadow:none}
+.onboard-shell {display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px;min-height:540px}
+.onboard-brand {text-align:center}
+.onboard-brand img {width:min(300px,85%);height:auto}
+.onboard-brand h1 {color:white;font:700 clamp(36px,5vw,54px)/1.2 Georgia,serif;margin:14px 0}
+.onboard-brand p {color:#e8c775;letter-spacing:.08em;font-size:13px}
+.onboard-panel {min-width:0;display:grid;gap:16px;text-align:left}
+.onboard-panel.card {background:#faf9f5;color:#242424;padding:28px;border:1px solid #e5d7ba;border-radius:24px}
+.onboard-panel h2 {font:700 28px/1.2 Georgia,serif;color:#3b6fa0;margin:0}
+.onboard-panel p {margin:0;line-height:1.5;font-size:16px}
+.onboard-panel label {display:grid;gap:7px;font:500 15px/1.4 system-ui,sans-serif}
+.onboard-panel input:not([type=checkbox]) {box-sizing:border-box;width:100%;min-height:48px;border:1px solid #d8d2c6;border-radius:12px;padding:12px;background:white;color:#222;font:16px system-ui,sans-serif;margin:0}
+.onboard-panel button,.onboard-panel .contact {border:0;border-radius:14px;padding:14px 18px;min-height:48px;margin:0;background:#3b6fa0;color:#fff;font:600 17px/1.4 Georgia,serif;cursor:pointer;text-align:center;text-decoration:none;box-shadow:none}
+.onboard-panel .gold {background:linear-gradient(110deg,#eed183,#bf944a,#a87a33);color:#201d16;box-shadow:0 8px 24px #173d5d33}
+/* Override the older profile form's dark olive hover with a lighter brand gold. */
+#profile-setup #web-onboarding button:not(:disabled):hover {background:linear-gradient(110deg,#f7e2a3,#e8c775,#d6ad60);color:#201d16;box-shadow:0 4px 12px #173d5d26}
+.onboard-panel .plain {background:transparent;color:#d7edff;padding:8px;font:600 16px/1.4 system-ui,sans-serif}
+.onboard-panel.card .plain {color:#3b6fa0;text-align:left}
+.onboard-panel .secondary {background:#e7edf1;color:#315e87}
+.onboard-panel .links {display:flex;justify-content:center;align-items:center;gap:14px}
+.onboard-panel .links span {height:24px;width:1px;background:#c3dced88}
+.onboard-panel .check {display:flex;align-items:start;gap:10px}
+.onboard-panel [role=status] {font:14px/1.5 system-ui,sans-serif;overflow-wrap:anywhere;color:inherit}
+.onboard-panel .notice {border-left:3px solid #bf944a;background:#eee8da;padding:12px;font-size:14px}
+.onboard-panel button:disabled {opacity:.55;cursor:not-allowed}
+.onboard-panel button:focus-visible,.onboard-panel a:focus-visible,.onboard-panel input:focus-visible {outline:3px solid #e8c775;outline-offset:3px}
+.onboard-panel .result {text-align:left;background:#e7edf1;color:#244967;white-space:pre-line}
+@media(max-width:720px) {.onboard-shell{grid-template-columns:1fr;gap:34px;min-height:0}.onboard-brand img{width:180px}.onboard-panel.card{padding:22px}#web-onboarding{border-radius:0;margin:0 0 24px}.onboard-brand h1{font-size:38px}}

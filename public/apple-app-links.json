@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "6H687K56LY.illumined.app.IlluminedIOS",
+        "paths": ["/join", "/join/*"]
+      }
+    ]
+  }
+}
