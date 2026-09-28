@@ -1,6 +1,19 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const csv=require('./public/schedule-csv.js');
+test('pasted spreadsheet tables retain commas and optional details',()=>{
+ const rows=csv.validate('date\ttopic\tdetails\r\n8/9/2026\tIntroduction, The O.C.I.A., & The Kerygma\t\r\n8/16/2026\tNatural Theology & Divine Revelation\tBring a Bible');
+ assert.equal(rows[0].topic,'Introduction, The O.C.I.A., & The Kerygma');
+ assert.equal(rows[0].details,'');assert.equal(rows[1].details,'Bring a Bible');
+ assert.equal(csv.validate('8/9/2026\tIntroduction, The O.C.I.A.')[0].topic,'Introduction, The O.C.I.A.');
+});
+test('space separated tables and headerless rows preserve the complete topic',()=>{
+ for(const header of ['', 'date    topic    details\n']){
+  const [row]=csv.validate(header+'8/9/2026    Introduction, The O.C.I.A., & The Kerygma');
+  assert.equal(row.topic,'Introduction, The O.C.I.A., & The Kerygma');assert.equal(row.details,'');
+ }
+ assert.equal(csv.validate('date,topic\n8/9/2026,Welcome')[0].topic,'Welcome');
+});
 test('ISO and US dates use local start of day and blank details',()=>{
  for(const date of ['2026-10-01','10/01/2026','10/1/2026']){
   const [x]=csv.validate('date,topic,details\n'+date+',Welcome,');
