@@ -6,6 +6,13 @@ import org.junit.Test
 import java.time.LocalDate
 
 class ScheduleImportParserTest {
+    @Test fun parsesSpaceSeparatedTableWithoutSplittingTopicCommas() {
+        for (separator in listOf("\t", "    ")) {
+            val result = ScheduleImportParser.parse("date${separator}topic${separator}details\n8/9/2026${separator}Introduction, The O.C.I.A., & The Kerygma") as ScheduleParseResult.Success
+            assertEquals("Introduction, The O.C.I.A., & The Kerygma", result.rows.single().topic)
+            assertEquals("", result.rows.single().details)
+        }
+    }
     @Test fun parsesHeaderCsvAndSortsDates() {
         val result = ScheduleImportParser.parse("date,topic,details\n9/10/2026,Prayer,Evening prayer\n2026-08-20,Creed,The profession of faith")
         assertTrue(result is ScheduleParseResult.Success)

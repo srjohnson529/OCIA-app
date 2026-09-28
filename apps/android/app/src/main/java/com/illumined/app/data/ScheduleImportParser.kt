@@ -42,6 +42,12 @@ object ScheduleImportParser {
     }
 
     private fun parseDelimitedRow(row: String): List<String> {
+        if ('\t' !in row) {
+            if (Regex("(?i)^date\\s+topic(?:\\s+details)?$").matches(row)) return row.split(Regex("\\s+"))
+            Regex("^(\\d{4}-\\d{2}-\\d{2}|\\d{1,2}[/-]\\d{1,2}[/-]\\d{4})\\s+(.+)$").matchEntire(row)?.let {
+                return listOf(it.groupValues[1], it.groupValues[2])
+            }
+        }
         val delimiter = if ('\t' in row) '\t' else ','; val values = mutableListOf<String>(); val current = StringBuilder(); var quoted = false; var index = 0
         while (index < row.length) { val char = row[index]; when { char == '"' && quoted && index + 1 < row.length && row[index + 1] == '"' -> { current.append('"'); index++ }; char == '"' -> quoted = !quoted; char == delimiter && !quoted -> { values += current.toString().trim(); current.clear() }; else -> current.append(char) }; index++ }
         values += current.toString().trim(); return values

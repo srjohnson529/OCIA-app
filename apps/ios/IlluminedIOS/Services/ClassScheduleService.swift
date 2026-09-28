@@ -305,6 +305,12 @@ final class ClassScheduleService: ObservableObject {
         if row.contains("\t") {
             return row.components(separatedBy: "\t").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         }
+        if row.range(of: #"^date\s+topic(?:\s+details)?$"#, options: [.regularExpression, .caseInsensitive]) != nil {
+            return row.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        }
+        if let range = row.range(of: #"^(?:\d{4}-\d{2}-\d{2}|\d{1,2}[/-]\d{1,2}[/-]\d{4})\s+"#, options: .regularExpression) {
+            return [String(row[range]).trimmingCharacters(in: .whitespaces), String(row[range.upperBound...])]
+        }
 
         var fields: [String] = []
         var currentField = ""
