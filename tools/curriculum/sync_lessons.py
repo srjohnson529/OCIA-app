@@ -16,7 +16,12 @@ DESTINATIONS = {
     "iOS secondary resource": PROJECT_ROOT / "apps" / "ios" / "Resources" / "lessons.json",
     "Android": PROJECT_ROOT / "apps" / "android" / "app" / "src" / "main" / "res" / "raw" / "lessons.json",
     "HTML": PROJECT_ROOT / "apps" / "html" / "lessons.json",
+    "Firebase hosting": PROJECT_ROOT / "apps" / "android" / "firebase" / "hosting" / "lessons.json",
 }
+# This separate web worktree is available on development machines, but not in CI.
+WEB_PUBLIC = PROJECT_ROOT / "work" / "github-main-html-safe" / "public"
+if WEB_PUBLIC.is_dir():
+    DESTINATIONS["Web app"] = WEB_PUBLIC / "lessons.json"
 EXPORTER = Path(__file__).with_name("export_lessons.py")
 
 
@@ -123,4 +128,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -266,7 +266,7 @@ Lesson ID: foundations-ocia
 
 ### Proclamation
 
->  "The OCIA is not merely a program but a journey of conversion—personal, communal, and sacramental—into the life of Christ and His Church."
+>  The OCIA is not merely a program but a journey of conversion—personal, communal, and sacramental—into the life of Christ and His Church.
 
 ### Explanation
 
@@ -375,7 +375,7 @@ Lesson ID: foundations-natural-theology
 
 ### Proclamation
 
->  "God, the beginning and end of all things, can be known with certainty by the natural light of human reason from the things that He has made."
+>  God, the beginning and end of all things, can be known with certainty by the natural light of human reason from the things that He has made. (cf. CCC 36)
 
 ### Explanation
 
@@ -490,7 +490,7 @@ Faith is the theological virtue by which we believe in God and all that He has r
 
 ### Proclamation
 
->  "Without faith, it is impossible to please God" (Hebrews 11:6). Faith is the foundation of the Christian life, the key by which we open the door to grace. Through faith, we say 'yes' to God’s invitation and enter into a relationship of trust, obedience, and love.
+>  "Without faith it is impossible to please [God]" (Hebrews 11:6; CCC 161). Faith is the foundation of the Christian life, the key by which we open the door to grace. Through faith, we say 'yes' to God’s invitation and enter into a relationship of trust, obedience, and love.
 
 ### Explanation
 
@@ -627,7 +627,7 @@ Divine Revelation is God’s free and loving act of making Himself and His plan 
 
 ### Proclamation
 
->  "In Jesus Christ, the eternal Son of God made man, God has fully and definitively revealed Himself. There is no greater message, no deeper truth, and no more perfect love than the Word made flesh dwelling among us."
+>  In Jesus Christ, the eternal Son of God made man, God has fully and definitively revealed Himself. There is no greater message, no deeper truth, and no more perfect love than the Word made flesh dwelling among us.
 
 ### Explanation
 
@@ -750,27 +750,28 @@ Sacred Scripture, or the Holy Bible, is the inspired Word of God, written under 
 
 ### Scriptural References
 
-- **2 Timothy 3:16–17** – "All Scripture is inspired by God and profitable for teaching, for reproof, for correction, and for training in righteousness."
+- **2 Timothy 3:16** – "All Scripture is inspired by God and profitable for teaching, for reproof, for correction, and for training in righteousness."
 - **Psalm 119:105** – "Your word is a lamp to my feet and a light to my path."
 - **John 20:31** – "These are written so that you may believe that Jesus is the Christ, the Son of God, and that by believing you may have life in His name."
 - **Hebrews 4:12** – "The word of God is living and active, sharper than any two-edged sword."
 
 ### Catechism References
 
-- **CCC 101** – In Sacred Scripture, the Church constantly finds her nourishment and her strength.
-- **CCC 105** – God is the author of Sacred Scripture; He inspired its human authors.
+- **CCC 104** – In Sacred Scripture, the Church constantly finds her nourishment and her strength.
+- **CCC 105–106** – God is the author of Sacred Scripture; He inspired its human authors.
 - **CCC 107** – Scripture teaches the truth without error for the sake of our salvation.
 - **CCC 108** – The Christian faith is not a “religion of the book,” but of the Word of God incarnate and living.
+- **CCC 128** – The unity of God’s divine plan in the Old and New Testaments is illuminated through typology, wherein prefigurations are fulfilled in the person of his incarnate Son.
 
 ### Proclamation
 
->  "The Bible is not merely a record of ancient events; it is the living Word of God, through which the Lord Himself speaks to His people today."
+>  The Bible is not merely a record of ancient events; it is the living Word of God, through which the Lord Himself speaks to His people today.
 
 ### Explanation
 
 Sacred Scripture is one of the two modes through which Divine Revelation is transmitted, the other being Sacred Tradition. Composed of the Old and New Testaments, it records God’s progressive self-revelation, culminating in the life, death, and resurrection of Jesus Christ. Though written by human authors, every book of Scripture is inspired by the Holy Spirit, making God the true author.
 
-The Scriptures are “without error” (inerrant) in what they teach for the sake of salvation. This does not mean they are a scientific or historical textbook, but that they faithfully convey divine truth. The Old Testament prepares for the New, and the New fulfills the Old, together forming a unified whole (cf. CCC 128–130).
+The Scriptures are “without error” (inerrant) in what they teach for the sake of salvation. Understanding what Scripture affirms requires attention to the human authors’ intentions, literary genres, and historical setting (cf. CCC 109–110). The Old Testament prepares for the New, and the New fulfills the Old, together forming a unified whole (cf. CCC 128–130).
 
 The Church has the responsibility and authority to authentically interpret Scripture, ensuring the faithful understand it as intended by God. Catholics are encouraged to read and meditate on the Bible regularly, allowing it to guide their faith, morals, and daily living.
 
@@ -828,10 +829,10 @@ Passing score: 80%
 
 8. What is meant by biblical inerrancy?
    - A. The Bible has no spelling errors
-   - B. It is free from error in matters of salvation
-   - C. It is free from all historical detail errors
+   - B. Scripture teaches without error the truth God wished to convey for our salvation
+   - C. Every passage must be read as a modern scientific report
    - D. It has never been translated
-   - Answer: B. It is free from error in matters of salvation
+   - Answer: B. Scripture teaches without error the truth God wished to convey for our salvation
 
 9. According to CCC 108, the Christian faith is:
    - A. A religion of the book
@@ -861,7 +862,7 @@ Passing score: 80%
    - D. Avoid interpreting it personally
    - Answer: A. Read and meditate on it regularly
 
-13. The unity between the Old and New Testaments is called:
+13. According to the Church’s Tradition, the unity of God’s plan in the Old and New Testaments is illuminated through what?
    - A. Typology
    - B. Syncretism
    - C. Allegory
@@ -902,7 +903,7 @@ Sacred Tradition is the living transmission of the message of the Gospel in the 
 
 ### Proclamation
 
->  "The same Holy Spirit who inspired the Scriptures guides the living Tradition of the Church, ensuring that the Gospel is faithfully handed on until the end of time."
+>  The same Holy Spirit who inspired the Scriptures guides the living Tradition of the Church, ensuring that the Gospel is faithfully handed on until the end of time.
 
 ### Explanation
 
@@ -1039,7 +1040,7 @@ The Creeds are concise, authoritative summaries of the Christian faith, professe
 
 ### Proclamation
 
->  "The Creeds unite us in the one faith of the Church, while the Councils safeguard that faith against error and proclaim it with clarity for every generation."
+>  The Creeds unite us in the one faith of the Church, while the Councils safeguard that faith against error and proclaim it with clarity for every generation.
 
 ### Explanation
 
@@ -1177,7 +1178,7 @@ God the Father is the first Person of the Holy Trinity, the Almighty Creator of 
 
 ### Proclamation
 
->  "God the Father is not a distant architect of the universe, but the loving Creator and sustainer of all that exists, who calls each of us into a relationship of trust, obedience, and love."
+>  God the Father is not a distant architect of the universe, but the loving Creator and sustainer of all that exists, who calls each of us into a relationship of trust, obedience, and love.
 
 ### Explanation
 
@@ -1308,7 +1309,7 @@ The Blessed Trinity is the central mystery of the Christian faith and life: one 
 
 ### Proclamation
 
->  "The mystery of the Most Holy Trinity is the source of all the other mysteries of faith, the light that illuminates them all."
+>  The mystery of the Most Holy Trinity is the source of all the other mysteries of faith, the light that illuminates them all. (cf. CCC 234)
 
 ### Explanation
 
@@ -1439,7 +1440,7 @@ Jesus Christ is the eternal Son of God, the second Person of the Holy Trinity, w
 
 ### Proclamation
 
->  "In Jesus Christ, the eternal Son of God made flesh, we see the face of the Father and receive the fullness of God’s love and mercy."
+>  In Jesus Christ, the eternal Son of God made flesh, we see the face of the Father and receive the fullness of God’s love and mercy.
 
 ### Explanation
 
@@ -1570,7 +1571,7 @@ The Incarnation is the mystery by which the eternal Son of God, without ceasing 
 
 ### Proclamation
 
->  "In the Incarnation, the eternal God entered human history, so that by becoming what we are, He might make us share in what He is."
+>  In the Incarnation, the eternal God entered human history, so that by becoming what we are, He might make us share in what He is.
 
 ### Explanation
 
@@ -1701,7 +1702,7 @@ The life, death, and resurrection of Jesus Christ — known as the Paschal Myste
 
 ### Proclamation
 
->  "By His life, Christ reveals the Father; by His death, He redeems us; and by His resurrection, He opens the way to eternal life."
+>  By His life, Christ reveals the Father; by His death, He redeems us; and by His resurrection, He opens the way to eternal life.
 
 ### Explanation
 
@@ -1827,7 +1828,7 @@ The Ascension of Jesus Christ is the event, forty days after His resurrection, w
 
 ### Proclamation
 
->  "The Ascension is not Christ’s departure from us, but His exaltation to the Father’s glory, where He reigns as Lord and intercedes for His Church."
+>  The Ascension is not Christ’s departure from us, but His exaltation to the Father’s glory, where He reigns as Lord and intercedes for His Church.
 
 ### Explanation
 
@@ -1952,7 +1953,7 @@ The Holy Spirit is the third Person of the Blessed Trinity, the eternal Love bet
 
 ### Proclamation
 
->  "The Holy Spirit is the soul of the Church, guiding her into all truth, empowering her mission, and making us sharers in the divine life."
+>  The Holy Spirit is the soul of the Church, guiding her into all truth, empowering her mission, and making us sharers in the divine life.
 
 ### Explanation
 
@@ -2083,7 +2084,7 @@ Creation is the free act by which God brought everything that exists—both visi
 
 ### Proclamation
 
->  "Creation is the first sign of God’s love, the stage upon which the drama of salvation unfolds, and the gift in which we discover our Creator."
+>  Creation is the first sign of God’s love, the stage upon which the drama of salvation unfolds, and the gift in which we discover our Creator.
 
 ### Explanation
 
@@ -2209,7 +2210,7 @@ Mankind is the summit of God’s visible creation, made in His image and likenes
 
 ### Proclamation
 
->  "Created in the image of God, every human person has inherent dignity, a rational soul, and an eternal destiny in communion with the Creator."
+>  Created in the image of God, every human person has inherent dignity, a rational soul, and an eternal destiny in communion with the Creator.
 
 ### Explanation
 
@@ -2335,7 +2336,7 @@ The Fall refers to the first sin of Adam and Eve, by which they disobeyed God’
 
 ### Proclamation
 
->  "Through the disobedience of one man, sin entered the world, but through the obedience of Jesus Christ, grace and life abound for all."
+>  Through the disobedience of one man, sin entered the world, but through the obedience of Jesus Christ, grace and life abound for all.
 
 ### Explanation
 
@@ -2461,7 +2462,7 @@ Salvation History is the unfolding of God’s plan to save humanity from sin and
 
 ### Proclamation
 
->  "The history of the world is the history of God’s love at work, drawing His people from sin into the fullness of life in Christ."
+>  The history of the world is the history of God’s love at work, drawing His people from sin into the fullness of life in Christ.
 
 ### Explanation
 
@@ -2720,7 +2721,7 @@ The Church is the People of God, the Body of Christ, and the Temple of the Holy 
 
 ### Proclamation
 
->  "The Church is not merely an institution but the living Body of Christ, in which every member is joined to Him and to one another in love."
+>  The Church is not merely an institution but the living Body of Christ, in which every member is joined to Him and to one another in love.
 
 ### Explanation
 
@@ -2839,7 +2840,7 @@ The Four Marks of the Church — One, Holy, Catholic, and Apostolic — are the 
 
 ### Proclamation
 
->  "The Church Christ founded is one, holy, catholic, and apostolic — marks that reveal her true identity and mission in the world."
+>  The Church Christ founded is one, holy, catholic, and apostolic — marks that reveal her true identity and mission in the world.
 
 ### Explanation
 
@@ -2967,7 +2968,7 @@ The Communion of Saints is the spiritual union of all members of the Church — 
 
 ### Proclamation
 
->  "In Christ, the faithful on earth, the souls in purgatory, and the saints in heaven are united in one family of God, interceding for one another and sharing in God’s grace."
+>  In Christ, the faithful on earth, the souls in purgatory, and the saints in heaven are united in one family of God, interceding for one another and sharing in God’s grace.
 
 ### Explanation
 
@@ -3077,7 +3078,7 @@ The Blessed Virgin Mary is the Mother of God (Theotokos), conceived without Orig
 
 ### Proclamation
 
->  "Mary is the first and perfect disciple of Christ, whose 'yes' brought the Savior into the world, and who now intercedes for us as our spiritual mother."
+>  Mary is the first and perfect disciple of Christ, whose 'yes' brought the Savior into the world, and who now intercedes for us as our spiritual mother.
 
 ### Explanation
 
@@ -3189,7 +3190,7 @@ Angels are spiritual, non-corporeal beings created by God to glorify Him and ser
 
 ### Proclamation
 
->  "The angels, servants and messengers of God, protect us, guide us, and lead us toward eternal life."
+>  The angels, servants and messengers of God, protect us, guide us, and lead us toward eternal life.
 
 ### Explanation
 
@@ -3301,7 +3302,7 @@ The Last Four Things are the final realities each person will face: Death, Judgm
 
 ### Proclamation
 
->  "Remember your last end, and you will never sin. The Last Four Things remind us to live each day in light of eternity."
+>  Remember your last end, and you will never sin. The Last Four Things remind us to live each day in light of eternity. (cf. Sirach 7:36)
 
 ### Explanation
 
@@ -3414,7 +3415,7 @@ The Church exists in three states: the Church Militant (faithful on earth), the 
 
 ### Proclamation
 
->  "Whether in battle on earth, in purification after death, or in glory before God, all members of the Church remain united in Christ and in love."
+>  Whether in battle on earth, in purification after death, or in glory before God, all members of the Church remain united in Christ and in love.
 
 ### Explanation
 
@@ -3975,7 +3976,7 @@ The Second Coming, also called the Parousia, is the future return of Jesus Chris
 
 ### Proclamation
 
->  "Christ will come again in glory to judge the living and the dead, and His Kingdom will have no end."
+>  Christ will come again in glory to judge the living and the dead, and His Kingdom will have no end. (cf. Nicene Creed)
 
 ### Explanation
 
@@ -4087,7 +4088,7 @@ Eternal life is the blessed communion with the Holy Trinity, the angels, and all
 
 ### Proclamation
 
->  "Eternal life is to know and love God forever, sharing in His divine life and joy without end."
+>  Eternal life is to know and love God forever, sharing in His divine life and joy without end.
 
 ### Explanation
 
@@ -4204,7 +4205,7 @@ The sacramental economy is the communication of the fruits of Christ’s Paschal
 
 ### Proclamation
 
->  "Through the sacramental economy, God pours out the grace of Christ’s saving work, making us sharers in His divine life."
+>  Through the sacramental economy, God pours out the grace of Christ’s saving work, making us sharers in His divine life.
 
 ### Explanation
 
@@ -4316,7 +4317,7 @@ The liturgy is the public worship of the Church, in which the faithful participa
 
 ### Proclamation
 
->  "In the liturgy, heaven and earth meet, and the faithful are drawn into the saving work of Christ."
+>  In the liturgy, heaven and earth meet, and the faithful are drawn into the saving work of Christ.
 
 ### Explanation
 
@@ -4560,7 +4561,7 @@ Baptism is the first of the seven sacraments and the gateway to the Christian li
 
 ### Proclamation
 
->  "Through Baptism we die to sin, are reborn as children of God, and begin our journey of faith in the Body of Christ."
+>  Through Baptism we die to sin, are reborn as children of God, and begin our journey of faith in the Body of Christ.
 
 ### Explanation
 
@@ -4672,7 +4673,7 @@ Confirmation is the sacrament of Christian initiation that perfects the grace of
 
 ### Proclamation
 
->  "In Confirmation, the Holy Spirit strengthens us to live our faith boldly and to be witnesses of Christ to the world."
+>  In Confirmation, the Holy Spirit strengthens us to live our faith boldly and to be witnesses of Christ to the world.
 
 ### Explanation
 
@@ -4784,7 +4785,7 @@ The Holy Eucharist is the sacrament in which Jesus Christ gives us His Body and 
 
 ### Proclamation
 
->  "In the Eucharist, we receive Jesus Himself — the Bread of Life — who nourishes our souls and unites us in His Body."
+>  In the Eucharist, we receive Jesus Himself — the Bread of Life — who nourishes our souls and unites us in His Body.
 
 ### Explanation
 
@@ -4896,7 +4897,7 @@ Holy Orders is the sacrament through which the mission entrusted by Christ to Hi
 
 ### Proclamation
 
->  "Through Holy Orders, Christ continues to shepherd His people through the ministry of bishops, priests, and deacons."
+>  Through Holy Orders, Christ continues to shepherd His people through the ministry of bishops, priests, and deacons.
 
 ### Explanation
 
@@ -5008,7 +5009,7 @@ Holy Matrimony is the sacrament in which a baptized man and a baptized woman fre
 
 ### Proclamation
 
->  "In Holy Matrimony, the love of husband and wife becomes a living sign of Christ’s love for His Church."
+>  In Holy Matrimony, the love of husband and wife becomes a living sign of Christ’s love for His Church.
 
 ### Explanation
 
@@ -5118,7 +5119,7 @@ The Sacrament of Reconciliation, also called Confession or Penance, is the sacra
 
 ### Proclamation
 
->  "In the Sacrament of Reconciliation, the mercy of Christ meets our repentance, and we are restored to grace and peace."
+>  In the Sacrament of Reconciliation, the mercy of Christ meets our repentance, and we are restored to grace and peace.
 
 ### Explanation
 
@@ -5230,7 +5231,7 @@ The Anointing of the Sick is the sacrament in which the Church, through the mini
 
 ### Proclamation
 
->  "In the Anointing of the Sick, Christ the Divine Physician brings healing, peace, and strength to those who suffer."
+>  In the Anointing of the Sick, Christ the Divine Physician brings healing, peace, and strength to those who suffer.
 
 ### Explanation
 
@@ -5342,7 +5343,7 @@ The Mass is the central act of Catholic worship, the re-presentation of Christ�
 
 ### Proclamation
 
->  "At the Mass, heaven touches earth, and Christ’s saving sacrifice is made present for our salvation."
+>  At the Mass, heaven touches earth, and Christ’s saving sacrifice is made present for our salvation.
 
 ### Explanation
 
@@ -5454,7 +5455,7 @@ Sacramentals are sacred signs instituted by the Church to prepare us to receive 
 
 ### Proclamation
 
->  "Through sacramentals, the Church blesses our lives, setting apart persons, places, and things for God’s glory."
+>  Through sacramentals, the Church blesses our lives, setting apart persons, places, and things for God’s glory.
 
 ### Explanation
 
@@ -5571,7 +5572,7 @@ Morality refers to the principles and standards by which we determine whether ac
 
 ### Proclamation
 
->  "True morality is not about rules alone, but about living in loving relationship with God and neighbor."
+>  True morality is not about rules alone, but about living in loving relationship with God and neighbor.
 
 ### Explanation
 
@@ -5683,7 +5684,7 @@ Human dignity is the intrinsic worth of every person, rooted in the fact that we
 
 ### Proclamation
 
->  "Every human life, from conception to natural death, is sacred and possesses an inviolable dignity given by God."
+>  Every human life, from conception to natural death, is sacred and possesses an inviolable dignity given by God.
 
 ### Explanation
 
@@ -5795,7 +5796,7 @@ Freedom is the God-given power to act or not to act, to choose good or evil, and
 
 ### Proclamation
 
->  "Freedom is not the license to do whatever we want, but the power to do what we ought."
+>  Freedom is not the license to do whatever we want, but the power to do what we ought.
 
 ### Explanation
 
@@ -6059,7 +6060,7 @@ Natural law is the moral law written on the human heart by God, knowable by reas
 
 ### Proclamation
 
->  "Natural law is God’s moral compass placed in every human heart, guiding us toward the good."
+>  Natural law is God’s moral compass placed in every human heart, guiding us toward the good.
 
 ### Explanation
 
@@ -6171,7 +6172,7 @@ Conscience is the inner voice of a human person, a judgment of reason, by which 
 
 ### Proclamation
 
->  "Conscience is God’s voice echoing in the human heart, calling us to choose the good and reject evil."
+>  Conscience is God’s voice echoing in the human heart, calling us to choose the good and reject evil.
 
 ### Explanation
 
@@ -6283,7 +6284,7 @@ The Ten Commandments are God’s moral law given to Moses on Mount Sinai, expres
 
 ### Proclamation
 
->  "The Ten Commandments reveal God’s will for our lives, guiding us to love Him above all and our neighbor as ourselves."
+>  The Ten Commandments reveal God’s will for our lives, guiding us to love Him above all and our neighbor as ourselves.
 
 ### Explanation
 
@@ -6395,7 +6396,7 @@ The first three Commandments govern our relationship with God: to worship Him al
 
 ### Proclamation
 
->  "The first three Commandments lead us into true worship, reverence, and rest in the Lord."
+>  The first three Commandments lead us into true worship, reverence, and rest in the Lord.
 
 ### Explanation
 
@@ -6506,7 +6507,7 @@ The Fourth Commandment—"Honor your father and your mother" (Exodus 20:12)—ca
 
 ### Proclamation
 
->  "The family is the original cell of social life. Authority, stability, and a life of relationships within the family constitute the foundations for freedom, security, and fraternity within society." (CCC 2207)
+>  "The family is the original cell of social life. … Authority, stability, and a life of relationships within the family constitute the foundations for freedom, security, and fraternity within society." (CCC 2207)
 
 ### Explanation
 
@@ -6619,7 +6620,7 @@ Lesson ID: morals-Commandment 5 & 7
 
 ### Proclamation
 
->  "You shall love your neighbor as yourself." – Matthew 22:39
+>  "You shall love your neighbor as yourself." (Matthew 22:39)
 
 ### Explanation
 
@@ -6730,7 +6731,7 @@ Lesson ID: morals-Commandment 6 & 9
 
 ### Proclamation
 
->  "Blessed are the pure in heart, for they shall see God." – Matthew 5:8
+>  "Blessed are the pure in heart, for they shall see God." (Matthew 5:8)
 
 ### Explanation
 
@@ -6843,7 +6844,7 @@ Lesson ID: morals-Commandments 8 & 10
 
 ### Proclamation
 
->  "Truth and contentment guard the heart and build a just society. To live honestly and desire rightly is to reflect the freedom of the children of God."
+>  Truth and contentment guard the heart and build a just society. To live honestly and desire rightly is to reflect the freedom of the children of God.
 
 ### Explanation
 
@@ -6953,7 +6954,7 @@ Freedom in Christ is the liberation from the slavery of sin and the ability to l
 
 ### Proclamation
 
->  "True freedom is found not in doing whatever we please, but in living as God created us to live — in truth, love, and holiness."
+>  True freedom is found not in doing whatever we please, but in living as God created us to live — in truth, love, and holiness.
 
 ### Explanation
 
@@ -7065,7 +7066,7 @@ Grace is God’s free and undeserved gift of His own life, given to help us resp
 
 ### Proclamation
 
->  "We are saved by God’s grace, justified in Christ, and called to bear fruit worthy of eternal life."
+>  We are saved by God’s grace, justified in Christ, and called to bear fruit worthy of eternal life.
 
 ### Explanation
 
@@ -7177,7 +7178,7 @@ The Beatitudes are the teachings of Jesus in the Sermon on the Mount that reveal
 
 ### Proclamation
 
->  "The Beatitudes show us the face of Christ and the path to the joy of His Kingdom."
+>  The Beatitudes show us the face of Christ and the path to the joy of His Kingdom.
 
 ### Explanation
 
@@ -7300,7 +7301,7 @@ Virtues are habitual and firm dispositions to do the good. They enable us to liv
 
 ### Proclamation
 
->  "Virtue strengthens the soul to choose the good; vice enslaves the soul to evil."
+>  Virtue strengthens the soul to choose the good; vice enslaves the soul to evil.
 
 ### Explanation
 
@@ -7411,7 +7412,7 @@ A habit is a stable quality of mind and will that inclines a person to act in a 
 
 ### Proclamation
 
->  "We become what we repeatedly do; therefore, let our habits be rooted in love, truth, and virtue."
+>  We become what we repeatedly do; therefore, let our habits be rooted in love, truth, and virtue.
 
 ### Explanation
 
@@ -7523,7 +7524,7 @@ Faith is the theological virtue by which we believe in God and all that He has r
 
 ### Proclamation
 
->  "Faith is both God’s gift and our response — a living relationship of trust and obedience to Him."
+>  Faith is both God’s gift and our response — a living relationship of trust and obedience to Him.
 
 ### Explanation
 
@@ -7635,7 +7636,7 @@ Hope is the theological virtue by which we desire the kingdom of heaven and eter
 
 ### Proclamation
 
->  "Hope anchors our soul in Christ and keeps our eyes fixed on the eternal joy of heaven."
+>  Hope anchors our soul in Christ and keeps our eyes fixed on the eternal joy of heaven.
 
 ### Explanation
 
@@ -7745,7 +7746,7 @@ Charity, or love, is the theological virtue by which we love God above all thing
 
 ### Proclamation
 
->  "Charity is the heart of the Christian life — the love of God poured into our hearts and flowing out to others."
+>  Charity is the heart of the Christian life — the love of God poured into our hearts and flowing out to others.
 
 ### Explanation
 
@@ -7857,7 +7858,7 @@ The cardinal virtues — prudence, justice, fortitude, and temperance — are th
 
 ### Proclamation
 
->  "The cardinal virtues are the foundation of the moral life, enabling us to live with wisdom, integrity, courage, and self-control."
+>  The cardinal virtues are the foundation of the moral life, enabling us to live with wisdom, integrity, courage, and self-control.
 
 ### Explanation
 
@@ -7972,7 +7973,7 @@ Sin is an offense against God and a rejection of His love. Mortal sin destroys t
 
 ### Proclamation
 
->  "Sin divides us from God, but His mercy is greater — through repentance and grace we are restored to life."
+>  Sin divides us from God, but His mercy is greater — through repentance and grace we are restored to life.
 
 ### Explanation
 
@@ -8086,7 +8087,7 @@ Catholic Social Teaching (CST) is the Church’s body of doctrine on human digni
 
 ### Proclamation
 
->  "Catholic Social Teaching calls us to see Christ in every person and to work for a world where human dignity is upheld and the common good is served."
+>  Catholic Social Teaching calls us to see Christ in every person and to work for a world where human dignity is upheld and the common good is served.
 
 ### Explanation
 
@@ -8204,7 +8205,7 @@ Justice is the moral virtue that gives God and neighbor their due. Mercy is the 
 
 ### Proclamation
 
->  "Justice gives each their due; mercy gives beyond what is due — for God’s mercy overflows where justice ends."
+>  Justice gives each their due; mercy gives beyond what is due — for God’s mercy overflows where justice ends.
 
 ### Explanation
 
@@ -8321,7 +8322,7 @@ Prayer is the raising of one’s mind and heart to God or the requesting of good
 
 ### Proclamation
 
->  "Prayer is the heartbeat of the Christian life — our continual conversation with the God who loves us."
+>  Prayer is the heartbeat of the Christian life — our continual conversation with the God who loves us.
 
 ### Explanation
 
@@ -8433,7 +8434,7 @@ The Lord’s Prayer, taught by Jesus Himself, is the perfect model of Christian 
 
 ### Proclamation
 
->  "When we pray the Lord’s Prayer, we speak with the very words of Jesus, uniting our hearts to His."
+>  When we pray the Lord’s Prayer, we speak with the very words of Jesus, uniting our hearts to His.
 
 ### Explanation
 
@@ -8554,7 +8555,7 @@ The Church’s tradition recognizes various forms and expressions of prayer, all
 
 ### Proclamation
 
->  "Prayer takes many forms, but all true prayer leads us into the heart of God."
+>  Prayer takes many forms, but all true prayer leads us into the heart of God.
 
 ### Explanation
 
@@ -8675,7 +8676,7 @@ The Mass is the highest form of prayer in the Catholic Church, the source and su
 
 ### Proclamation
 
->  "In the Mass, heaven touches earth, and we are drawn into the eternal prayer of Christ to the Father."
+>  In the Mass, heaven touches earth, and we are drawn into the eternal prayer of Christ to the Father.
 
 ### Explanation
 
@@ -8793,7 +8794,7 @@ Prayer without ceasing is the continual orientation of our hearts toward God, li
 
 ### Proclamation
 
->  "To pray without ceasing is to live every moment in the awareness of God’s love and to respond with love."
+>  To pray without ceasing is to live every moment in the awareness of God’s love and to respond with love.
 
 ### Explanation
 
