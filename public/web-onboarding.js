@@ -40,8 +40,8 @@ function createWebOnboarding({auth, db, call, friendlyAuthError}) {
   }
   function contact(panel) {
     const a = node('a', 'Contact Illumined', 'contact secondary');
-    a.href = 'mailto:illumined2026@gmail.com?subject=Parish%20startup%20code%20request&body=Name%3A%0AParish%3A%0ACity%3A%0A'; add(panel, a);
-    add(panel, node('p', 'illumined2026@gmail.com'));
+    a.href = 'mailto:stephen.johnson@illumined.net?subject=Parish%20startup%20code%20request&body=Name%3A%0AParish%3A%0ACity%3A%0A'; add(panel, a);
+    add(panel, node('p', 'stephen.johnson@illumined.net'));
   }
   function back(panel, action = welcome) { button(panel, '‹ Back', action, 'plain'); }
   function welcome() {
@@ -52,14 +52,33 @@ function createWebOnboarding({auth, db, call, friendlyAuthError}) {
     const qr = button(p, '▦ QR Code', qrEntry, 'plain'), sign = button(p, 'Sign In', () => { flow = 'welcome'; credentials(); }, 'plain');
     links.append(qr, node('span'), sign);
     button(p, 'Enter an invitation code', studentCode, 'plain');
-    button(p, 'Instructor? Start a Classroom', () => { flow = 'parish'; save(); auth.currentUser ? resume() : activationEntry(); }, 'plain');
-    button(p, 'Register Your Parish', () => { flow = 'parish'; save(); auth.currentUser ? resume() : credentials('register'); }, 'plain');
+    button(p, 'Start Your Parish Classroom', parishIntroduction, 'plain');
+    const downloads = node('div', '', 'onboard-downloads');
+    const downloadTitle = node('p', 'Download the App');
+    downloadTitle.id = 'onboard-download-title';
+    downloads.append(downloadTitle);
+    const stores = node('div', '', 'onboard-store-links');
+    stores.setAttribute('role', 'group');
+    stores.setAttribute('aria-labelledby', downloadTitle.id);
+    [
+      ['https://apps.apple.com/app/id6791602784', 'images/app-store-badge.svg', 'Download on the App Store', 'apple'],
+      ['https://play.google.com/store/apps/details?id=com.illumined.app', 'images/google-play-badge.png', 'Get it on Google Play', 'google']
+    ].forEach(([url, artwork, label, store]) => {
+      const link = node('a', '', `onboard-store-link ${store}`);
+      link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+      link.setAttribute('aria-label', `${label} (opens in a new tab)`);
+      const badge = node('img'); badge.src = artwork; badge.alt = label;
+      link.append(badge); stores.append(link);
+    });
+    downloads.append(stores); add(p, downloads);
+
   }
   function credentials(nextMode = 'signin') {
     mode = nextMode; save();
     if (auth.currentUser) return resume();
     const p = page(mode === 'register' ? 'Create Your Account' : 'Sign In', 'Use this same email and password on the website, iPhone, and Android.');
     back(p);
+    if (flow === 'parish') add(p, node('p', 'Instructor account • Free testing phase. Signing in or creating an account does not create a classroom or activate parish access yet. Your startup code is verified in the next step.', 'notice'));
     if (selection) add(p, node('p', `${selection.parishName} • ${selection.city}`));
     const email = field(p, 'Email', 'email'), password = field(p, 'Password', 'password');
     let confirm;
@@ -75,21 +94,48 @@ function createWebOnboarding({auth, db, call, friendlyAuthError}) {
       await auth.sendPasswordResetEmail(email.value.trim()); p.status.textContent = 'Password reset email sent. Check your inbox.';
     }, 'plain');
   }
+  function testingNotice(panel) {
+    add(panel, node('p', 'FREE TESTING PHASE', 'parish-phase'));
+    add(panel, node('p', 'Illumined is currently free to use during testing. No payment information is requested and no checkout is active. A parish startup code is still required to activate a new parish classroom.', 'notice'));
+  }
+  function requestStartupCode(panel) {
+    const help = node('div', '', 'parish-code-help');
+    help.append(node('h3', 'Need a startup code?'), node('p', 'Email Illumined with your name, parish name, city, and your role at the parish. Illumined will help arrange testing access and provide the startup code.'));
+    const link = node('a', 'Request a startup code by email', 'contact secondary');
+    link.href = 'mailto:stephen.johnson@illumined.net?subject=Parish%20testing%20access%20and%20startup%20code&body=Name%3A%0AParish%3A%0ACity%3A%0ARole%20at%20parish%3A%0A';
+    help.append(link, node('p', 'stephen.johnson@illumined.net', 'parish-email'), node('p', 'This opens your email app; you must send the message. If it does not open, email the address above.', 'parish-help-note')); add(panel, help);
+  }
+  function futureParishAccess(panel) {
+    const details = node('details', '', 'parish-future');
+    details.append(node('summary', 'After testing: the planned parish registration process'), node('p', 'The planned process is to register your parish on the website, complete payment when available, and receive a parish startup code. You would then sign in with the same account on the web or device app, activate parish access, and finish your profile and classroom setup.'), node('p', 'Pricing, launch timing, and arrangements for testing parishes have not been finalized. This screen does not enroll you in a paid plan.')); add(panel, details);
+  }
+  function parishIntroduction() {
+    flow = 'parish'; selection = null; save();
+    const p = page('Register your class on Illumined', 'Access the classroom management tools, lesson library, and faith formation guides to structure your class around your parish’s pastoral and catechetical needs.'); back(p);
+    testingNotice(p);
+    const steps = node('ol', '', 'parish-startup-steps');
+    ['Get your parish startup code from Illumined.', 'Sign in or create your instructor account with your email and password.', 'Activate parish access with your code, then add your name, parish, and city. Illumined creates the Class ID for you.'].forEach(text => steps.append(node('li', text)));
+    add(p, steps);
+    button(p, 'I have a startup code', () => auth.currentUser ? resume() : activationEntry(), 'gold');
+    requestStartupCode(p);
+    button(p, 'Create Instructor Account', () => auth.currentUser ? resume() : credentials('register'), 'plain');
+    button(p, 'Already have an account? Sign In', () => auth.currentUser ? resume() : credentials(), 'plain');
+    futureParishAccess(p);
+  }
   function activationEntry() {
     flow = 'parish'; save();
-    const p = page('Start a Classroom', 'Enter your parish startup code, then sign in with your existing Illumined account.'); back(p);
+    const p = page('Enter Your Parish Startup Code', 'This code activates a new parish—not a student invitation. Enter the code supplied by Illumined, then sign in or create your instructor account.'); back(p, parishIntroduction);
     const code = field(p, 'Parish startup code', 'text', startupCode);
-    button(p, 'Continue', () => { startupCode = code.value.trim(); credentials(); }, '', true);
-    add(p, node('p', 'No startup code yet?')); contact(p);
-    button(p, 'Register Your Parish', () => credentials('register'), 'plain');
+    button(p, 'Continue to Sign In', () => { startupCode = code.value.trim(); credentials(); }, 'gold', true);
+    add(p, node('p', 'Your code is verified after sign-in. Entering it here does not activate access or create a classroom.', 'parish-help-note'));
+    requestStartupCode(p);
   }
   function payment() {
-    const p = page('Activate Your Parish', 'Your account is ready. Parish access stays with this account across all your devices.');
-    add(p, node('p', 'Online payment is not available yet. No payment details are collected and no charge will be made. Contact Illumined for a startup code.', 'notice'));
-    const checkout = button(p, 'Payment — Coming Later', () => call('createParishCheckout'), 'gold'); checkout.disabled = true;
+    const p = page('Activate Your Parish', 'Your instructor account is ready. Enter your startup code to unlock parish setup; you will add your name, parish name, and city next.');
+    testingNotice(p);
     const code = field(p, 'Parish startup code', 'text', startupCode);
     button(p, 'Activate Parish Access', async () => { await call('activateParishAccess', {setupCode: code.value.trim()}); startupCode = ''; classroom(); }, '', true);
-    contact(p); button(p, 'Sign Out', () => auth.signOut(), 'plain');
+    requestStartupCode(p); futureParishAccess(p); button(p, 'Sign Out', () => auth.signOut(), 'plain');
   }
   function classroom() {
     const p = page('Create Your Classroom', 'Complete your profile. Illumined creates the Class ID from your parish name and city.');

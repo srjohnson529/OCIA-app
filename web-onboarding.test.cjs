@@ -30,14 +30,54 @@ test('welcome leads with classroom search and hides credentials until requested'
   const s=setup();assert.equal(s.all().filter(e=>e.tag==='button')[0].textContent,'Find My Classroom');assert.equal(s.all().filter(e=>e.tag==='input').length,0);
   await s.click('Find My Classroom');assert.ok(s.input('Parish name'));assert.ok(s.input('City'));assert.equal(s.calls.length,0);
 });
+test('welcome offers accessible official store badges without changing onboarding',async()=>{
+  const s=setup();
+  const links=s.all().filter(e=>e.tag==='a'&&e.className?.includes('onboard-store-link'));
+  assert.deepEqual(links.map(e=>e.href),[
+    'https://apps.apple.com/app/id6791602784',
+    'https://play.google.com/store/apps/details?id=com.illumined.app'
+  ]);
+  for(const link of links){
+    assert.equal(link.target,'_blank');assert.equal(link.rel,'noopener noreferrer');
+    assert.match(link['aria-label'],/opens in a new tab/);
+    const image=link.children[0];assert.equal(image.tag,'img');assert.ok(image.alt);
+    assert.ok(fs.existsSync('public/'+image.src));
+  }
+  assert.equal(s.calls.length,0);
+  await s.click('Sign In');
+  assert.equal(s.all().filter(e=>e.className?.includes('onboard-store-link')).length,0);
+});
 test('registration uses the shared Firebase account and password confirmation',async()=>{
-  const s=setup();await s.click('Register Your Parish');s.input('Email').value='teacher@example.test';s.input('Password').value='sample-password';s.input('Confirm password').value='different';await s.submit();assert.equal(s.calls.length,0);
+  const s=setup();await s.click('Start Your Parish Classroom');await s.click('Create Instructor Account');s.input('Email').value='teacher@example.test';s.input('Password').value='sample-password';s.input('Confirm password').value='different';await s.submit();assert.equal(s.calls.length,0);
   s.input('Confirm password').value='sample-password';await s.submit();assert.equal(s.calls[0].name,'register');
 });
-test('startup code survives sign-in and payment remains disabled',async()=>{
-  const s=setup();await s.click('Instructor? Start a Classroom');s.input('Parish startup code').value='START-DEMO';await s.submit();
-  s.auth.currentUser={uid:'u'};await s.controller.resume();assert.equal(s.button('Payment — Coming Later').disabled,true);assert.equal(s.input('Parish startup code').value,'START-DEMO');
+test('startup code survives sign-in without offering checkout',async()=>{
+  const s=setup();await s.click('Start Your Parish Classroom');await s.click('I have a startup code');s.input('Parish startup code').value='START-DEMO';await s.submit();
+  s.auth.currentUser={uid:'u'};await s.controller.resume();assert.equal(s.button('Payment — Coming Later'),undefined);assert.equal(s.input('Parish startup code').value,'START-DEMO');
   await s.submit();assert.equal(s.calls.find(c=>c.name==='activateParishAccess').data.setupCode,'START-DEMO');assert.ok(s.input('Parish name'));assert.equal(s.calls.some(c=>c.name==='createParishCheckout'),false);
+});
+test('single parish entry explains testing, requesting a code, and future plans',async()=>{
+    const s=setup();
+    assert.equal(s.all().filter(e=>e.tag==='button'&&e.textContent==='Start Your Parish Classroom').length,1);
+    assert.equal(s.button('Register Your Parish'),undefined);
+    assert.equal(s.button('Instructor? Start a Classroom'),undefined);
+    await s.click('Start Your Parish Classroom');
+    assert.ok(s.all().some(e=>e.textContent==='FREE TESTING PHASE'));
+    assert.ok(s.all().some(e=>e.textContent?.includes('No payment information is requested')));
+    assert.equal(s.all().filter(e=>e.tag==='input').length,0);
+    assert.equal(s.calls.length,0);
+    const email=s.all().find(e=>e.tag==='a'&&e.href?.startsWith('mailto:'));
+    assert.ok(email);assert.match(decodeURIComponent(email.href),/stephen.johnson@illumined.net/);
+    for(const field of ['Name:','Parish:','City:','Role at parish:']) assert.ok(decodeURIComponent(email.href).includes(field));
+    assert.ok(s.all().some(e=>e.textContent?.includes('you must send the message')));
+    const future=s.all().find(e=>e.tag==='details');assert.ok(future);assert.notEqual(future.open,true);
+    assert.ok(s.all().some(e=>e.textContent?.includes('have not been finalized')));
+    await s.click('I have a startup code');await s.click('‹ Back');assert.ok(s.button('I have a startup code'));
+});
+test('activated instructor entering parish guidance resumes setup without reactivation',async()=>{
+  const s=setup();await s.click('Start Your Parish Classroom');s.auth.currentUser={uid:'teacher'};s.setAccess({status:'ready'});
+  await s.click('I have a startup code');assert.ok(s.input('Parish name'));assert.equal(s.input('Parish startup code'),undefined);
+  assert.equal(s.calls.some(c=>c.name==='activateParishAccess'),false);
 });
 test('ready account resumes parish setup without a startup code or manual ID',async()=>{
   const s=setup();s.auth.currentUser={uid:'u'};s.setAccess({status:'ready'});await s.controller.resume();
