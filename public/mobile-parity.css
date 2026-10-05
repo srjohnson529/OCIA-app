@@ -1,15 +1,68 @@
 /* Shared mobile-parity components; keep marketing and payment flows unchanged. */
+/* Keep the brand divider independent of editable landing-page text/styles. */
+header .brand-name { text-decoration: none; }
+header .brand-divider-dot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  height: 5px;
+  margin-top: .16rem;
+  border-radius: 0;
+  background: radial-gradient(circle at center, #bf944a 2.5px, transparent 2.6px);
+}
+header .brand-divider-dot::before,
+header .brand-divider-dot::after {
+  content: '';
+  width: calc(50% - 7px);
+  height: 2px;
+  background: #bf944a;
+}
 .onboard-approval { margin-top: 24px; padding: 18px; border: 1px solid #b9955066; border-radius: 16px; background: #fff; color: #274e73; text-align: left; }
 .onboard-approval summary { cursor: pointer; min-height: 44px; align-content: center; font-weight: 700; }
 .onboard-approval summary:focus-visible { outline: 3px solid #b99550; outline-offset: 4px; }
 .onboard-approval p { color: #333 !important; font-size: 0.95rem; line-height: 1.55; }
 .approval-official { white-space: pre-line; }
-#landing-approval { padding: 0; border: 0; background: transparent; }
+.landing-contact-actions { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.landing-contact-actions > a { flex-shrink: 0; }
+#landing-approval { margin: 0; padding: 0; border: 0; background: transparent; max-width: 60%; text-align: right; }
+#landing-approval > p { text-align: left; }
+@media (max-width: 700px) {
+  .landing-contact-actions { flex-direction: column; align-items: stretch; gap: 16px; }
+  #landing-approval { max-width: none; text-align: left; }
+}
 #landing-approval > summary { min-height: 48px; background: #3b6fa0; color: #fff; list-style: none; gap: .5em; }
 #landing-approval > summary::-webkit-details-marker { display: none; }
 #landing-approval > summary::before { content: '▸'; }
 #landing-approval[open] > summary::before { content: '▾'; }
 #landing-approval > summary:hover { background: #315e87; }
+.landing-contact-actions > .landing-button,
+#landing-learn-more > .landing-button,
+#landing-approval > summary.landing-button {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: .6rem .95rem;
+  border-radius: 10px;
+  font-size: .9rem;
+  font-weight: 600;
+  line-height: 1.3;
+  box-shadow: none;
+}
+/* Align direct children too: page copy edits need no extra HTML wrapper. */
+#landing-learn-more {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  column-gap: 24px;
+}
+#landing-learn-more > .landing-section-heading,
+#landing-learn-more > .landing-contact-actions { grid-column: 1 / -1; }
+#landing-learn-more > .landing-button { grid-column: 1; justify-self: start; }
+#landing-learn-more > #landing-approval { grid-column: 2; width: 100%; max-width: none; justify-self: end; }
+@media (max-width: 700px) {
+  #landing-learn-more { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
+  #landing-learn-more > #landing-approval { grid-column: 1; justify-self: start; text-align: left; }
+}
 #lesson-tracker.web-lesson-tracker {
   display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 760px;
   margin: 0 auto 26px; padding: 24px; box-sizing: border-box; text-align: left;

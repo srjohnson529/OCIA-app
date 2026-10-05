@@ -534,45 +534,36 @@ body.auth-locked .main-content-container {
 
 .landing-walkthrough {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
 }
 
 .landing-walkthrough-step {
     display: grid;
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    aspect-ratio: 1;
+    box-sizing: border-box;
+    text-align: left;
     gap: 1.15rem;
-    padding: clamp(1.2rem, 3vw, 1.75rem);
-    border: 1px solid rgba(59,111,160,.14);
-    border-radius: 18px;
-    background: linear-gradient(145deg, #fff 0%, #f7f7f5 100%);
-}
-
-.landing-walkthrough-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    color: #fff;
-    background: #3b6fa0;
-    box-shadow: 0 8px 18px rgba(39,78,115,.2);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: .9rem;
-    font-weight: 900;
-    letter-spacing: .08em;
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    border: 1px solid rgba(59,111,160,.06);
+    border-radius: 28px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(20,40,60,.10);
 }
 
 .landing-walkthrough-copy h3 {
-    margin: .1rem 0 .45rem;
+    margin: 0 0 1.5rem;
     color: #274e73;
-    font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+    font-size: clamp(2rem, 3.5vw, 2.5rem);
+    line-height: 1.2;
 }
 
 .landing-walkthrough-copy > p {
     margin: 0;
     color: #625f59;
-    font-size: 1rem;
+    font-size: 1.125rem;
     line-height: 1.6;
 }
 
@@ -637,7 +628,7 @@ body.auth-locked .main-content-container {
     #profile-setup .auth-actions { grid-template-columns: 1fr; }
     #profile-setup .auth-actions .auth-primary { grid-column: auto; }
     .landing-walkthrough-step { grid-template-columns: 1fr; gap: .75rem; }
-    .landing-walkthrough-number { width: 48px; height: 48px; }
+    .landing-walkthrough { grid-template-columns: 1fr; }
 }
 
 .account-grid {
@@ -3033,56 +3024,50 @@ body > nav button:focus-visible {
 
         <div id="landing-about" class="landing-section">
             <div class="landing-section-heading">
-                <div class="landing-eyebrow" data-i18n="A guided tour of Illumined">A guided tour of Illumined</div>
-                <h2 data-i18n="Build a formation journey that belongs to your parish">Build a formation journey that belongs to your parish</h2>
-                <p data-i18n="From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students while preserving the pastoral character of each class. Explore the experience step by step.">From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students while preserving the pastoral character of each class. Explore the experience step by step.</p>
+                <div class="landing-eyebrow" data-i18n="A snapshot of Illumined">A guided tour of Illumined</div>
+                <h2 data-i18n="Use Illumined to build a faith formation journey that fits to your parish">Build a formation journey that belongs to your parish</h2>
+                <p data-i18n="From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students, strengthen connectivity, and preserve the pastoral character of each class.">From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students while preserving the pastoral character of each class. Explore the experience step by step.</p>
             </div>
             <div class="landing-walkthrough">
                 <article class="landing-walkthrough-step">
-                    <div class="landing-walkthrough-number">01</div>
                     <div class="landing-walkthrough-copy">
-                        <h3 data-i18n="Begin with a home page shaped for your class">Begin with a home page shaped for your class</h3>
+                        <h3 data-i18n="Your Classroom Dashboard">Your Classroom Home</h3>
                         <p data-i18n="Welcome students into a focused class experience. Highlight current announcements, upcoming assignments, prayer intentions, schedules, and the next formation topic so everyone immediately knows where to begin.">Welcome students into a focused class experience. Highlight current announcements, upcoming assignments, prayer intentions, schedules, and the next formation topic so everyone immediately knows where to begin.</p>
                         <div class="landing-walkthrough-media" data-walkthrough-media="home"></div>
                     </div>
                 </article>
                 <article class="landing-walkthrough-step">
-                    <div class="landing-walkthrough-number">02</div>
                     <div class="landing-walkthrough-copy">
-                        <h3 data-i18n="Teach from a rich, adaptable lesson library">Teach from a rich, adaptable lesson library</h3>
-                        <p data-i18n="Use the included Catholic lesson and quiz library as your foundation, then edit existing material or create your own. Instructors decide which lessons a class receives and whether each quiz is required, optional, or hidden.">Use the included Catholic lesson and quiz library as your foundation, then edit existing material or create your own. Instructors decide which lessons a class receives and whether each quiz is required, optional, or hidden.</p>
+                        <h3 data-i18n="Clear and Concise Lessons">Flexible Lessons</h3>
+                        <p data-i18n="Use the included Illumined lesson and quiz library as your foundation. Curate assignment plans to fit your program's needs'. Customize lessons and quizzes or build your own from scratch.">Use the included Catholic lesson and quiz library as your foundation, then edit existing material or create your own. Instructors decide which lessons a class receives and whether each quiz is required, optional, or hidden.</p>
                         <div class="landing-walkthrough-media" data-walkthrough-media="lessons"></div>
                     </div>
                 </article>
                 <article class="landing-walkthrough-step">
-                    <div class="landing-walkthrough-number">03</div>
                     <div class="landing-walkthrough-copy">
-                        <h3 data-i18n="Create a purposeful path through every assignment">Create a purposeful path through every assignment</h3>
-                        <p data-i18n="Bring readings, lessons, and discussion together in one progressive plan. Students move through each stage in order, building knowledge and reflection before entering the concluding class conversation.">Bring readings, lessons, and discussion together in one progressive plan. Students move through each stage in order, building knowledge and reflection before entering the concluding class conversation.</p>
+                        <h3 data-i18n="Guided Assignments">Guided Assignments</h3>
+                        <p data-i18n="Bring readings, lessons, and discussion together in one progressive plan. Guide students through each stage in order, building knowledge and encouraging reflection before or after class conversation.">Bring readings, lessons, and discussion together in one progressive plan. Students move through each stage in order, building knowledge and reflection before entering the concluding class conversation.</p>
                         <div class="landing-walkthrough-media" data-walkthrough-media="assignments"></div>
                     </div>
                 </article>
                 <article class="landing-walkthrough-step">
-                    <div class="landing-walkthrough-number">04</div>
                     <div class="landing-walkthrough-copy">
-                        <h3 data-i18n="Invite students into the prayer of the Church">Invite students into the prayer of the Church</h3>
+                        <h3 data-i18n="Prayer & Formation">Prayer & Formation</h3>
                         <p data-i18n="Introduce the lived faith through guided spiritual formation tools, including common prayers, the Rosary, Lectio Divina, the Daily Gospel, liturgical living, and Daily Formation shaped around the Church calendar.">Introduce the lived faith through guided spiritual formation tools, including common prayers, the Rosary, Lectio Divina, the Daily Gospel, liturgical living, and Daily Formation shaped around the Church calendar.</p>
                         <div class="landing-walkthrough-media" data-walkthrough-media="formation"></div>
                     </div>
                 </article>
                 <article class="landing-walkthrough-step">
-                    <div class="landing-walkthrough-number">05</div>
                     <div class="landing-walkthrough-copy">
-                        <h3 data-i18n="Keep formation connected between meetings">Keep formation connected between meetings</h3>
-                        <p data-i18n="Continue the parish conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students remain present to the community throughout the week.">Continue the parish conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students remain present to the community throughout the week.</p>
+                        <h3 data-i18n="Stay Connected">Stay Connected</h3>
+                        <p data-i18n="Continue the conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students stay connected to the community throughout the week.">Continue the parish conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students remain present to the community throughout the week.</p>
                         <div class="landing-walkthrough-media" data-walkthrough-media="community"></div>
                     </div>
                 </article>
                 <article class="landing-walkthrough-step">
-                    <div class="landing-walkthrough-number">06</div>
                     <div class="landing-walkthrough-copy">
-                        <h3 data-i18n="Curate the entire OCIA experience with instructor tools">Curate the entire OCIA experience with instructor tools</h3>
-                        <p data-i18n="Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation, guide discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.">Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation, guide discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.</p>
+                        <h3 data-i18n="Instructor Tools">Instructor Tools</h3>
+                        <p data-i18n="Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation cards, facilitate discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.">Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation, guide discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.</p>
                         <div class="landing-walkthrough-media" data-walkthrough-media="instructor"></div>
                     </div>
                 </article>
@@ -3331,17 +3316,16 @@ The nihil obstat and imprimatur do not signify agreement with the content, opini
                 "A guided tour of Illumined": "Un recorrido guiado por Illumined",
                 "Build a formation journey that belongs to your parish": "Crea un camino de formación propio de tu parroquia",
                 "From the first welcome to the final conversation, Illumined gives formation teams a clear way to guide students while preserving the pastoral character of each class. Explore the experience step by step.": "Desde la primera bienvenida hasta la conversación final, Illumined ofrece a los equipos de formación una manera clara de guiar a los estudiantes sin perder el carácter pastoral de cada clase. Descubre la experiencia paso a paso.",
-                "Begin with a home page shaped for your class": "Comienza con una página de inicio preparada para tu clase",
+                "Your Classroom Home": "El inicio de tu aula",
                 "Welcome students into a focused class experience. Highlight current announcements, upcoming assignments, prayer intentions, schedules, and the next formation topic so everyone immediately knows where to begin.": "Recibe a los estudiantes con una experiencia centrada en su clase. Destaca los anuncios actuales, las próximas tareas, las intenciones de oración, los horarios y el siguiente tema de formación para que todos sepan de inmediato por dónde comenzar.",
-                "Teach from a rich, adaptable lesson library": "Enseña con una biblioteca de lecciones amplia y adaptable",
+                "Flexible Lessons": "Lecciones adaptables",
                 "Use the included Catholic lesson and quiz library as your foundation, then edit existing material or create your own. Instructors decide which lessons a class receives and whether each quiz is required, optional, or hidden.": "Utiliza como base la biblioteca incluida de lecciones y cuestionarios católicos; luego edita el material existente o crea el tuyo. Los instructores deciden qué lecciones recibe cada clase y si cada cuestionario es obligatorio, opcional u oculto.",
-                "Create a purposeful path through every assignment": "Crea un camino con propósito en cada tarea",
+                "Guided Assignments": "Tareas guiadas",
                 "Bring readings, lessons, and discussion together in one progressive plan. Students move through each stage in order, building knowledge and reflection before entering the concluding class conversation.": "Reúne lecturas, lecciones y conversación en un único plan progresivo. Los estudiantes avanzan por cada etapa en orden, desarrollando conocimiento y reflexión antes de participar en la conversación final de la clase.",
-                "Invite students into the prayer of the Church": "Invita a los estudiantes a entrar en la oración de la Iglesia",
+                "Prayer & Formation": "Oración y formación",
                 "Introduce the lived faith through guided spiritual formation tools, including common prayers, the Rosary, Lectio Divina, the Daily Gospel, liturgical living, and Daily Formation shaped around the Church calendar.": "Presenta la fe vivida mediante herramientas guiadas de formación espiritual, entre ellas las oraciones comunes, el Rosario, la Lectio Divina, el Evangelio diario, la vida litúrgica y la Formación diaria organizada según el calendario de la Iglesia.",
-                "Keep formation connected between meetings": "Mantén conectada la formación entre reuniones",
+                "Stay Connected": "Mantente conectado",
                 "Continue the parish conversation through announcements, class discussions, prayer requests, shared resources, and timely notifications. Illumined helps students remain present to the community throughout the week.": "Continúa la conversación parroquial mediante anuncios, conversaciones de clase, peticiones de oración, recursos compartidos y notificaciones oportunas. Illumined ayuda a los estudiantes a mantenerse presentes en la comunidad durante toda la semana.",
-                "Curate the entire OCIA experience with instructor tools": "Da forma a toda la experiencia de OICA con las herramientas del instructor",
                 "Manage multiple classes, build schedules, create lessons and assignments, publish Daily Formation, guide discussions, send announcements, and follow student progress from one organized workspace—on the web or from the mobile apps.": "Administra varias clases, prepara horarios, crea lecciones y tareas, publica la Formación diaria, guía conversaciones, envía anuncios y sigue el progreso de los estudiantes desde un espacio de trabajo organizado, en la web o en las aplicaciones móviles.",
                 "Illumined class home page": "Página de inicio de la clase en Illumined",
                 "Your class at a glance": "Tu clase de un vistazo",

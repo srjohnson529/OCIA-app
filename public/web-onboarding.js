@@ -128,7 +128,7 @@ function createWebOnboarding({auth, db, call, friendlyAuthError}) {
     textBindings.clear(); attributeBindings = [];
     root.replaceChildren();
     const shell = node('div', '', 'onboard-shell'), brand = node('div', '', 'onboard-brand');
-    const logo = node('img'); logo.src = 'images/illumined-logo.png'; logo.alt = 'Illumined';
+    const logo = node('img'); logo.src = 'images/illumined-logo-600.png'; logo.width = 600; logo.height = 600; logo.alt = 'Illumined';
     brand.append(logo, node('h1', 'Illumined'), node('p', 'BEING • TRUTH • GOODNESS'));
     const panel = node('form', '', `onboard-panel${card ? ' card' : ''}`); panel.onsubmit = e => e.preventDefault();
     if (title) panel.append(node('h2', title)); if (intro) panel.append(node('p', intro));
