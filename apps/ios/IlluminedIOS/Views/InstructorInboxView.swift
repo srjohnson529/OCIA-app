@@ -169,10 +169,11 @@ struct InstructorInboxView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text(t("Private to the student and all instructors assigned to this classroom. Other students cannot see these messages."))
+            Text(t(profile.isInstructor ? "Send a message to a specific student." : "Message your instructors."))
                 .font(IlluminedTheme.font(size: 13)).foregroundStyle(IlluminedTheme.secondaryText).padding(.horizontal)
             if profile.isInstructor && store.selected == nil && store.recipient == nil {
                 List {
+                    Group {
                     Button(t("New message")) { store.newMessage() }
                     if store.choosing {
                         Section(t("Choose a student")) {
@@ -195,6 +196,9 @@ struct InstructorInboxView: View {
                             }
                         }
                     }
+                    }
+                    .listRowBackground(Color.white)
+                    .foregroundStyle(IlluminedTheme.ink)
                 }.scrollContentBackground(.hidden)
             } else {
                 if profile.isInstructor {

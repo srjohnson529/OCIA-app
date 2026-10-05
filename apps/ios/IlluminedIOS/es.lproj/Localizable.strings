@@ -17,6 +17,8 @@
 "No active students in this classroom." = "No hay estudiantes activos en esta clase.";
 "Student list unavailable. Please try again." = "Lista de estudiantes no disponible. Inténtalo de nuevo.";
 "Private to the student and all instructors assigned to this classroom. Other students cannot see these messages." = "Privado para el estudiante y todos los instructores de esta clase. Los demás estudiantes no pueden ver estos mensajes.";
+"Send a message to a specific student." = "Envía un mensaje a un estudiante específico.";
+"Message your instructors." = "Envía un mensaje a tus instructores.";
 "No student conversations yet." = "Todavía no hay conversaciones de estudiantes.";
 "All conversations" = "Todas las conversaciones";
 "Load earlier messages" = "Cargar mensajes anteriores";

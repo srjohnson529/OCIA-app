@@ -83,8 +83,8 @@ internal fun InstructorInboxExperience(userId: String, profile: UserProfile) {
         if (messages.isNotEmpty() && limit == 100L) listState.animateScrollToItem(messages.lastIndex)
     }
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(t("Private to the student and all instructors assigned to this classroom. Other students cannot see these messages.",
-            "Privado para el estudiante y todos los instructores de esta clase. Los demás estudiantes no pueden ver estos mensajes."), style = MaterialTheme.typography.bodySmall)
+        Text(if (profile.isInstructor) t("Send a message to a specific student.", "Envía un mensaje a un estudiante específico.")
+            else t("Message your instructors.", "Envía un mensaje a tus instructores."), style = MaterialTheme.typography.bodySmall)
         if (profile.isInstructor && selected == null && recipient == null) {
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 item { Button(onClick = { choosing = true }) { Text(t("New message", "Nuevo mensaje")) } }

@@ -122,7 +122,7 @@ struct AuthView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 
     private var launchBrand: some View {

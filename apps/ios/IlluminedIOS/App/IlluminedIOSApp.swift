@@ -23,6 +23,8 @@ struct IlluminedIOSApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                // The branded palette uses fixed light surfaces and dark text.
+                .preferredColorScheme(.light)
                 .environmentObject(authService)
                 .environmentObject(notificationService)
                 .environmentObject(inviteLinkStore)
