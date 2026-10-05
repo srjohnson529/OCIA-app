@@ -1,0 +1,11 @@
+{
+  "id": "/",
+  "name": "Illumined",
+  "short_name": "Illumined",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f4ef",
+  "theme_color": "#3d709a",
+  "icons": [{"src": "/images/illumined-logo.png", "type": "image/png", "purpose": "any"}]
+}

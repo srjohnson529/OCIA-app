@@ -4,6 +4,13 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 class Element {
   constructor(tag) { this.tag = tag; this.children = []; this.value = ''; this.classList = {add(){}}; }
+  get textContent() { return this._text || ''; }
+  set textContent(value) { this._text=value; this.children=[]; }
+  get firstChild() {
+    if(!this._text) return this.children[0];
+    const owner=this;
+    return {nodeType:3,get nodeValue(){return owner._text;},set nodeValue(value){owner._text=value;}};
+  }
   append(...children) { for(const child of children) { if(child.parent) child.parent.children = child.parent.children.filter(x=>x!==child); child.parent=this; this.children.push(child); } }
   insertBefore(child, before) { child.parent=this; const i=this.children.indexOf(before); this.children.splice(i<0?this.children.length:i,0,child); }
   replaceChildren() { this.children=[]; }
@@ -12,10 +19,10 @@ class Element {
   checkValidity() { return true; }
   scrollIntoView() {}
 }
-function setup() {
+function setup(language='en') {
   const root = new Element('div'), calls = [], auth = {currentUser:null,onAuthStateChanged(fn){this.changed=fn; fn(null);},async createUserWithEmailAndPassword(email,password){calls.push({name:'register',email,password});},async signInWithEmailAndPassword(email,password){calls.push({name:'signin',email,password});},async signOut(){this.currentUser=null;this.changed(null);},async sendPasswordResetEmail(){}};
   let access={status:'not_activated'}, rooms=[];
-  const document={body:new Element('body'),createElement:tag=>new Element(tag),createTextNode:text=>({textContent:text}),getElementById:()=>root,querySelectorAll:()=>[]};
+  const document={documentElement:{lang:language},body:new Element('body'),createElement:tag=>new Element(tag),createTextNode:text=>({textContent:text}),getElementById:()=>root,querySelectorAll:()=>[]};
   const context={document,sessionStorage:{getItem:()=>null,setItem(){}},URL,window:{}};
   vm.createContext(context); vm.runInContext(fs.readFileSync('public/web-onboarding.js','utf8'),context);
   const controller=context.createWebOnboarding({auth,db:{collection:()=>({doc:()=>({get:async()=>({exists:false})})})},friendlyAuthError:e=>e.message,call:async(name,data)=>{calls.push({name,data}); if(name==='getParishAccess') return access; if(name==='findClassrooms') return {classrooms:rooms}; return {};}});
@@ -24,8 +31,53 @@ function setup() {
   const input=label=>all().find(e=>e.tag==='label'&&e.textContent===label)?.children[0];
   const click=async text=>{const b=button(text);assert.ok(b,`Button ${text}`);assert.notEqual(b.disabled,true);await b.onclick({preventDefault(){}});};
   const submit=()=>all().find(e=>e.tag==='form').onsubmit({preventDefault(){}});
-  return {root,auth,calls,controller,all,button,input,click,submit,setAccess:value=>access=value,setRooms:value=>rooms=value};
+  return {root,auth,calls,controller,all,button,input,click,submit,setAccess:value=>access=value,setRooms:value=>rooms=value,setLanguage:language=>{document.documentElement.lang=language;controller.refreshLanguage();}};
 }
+test('Spanish welcome and search follow the selected language without losing input',async()=>{
+  const s=setup('es');
+  for(const label of ['Buscar mi clase','▦ Código QR','Iniciar sesión','Ingresar un código de invitación','Crear la clase de tu parroquia'])assert.ok(s.button(label));
+  assert.ok(s.all().some(e=>e.textContent==='Descargar la aplicación'));
+  assert.ok(s.all().some(e=>e['aria-label']==='Descargar en App Store (se abre en una pestaña nueva)'));
+  await s.click('Buscar mi clase');
+  const parish=s.input('Nombre de la parroquia'),city=s.input('Ciudad');
+  parish.value='Holy Rosary';city.value='Steubenville';
+  s.setLanguage('en');assert.equal(s.input('Parish name'),parish);assert.equal(s.input('City'),city);
+  assert.equal(parish.value,'Holy Rosary');assert.equal(city.value,'Steubenville');
+  s.setLanguage('es');await s.submit();
+  assert.deepEqual(JSON.parse(JSON.stringify(s.calls[0].data)),{parishName:'Holy Rosary',city:'Steubenville'});
+  assert.ok(s.all().some(e=>e.textContent.startsWith('No se encontró ninguna clase.')));
+  s.setLanguage('en');assert.ok(s.all().some(e=>e.textContent.startsWith('No matching classroom.')));
+});
+test('Spanish classroom results retain names and lead to translated signup and approval',async()=>{
+  const s=setup('es');s.setRooms([{classId:'room',parishName:'Holy Rosary',city:'Steubenville',className:'OCIA'}]);
+  await s.click('Buscar mi clase');s.input('Nombre de la parroquia').value='Rosary';s.input('Ciudad').value='Steubenville';await s.submit();
+  await s.click('Holy Rosary\nSteubenville • OCIA');
+  const email=s.input('Correo electrónico'),password=s.input('Contraseña');email.value='student@example.test';password.value='secret123';
+  s.input('Confirmar contraseña').value='different';await s.submit();assert.ok(s.all().some(e=>e.textContent==='Las contraseñas no coinciden.'));
+  s.setLanguage('en');assert.equal(s.input('Email'),email);assert.equal(s.input('Password'),password);assert.equal(password.value,'secret123');
+  s.setLanguage('es');s.auth.currentUser={uid:'student'};await s.controller.resume();s.input('Tu nombre').value='María';await s.submit();
+  assert.ok(s.button('Cancelar solicitud'));assert.ok(s.button('Actualizar estado'));assert.ok(s.button('Cerrar sesión'));
+  assert.ok(s.all().some(e=>e.textContent==='Esperando la aprobación de tu instructor'));
+});
+test('Spanish invitation, QR fallback, and parish guidance are translated',async()=>{
+  const s=setup('es');await s.click('▦ Código QR');const upload=s.input('Imagen del código QR');await upload.onchange();
+  assert.ok(s.all().some(e=>e.textContent.startsWith('Este navegador no permite')));
+  await s.click('Ingresar código de invitación');assert.ok(s.input('Código de invitación para estudiantes'));
+  await s.click('‹ Volver');await s.click('Crear la clase de tu parroquia');assert.ok(s.button('Tengo un código de activación'));
+  assert.ok(s.all().some(e=>e.textContent==='FASE DE PRUEBA GRATUITA'));
+  await s.click('Tengo un código de activación');assert.ok(s.input('Código de activación parroquial'));
+});
+test('Spanish classroom setup retains checkbox and translates live identifier preview',async()=>{
+  const s=setup('es');s.auth.currentUser={uid:'teacher'};s.setAccess({status:'ready'});await s.controller.resume();
+  s.input('Nombre de la parroquia').value='Holy Rosary';s.input('Ciudad').value='Steubenville';s.input('Ciudad').oninput();
+  const checkbox=s.all().find(e=>e.type==='checkbox');checkbox.checked=false;
+  assert.ok(s.all().some(e=>e.textContent.startsWith('Vista previa del identificador: holy rosary-steubenville')));
+  s.setLanguage('en');assert.equal(checkbox.checked,false);assert.ok(s.all().some(e=>e.textContent.startsWith('Class ID preview: holy rosary-steubenville')));
+});
+test('global language application refreshes onboarding in place',()=>{
+  const html=fs.readFileSync('public/Catechism app.html','utf8');
+  assert.match(html,/document\.documentElement\.lang = uiLanguage;\s*window\.WebOnboarding\?\.refreshLanguage\(\);/);
+});
 test('welcome leads with classroom search and hides credentials until requested',async()=>{
   const s=setup();assert.equal(s.all().filter(e=>e.tag==='button')[0].textContent,'Find My Classroom');assert.equal(s.all().filter(e=>e.tag==='input').length,0);
   await s.click('Find My Classroom');assert.ok(s.input('Parish name'));assert.ok(s.input('City'));assert.equal(s.calls.length,0);

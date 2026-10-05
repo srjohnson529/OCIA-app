@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#3d709a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="/images/illumined-logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Illumined: Catholic Faith Formation App</title>
@@ -64,21 +68,38 @@
             left: 0.75rem;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            color: #fff;
+            gap: 0;
+            color: #274e73;
+            background: rgba(255,255,255,0.94);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 999px;
+            padding-left: 12px;
+            box-shadow: 0 2px 8px rgba(20,40,65,0.08);
             font-size: 0.78rem;
             font-weight: 700;
             text-shadow: none;
         }
 
         .language-picker select {
-            border: 1px solid rgba(255,255,255,0.55);
+            border: 0;
             border-radius: 999px;
-            background: rgba(255,255,255,0.96);
+            background: transparent;
             color: #274e73;
             font: inherit;
-            padding: 0.32rem 0.6rem;
+            padding: 0 28px 0 8px;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m2 2 4 4 4-4' fill='none' stroke='%23274e73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 11px center;
+            width: auto;
+            min-height: 44px;
+            cursor: pointer;
         }
+        .language-picker .language-globe { display: flex; align-items: center; justify-content: center; width: 20px; height: 44px; }
+        .language-picker .language-globe svg { width: 20px; height: 20px; }
+        .language-picker select option { background: #fff; color: #274e73; }
+        .language-picker select:focus-visible { outline: 2px solid #efd08a; outline-offset: 3px; }
 
         .brand-lockup {
             display: flex;
@@ -143,13 +164,6 @@
                 margin-right: 0.55rem;
             }
 
-            .language-picker label {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                overflow: hidden;
-                clip: rect(0 0 0 0);
-            }
         }
 #user-info-display {
     position: absolute;
@@ -2292,10 +2306,12 @@ body > nav button:focus-visible {
     <!-- Header -->
     <header>
         <div class="language-picker">
-            <label for="language-select" data-i18n="Language">Language</label>
-            <select id="language-select" aria-label="Language">
-                <option value="en">English</option>
-                <option value="es">Español</option>
+            <label for="language-select" class="language-globe" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" focusable="false" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6.5h14M5 17.5h14"/></svg>
+            </label>
+            <select id="language-select" aria-label="Language" data-i18n-aria-label="Language">
+                <option value="en" aria-label="English">EN</option>
+                <option value="es" aria-label="Español">SP</option>
             </select>
         </div>
         <div class="brand-lockup" aria-label="Illumined">
@@ -2318,7 +2334,7 @@ body > nav button:focus-visible {
         <button id="resources-nav-button" data-i18n="Resources">Resources</button>
         <button id="achievements-nav-button" data-i18n="Achievements">Achievements</button>
         <button id="instructor-nav-button" class="hidden" data-i18n="Instructor Tools">Instructor Tools</button>
-        <button id="instructor-updates-nav" class="hidden" onclick="openInstructorUpdates()">Instructor Updates</button>
+        <button id="instructor-updates-nav" class="hidden" onclick="openInstructorUpdates()">From Illumined</button>
         <button id="admin-support-nav" class="hidden" onclick="AdminSupport.open()">Parish & Account Support</button>
         <button id="quit-nav-button" data-i18n="Account">Account</button>
     </nav>
@@ -2340,6 +2356,7 @@ body > nav button:focus-visible {
             <div id="dashboard-container">
                 <div class="dashboard-item">
                     <span id="upcoming-topic-stat" data-i18n="Loading...">Loading...</span>
+                    <div id="refreshments-summary"></div>
                     <p data-i18n="Next Class Topic">Next Class Topic</p>
                 </div>
                 <div class="dashboard-item">
@@ -2351,7 +2368,7 @@ body > nav button:focus-visible {
             <div class="student-firestore-board" id="announcement-board">
                 <div class="student-firestore-header">
                     <div>
-                        <div class="student-firestore-kicker" data-i18n="Instructor Updates">Instructor Updates</div>
+                        <div class="student-firestore-kicker" data-i18n="From Illumined">From Illumined</div>
                         <h3 data-i18n="Announcements">Announcements</h3>
                         <p data-i18n="Class updates posted from the instructor side of Illumined.">Class updates posted from the instructor side of Illumined.</p>
                     </div>
@@ -2954,7 +2971,7 @@ body > nav button:focus-visible {
                 <div class="chat-header" id="chat-header" data-i18n="Chat">Chat</div>
                 <div class="messages-area" id="messages-area"></div>
                 <div class="input-area" id="message-input-area">
-                    <input id="message-input" type="text" placeholder="Type your message..." data-i18n-placeholder="Type your message...">
+                    <input id="message-input" type="text" maxlength="4000" placeholder="Type your message..." data-i18n-placeholder="Type your message...">
                     <button class="button-theme" id="send-button" data-i18n="Send">Send</button>
                 </div>
                 <button class="button-theme" id="close-chat-button" data-i18n="Close">Close</button>
@@ -3079,6 +3096,21 @@ body > nav button:focus-visible {
                 <p data-i18n="If you are an OCIA director, pastor, or member of a parish formation team and would like to learn more about Illumined, please contact us directly. We can help you get started, provide training and ongoing support, and enroll your parish at no cost. Illumined is currently free to use as we continue developing and expanding the platform’s tools and features.">Instructors can create and edit lessons, organize progressive assignments, manage discussions and announcements, publish Daily Formation, and follow student progress while keeping each class separate.</p>
             </div>
             <a class="landing-button landing-button-primary" href="mailto:stephen.johnson@illumined.net?subject=Learning%20more%20about%20Illumined" style="background:#3b6fa0;color:#fff" data-i18n="Ask about Illumined">Ask about Illumined</a>
+            <details class="onboard-approval" id="landing-approval">
+                <summary class="landing-button">Nihil Obstat &amp; Imprimatur</summary>
+                <p data-i18n="Applies only to the English-language lesson and quiz materials and English-language spiritual formation materials submitted for review. It does not extend to translations, later additions, or user-created content.">Applies only to the English-language lesson and quiz materials and English-language spiritual formation materials submitted for review. It does not extend to translations, later additions, or user-created content.</p>
+                <p class="approval-official" lang="en">Nihil Obstat:
+The Reverend James M. Dunfee, MA, STL
+Censor Librorum
+September 28, 2026
+
+Imprimatur:
+The Most Reverend Edward M. Lohse, JCD
+Apostolic Administrator of Steubenville
+September 28, 2026
+
+The nihil obstat and imprimatur do not signify agreement with the content, opinions, or statements expressed but simply affirm that the content does not contradict faith and morals.</p>
+            </details>
         </div>
 
         <footer class="landing-footer">
@@ -3161,7 +3193,7 @@ body > nav button:focus-visible {
 			<button class="button-theme" onclick="window.open('https://www.catholic.com/', '_blank')">Catholic Answers</button>
             <button class="button-theme" onclick="window.open('https://www.ibreviary.com/m2/breviario.php/', '_blank')">ibreviary</button>
             <button class="button-theme" onclick="window.open('https://www.singthehours.org/', '_blank')">Sing the Hours</button>
-            <button class="button-theme" onclick="showCustomAlert('Push notifications are managed in the Illumined mobile app from More > Notifications. The website will still show dashboard announcements when you sign in.')" data-i18n="Notifications">Notifications</button>
+            <button class="button-theme" onclick="window.WebPush?.showSettings()" data-i18n="Notifications">Notifications</button>
             <button class="button-theme" onclick="window.open('https://www.newadvent.org/cathen/', '_blank')">New Advent Catholic Encyclopedia</button>
 		</section>
     </div>
@@ -3171,6 +3203,7 @@ body > nav button:focus-visible {
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging-compat.js"></script>
 
     <script src="rite-preparation-catalog.js"></script>
     <script src="parish-time-controls.js"></script>
@@ -3356,6 +3389,7 @@ body > nav button:focus-visible {
                 "One place to guide the OCIA journey": "Un solo lugar para acompañar el camino de OICA",
                 "Instructors can create and edit lessons, organize progressive assignments, manage discussions and announcements, publish Daily Formation, and follow student progress while keeping each class separate.": "Los instructores pueden crear y editar lecciones, organizar tareas progresivas, administrar conversaciones y anuncios, publicar la Formación diaria y seguir el progreso de los estudiantes manteniendo cada clase separada.",
                 "Ask about Illumined": "Pregunta por Illumined",
+                "Applies only to the English-language lesson and quiz materials and English-language spiritual formation materials submitted for review. It does not extend to translations, later additions, or user-created content.": "Se aplica únicamente a los materiales de lecciones y cuestionarios en inglés y a los materiales de formación espiritual en inglés presentados para revisión. No se extiende a traducciones, incorporaciones posteriores ni contenido creado por los usuarios.",
                 "Catholic faith formation for parish communities.": "Formación en la fe católica para comunidades parroquiales.",
                 "Privacy Policy": "Política de privacidad",
                 "Account Deletion": "Eliminación de la cuenta",
@@ -3381,7 +3415,7 @@ body > nav button:focus-visible {
                 "Lessons Left": "Lecciones pendientes",
                 "Next Class Topic": "Próximo tema de clase",
                 "Badges Earned": "Insignias obtenidas",
-                "Instructor Updates": "Actualizaciones del instructor",
+                "From Illumined": "De Illumined",
                 "Class updates posted from the instructor side of Illumined.": "Actualizaciones de la clase publicadas por el instructor.",
                 "Class Work": "Trabajo de clase",
                 "Assignments": "Tareas",
@@ -3810,6 +3844,9 @@ body > nav button:focus-visible {
         }
         function applyUiLanguage() {
             document.documentElement.lang = uiLanguage;
+            window.WebOnboarding?.refreshLanguage();
+            window.InstructorInbox?.refreshLanguage();
+            window.Refreshments?.refreshLanguage();
             document.title = uiText('Illumined: Catholic Faith Formation App');
             document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = uiText(element.dataset.i18n); });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.placeholder = uiText(element.dataset.i18nPlaceholder); });
@@ -3849,7 +3886,7 @@ body > nav button:focus-visible {
             renderLiturgyOfTheHours();
             renderExaminationOfConscience();
             renderSpiritualPractices();
-            if (currentCommonPrayer && !document.getElementById('prayer-display-section')?.classList.contains('hidden')) {
+            if (currentCommonPrayer && (window.PrayerReader?.isOpen || !document.getElementById('prayer-display-section')?.classList.contains('hidden'))) {
                 displayPrayer(currentCommonPrayer);
             }
             if (rosaryState.mysteryType && !document.getElementById('rosary-explanation-section')?.classList.contains('hidden')) {
@@ -3952,6 +3989,7 @@ body > nav button:focus-visible {
         }
 
         function resetStudentUIForSignOut() {
+            window.Refreshments?.stop();
             const userInfoDisplay = document.getElementById('user-info-display');
             if (userInfoDisplay) userInfoDisplay.classList.add('hidden');
 
@@ -4736,6 +4774,7 @@ body > nav button:focus-visible {
 
         // Show Section Function
       function showSection(sectionId) {
+            window.PrayerReader?.close();
             if (!publicSections.has(sectionId) && (!currentUser || !userProfile)) {
                 showCustomAlert('Please sign in and finish your student profile first.');
                 sectionId = 'profile-setup';
@@ -4751,6 +4790,7 @@ body > nav button:focus-visible {
                         window.scrollTo(0, 0); // Add this line to scroll to the top
             window.InstructorTour?.onSection(sectionId);
             window.WebParity?.onSection(sectionId);
+            window.InstructorInbox?.onSection(sectionId);
         }
 
         function triggerFireworks() {
@@ -5860,7 +5900,9 @@ body > nav button:focus-visible {
                 btn.classList.add('button-theme', 'lesson-button');
                 const prayerId = getPrayerId(prayer);
                 const isMemorized = userProfile && Array.isArray(userProfile.memorizedPrayerIds) && userProfile.memorizedPrayerIds.includes(prayerId);
-                btn.textContent = `${isMemorized ? '✓ ' : ''}${commonPrayerDisplayName(prayer)}`;
+                const isSaved = userProfile?.selectedPrayerIds?.includes(prayerId);
+                btn.textContent = `${isMemorized ? '✓ ' : ''}${isSaved ? '★ ' : ''}${commonPrayerDisplayName(prayer)}`;
+                btn.setAttribute('aria-label', commonPrayerDisplayName(prayer) + (isMemorized ? (uiLanguage === 'es' ? ', memorizada' : ', memorized') : '') + (isSaved ? (uiLanguage === 'es' ? ', guardada' : ', saved') : ''));
                 btn.onclick = () => displayPrayer(prayer);
                 container.appendChild(btn);
             });
@@ -5869,6 +5911,7 @@ body > nav button:focus-visible {
         // Display a Single Prayer
         function displayPrayer(prayer) {
             currentCommonPrayer = prayer;
+            if (window.PrayerReader) { window.PrayerReader.open(prayer); return; }
             document.getElementById('prayer-display-title').textContent = commonPrayerDisplayName(prayer);
             renderPrayerMemorizedControl(prayer);
             const prayerText = document.getElementById('prayer-display-text');
@@ -6055,7 +6098,7 @@ function updateUIForAuthenticatedUser() {
     window.WebParity?.sync();
     document.getElementById('instructor-nav-button')?.classList.toggle('hidden', userProfile.isInstructor !== true);
     document.getElementById('instructor-updates-nav')?.classList.toggle('hidden', !(userProfile.isInstructor || userProfile.isAdmin));
-    document.getElementById('instructor-updates-nav').textContent = uiLanguage === 'es' ? 'Novedades para instructores' : 'Instructor Updates';
+    document.getElementById('instructor-updates-nav').textContent = uiLanguage === 'es' ? 'De Illumined' : 'From Illumined';
     document.getElementById('admin-support-nav').classList.toggle('hidden', userProfile.isAdmin !== true);
     document.getElementById('admin-support-nav').textContent = uiLanguage === 'es' ? 'Parroquias y soporte de cuentas' : 'Parish & Account Support';
     setAuthenticatedShell(true);
@@ -6182,6 +6225,7 @@ async function signOut() {
         stopStudentDashboardListeners();
         resetStudentUIForSignOut();
         
+        await window.WebPush?.disconnect();
         await auth.signOut();
         showSection('profile-setup');
         setAuthStatus('Signed out successfully.');
@@ -6330,6 +6374,10 @@ async function loadUserProfile() {
 
 // Chat Listener - Updated to match SwiftUI app paths
 function setupChatListener() {
+    window.Refreshments?.sync();
+    window.InstructorInbox?.sync(currentUser, userProfile);
+    window.WebPush?.sync();
+    window.ClassroomChat?.sync(currentUser, userProfile);
     if (chatMessagesListener) {
         chatMessagesListener();
         chatMessagesListener = null;
@@ -6359,7 +6407,7 @@ function setupChatListener() {
             snapshot.forEach(doc => {
                 const messageData = doc.data();
                 if (messageData.timestamp) {
-                    messages.push(messageData);
+                    messages.push({...messageData, id: doc.id});
                 }
             });
             
@@ -6371,6 +6419,7 @@ function setupChatListener() {
                 return 0;
             });
             
+            window.ClassroomChat?.displayed(messages);
             messages.forEach(message => {
                 displayMessage(message);
             });
@@ -6425,6 +6474,7 @@ function displayMessage(messageData) {
     time.className = 'message-time';
     time.textContent = timestamp;
 
+    if(window.memberPhoto) header.appendChild(window.memberPhoto(messageData.senderId));
     header.appendChild(sender);
     header.appendChild(time);
 
@@ -6436,6 +6486,7 @@ function displayMessage(messageData) {
     appendLinkifiedTextWithLineBreaks(content, messageText);
 
     bubble.appendChild(content);
+    window.ClassroomChat?.attach(messageData, bubble);
     messageDiv.appendChild(header);
     messageDiv.appendChild(bubble);
     
@@ -6462,11 +6513,13 @@ async function sendMessage() {
             senderName: userProfile.username, // matches SwiftUI senderName field
             senderEmail: currentUser.email || '',
             message: messageText, // matches SwiftUI message field
+            ...(window.ClassroomChat?.reply() ? {replyTo: window.ClassroomChat.reply()} : {}),
             classId: userProfile.classId,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         messageInput.value = '';
+        window.ClassroomChat?.sent();
         
     } catch (error) {
         console.error("Error sending message:", error);
@@ -7456,7 +7509,7 @@ async function submitPrayerRequest() {
             const t = (en, es) => uiLanguage === 'es' ? es : en;
             const panel = document.getElementById('instructor-updates-panel');
             showSection('instructor-updates-section');
-            panel.innerHTML = `<article class="instructor-card"><h2>${t('Instructor Updates','Novedades para instructores')}</h2><p>${t('App news and information from Illumined. Push alerts follow your notification settings.','Noticias e información de Illumined. Las alertas respetan tus ajustes de notificaciones.')}</p>${userProfile.isAdmin ? `<form id="instructor-update-form"><h3>${t('Admin: Send an update','Administrador: Enviar una novedad')}</h3><label>${t('Title','Título')}<input name="title" maxlength="120" required></label><label>${t('Message','Mensaje')}<textarea name="message" maxlength="2000" rows="6" required></textarea></label><label><input type="checkbox" name="showOnStartup" checked>${t('Show at instructor startup','Mostrar al iniciar para instructores')}</label><label><input type="checkbox" name="sendPush" checked>${t('Send push notification','Enviar notificación push')}</label><button type="submit">${t('Send to all instructors','Enviar a todos los instructores')}</button></form>` : ''}<p id="instructor-update-status" role="status"></p></article><div id="instructor-update-list"></div>`;
+            panel.innerHTML = `<article class="instructor-card"><h2>${t('From Illumined','De Illumined')}</h2><p>${t('App news and information from Illumined. Push alerts follow your notification settings.','Noticias e información de Illumined. Las alertas respetan tus ajustes de notificaciones.')}</p>${userProfile.isAdmin ? `<form id="instructor-update-form"><h3>${t('Admin: Send an update','Administrador: Enviar una novedad')}</h3><label>${t('Title','Título')}<input name="title" maxlength="120" required></label><label>${t('Message','Mensaje')}<textarea name="message" maxlength="2000" rows="6" required></textarea></label><label><input type="checkbox" name="showOnStartup" checked>${t('Show at instructor startup','Mostrar al iniciar para instructores')}</label><label><input type="checkbox" name="sendPush" checked>${t('Send push notification','Enviar notificación push')}</label><button type="submit">${t('Send to all instructors','Enviar a todos los instructores')}</button></form>` : ''}<p id="instructor-update-status" role="status"></p></article><div id="instructor-update-list"></div>`;
             const list = panel.querySelector('#instructor-update-list');
             if (userProfile.isAdmin) { const manage = document.createElement('button'); manage.textContent = t('Update Management · Drafts & Scheduling','Gestión de novedades · Borradores y programación'); manage.onclick = () => UpdateManagement.open(); panel.prepend(manage); }
             const status = panel.querySelector('#instructor-update-status');
@@ -7917,6 +7970,7 @@ async function submitPrayerRequest() {
         async function renderInstructorClasses(panel) {
             const ids=instructorClasses(); const snaps=await Promise.all(ids.map(id=>db.collection('classrooms').doc(id).get()));
             panel.innerHTML=`<div class="instructor-grid"><form id="class-editor" class="instructor-form"><h3>${uiText('Create classroom')}</h3><input id="class-id-new" placeholder="${uiText('Class ID (for example STMARK2026)')}" required><input id="class-name-new" placeholder="${uiText('Classroom or parish name')}" required><button class="button-theme">${uiText('Create classroom')}</button></form><div class="instructor-list"><h3>${uiText('Your classrooms')}</h3>${snaps.map((s,i)=>{const x=s.data()||{};return instructorCard(x.name||ids[i],uiText(`Class ID: ${ids[i]}`),uiText(x.isArchived?'Archived':'Active'),`<button data-select-class="${esc(ids[i])}">${uiText('Manage')}</button><button data-toggle-archive="${esc(ids[i])}">${uiText(x.isArchived?'Restore':'Archive')}</button>`)}).join('')||`<p class="muted">${uiText('No classrooms yet.')}</p>`}</div></div>`;
+            snaps.forEach((snap,index)=>{if(snap.data()?.isArchived)return;const host=document.createElement('section');host.className='instructor-form';const title=document.createElement('h3');title.textContent=ids[index];host.append(title);panel.append(host);window.mountRefreshmentSetting?.(host,ids[index],{db,document,spanish:uiLanguage==='es',call:async data=>(await firebase.functions().httpsCallable('classroomRefreshments')(data)).data});});
             panel.querySelector('#class-editor').onsubmit=async e=>{e.preventDefault();const id=formValue('class-id-new').toUpperCase().replace(/\s+/g,''),ref=db.collection('classrooms').doc(id),existing=await ref.get();if(existing.exists){showCustomAlert(uiText('That class ID is already in use. Choose another.'));return;}await ref.set({name:formValue('class-name-new'),instructorId:currentUser.uid,createdBy:currentUser.uid,isArchived:false,createdAt:instructorTimestamp()});const ids=[...new Set([...instructorClasses(),id])];await db.collection('userProfiles').doc(currentUser.uid).update({classIds:ids,classId:id});instructorClassId=id;await renderInstructorWorkspace();};
             panel.querySelectorAll('[data-select-class]').forEach(b=>b.onclick=async()=>{instructorClassId=b.dataset.selectClass;userProfile.classId=instructorClassId;document.getElementById('instructor-class-select').value=instructorClassId;await renderInstructorWorkspace();});panel.querySelectorAll('[data-toggle-archive]').forEach(b=>b.onclick=async()=>{const ref=db.collection('classrooms').doc(b.dataset.toggleArchive),s=await ref.get();await ref.update({isArchived:s.data()?.isArchived!==true,updatedAt:instructorTimestamp()});await renderInstructorWorkspace();});
         }
@@ -8157,7 +8211,24 @@ document.getElementById('forgot-password-button').addEventListener('click', send
 <link rel="stylesheet" href="web-onboarding.css">
 <link rel="stylesheet" href="mobile-parity.css">
 <script src="web-parity.js"></script>
+<link rel="stylesheet" href="instructor-inbox.css">
+<script src="instructor-inbox.js"></script>
+<script src="classroom-chat.js"></script>
+<script>window.ClassroomChat = createClassroomChat({db, current: () => ({user: currentUser, profile: userProfile}), document, fieldPath: (...parts) => new firebase.firestore.FieldPath(...parts), deleteField: () => firebase.firestore.FieldValue.delete(), timestamp: () => firebase.firestore.FieldValue.serverTimestamp(), alert: showCustomAlert, prompt: (label, value) => window.prompt(label, value), confirm: label => window.confirm(label)});</script>
+<script>window.InstructorInbox = createInstructorInbox({db, auth, timestamp: () => firebase.firestore.FieldValue.serverTimestamp(), document, storage: localStorage});</script>
+<link rel="stylesheet" href="prayer-reader.css">
+<script src="prayer-reader.js"></script>
 <script src="web-onboarding.js"></script>
 <script>window.WebOnboarding = createWebOnboarding({auth, db, call: async (name, data = {}) => (await firebase.functions().httpsCallable(name)(data)).data, friendlyAuthError});</script>
+<link rel="stylesheet" href="web-push.css">
+<script src="web-push-config.js"></script>
+<script src="web-push-policy.js"></script>
+<script src="web-push.js"></script>
+<script>window.WebPush = createWebPush({firebase, db, auth, current: () => ({user: currentUser, profile: userProfile}), document, browser: window, config: window.IlluminedPushConfig, policy: window.IlluminedPushPolicy, alert: showCustomAlert, openChat: privateMessage => { document.getElementById('chat-menu-button').click(); window.InstructorInbox?.open(privateMessage); }, openHome: () => showSection('main-menu-section')});</script>
+<link rel="stylesheet" href="refreshments.css">
+<script src="refreshments.js"></script>
+<script>window.Refreshments = createRefreshments({db,call:async data=>(await firebase.functions().httpsCallable('classroomRefreshments')(data)).data,current:()=>({user:currentUser,profile:userProfile}),document,language:()=>uiLanguage});window.Refreshments.sync();</script>
+<link rel="stylesheet" href="member-photos.css">
+<script src="member-photos.js"></script>
 </body>
 </html>

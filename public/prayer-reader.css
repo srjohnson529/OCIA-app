@@ -1,0 +1,25 @@
+/* Daily Formation's rounded reading panel, in Illumined's fixed prayer palette. */
+#common-prayers-menu-section { background:#3e719b; color:#fff; padding:28px; border-radius:24px; }
+#common-prayers-menu-section h2 { color:#fff; }
+#common-prayers-container .lesson-button { background:#35658e; color:#fff; border:1px solid #efd08a80; border-left:3px solid #efd08a; box-shadow:none; text-align:left; }
+#common-prayers-container .lesson-button:hover { background:#2f5d85; color:#fff; }
+#common-prayers-menu-back-button { background:transparent; color:#efd08a; border:1px solid #efd08a80; box-shadow:none; }
+dialog.common-prayer-reader { width:min(620px,calc(100% - 32px)); max-width:620px; max-height:90vh; max-height:90dvh; margin:5vh auto auto; padding:0; border:2px solid #efd08a; border-radius:24px; background:#3e719b; color:#fff; box-shadow:0 24px 70px #0006; overflow:hidden; font-family:Georgia,'Times New Roman',serif; }
+dialog.common-prayer-reader[open] { display:flex; flex-direction:column; animation:prayer-reader-down .3s ease-out; }
+dialog.common-prayer-reader::backdrop { background:rgba(20,25,30,.62); }
+.common-prayer-reader header { flex:none; display:block; text-align:left; position:static; background:transparent; box-shadow:none; margin:0; padding:26px 28px 18px; border-bottom:1px solid #efd08a60; }
+.common-prayer-reader .prayer-reader-kicker { color:#efd08a; font:600 12px system-ui,sans-serif; letter-spacing:.12em; text-transform:uppercase; }
+.common-prayer-reader h2 { color:#fff; margin:12px 0 0; font-size:clamp(24px,5vw,32px); line-height:1.2; }
+.common-prayer-reader .prayer-reader-scroll { overflow-y:auto; overscroll-behavior:contain; min-height:0; padding:24px 28px; scrollbar-color:#efd08a #35658e; }
+.common-prayer-reader .prayer-reader-scroll p { white-space:pre-wrap; overflow-wrap:anywhere; margin:0; font-size:1.18rem; line-height:1.75; color:#fff; }
+.common-prayer-reader footer { flex:none; padding:12px 20px max(18px,env(safe-area-inset-bottom)); border-top:1px solid #efd08a60; background:#35658e; }
+.common-prayer-reader .prayer-reader-status { margin:0 0 10px; color:#fff; font:14px/1.4 system-ui,sans-serif; }
+.common-prayer-reader .prayer-reader-status:empty { display:none; }
+.common-prayer-reader .prayer-reader-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.common-prayer-reader button { min-height:46px; margin:0; padding:10px 6px; border:1px solid #efd08a; border-radius:12px; background:transparent; color:#efd08a; font:16px Georgia,serif; box-shadow:none; cursor:pointer; }
+.common-prayer-reader button:hover,.common-prayer-reader button[aria-pressed=true] { background:#efd08a; color:#23496a; }
+.common-prayer-reader button:disabled { opacity:.6; cursor:wait; }
+.common-prayer-reader :focus-visible { outline:3px solid #fff; outline-offset:-3px; }
+@keyframes prayer-reader-down { from { transform:translateY(-70px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@media(prefers-reduced-motion:reduce) { dialog.common-prayer-reader[open] { animation:none; } }
+@media(max-width:380px) { #common-prayers-menu-section { padding:18px; } .common-prayer-reader header { padding:20px; } .common-prayer-reader .prayer-reader-scroll { padding:20px; } .common-prayer-reader footer { padding-left:12px; padding-right:12px; } .common-prayer-reader button { font-size:14px; } }

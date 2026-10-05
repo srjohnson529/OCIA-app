@@ -38,6 +38,7 @@ window.StudentDetails = {
             const rows=students.filter(s=>(filter.value==='all'||status(s)===filter.value)&&(!query||[s.displayName,s.email].join(' ').toLocaleLowerCase().includes(query)));
             for(const student of rows) {
                 const card=el('article','',list,'instructor-card');
+                if(globalThis.memberPhoto) card.append(globalThis.memberPhoto(student.id));
                 el('h4',student.displayName||student.email||t('Student','Estudiante'),card);
                 el('p',labels[status(student)]+' · '+(student.email||''),card);
                 el('p',(student.completedLessons||[]).length+' / '+lessons.length+' '+t('lessons completed','lecciones completadas'),card);
@@ -50,6 +51,7 @@ window.StudentDetails = {
             list.replaceChildren();
             const back=el('button',t('‹ Back to roster','‹ Volver a la lista'),list);back.onclick=draw;
             const card=el('article','',list,'instructor-card');
+            if(globalThis.memberPhoto) card.append(globalThis.memberPhoto(student.id));
             el('h4',student.displayName||student.email,card);
             el('p',labels[status(student)],card);
             if(student.email)el('a',t('Email Student','Enviar correo al estudiante'),card).href='mailto:'+encodeURIComponent(student.email);
