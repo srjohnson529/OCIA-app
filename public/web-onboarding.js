@@ -2,7 +2,7 @@
 function createWebOnboarding({auth, db, call, friendlyAuthError}) {
   const spanish = {
     "Applies only to the English-language lesson and quiz materials and English-language spiritual formation materials submitted for review. It does not extend to translations, later additions, or user-created content.": "Se aplica únicamente a los materiales de lecciones y cuestionarios en inglés y a los materiales de formación espiritual en inglés presentados para revisión. No se extiende a traducciones, incorporaciones posteriores ni contenido creado por los usuarios.",
-    'BEING • TRUTH • GOODNESS': 'SER • VERDAD • BONDAD',
+    'A Catholic Formation App': 'Una aplicación de formación católica',
     'Find My Classroom': 'Buscar mi clase',
     'Find Classroom': 'Buscar clase',
     '▦ QR Code': '▦ Código QR',
@@ -129,7 +129,7 @@ function createWebOnboarding({auth, db, call, friendlyAuthError}) {
     root.replaceChildren();
     const shell = node('div', '', 'onboard-shell'), brand = node('div', '', 'onboard-brand');
     const logo = node('img'); logo.src = 'images/illumined-logo-600.png'; logo.width = 600; logo.height = 600; logo.alt = 'Illumined';
-    brand.append(logo, node('h1', 'Illumined'), node('p', 'BEING • TRUTH • GOODNESS'));
+    brand.append(logo, node('h1', 'Illumined'), node('p', 'A Catholic Formation App'));
     const panel = node('form', '', `onboard-panel${card ? ' card' : ''}`); panel.onsubmit = e => e.preventDefault();
     if (title) panel.append(node('h2', title)); if (intro) panel.append(node('p', intro));
     const status = node('div'); status.setAttribute('role', 'status');
