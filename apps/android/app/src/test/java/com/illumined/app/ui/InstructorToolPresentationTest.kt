@@ -7,7 +7,7 @@ class InstructorToolPresentationTest {
     @Test
     fun `menu ordering and copy match iOS`() {
         assertEquals(
-            listOf("Announcements", "Assignments", "Discussion Boards", "Student Progress", "Class Schedule", "Classes", "Instructor Invites"),
+            listOf("Announcements", "Assignments", "Discussion Boards", "Student Details", "Class Schedule", "Daily Formation", "Rite and Sacrament Preparation", "Classes", "Classroom Codes", "Instructor Updates"),
             InstructorToolPresentation.items.map { it.title },
         )
         assertEquals("Open", InstructorToolPresentation.Status)
@@ -15,7 +15,7 @@ class InstructorToolPresentationTest {
 
     @Test
     fun `every iOS tool intent has a nonblank scalable glyph`() {
-        assertEquals(7, InstructorToolPresentation.items.map { it.key }.distinct().size)
+        assertEquals(10, InstructorToolPresentation.items.map { it.key }.distinct().size)
         InstructorToolPresentation.items.forEach { item ->
             require(item.symbolName.isNotBlank())
             require(item.subtitle.isNotBlank())

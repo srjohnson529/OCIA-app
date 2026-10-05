@@ -9,9 +9,11 @@ struct ChatMessage: Identifiable, Codable, Equatable {
     var message: String
     var classId: String
     var timestamp: Timestamp?
+    var replyTo: String? = nil
+    var reactions: [String: String]? = nil
+    var editedAt: Timestamp? = nil
 
     var date: Date {
         timestamp?.dateValue() ?? Date.distantPast
     }
 }
-

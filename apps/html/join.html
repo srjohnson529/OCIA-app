@@ -44,10 +44,10 @@
   (() => {
     const params = new URLSearchParams(location.search);
     const role = (params.get('role') || '').toLowerCase();
-    const classId = (params.get('classId') || '').trim().toUpperCase();
+    const classId = (params.get('classId') || '').trim();
     const code = (params.get('code') || '').trim().toUpperCase();
-    const valid = ['student','instructor','parish'].includes(role) &&
-      (role === 'parish' ? !!code : !!classId) && (role !== 'instructor' || !!code);
+    const valid = ['student','instructor','parish'].includes(role) && !!code &&
+      (role !== 'instructor' || !!classId);
     const labels = {
       student: 'You have been invited to join an Illumined class as a student.',
       instructor: 'You have been invited to join an Illumined class as a co-instructor.',
@@ -64,14 +64,18 @@
     }
     document.getElementById('intro').textContent = labels[role];
     add('Class ID', classId);
-    add(role === 'parish' ? 'Parish setup code' : 'One-use invite code', code);
+    add(role === 'parish' ? 'Parish setup code' : role === 'student' ? 'Student invitation code' : 'One-use invite code', code);
     const app = new URL('illumined://join');
     app.searchParams.set('role', role);
     if (classId) app.searchParams.set('classId', classId);
     if (code) app.searchParams.set('code', code);
     document.getElementById('openApp').href = app.toString();
     if (role === 'student') {
-      localStorage.setItem('illumined.pendingInvite', JSON.stringify({ role, classId, code, savedAt: Date.now() }));
+      const web = new URL('/', location.origin);
+      web.searchParams.set('role', role);
+      if (classId) web.searchParams.set('classId', classId);
+      web.searchParams.set('code', code);
+      document.getElementById('continueWeb').href = web.toString();
     } else {
       document.getElementById('continueWeb').hidden = true;
     }

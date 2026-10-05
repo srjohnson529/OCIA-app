@@ -2,6 +2,7 @@
 <resources>
     <style name="Theme.Illumined" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">serif</item>
+        <item name="android:windowBackground">@drawable/illumined_launch_background</item>
         <item name="android:windowSplashScreenBackground">@color/illumined_blue</item>
         <!-- Keep Android's required handoff splash icon invisible.  The full
              Illumined brand is rendered immediately afterward by Compose. -->

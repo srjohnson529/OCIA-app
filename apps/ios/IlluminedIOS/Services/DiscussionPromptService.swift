@@ -28,7 +28,7 @@ final class DiscussionPromptService: ObservableObject {
         guard prompts.isEmpty else { return }
 
         guard let url = Bundle.main.url(forResource: "discussion_prompts", withExtension: "json") else {
-            errorMessage = "discussion_prompts.json was not found in the app bundle."
+            errorMessage = IlluminedL10n.string("Discussion prompts could not be found in the app.")
             return
         }
 
@@ -37,7 +37,7 @@ final class DiscussionPromptService: ObservableObject {
             localPrompts = try JSONDecoder().decode(PromptCatalog.self, from: data).prompts
             publishPrompts()
         } catch {
-            errorMessage = "Could not load discussion prompts: \(error.localizedDescription)"
+            errorMessage = IlluminedL10n.format("Could not load discussion prompts: %@", error.localizedDescription)
         }
     }
 
@@ -314,23 +314,23 @@ final class DiscussionPromptService: ObservableObject {
 
     func post(message: String, prompt: DiscussionPrompt, profile: UserProfile) async -> Bool {
         guard let user = Auth.auth().currentUser else {
-            errorMessage = "Please sign in before posting."
+            errorMessage = IlluminedL10n.string("Please sign in before posting.")
             return false
         }
 
         guard !profile.primaryClassId.isEmpty else {
-            errorMessage = "Please join a class before posting."
+            errorMessage = IlluminedL10n.string("Please join a class before posting.")
             return false
         }
 
         let cleanedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanedMessage.isEmpty else {
-            errorMessage = "Please write a response before posting."
+            errorMessage = IlluminedL10n.string("Please write a response before posting.")
             return false
         }
 
         guard !posts.contains(where: { $0.promptId == prompt.id && $0.authorId == user.uid }) else {
-            errorMessage = "You already posted a response for this discussion. Edit or delete your original response to post a new one."
+            errorMessage = IlluminedL10n.string("You already posted a response for this discussion. Edit or delete your original response to post a new one.")
             return false
         }
 
@@ -366,23 +366,23 @@ final class DiscussionPromptService: ObservableObject {
 
     func updatePost(_ post: DiscussionPost, message: String, profile: UserProfile) async -> Bool {
         guard let postId = post.id else {
-            errorMessage = "This discussion post is missing its ID."
+            errorMessage = IlluminedL10n.string("This discussion post is missing its ID.")
             return false
         }
 
         guard let user = Auth.auth().currentUser else {
-            errorMessage = "Please sign in before editing."
+            errorMessage = IlluminedL10n.string("Please sign in before editing.")
             return false
         }
 
         guard post.authorId == user.uid else {
-            errorMessage = "You can only edit your own response."
+            errorMessage = IlluminedL10n.string("You can only edit your own response.")
             return false
         }
 
         let cleanedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanedMessage.isEmpty else {
-            errorMessage = "Please write a response before saving."
+            errorMessage = IlluminedL10n.string("Please write a response before saving.")
             return false
         }
 
@@ -401,17 +401,17 @@ final class DiscussionPromptService: ObservableObject {
 
     func deletePost(_ post: DiscussionPost, prompt: DiscussionPrompt) async -> Bool {
         guard let postId = post.id else {
-            errorMessage = "This discussion post is missing its ID."
+            errorMessage = IlluminedL10n.string("This discussion post is missing its ID.")
             return false
         }
 
         guard let user = Auth.auth().currentUser else {
-            errorMessage = "Please sign in before deleting."
+            errorMessage = IlluminedL10n.string("Please sign in before deleting.")
             return false
         }
 
         guard post.authorId == user.uid else {
-            errorMessage = "You can only delete your own response."
+            errorMessage = IlluminedL10n.string("You can only delete your own response.")
             return false
         }
 
@@ -430,23 +430,23 @@ final class DiscussionPromptService: ObservableObject {
 
     func reply(message: String, post: DiscussionPost, prompt: DiscussionPrompt, profile: UserProfile) async -> Bool {
         guard let postId = post.id else {
-            errorMessage = "This discussion post is missing its ID."
+            errorMessage = IlluminedL10n.string("This discussion post is missing its ID.")
             return false
         }
 
         guard let user = Auth.auth().currentUser else {
-            errorMessage = "Please sign in before replying."
+            errorMessage = IlluminedL10n.string("Please sign in before replying.")
             return false
         }
 
         guard !profile.primaryClassId.isEmpty else {
-            errorMessage = "Please join a class before replying."
+            errorMessage = IlluminedL10n.string("Please join a class before replying.")
             return false
         }
 
         let cleanedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanedMessage.isEmpty else {
-            errorMessage = "Please write a reply before posting."
+            errorMessage = IlluminedL10n.string("Please write a reply before posting.")
             return false
         }
 

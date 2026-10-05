@@ -9,11 +9,11 @@ struct FormationGamesView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 10) {
-                            Label("Formation Games", systemImage: "puzzlepiece.extension")
+                            Label(IlluminedL10n.string("Formation Games"), systemImage: "puzzlepiece.extension")
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Practice Catholic moral theology terms with quick, repeatable games.")
+                            Text(IlluminedL10n.string("Practice Catholic moral theology terms with quick, repeatable games."))
                                 .font(IlluminedTheme.font(size: 16))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
@@ -25,8 +25,8 @@ struct FormationGamesView: View {
                             TermDefinitionMatchGameView()
                         } label: {
                             FormationGameMenuCard(
-                                title: "Match Terms",
-                                subtitle: "Choose the correct definition for each virtue or vice.",
+                                title: IlluminedL10n.string("Match Terms"),
+                                subtitle: IlluminedL10n.string("Choose the correct definition for each virtue or vice."),
                                 systemImage: "rectangle.and.text.magnifyingglass"
                             )
                         }
@@ -36,8 +36,8 @@ struct FormationGamesView: View {
                             DefinitionChoiceGameView()
                         } label: {
                             FormationGameMenuCard(
-                                title: "Name That Term",
-                                subtitle: "Read the definition and select the matching term.",
+                                title: IlluminedL10n.string("Name That Term"),
+                                subtitle: IlluminedL10n.string("Read the definition and select the matching term."),
                                 systemImage: "checklist"
                             )
                         }
@@ -103,23 +103,23 @@ private struct TermDefinitionMatchGameView: View {
 
     var body: some View {
         FormationGameShell(
-            title: "Match Terms",
-            subtitle: "Choose the definition that matches the term.",
+            title: IlluminedL10n.string("Match Terms"),
+            subtitle: IlluminedL10n.string("Choose the definition that matches the term."),
             score: score,
             attempts: attempts,
             onReset: resetGame
         ) {
             IlluminedCard {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(currentTerm.category)
+                    Text(currentTerm.localizedCategory)
                         .font(IlluminedTheme.font(size: 14, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.gold)
 
-                    Text(currentTerm.term)
+                    Text(currentTerm.localizedTerm)
                         .font(IlluminedTheme.font(size: 30, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.blue)
 
-                    Text("Which definition belongs to this term?")
+                    Text(IlluminedL10n.string("Which definition belongs to this term?"))
                         .font(IlluminedTheme.font(size: 16))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 }
@@ -128,7 +128,7 @@ private struct TermDefinitionMatchGameView: View {
             VStack(spacing: 10) {
                 ForEach(options) { option in
                     FormationAnswerButton(
-                        text: option.definition,
+                        text: option.localizedDefinition,
                         isSelected: selectedID == option.id,
                         isCorrect: isAnswered && option.id == currentTerm.id,
                         isWrong: isAnswered && selectedID == option.id && option.id != currentTerm.id
@@ -143,7 +143,7 @@ private struct TermDefinitionMatchGameView: View {
                 Button {
                     nextRound()
                 } label: {
-                    Label("Next Term", systemImage: "arrow.right.circle.fill")
+                    Label(IlluminedL10n.string("Next Term"), systemImage: "arrow.right.circle.fill")
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                 }
@@ -207,19 +207,19 @@ private struct DefinitionChoiceGameView: View {
 
     var body: some View {
         FormationGameShell(
-            title: "Name That Term",
-            subtitle: "Choose the term that matches the definition.",
+            title: IlluminedL10n.string("Name That Term"),
+            subtitle: IlluminedL10n.string("Choose the term that matches the definition."),
             score: score,
             attempts: attempts,
             onReset: resetGame
         ) {
             IlluminedCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Definition")
+                    Text(IlluminedL10n.string("Definition"))
                         .font(IlluminedTheme.font(size: 14, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.gold)
 
-                    Text(currentTerm.definition)
+                    Text(currentTerm.localizedDefinition)
                         .font(IlluminedTheme.font(size: 20, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
                         .lineSpacing(4)
@@ -229,7 +229,7 @@ private struct DefinitionChoiceGameView: View {
             VStack(spacing: 10) {
                 ForEach(options) { option in
                     FormationAnswerButton(
-                        text: option.term,
+                        text: option.localizedTerm,
                         isSelected: selectedID == option.id,
                         isCorrect: isAnswered && option.id == currentTerm.id,
                         isWrong: isAnswered && selectedID == option.id && option.id != currentTerm.id
@@ -243,11 +243,11 @@ private struct DefinitionChoiceGameView: View {
             if isAnswered {
                 IlluminedCard {
                     VStack(alignment: .leading, spacing: 5) {
-                        Text(currentTerm.category)
+                        Text(currentTerm.localizedCategory)
                             .font(IlluminedTheme.font(size: 14, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.gold)
 
-                        Text(currentTerm.term)
+                        Text(currentTerm.localizedTerm)
                             .font(IlluminedTheme.font(size: 22, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
                     }
@@ -256,7 +256,7 @@ private struct DefinitionChoiceGameView: View {
                 Button {
                     nextRound()
                 } label: {
-                    Label("Next Definition", systemImage: "arrow.right.circle.fill")
+                    Label(IlluminedL10n.string("Next Definition"), systemImage: "arrow.right.circle.fill")
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                 }
@@ -351,14 +351,14 @@ private struct FormationGameShell<Content: View>: View {
 
                                 Spacer()
 
-                                Button("Reset", action: onReset)
+                                Button(IlluminedL10n.string("Reset"), action: onReset)
                                     .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
                             }
 
                             HStack(spacing: 12) {
-                                FormationScorePill(title: "Score", value: "\(score)")
-                                FormationScorePill(title: "Attempts", value: "\(attempts)")
+                                FormationScorePill(title: IlluminedL10n.string("Score"), value: "\(score)")
+                                FormationScorePill(title: IlluminedL10n.string("Attempts"), value: "\(attempts)")
                             }
                         }
                     }
@@ -445,6 +445,113 @@ private struct FormationGameTerm: Identifiable, Equatable {
     let term: String
     let definition: String
     let category: String
+
+    var localizedTerm: String {
+        Locale.current.languageCode == "es" ? FormationGameSpanishTranslations.byID[id]?.term ?? term : term
+    }
+
+    var localizedDefinition: String {
+        Locale.current.languageCode == "es" ? FormationGameSpanishTranslations.byID[id]?.definition ?? definition : definition
+    }
+
+    var localizedCategory: String {
+        let key: String
+        switch category {
+        case "Cardinal Virtues": key = "Cardinal Virtues"
+        case "Parts of Prudence": key = "Parts of Prudence"
+        case "Potential Parts of Prudence": key = "Potential Parts of Prudence"
+        case "Parts of Justice": key = "Parts of Justice"
+        case "Parts of Fortitude": key = "Parts of Fortitude"
+        case "Parts of Temperance": key = "Parts of Temperance"
+        case "Theological Virtues": key = "Theological Virtues"
+        case "Vices Contrary to Prudence": key = "Vices Contrary to Prudence"
+        case "Vices Contrary to Justice": key = "Vices Contrary to Justice"
+        default: return category
+        }
+        return IlluminedL10n.string(key)
+    }
+}
+
+private struct FormationGameTranslation {
+    let term: String
+    let definition: String
+}
+
+private enum FormationGameSpanishTranslations {
+    static let byID: [String: FormationGameTranslation] = [
+        "prudence": .init(term: "Prudencia", definition: "Conocer los medios para alcanzar el fin y saber aplicar un principio general en circunstancias concretas."),
+        "memory": .init(term: "Memoria", definition: "Recordar las cosas correctas relacionadas con una acción y sus circunstancias."),
+        "understanding": .init(term: "Entendimiento", definition: "La capacidad de comprender los principios prácticos y la naturaleza de diversas situaciones."),
+        "docility": .init(term: "Docilidad", definition: "La capacidad de dejarse guiar y aceptar el consejo de otros."),
+        "shrewdness": .init(term: "Sagacidad", definition: "Rapidez para descubrir los medios que conducen al fin."),
+        "reason": .init(term: "Razón", definition: "La capacidad de razonar sobre asuntos prácticos y aplicar principios universales a situaciones particulares."),
+        "foresight": .init(term: "Previsión", definition: "La capacidad de prever los resultados futuros de las acciones basándose en la experiencia pasada."),
+        "circumspection": .init(term: "Circunspección", definition: "La virtud por la cual se tienen en cuenta las propias circunstancias."),
+        "caution": .init(term: "Cautela", definition: "Aplicar el conocimiento del pasado a la acción para evitar impedimentos y males."),
+        "good-counsel": .init(term: "Buen consejo", definition: "El hábito de buscar y aceptar un buen consejo."),
+        "synesis": .init(term: "Sínesis", definition: "La capacidad de saber qué hacer cuando se aplica la ley común."),
+        "gnome": .init(term: "Gnome", definition: "La capacidad de saber qué hacer cuando no se aplica la ley común."),
+        "justice": .init(term: "Justicia", definition: "Dar a cada uno lo que le corresponde."),
+        "commutative-justice": .init(term: "Justicia conmutativa", definition: "Justicia entre individuos."),
+        "legal-justice": .init(term: "Justicia legal", definition: "Justicia del individuo hacia el bien común."),
+        "distributive-justice": .init(term: "Justicia distributiva", definition: "Justicia de quienes están a cargo del bien común hacia el individuo."),
+        "restitution": .init(term: "Restitución", definition: "El hábito por el cual se devuelve lo que se debe."),
+        "religion": .init(term: "Religión", definition: "La virtud por la cual damos a Dios lo que se le debe."),
+        "devotion": .init(term: "Devoción", definition: "Una voluntad pronta para hacer lo que pertenece al servicio de Dios."),
+        "prayer": .init(term: "Oración", definition: "El acto, y también la virtud, de elevar la mente y el corazón a Dios."),
+        "adoration": .init(term: "Adoración", definition: "El acto por el cual se manifiesta a Dios la reverencia que se le debe."),
+        "sacrifice": .init(term: "Sacrificio", definition: "Ofrecer algún bien a Dios en forma de oblación."),
+        "vow": .init(term: "Voto", definition: "Obligarse mediante una promesa a hacer algo, normalmente relacionado con el servicio de Dios."),
+        "piety": .init(term: "Piedad", definition: "La virtud por la cual se rinde el debido honor y reverencia a los padres."),
+        "dulia": .init(term: "Dulía", definition: "Dar el debido honor a los superiores."),
+        "obedience": .init(term: "Obediencia", definition: "Prontitud de la voluntad para cumplir la voluntad del superior."),
+        "gratitude": .init(term: "Gratitud", definition: "Aprecio, normalmente expresado, hacia un benefactor por algún don recibido."),
+        "truthfulness": .init(term: "Veracidad", definition: "El hábito de decir la verdad."),
+        "friendship": .init(term: "Amistad", definition: "La virtud por la cual una persona puede entablar amistad."),
+        "liberality": .init(term: "Liberalidad", definition: "El uso de los bienes sobrantes para ayudar a los pobres."),
+        "epikeia": .init(term: "Epiqueya", definition: "La virtud por la cual se conoce la intención del legislador."),
+        "fortitude": .init(term: "Fortaleza", definition: "Disposición para afrontar lo arduo y soportar el sufrimiento a lo largo del tiempo."),
+        "magnanimity": .init(term: "Magnanimidad", definition: "Buscar la excelencia en todo, especialmente en las cosas grandes."),
+        "magnificence": .init(term: "Magnificencia", definition: "Usar las propias riquezas para realizar grandes obras."),
+        "patience": .init(term: "Paciencia", definition: "La capacidad de soportar bien los males."),
+        "perseverance": .init(term: "Perseverancia", definition: "Persistir en lo arduo hasta alcanzar el fin."),
+        "longanimity": .init(term: "Longanimidad", definition: "Grandeza de alma; la capacidad de esperar el bien."),
+        "mortification": .init(term: "Mortificación", definition: "La disposición a soportar bien el dolor y la incomodidad por amor a Dios."),
+        "courage": .init(term: "Valentía", definition: "Elegir perseguir el bien a pesar del peligro de muerte."),
+        "custody-mind": .init(term: "Custodia de la mente", definition: "No permitir que la mente albergue pensamientos impropios."),
+        "custody-eyes": .init(term: "Custodia de los ojos", definition: "Mantener el control de la mirada para no ser atraído al pecado."),
+        "temperance": .init(term: "Templanza", definition: "La virtud que modera los placeres del tacto y del gusto."),
+        "shame": .init(term: "Vergüenza", definition: "Temor a ser percibido como indigno."),
+        "honestia": .init(term: "Honestidad", definition: "El hábito de procurar siempre lo virtuoso en cada situación."),
+        "abstinence": .init(term: "Abstinencia", definition: "Abstenerse de comer ciertos tipos de alimentos."),
+        "fasting": .init(term: "Ayuno", definition: "Abstenerse de alimentos en general."),
+        "sobriety": .init(term: "Sobriedad", definition: "La virtud por la cual se modera el consumo de alcohol."),
+        "chastity": .init(term: "Castidad", definition: "Moderar los placeres del tacto en materias relativas al Sexto Mandamiento."),
+        "continence": .init(term: "Continencia", definition: "Una virtud de la voluntad por la cual se permanece firme a pesar del tumulto de los apetitos."),
+        "clemency": .init(term: "Clemencia o mansedumbre", definition: "Moderación del deleite de la reivindicación o de la ira."),
+        "humility": .init(term: "Humildad", definition: "Disposición a vivir conforme a la verdad y a no juzgarse superior a lo que se es."),
+        "eutrapelia": .init(term: "Eutrapelia", definition: "La virtud de la recreación adecuada."),
+        "silence": .init(term: "Silencio", definition: "No hablar salvo cuando sea necesario y buscar la quietud interior de los apetitos."),
+        "studiosity": .init(term: "Estudiosidad", definition: "Buscar el conocimiento de acuerdo con el propio estado de vida."),
+        "simplicity": .init(term: "Sencillez", definition: "Moderar los bienes externos en cuanto a cantidad, sin tener ni demasiado ni demasiado poco."),
+        "veracity": .init(term: "Veracidad", definition: "Regular el habla y orientarla hacia la verdad."),
+        "faith": .init(term: "Fe", definition: "La virtud que nos inclina a creer precisamente lo que Dios nos revela."),
+        "hope": .init(term: "Esperanza", definition: "La virtud referida a un bien futuro y arduo: la bienaventuranza eterna y la ayuda divina."),
+        "charity": .init(term: "Caridad", definition: "Amistad entre Dios y el ser humano; amor sobrenatural ordenado a la bienaventuranza eterna."),
+        "precipitation": .init(term: "Precipitación", definition: "Actuar con demasiada rapidez por no buscar consejo."),
+        "inconsideration": .init(term: "Inconsideración", definition: "No juzgar cuál de los medios considerados es el mejor."),
+        "inconsistency": .init(term: "Inconstancia", definition: "No ordenar o realizar la acción juzgada como la mejor."),
+        "negligence": .init(term: "Negligencia", definition: "No buscar consejo o no hacer lo que se debe cuando corresponde."),
+        "guile": .init(term: "Dolo", definition: "El hábito del engaño, normalmente mediante palabras."),
+        "fraud": .init(term: "Fraude", definition: "El hábito del engaño, normalmente mediante acciones."),
+        "murder": .init(term: "Asesinato", definition: "La muerte injusta de una persona inocente."),
+        "theft": .init(term: "Hurto", definition: "Tomar a escondidas lo que pertenece a otro."),
+        "robbery": .init(term: "Robo", definition: "Tomar abierta o violentamente lo que pertenece a otro."),
+        "perjury": .init(term: "Perjurio", definition: "Mentir bajo juramento."),
+        "detraction": .init(term: "Detracción", definition: "Decir algo verdadero con el fin de destruir la reputación de alguien."),
+        "murmuring": .init(term: "Murmuración", definition: "Detracción oculta destinada a separar el afecto de una persona hacia otra."),
+        "superstition": .init(term: "Superstición", definition: "Rendir a una criatura el honor o culto que solo se debe a Dios.")
+    ]
 }
 
 private enum FormationGameData {

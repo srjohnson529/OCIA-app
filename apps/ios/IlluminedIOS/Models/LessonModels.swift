@@ -20,8 +20,22 @@ struct Lesson: Identifiable, Codable, Equatable {
     var videoURL: String?
     var quiz: [QuizQuestion]
     var quizPolicy: QuizPolicy
+    var titleEs: String?
+    var contentHTMLEs: String?
+    var quizEs: [QuizQuestion]?
 
-    init(id: String, title: String, category: String, contentHTML: String, videoURL: String?, quiz: [QuizQuestion], quizPolicy: QuizPolicy = .required) {
+    init(
+        id: String,
+        title: String,
+        category: String,
+        contentHTML: String,
+        videoURL: String?,
+        quiz: [QuizQuestion],
+        quizPolicy: QuizPolicy = .required,
+        titleEs: String? = nil,
+        contentHTMLEs: String? = nil,
+        quizEs: [QuizQuestion]? = nil
+    ) {
         self.id = id
         self.title = title
         self.category = category
@@ -29,6 +43,21 @@ struct Lesson: Identifiable, Codable, Equatable {
         self.videoURL = videoURL
         self.quiz = quiz
         self.quizPolicy = quizPolicy
+        self.titleEs = titleEs
+        self.contentHTMLEs = contentHTMLEs
+        self.quizEs = quizEs
+    }
+
+    var localizedTitle: String {
+        prefersSpanish ? titleEs.nonEmpty ?? title : title
+    }
+
+    var localizedContentHTML: String {
+        prefersSpanish ? contentHTMLEs.nonEmpty ?? contentHTML : contentHTML
+    }
+
+    var localizedQuiz: [QuizQuestion] {
+        prefersSpanish ? quizEs.nonEmpty ?? quiz : quiz
     }
 
     enum CodingKeys: String, CodingKey {
@@ -39,6 +68,10 @@ struct Lesson: Identifiable, Codable, Equatable {
         case videoURL = "videoUrl"
         case quiz
         case quizPolicy
+        case titleEs
+        case contentEs
+        case contentHTMLEs
+        case quizEs
     }
 
     private struct QuizContainer: Codable, Equatable {
@@ -54,6 +87,9 @@ struct Lesson: Identifiable, Codable, Equatable {
         contentHTML = try container.decode(String.self, forKey: .contentHTML)
         videoURL = try container.decodeIfPresent(String.self, forKey: .videoURL)
         quizPolicy = try container.decodeIfPresent(QuizPolicy.self, forKey: .quizPolicy) ?? .required
+        titleEs = try container.decodeIfPresent(String.self, forKey: .titleEs)
+        contentHTMLEs = try container.decodeIfPresent(String.self, forKey: .contentEs)
+            ?? container.decodeIfPresent(String.self, forKey: .contentHTMLEs)
 
         if let questionArray = try? container.decode([QuizQuestion].self, forKey: .quiz) {
             quiz = questionArray
@@ -61,6 +97,44 @@ struct Lesson: Identifiable, Codable, Equatable {
             let wrappedQuiz = try container.decode(QuizContainer.self, forKey: .quiz)
             quiz = wrappedQuiz.questions
         }
+
+        if let questionArray = try? container.decode([QuizQuestion].self, forKey: .quizEs) {
+            quizEs = questionArray
+        } else if let wrappedQuiz = try? container.decode(QuizContainer.self, forKey: .quizEs) {
+            quizEs = wrappedQuiz.questions
+        } else {
+            quizEs = nil
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(category, forKey: .category)
+        try container.encode(contentHTML, forKey: .contentHTML)
+        try container.encodeIfPresent(videoURL, forKey: .videoURL)
+        try container.encode(quiz, forKey: .quiz)
+        try container.encode(quizPolicy, forKey: .quizPolicy)
+        try container.encodeIfPresent(titleEs, forKey: .titleEs)
+        try container.encodeIfPresent(contentHTMLEs, forKey: .contentEs)
+        try container.encodeIfPresent(quizEs, forKey: .quizEs)
+    }
+}
+
+private var prefersSpanish: Bool {
+    Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true
+}
+
+private extension Optional where Wrapped == String {
+    var nonEmpty: String? {
+        self?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? self : nil
+    }
+}
+
+private extension Optional where Wrapped == [QuizQuestion] {
+    var nonEmpty: [QuizQuestion]? {
+        self?.isEmpty == false ? self : nil
     }
 }
 

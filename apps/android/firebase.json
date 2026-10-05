@@ -9,7 +9,11 @@
     "source": "functions",
     "runtime": "nodejs22"
   },
+  "storage": {
+    "rules": "firebase/storage.rules"
+  },
   "hosting": {
+    "appAssociation": "NONE",
     "public": "firebase/hosting",
     "ignore": [
       "firebase.json",

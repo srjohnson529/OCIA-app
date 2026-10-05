@@ -58,9 +58,9 @@ class DiscussionRepository(
         val post = db.collection("discussionPosts").document()
         val participation = db.collection("discussionParticipation").document("${prompt.id}_$userId")
         db.runBatch { batch ->
-            batch.set(post, mapOf("promptId" to prompt.id, "lessonId" to prompt.lessonId, "classId" to classId,
+            batch.set(post, mapOf("promptId" to prompt.id, "lessonId" to prompt.lessonId, "assignmentId" to prompt.assignmentId, "classId" to classId,
                 "authorId" to userId, "authorName" to name, "message" to message.trim(), "createdAt" to FieldValue.serverTimestamp()))
-            batch.set(participation, mapOf("promptId" to prompt.id, "lessonId" to prompt.lessonId, "classId" to classId,
+            batch.set(participation, mapOf("promptId" to prompt.id, "lessonId" to prompt.lessonId, "assignmentId" to prompt.assignmentId, "classId" to classId,
                 "userId" to userId, "studentName" to name, "postedAt" to FieldValue.serverTimestamp()), SetOptions.merge())
         }.addOnSuccessListener { success() }.addOnFailureListener(error)
     }

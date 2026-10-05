@@ -30,6 +30,9 @@ import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.util.Locale
+
+private fun inviteT(english: String, spanish: String) = if (Locale.getDefault().language == "es") spanish else english
 
 internal enum class InviteRole(val value: String) { STUDENT("student"), INSTRUCTOR("instructor"), PARISH("parish") }
 
@@ -45,13 +48,13 @@ internal data class IlluminedInviteLink(val role: InviteRole, val classId: Strin
 
     val title: String
         get() = when (role) {
-            InviteRole.STUDENT -> "Join my Illumined class"
-            InviteRole.INSTRUCTOR -> "Join my Illumined class as a co-instructor"
-            InviteRole.PARISH -> "Set up your parish classroom in Illumined"
+            InviteRole.STUDENT -> inviteT("Join my Illumined class", "Únete a mi clase de Illumined")
+            InviteRole.INSTRUCTOR -> inviteT("Join my Illumined class as a co-instructor", "Únete a mi clase de Illumined como instructor asociado")
+            InviteRole.PARISH -> inviteT("Set up your parish classroom in Illumined", "Configura la clase de tu parroquia en Illumined")
         }
 
     val message: String
-        get() = "$title. Open this link on a device with Illumined installed.${if (classId.isBlank()) "" else " Class ID: $classId."}${if (code.isBlank()) "" else " One-use code: $code."} $url"
+        get() = "$title. ${inviteT("Open this link on a device with Illumined installed.", "Abre este enlace en un dispositivo que tenga Illumined instalado.")}${if (classId.isBlank()) "" else " ${inviteT("Class ID", "ID de clase")}: $classId."}${if (code.isBlank()) "" else " ${if (role == InviteRole.STUDENT) inviteT("Student code", "Código de estudiante") else inviteT("One-use code", "Código de un solo uso")}: $code."} $url"
 
     companion object {
         fun parse(raw: String?): IlluminedInviteLink? {
@@ -65,11 +68,11 @@ internal data class IlluminedInviteLink(val role: InviteRole, val classId: Strin
                 if (parts.size == 2) decode(parts[0]) to decode(parts[1]) else null
             }.toMap()
             val role = InviteRole.entries.firstOrNull { it.value == values["role"]?.lowercase() } ?: return null
-            val classId = values["classId"].orEmpty().trim().uppercase()
+            val classId = values["classId"].orEmpty().trim()
             val code = values["code"].orEmpty().trim().uppercase()
             if (role == InviteRole.PARISH && code.isBlank()) return null
-            if (role != InviteRole.PARISH && classId.isBlank()) return null
-            if (role == InviteRole.INSTRUCTOR && code.isBlank()) return null
+            if (role == InviteRole.INSTRUCTOR && classId.isBlank()) return null
+            if (code.isBlank()) return null
             return IlluminedInviteLink(role, classId, code)
         }
 
@@ -103,9 +106,9 @@ internal fun InviteShareControls(invite: IlluminedInviteLink) {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.setPrimaryClip(ClipData.newPlainText(invite.title, invite.uri.toString()))
             copied = true
-        }, modifier = Modifier.weight(1f)) { Text(if (copied) "Copied" else "Copy Link", fontSize = 12.sp) }
-        OutlinedButton(onClick = { showingQr = true }, modifier = Modifier.weight(1f)) { Text("QR Code", fontSize = 12.sp) }
-        OutlinedButton(onClick = { emailInvite(context, invite) }, modifier = Modifier.weight(1f)) { Text("Email", fontSize = 12.sp) }
+        }, modifier = Modifier.weight(1f)) { Text(if (copied) inviteT("Copied", "Copiado") else inviteT("Copy Link", "Copiar enlace"), fontSize = 12.sp) }
+        OutlinedButton(onClick = { showingQr = true }, modifier = Modifier.weight(1f)) { Text(inviteT("QR Code", "Código QR"), fontSize = 12.sp) }
+        OutlinedButton(onClick = { emailInvite(context, invite) }, modifier = Modifier.weight(1f)) { Text(inviteT("Email", "Correo"), fontSize = 12.sp) }
     }
     if (showingQr) {
         val bitmap = remember(invite.uri) { qrBitmap(invite.uri.toString()) }
@@ -114,11 +117,11 @@ internal fun InviteShareControls(invite: IlluminedInviteLink) {
             title = { Text(invite.title, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    bitmap?.let { Image(it.asImageBitmap(), "QR code for ${invite.title}", Modifier.size(260.dp)) }
-                    Text(if (invite.classId.isBlank()) invite.code else "Class ${invite.classId}")
+                    bitmap?.let { Image(it.asImageBitmap(), "${inviteT("QR code for", "Código QR para")} ${invite.title}", Modifier.size(260.dp)) }
+                    Text(if (invite.classId.isBlank()) invite.code else "${inviteT("Class", "Clase")} ${invite.classId}")
                 }
             },
-            confirmButton = { TextButton(onClick = { showingQr = false }) { Text("Done") } },
+            confirmButton = { TextButton(onClick = { showingQr = false }) { Text(inviteT("Done", "Listo")) } },
         )
     }
 }
@@ -128,7 +131,7 @@ private fun emailInvite(context: Context, invite: IlluminedInviteLink) {
         putExtra(Intent.EXTRA_SUBJECT, invite.title)
         putExtra(Intent.EXTRA_TEXT, invite.message)
     }
-    runCatching { context.startActivity(Intent.createChooser(intent, "Email invite")) }
+    runCatching { context.startActivity(Intent.createChooser(intent, inviteT("Email invite", "Enviar invitación por correo"))) }
 }
 
 private fun qrBitmap(value: String): Bitmap? = runCatching {

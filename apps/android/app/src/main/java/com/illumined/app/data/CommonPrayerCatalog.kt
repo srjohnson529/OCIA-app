@@ -3,6 +3,7 @@ package com.illumined.app.data
 import android.content.Context
 import com.illumined.app.R
 import org.json.JSONObject
+import java.util.Locale
 
 object CommonPrayerCatalog {
     fun namesById(context: Context): Map<String, String> = runCatching {
@@ -11,7 +12,11 @@ object CommonPrayerCatalog {
         buildMap {
             repeat(array.length()) { index ->
                 val prayer = array.getJSONObject(index)
-                put(prayer.getString("id"), prayer.getString("title"))
+                val title = prayer.getString("title")
+                val localizedTitle = prayer.optString("titleEs").takeIf {
+                    Locale.getDefault().language == "es" && it.isNotBlank()
+                } ?: title
+                put(prayer.getString("id"), localizedTitle)
             }
         }
     }.getOrDefault(emptyMap())

@@ -24,8 +24,106 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.illumined.app.ui.theme.IlluminedThemeTokens
 
-private data class GameTerm(val id: String, val term: String, val definition: String, val category: String)
+private data class GameTerm(val id: String, val term: String, val definition: String, val category: String) {
+    val localizedCategory: String get() = localizedGameCategory(category)
+    val localizedTerm: String get() = if (isSpanishGameLocale()) spanishGameTranslations[id]?.term ?: term else term
+    val localizedDefinition: String get() = if (isSpanishGameLocale()) spanishGameTranslations[id]?.definition ?: definition else definition
+}
+private data class GameTranslation(val term: String, val definition: String)
 private enum class GamePage { MENU, MATCH, NAME }
+
+private fun isSpanishGameLocale(): Boolean = java.util.Locale.getDefault().language == "es"
+
+private fun gameT(english: String, spanish: String): String =
+    if (isSpanishGameLocale()) spanish else english
+
+private fun localizedGameCategory(category: String): String = when (category) {
+    "Cardinal Virtues" -> gameT(category, "Virtudes cardinales")
+    "Parts of Prudence" -> gameT(category, "Partes de la prudencia")
+    "Potential Parts of Prudence" -> gameT(category, "Partes potenciales de la prudencia")
+    "Parts of Justice" -> gameT(category, "Partes de la justicia")
+    "Parts of Fortitude" -> gameT(category, "Partes de la fortaleza")
+    "Parts of Temperance" -> gameT(category, "Partes de la templanza")
+    "Theological Virtues" -> gameT(category, "Virtudes teologales")
+    "Vices Contrary to Prudence" -> gameT(category, "Vicios contrarios a la prudencia")
+    "Vices Contrary to Justice" -> gameT(category, "Vicios contrarios a la justicia")
+    else -> category
+}
+
+private val spanishGameTranslations = mapOf(
+    "prudence" to GameTranslation("Prudencia", "Conocer los medios para alcanzar el fin y saber aplicar un principio general en circunstancias concretas."),
+    "memory" to GameTranslation("Memoria", "Recordar las cosas correctas relacionadas con una acción y sus circunstancias."),
+    "understanding" to GameTranslation("Entendimiento", "La capacidad de comprender los principios prácticos y la naturaleza de diversas situaciones."),
+    "docility" to GameTranslation("Docilidad", "La capacidad de dejarse guiar y aceptar el consejo de otros."),
+    "shrewdness" to GameTranslation("Sagacidad", "Rapidez para descubrir los medios que conducen al fin."),
+    "reason" to GameTranslation("Razón", "La capacidad de razonar sobre asuntos prácticos y aplicar principios universales a situaciones particulares."),
+    "foresight" to GameTranslation("Previsión", "La capacidad de prever los resultados futuros de las acciones basándose en la experiencia pasada."),
+    "circumspection" to GameTranslation("Circunspección", "La virtud por la cual se tienen en cuenta las propias circunstancias."),
+    "caution" to GameTranslation("Cautela", "Aplicar el conocimiento del pasado a la acción para evitar impedimentos y males."),
+    "good-counsel" to GameTranslation("Buen consejo", "El hábito de buscar y aceptar un buen consejo."),
+    "synesis" to GameTranslation("Sínesis", "La capacidad de saber qué hacer cuando se aplica la ley común."),
+    "gnome" to GameTranslation("Gnome", "La capacidad de saber qué hacer cuando no se aplica la ley común."),
+    "justice" to GameTranslation("Justicia", "Dar a cada uno lo que le corresponde."),
+    "commutative-justice" to GameTranslation("Justicia conmutativa", "Justicia entre individuos."),
+    "legal-justice" to GameTranslation("Justicia legal", "Justicia del individuo hacia el bien común."),
+    "distributive-justice" to GameTranslation("Justicia distributiva", "Justicia de quienes están a cargo del bien común hacia el individuo."),
+    "restitution" to GameTranslation("Restitución", "El hábito por el cual se devuelve lo que se debe."),
+    "religion" to GameTranslation("Religión", "La virtud por la cual damos a Dios lo que se le debe."),
+    "devotion" to GameTranslation("Devoción", "Una voluntad pronta para hacer lo que pertenece al servicio de Dios."),
+    "prayer" to GameTranslation("Oración", "El acto, y también la virtud, de elevar la mente y el corazón a Dios."),
+    "adoration" to GameTranslation("Adoración", "El acto por el cual se manifiesta a Dios la reverencia que se le debe."),
+    "sacrifice" to GameTranslation("Sacrificio", "Ofrecer algún bien a Dios en forma de oblación."),
+    "vow" to GameTranslation("Voto", "Obligarse mediante una promesa a hacer algo, normalmente relacionado con el servicio de Dios."),
+    "piety" to GameTranslation("Piedad", "La virtud por la cual se rinde el debido honor y reverencia a los padres."),
+    "dulia" to GameTranslation("Dulía", "Dar el debido honor a los superiores."),
+    "obedience" to GameTranslation("Obediencia", "Prontitud de la voluntad para cumplir la voluntad del superior."),
+    "gratitude" to GameTranslation("Gratitud", "Aprecio, normalmente expresado, hacia un benefactor por algún don recibido."),
+    "truthfulness" to GameTranslation("Veracidad", "El hábito de decir la verdad."),
+    "friendship" to GameTranslation("Amistad", "La virtud por la cual una persona puede entablar amistad."),
+    "liberality" to GameTranslation("Liberalidad", "El uso de los bienes sobrantes para ayudar a los pobres."),
+    "epikeia" to GameTranslation("Epiqueya", "La virtud por la cual se conoce la intención del legislador."),
+    "fortitude" to GameTranslation("Fortaleza", "Disposición para afrontar lo arduo y soportar el sufrimiento a lo largo del tiempo."),
+    "magnanimity" to GameTranslation("Magnanimidad", "Buscar la excelencia en todo, especialmente en las cosas grandes."),
+    "magnificence" to GameTranslation("Magnificencia", "Usar las propias riquezas para realizar grandes obras."),
+    "patience" to GameTranslation("Paciencia", "La capacidad de soportar bien los males."),
+    "perseverance" to GameTranslation("Perseverancia", "Persistir en lo arduo hasta alcanzar el fin."),
+    "longanimity" to GameTranslation("Longanimidad", "Grandeza de alma; la capacidad de esperar el bien."),
+    "mortification" to GameTranslation("Mortificación", "La disposición a soportar bien el dolor y la incomodidad por amor a Dios."),
+    "courage" to GameTranslation("Valentía", "Elegir perseguir el bien a pesar del peligro de muerte."),
+    "custody-mind" to GameTranslation("Custodia de la mente", "No permitir que la mente albergue pensamientos impropios."),
+    "custody-eyes" to GameTranslation("Custodia de los ojos", "Mantener el control de la mirada para no ser atraído al pecado."),
+    "temperance" to GameTranslation("Templanza", "La virtud que modera los placeres del tacto y del gusto."),
+    "shame" to GameTranslation("Vergüenza", "Temor a ser percibido como indigno."),
+    "honestia" to GameTranslation("Honestidad", "El hábito de procurar siempre lo virtuoso en cada situación."),
+    "abstinence" to GameTranslation("Abstinencia", "Abstenerse de comer ciertos tipos de alimentos."),
+    "fasting" to GameTranslation("Ayuno", "Abstenerse de alimentos en general."),
+    "sobriety" to GameTranslation("Sobriedad", "La virtud por la cual se modera el consumo de alcohol."),
+    "chastity" to GameTranslation("Castidad", "Moderar los placeres del tacto en materias relativas al Sexto Mandamiento."),
+    "continence" to GameTranslation("Continencia", "Una virtud de la voluntad por la cual se permanece firme a pesar del tumulto de los apetitos."),
+    "clemency" to GameTranslation("Clemencia o mansedumbre", "Moderación del deleite de la reivindicación o de la ira."),
+    "humility" to GameTranslation("Humildad", "Disposición a vivir conforme a la verdad y a no juzgarse superior a lo que se es."),
+    "eutrapelia" to GameTranslation("Eutrapelia", "La virtud de la recreación adecuada."),
+    "silence" to GameTranslation("Silencio", "No hablar salvo cuando sea necesario y buscar la quietud interior de los apetitos."),
+    "studiosity" to GameTranslation("Estudiosidad", "Buscar el conocimiento de acuerdo con el propio estado de vida."),
+    "simplicity" to GameTranslation("Sencillez", "Moderar los bienes externos en cuanto a cantidad, sin tener ni demasiado ni demasiado poco."),
+    "veracity" to GameTranslation("Veracidad", "Regular el habla y orientarla hacia la verdad."),
+    "faith" to GameTranslation("Fe", "La virtud que nos inclina a creer precisamente lo que Dios nos revela."),
+    "hope" to GameTranslation("Esperanza", "La virtud referida a un bien futuro y arduo: la bienaventuranza eterna y la ayuda divina."),
+    "charity" to GameTranslation("Caridad", "Amistad entre Dios y el ser humano; amor sobrenatural ordenado a la bienaventuranza eterna."),
+    "precipitation" to GameTranslation("Precipitación", "Actuar con demasiada rapidez por no buscar consejo."),
+    "inconsideration" to GameTranslation("Inconsideración", "No juzgar cuál de los medios considerados es el mejor."),
+    "inconsistency" to GameTranslation("Inconstancia", "No ordenar o realizar la acción juzgada como la mejor."),
+    "negligence" to GameTranslation("Negligencia", "No buscar consejo o no hacer lo que se debe cuando corresponde."),
+    "guile" to GameTranslation("Dolo", "El hábito del engaño, normalmente mediante palabras."),
+    "fraud" to GameTranslation("Fraude", "El hábito del engaño, normalmente mediante acciones."),
+    "murder" to GameTranslation("Asesinato", "La muerte injusta de una persona inocente."),
+    "theft" to GameTranslation("Hurto", "Tomar a escondidas lo que pertenece a otro."),
+    "robbery" to GameTranslation("Robo", "Tomar abierta o violentamente lo que pertenece a otro."),
+    "perjury" to GameTranslation("Perjurio", "Mentir bajo juramento."),
+    "detraction" to GameTranslation("Detracción", "Decir algo verdadero con el fin de destruir la reputación de alguien."),
+    "murmuring" to GameTranslation("Murmuración", "Detracción oculta destinada a separar el afecto de una persona hacia otra."),
+    "superstition" to GameTranslation("Superstición", "Rendir a una criatura el honor o culto que solo se debe a Dios.")
+)
 
 @Composable
 fun FormationGamesExperience(onBack: () -> Unit) {
@@ -43,17 +141,17 @@ fun FormationGamesExperience(onBack: () -> Unit) {
 @Composable
 private fun GameMenu(onBack: () -> Unit, select: (GamePage) -> Unit) {
     Column(Modifier.fillMaxSize().background(gameBrush()).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        TextButton(onClick = onBack) { Text("‹ Back") }
+        TextButton(onClick = onBack) { Text(gameT("‹ Back", "‹ Volver")) }
         GameCard {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 FormationGameSymbol(FormationGameSymbolKind.Puzzle, IlluminedThemeTokens.Blue, Modifier.size(24.dp))
-                Text("Formation Games", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                Text(gameT("Formation Games", "Juegos de formación"), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
             }
-            Text("Practice Catholic moral theology terms with quick, repeatable games.", fontSize = 16.sp, color = IlluminedThemeTokens.SecondaryText, lineHeight = 20.sp)
+            Text(gameT("Practice Catholic moral theology terms with quick, repeatable games.", "Practica términos de teología moral católica con juegos breves y repetibles."), fontSize = 16.sp, color = IlluminedThemeTokens.SecondaryText, lineHeight = 20.sp)
         }
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            GameMenuCard("Match Terms", "Choose the correct definition for each virtue or vice.") { select(GamePage.MATCH) }
-            GameMenuCard("Name That Term", "Read the definition and select the matching term.") { select(GamePage.NAME) }
+            GameMenuCard(gameT("Match Terms", "Relacionar términos"), gameT("Choose the correct definition for each virtue or vice.", "Elige la definición correcta para cada virtud o vicio.")) { select(GamePage.MATCH) }
+            GameMenuCard(gameT("Name That Term", "Nombra el término"), gameT("Read the definition and select the matching term.", "Lee la definición y selecciona el término correspondiente.")) { select(GamePage.NAME) }
         }
     }
 }
@@ -81,9 +179,9 @@ private fun GameRound(definitionFirst: Boolean, onBack: () -> Unit) {
     val current = deck[index]; val options = remember(deck, index) { (listOf(current) + deck.filter { it.id != current.id }.shuffled().take(3)).shuffled() }; val answered = selected != null
     fun reset() { deck = gameTerms.shuffled(); index = 0; score = 0; attempts = 0; selected = null }
     Column(Modifier.fillMaxSize().background(gameBrush()).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        TextButton(onClick = onBack) { Text("‹ Back") }
-        GameCard { Row { Column(Modifier.weight(1f)) { Text(if (definitionFirst) "Name That Term" else "Match Terms", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue); Text(if (definitionFirst) "Choose the term that matches the definition." else "Choose the definition that matches the term.", color = IlluminedThemeTokens.SecondaryText) }; TextButton(onClick = { reset() }) { Text("Reset") } }; Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { ScorePill("Score", score); ScorePill("Attempts", attempts) } }
-        GameCard { Text(if (definitionFirst) "Definition" else current.category, color = IlluminedThemeTokens.Gold, fontWeight = FontWeight.SemiBold); Text(if (definitionFirst) current.definition else current.term, fontSize = if (definitionFirst) 20.sp else 30.sp, fontWeight = FontWeight.SemiBold, color = if (definitionFirst) IlluminedThemeTokens.Ink else IlluminedThemeTokens.Blue) }
+        TextButton(onClick = onBack) { Text(gameT("‹ Back", "‹ Volver")) }
+        GameCard { Row { Column(Modifier.weight(1f)) { Text(if (definitionFirst) gameT("Name That Term", "Nombra el término") else gameT("Match Terms", "Relacionar términos"), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue); Text(if (definitionFirst) gameT("Choose the term that matches the definition.", "Elige el término que corresponde a la definición.") else gameT("Choose the definition that matches the term.", "Elige la definición que corresponde al término."), color = IlluminedThemeTokens.SecondaryText) }; TextButton(onClick = { reset() }) { Text(gameT("Reset", "Reiniciar")) } }; Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { ScorePill(gameT("Score", "Puntuación"), score); ScorePill(gameT("Attempts", "Intentos"), attempts) } }
+        GameCard { Text(if (definitionFirst) gameT("Definition", "Definición") else current.localizedCategory, color = IlluminedThemeTokens.Gold, fontWeight = FontWeight.SemiBold); Text(if (definitionFirst) current.localizedDefinition else current.localizedTerm, fontSize = if (definitionFirst) 20.sp else 30.sp, fontWeight = FontWeight.SemiBold, color = if (definitionFirst) IlluminedThemeTokens.Ink else IlluminedThemeTokens.Blue) }
         options.forEach { option ->
             val correct = answered && option.id == current.id
             val wrong = answered && selected == option.id && option.id != current.id
@@ -103,16 +201,16 @@ private fun GameRound(definitionFirst: Boolean, onBack: () -> Unit) {
                 Row(Modifier.padding(14.dp), verticalAlignment = Alignment.Top) {
                     FormationGameSymbol(symbol, answerColor, Modifier.padding(top = 2.dp).size(20.dp))
                     Spacer(Modifier.width(12.dp))
-                    Text(if (definitionFirst) option.term else option.definition, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, lineHeight = 19.sp, modifier = Modifier.weight(1f))
+                    Text(if (definitionFirst) option.localizedTerm else option.localizedDefinition, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, lineHeight = 19.sp, modifier = Modifier.weight(1f))
                 }
             }
         }
         if (answered) {
-            if (definitionFirst) GameCard { Text(current.category, fontSize = 14.sp, color = IlluminedThemeTokens.Gold, fontWeight = FontWeight.SemiBold); Text(current.term, fontSize = 22.sp, color = IlluminedThemeTokens.Blue, fontWeight = FontWeight.SemiBold) }
+            if (definitionFirst) GameCard { Text(current.localizedCategory, fontSize = 14.sp, color = IlluminedThemeTokens.Gold, fontWeight = FontWeight.SemiBold); Text(current.localizedTerm, fontSize = 22.sp, color = IlluminedThemeTokens.Blue, fontWeight = FontWeight.SemiBold) }
             Button(onClick = { index = (index + 1) % deck.size; selected = null }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) {
                 FormationGameSymbol(FormationGameSymbolKind.ArrowCircleFilled, Color.White, Modifier.size(19.dp), IlluminedThemeTokens.Blue)
                 Spacer(Modifier.width(8.dp))
-                Text(if (definitionFirst) "Next Definition" else "Next Term", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                Text(if (definitionFirst) gameT("Next Definition", "Siguiente definición") else gameT("Next Term", "Siguiente término"), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }

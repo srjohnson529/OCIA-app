@@ -4,6 +4,8 @@ struct DashboardView: View {
     let onOpenLessons: () -> Void
 
     @EnvironmentObject private var profileService: ProfileService
+    @EnvironmentObject private var walkthrough: InstructorWalkthrough
+    @Environment(\.accessibilityReduceMotion) private var reduceWalkthroughMotion
     @StateObject private var lessonService = LessonCatalogService()
     @StateObject private var announcementService = AnnouncementService()
     @StateObject private var assignmentService = AssignmentService()
@@ -39,51 +41,33 @@ struct DashboardView: View {
             ZStack {
                 IlluminedBackground()
 
+                ScrollViewReader { reader in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         if let profile = profileService.profile {
                             IlluminedCard {
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("Welcome, \(profile.displayName)")
+                                    SavedProfilePhoto(scope: "classroom", target: profile.primaryClassId)
+                                    Text(IlluminedL10n.format("Welcome, %@", profile.displayName))
                                         .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.ink)
-                                    Label(profile.primaryClassId.isEmpty ? "No class assigned" : profile.primaryClassId, systemImage: "person.3")
+                                    Label(profile.primaryClassId.isEmpty ? IlluminedL10n.string("No class assigned") : profile.primaryClassId, systemImage: "person.3")
                                         .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                                 }
-                            }
-                            
-                            NextScheduledDayCard(sessions: nextClassSessions)
+                            }.walkthroughAnchor("welcome").id("welcome")
 
-                            Button(action: onOpenLessons) {
-                                IlluminedCard {
-                                    VStack(alignment: .leading, spacing: 14) {
-                                        HStack {
-                                            Text("Lesson Tracker")
-                                                .font(IlluminedTheme.font(size: 17, weight: .semibold))
-                                                .foregroundStyle(IlluminedTheme.ink)
-                                            Spacer()
-                                            Text("\(completedLessons)/\(totalLessons)")
-                                                .font(IlluminedTheme.font(size: 17, weight: .semibold))
-                                                .foregroundStyle(IlluminedTheme.blue)
-                                        }
+                            NextScheduledDayCard(sessions: nextClassSessions, classId: profile.primaryClassId, userId: profile.userId)
+                                .walkthroughAnchor("schedule").id("schedule")
 
-                                        ProgressView(value: totalLessons == 0 ? 0 : Double(completedLessons) / Double(totalLessons))
-                                            .tint(IlluminedTheme.gold)
 
-                                        HStack(spacing: 12) {
-                                            StatPill(title: "Completed", value: "\(completedLessons)", color: IlluminedTheme.blue)
-                                            StatPill(title: "Uncompleted", value: "\(uncompletedLessons)", color: IlluminedTheme.gold)
-                                        }
-                                    }
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Lesson Tracker")
-                            .accessibilityHint("Opens the lessons page")
 
                     
 
                             AnnouncementBoardCard(announcements: announcementService.activeAnnouncements)
+                                .walkthroughAnchor("announcements").id("announcements")
+
+                            RitePreparationDashboardCard(classId: profile.primaryClassId, userId: profile.userId, showTourEmpty:walkthrough.active)
+                                .walkthroughAnchor("guides").id("guides")
 
                             AssignmentsCard(
                                 assignments: assignmentService.activeAssignmentsNewestFirst,
@@ -92,6 +76,7 @@ struct DashboardView: View {
                                 profile: profile,
                                 assignmentCompletionService: assignmentCompletionService
                             )
+                            .walkthroughAnchor("assignments").id("assignments")
 
                             PrayerRequestsCard(
                                 requests: prayerRequestService.recentRequests,
@@ -100,13 +85,30 @@ struct DashboardView: View {
                                 prayerRequestService: prayerRequestService,
                                 onNewRequest: { isShowingPrayerComposer = true }
                             )
+                            .walkthroughAnchor("prayers").id("prayers")
                         } else {
                             IlluminedCard {
-                                ContentUnavailableView("Profile Needed", systemImage: "person.crop.circle.badge.exclamationmark", description: Text("Sign in and create your profile to see progress."))
+                                ContentUnavailableView(
+                                    IlluminedL10n.string("Profile Needed"),
+                                    systemImage: "person.crop.circle.badge.exclamationmark",
+                                    description: Text(IlluminedL10n.string("Sign in and create your profile to see progress."))
+                                )
                             }
                         }
                     }
                     .padding()
+                }
+                .walkthroughAnchor("viewport-home")
+                .task(id:walkthrough.target) {
+                    if walkthrough.active && walkthrough.page == "home" && !walkthrough.target.hasPrefix("nav-") {
+                        // Let the navigation/scroll layout settle before revealing the target.
+                        await Task.yield()
+                        guard !Task.isCancelled else { return }
+                        withAnimation(walkthrough.animatesStep && !reduceWalkthroughMotion ? .easeInOut(duration:InstructorWalkthrough.movementDuration) : nil) {
+                            reader.scrollTo(walkthrough.target,anchor:.top)
+                        }
+                    }
+                }
                 }
             }
             .illuminedNavigation()
@@ -138,7 +140,7 @@ struct DashboardView: View {
                     )
                 }
             }
-            .alert("Dashboard Error", isPresented: Binding(
+            .alert(IlluminedL10n.string("Dashboard Error"), isPresented: Binding(
                 get: {
                     prayerRequestService.errorMessage != nil ||
                     announcementService.errorMessage != nil ||
@@ -156,7 +158,7 @@ struct DashboardView: View {
                     }
                 }
             )) {
-                Button("OK", role: .cancel) {
+                Button(IlluminedL10n.string("OK"), role: .cancel) {
                     prayerRequestService.errorMessage = nil
                     announcementService.errorMessage = nil
                     assignmentService.errorMessage = nil
@@ -164,7 +166,7 @@ struct DashboardView: View {
                     classScheduleService.errorMessage = nil
                 }
             } message: {
-                Text(prayerRequestService.errorMessage ?? announcementService.errorMessage ?? assignmentService.errorMessage ?? assignmentCompletionService.errorMessage ?? classScheduleService.errorMessage ?? "")
+                Text(IlluminedL10n.string(prayerRequestService.errorMessage ?? announcementService.errorMessage ?? assignmentService.errorMessage ?? assignmentCompletionService.errorMessage ?? classScheduleService.errorMessage ?? ""))
             }
         }
     }
@@ -182,10 +184,10 @@ private struct AnnouncementBoardCard: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Announcements")
+                        Text(IlluminedL10n.string("Announcements"))
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
-                        Text("Updates from your instructor")
+                        Text(IlluminedL10n.string("Updates from your instructor"))
                             .font(IlluminedTheme.font(size: 12))
                             .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                     }
@@ -198,7 +200,7 @@ private struct AnnouncementBoardCard: View {
                 }
 
                 if visibleAnnouncements.isEmpty {
-                    Text("No announcements yet.")
+                    Text(IlluminedL10n.string("No announcements yet."))
                         .font(IlluminedTheme.font(size: 15))
                         .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -212,7 +214,7 @@ private struct AnnouncementBoardCard: View {
                                 AnnouncementRow(announcement: announcement)
                             }
                             .buttonStyle(.plain)
-                            .accessibilityHint("Opens the full announcement")
+                            .accessibilityHint(IlluminedL10n.string("Opens the full announcement"))
                         }
                     }
                 }
@@ -302,9 +304,7 @@ private struct AnnouncementDetailView: View {
                 .padding()
             }
         }
-        .navigationTitle("Announcement")
-        .navigationBarTitleDisplayMode(.inline)
-        .illuminedNavigation()
+        .illuminedBrandHeader()
     }
 }
 
@@ -333,10 +333,12 @@ private struct AssignmentsCard: View {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Assignments")
+                            Text(IlluminedL10n.string("Assignments"))
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.ink)
-                            Text(visibleAssignments.isEmpty ? "No active assignments yet" : "\(assignments.count) active assignment\(assignments.count == 1 ? "" : "s")")
+                            Text(visibleAssignments.isEmpty
+                                ? IlluminedL10n.string("No active assignments yet")
+                                : IlluminedL10n.count(assignments.count, singular: "%d active assignment", plural: "%d active assignments"))
                                 .font(IlluminedTheme.font(size: 12))
                                 .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                         }
@@ -355,7 +357,7 @@ private struct AssignmentsCard: View {
                     }
 
                     if visibleAssignments.isEmpty {
-                        Text("Tap here when your instructor posts assignments.")
+                        Text(IlluminedL10n.string("Tap here when your instructor posts assignments."))
                             .font(IlluminedTheme.font(size: 15))
                             .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -370,7 +372,11 @@ private struct AssignmentsCard: View {
                             }
 
                             if assignments.count > visibleAssignments.count {
-                                Text("+ \(assignments.count - visibleAssignments.count) more assignment\(assignments.count - visibleAssignments.count == 1 ? "" : "s")")
+                                Text(IlluminedL10n.count(
+                                    assignments.count - visibleAssignments.count,
+                                    singular: "+ %d more assignment",
+                                    plural: "+ %d more assignments"
+                                ))
                                     .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -407,12 +413,12 @@ private struct AssignmentSummaryRow: View {
                     .foregroundStyle(IlluminedTheme.blue)
                     .lineLimit(2)
 
-                Text("Due \(Self.dateFormatter.string(from: assignment.dueDate))")
+                Text(IlluminedL10n.format("Due %@", Self.dateFormatter.string(from: assignment.dueDate)))
                     .font(IlluminedTheme.font(size: 11, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
 
                 if assignment.hasAssignedReading {
-                    Label("\(assignment.assignedReadings.count) reading\(assignment.assignedReadings.count == 1 ? "" : "s")", systemImage: "doc.text")
+                    Label(IlluminedL10n.count(assignment.assignedReadings.count, singular: "%d reading", plural: "%d readings"), systemImage: "doc.text")
                         .font(IlluminedTheme.font(size: 12))
                         .foregroundStyle(IlluminedTheme.gold)
                         .lineLimit(1)
@@ -447,11 +453,11 @@ private struct AssignmentsListView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Assignments")
+                            Text(IlluminedL10n.string("Assignments"))
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Select an assignment to open the full details, readings, lesson links, and completion check.")
+                            Text(IlluminedL10n.string("Select an assignment to open the full details, readings, lesson links, and completion check."))
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                         }
@@ -460,9 +466,9 @@ private struct AssignmentsListView: View {
                     if assignments.isEmpty {
                         IlluminedCard {
                             ContentUnavailableView(
-                                "No Assignments",
+                                IlluminedL10n.string("No Assignments"),
                                 systemImage: "checklist",
-                                description: Text("Your instructor has not posted active assignments yet.")
+                                description: Text(IlluminedL10n.string("Your instructor has not posted active assignments yet."))
                             )
                         }
                     } else {
@@ -519,19 +525,19 @@ private struct AssignmentListRow: View {
                         .foregroundStyle(IlluminedTheme.ink)
                         .lineLimit(2)
 
-                    Text("Due \(Self.dateFormatter.string(from: assignment.dueDate))")
+                    Text(IlluminedL10n.format("Due %@", Self.dateFormatter.string(from: assignment.dueDate)))
                         .font(IlluminedTheme.font(size: 12, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.blue)
 
                     HStack(spacing: 8) {
                         if assignment.hasAssignedReading {
-                            Label("\(assignment.assignedReadings.count) reading\(assignment.assignedReadings.count == 1 ? "" : "s")", systemImage: "doc.text")
+                            Label(IlluminedL10n.count(assignment.assignedReadings.count, singular: "%d reading", plural: "%d readings"), systemImage: "doc.text")
                                 .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.gold)
                         }
 
                         if !assignment.linkedLessons.isEmpty {
-                            Label("\(assignment.linkedLessons.count) lesson\(assignment.linkedLessons.count == 1 ? "" : "s")", systemImage: "book.closed")
+                            Label(IlluminedL10n.count(assignment.linkedLessons.count, singular: "%d lesson", plural: "%d lessons"), systemImage: "book.closed")
                                 .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.gold)
                         }
@@ -556,6 +562,7 @@ private struct AssignmentListRow: View {
 }
 
 private struct AssignmentDetailView: View {
+    @EnvironmentObject private var profileService: ProfileService
     let assignment: Assignment
     let isCompleted: Bool
     let lessonCategories: [LessonCategory]
@@ -563,6 +570,8 @@ private struct AssignmentDetailView: View {
     @ObservedObject var assignmentCompletionService: AssignmentCompletionService
     @StateObject private var discussionService = DiscussionPromptService()
     @State private var isSaving = false
+
+    private var completedLessonIds: [String] { Array((profileService.profile ?? profile).completedLessons) }
 
     private var liveCompleted: Bool {
         assignment.id.map { assignmentCompletionService.completedAssignmentIds.contains($0) } ?? isCompleted
@@ -579,8 +588,11 @@ private struct AssignmentDetailView: View {
         }
     }
 
-    private var linkedDiscussion: DiscussionPrompt? {
-        discussionService.prompt(for: assignment)
+    private var linkedDiscussions: [DiscussionPrompt] {
+        let direct = discussionService.prompts.filter { $0.assignmentId == assignment.id && $0.isVisible }
+        return direct.isEmpty ? discussionService.prompts.filter { prompt in
+            !prompt.isAssignmentLinked && prompt.isVisible && assignment.linkedLessons.contains { $0.lessonId == prompt.lessonId }
+        } : direct
     }
 
     private var readingsCompleted: Bool {
@@ -590,7 +602,7 @@ private struct AssignmentDetailView: View {
     }
 
     private var lessonsCompleted: Bool {
-        assignment.linkedLessons.allSatisfy { profile.completedLessons.contains($0.lessonId) }
+        assignment.linkedLessons.allSatisfy { completedLessonIds.contains($0.lessonId) }
     }
 
     private var prerequisitesCompleted: Bool {
@@ -598,8 +610,45 @@ private struct AssignmentDetailView: View {
     }
 
     private var discussionCompleted: Bool {
-        guard let linkedDiscussion else { return true }
-        return discussionService.completedPromptIds.contains(linkedDiscussion.id)
+        linkedDiscussions.allSatisfy { discussionService.completedPromptIds.contains($0.id) }
+    }
+
+    private func resumeText(_ en: String, _ es: String) -> String {
+        Locale.current.language.languageCode?.identifier == "es" ? es : en
+    }
+    @ViewBuilder private var continueAssignmentCard: some View {
+        let required = linkedDiscussions.filter { $0.requiredForAssignment }
+        let total = assignment.assignedReadings.count + assignment.linkedLessons.count + required.count
+        let completed = assignment.assignedReadings.filter { assignmentCompletionService.isReadingCompleted(assignment: assignment, reading: $0) }.count
+            + assignment.linkedLessons.filter { completedLessonIds.contains($0.lessonId) }.count
+            + required.filter { discussionService.completedPromptIds.contains($0.id) }.count
+        if total > 0 {
+            IlluminedCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(resumeText("\(completed) of \(total) activities completed", "\(completed) de \(total) actividades completadas"))
+                        .font(IlluminedTheme.font(size: 16, weight: .semibold))
+                    ProgressView(value: Double(completed), total: Double(total)).tint(IlluminedTheme.gold)
+                    Group {
+                        if let reading = assignment.assignedReadings.first(where: { !assignmentCompletionService.isReadingCompleted(assignment: assignment, reading: $0) }) {
+                            NavigationLink {
+                                AssignmentReadingDetailView(assignment: assignment, reading: reading, profile: profile, assignmentCompletionService: assignmentCompletionService)
+                            } label: { Text(resumeText("Continue Assignment", "Continuar tarea")) }
+                        } else if let link = assignment.linkedLessons.first(where: { !completedLessonIds.contains($0.lessonId) }) {
+                            if let match = linkedLessonMatches.first(where: { $0.lesson.id == link.lessonId }) {
+                                NavigationLink {
+                                    LessonDetailScreen(lesson: match.lesson, category: match.category, allCategories: lessonCategories)
+                                } label: { Text(resumeText("Continue Assignment", "Continuar tarea")) }
+                            } else {
+                                Text(resumeText("The next lesson is unavailable. Please contact your instructor.", "La siguiente lección no está disponible. Contacta a tu instructor."))
+                            }
+                        } else if let prompt = required.first(where: { !discussionService.completedPromptIds.contains($0.id) }) {
+                            NavigationLink { DiscussionBoardView(prompt: prompt) }
+                            label: { Text(resumeText("Continue Assignment", "Continuar tarea")) }
+                        }
+                    }.buttonStyle(IlluminedPrimaryButtonStyle())
+                }
+            }
+        }
     }
 
     private static let dateFormatter: DateFormatter = {
@@ -621,16 +670,18 @@ private struct AssignmentDetailView: View {
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Due \(Self.dateFormatter.string(from: assignment.dueDate))")
+                            Text(IlluminedL10n.format("Due %@", Self.dateFormatter.string(from: assignment.dueDate)))
                                 .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                         }
                     }
 
+                    continueAssignmentCard
+
                     if !assignment.instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Instructions")
+                                Text(IlluminedL10n.string("Instructions"))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -645,7 +696,7 @@ private struct AssignmentDetailView: View {
                     if assignment.hasAssignedReading {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Step 1 · Assigned Readings")
+                                Text(IlluminedL10n.string("Step 1 · Assigned Readings"))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -658,7 +709,7 @@ private struct AssignmentDetailView: View {
                                             assignmentCompletionService: assignmentCompletionService
                                         )
                                     } label: {
-                                        AssignmentReadingLinkRow(reading: reading)
+                                        AssignmentReadingLinkRow(reading: reading, isCompleted: assignmentCompletionService.isReadingCompleted(assignment: assignment, reading: reading))
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -669,7 +720,7 @@ private struct AssignmentDetailView: View {
                     if !linkedLessonMatches.isEmpty {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Step \(assignment.hasAssignedReading ? 2 : 1) · Lessons")
+                                Text(IlluminedL10n.format("Step %d · Lessons", assignment.hasAssignedReading ? 2 : 1))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -697,6 +748,7 @@ private struct AssignmentDetailView: View {
                                                 Text(match.category.category)
                                                     .font(IlluminedTheme.font(size: 12))
                                                     .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
+                                                AssignmentItemProgressLabel(isCompleted: completedLessonIds.contains(match.lesson.id))
                                             }
 
                                             Spacer()
@@ -714,10 +766,13 @@ private struct AssignmentDetailView: View {
                         }
                     }
 
-                    if let discussion = linkedDiscussion {
+                    ForEach(linkedDiscussions) { discussion in
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Step \((assignment.hasAssignedReading ? 1 : 0) + (!linkedLessonMatches.isEmpty ? 1 : 0) + 1) · Discussion")
+                                Text(IlluminedL10n.format(
+                                    "Step %d · Discussion",
+                                    (assignment.hasAssignedReading ? 1 : 0) + (!linkedLessonMatches.isEmpty ? 1 : 0) + 1
+                                ))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -725,14 +780,18 @@ private struct AssignmentDetailView: View {
                                     DiscussionBoardView(prompt: discussion)
                                 } label: {
                                     HStack(spacing: 12) {
-                                        Image(systemName: discussionCompleted ? "checkmark.circle.fill" : (prerequisitesCompleted ? "text.bubble.fill" : "lock.fill"))
-                                            .foregroundStyle(discussionCompleted ? .green : IlluminedTheme.blue)
+                                        Image(systemName: discussionService.completedPromptIds.contains(discussion.id) ? "checkmark.circle.fill" : "text.bubble.fill")
+                                            .foregroundStyle(IlluminedTheme.blue)
                                             .frame(width: 34, height: 34)
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(discussion.title)
                                                 .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                                 .foregroundStyle(IlluminedTheme.ink)
-                                            Text(discussionCompleted ? "Completed" : (prerequisitesCompleted ? "Ready after the readings and lessons" : "Complete the readings and lessons first"))
+                                            Text(IlluminedL10n.string(
+                                                discussionService.completedPromptIds.contains(discussion.id)
+                                                    ? "Completed"
+                                                    : "Ready to discuss"
+                                            ))
                                                 .font(IlluminedTheme.font(size: 12))
                                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                         }
@@ -744,13 +803,11 @@ private struct AssignmentDetailView: View {
                                     .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                                 }
                                 .buttonStyle(.plain)
-                                .disabled(!prerequisitesCompleted)
-                                .opacity(prerequisitesCompleted ? 1 : 0.68)
                             }
                         }
                     }
 
-                    if linkedDiscussion == nil {
+                    if !linkedDiscussions.contains(where: { $0.requiredForAssignment }) && assignment.assignedReadings.isEmpty && assignment.linkedLessons.isEmpty {
                         Button {
                             isSaving = true
                             Task {
@@ -758,12 +815,15 @@ private struct AssignmentDetailView: View {
                                 isSaving = false
                             }
                         } label: {
-                            Label(liveCompleted ? "Mark Assignment Incomplete" : "Mark Assignment Completed", systemImage: liveCompleted ? "checkmark.circle.fill" : "circle")
+                            Label(IlluminedL10n.string(liveCompleted ? "Mark Assignment Incomplete" : "Mark Assignment Completed"), systemImage: liveCompleted ? "checkmark.circle.fill" : "circle")
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(IlluminedPrimaryButtonStyle())
                         .disabled(isSaving || !prerequisitesCompleted)
+                    } else {
+                        Text(Locale.current.language.languageCode?.identifier == "es" ? "La tarea se completa automáticamente al terminar todas las lecturas, lecciones y respuestas de discusión asignadas." : "The assignment completes automatically when every assigned reading, lesson, and discussion response is finished.")
+                            .font(IlluminedTheme.font(size: 14)).foregroundStyle(IlluminedTheme.secondaryText)
                     }
                 }
                 .padding()
@@ -785,6 +845,7 @@ private struct AssignmentDetailView: View {
 
 private struct AssignmentReadingLinkRow: View {
     let reading: AssignmentReading
+    let isCompleted: Bool
 
     private var readingPreview: String {
         let compactText = reading.cleanedText
@@ -814,6 +875,7 @@ private struct AssignmentReadingLinkRow: View {
                     .font(IlluminedTheme.font(size: 12))
                     .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                     .lineLimit(1)
+                AssignmentItemProgressLabel(isCompleted: isCompleted)
             }
 
             Spacer()
@@ -824,6 +886,17 @@ private struct AssignmentReadingLinkRow: View {
         }
         .padding(10)
         .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+private struct AssignmentItemProgressLabel: View {
+    let isCompleted: Bool
+    var body: some View {
+        let spanish = Locale.current.language.languageCode?.identifier == "es"
+        Label(isCompleted ? (spanish ? "Completado" : "Completed") : (spanish ? "Pendiente" : "To do"),
+              systemImage: isCompleted ? "checkmark.circle.fill" : "circle")
+            .font(IlluminedTheme.font(size: 12, weight: .semibold))
+            .foregroundStyle(isCompleted ? Color(red: 0.18, green: 0.42, blue: 0.20) : IlluminedTheme.secondaryText)
     }
 }
 
@@ -863,7 +936,7 @@ private struct AssignmentRow: View {
                     Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
                         .font(IlluminedTheme.font(size: 22, weight: .semibold))
                         .foregroundStyle(isCompleted ? IlluminedTheme.blue : IlluminedTheme.ink.opacity(0.62))
-                        .accessibilityLabel(isCompleted ? "Mark incomplete" : "Mark complete")
+                        .accessibilityLabel(IlluminedL10n.string(isCompleted ? "Mark incomplete" : "Mark complete"))
                 }
                 .buttonStyle(.plain)
 
@@ -906,7 +979,7 @@ private struct AssignmentRow: View {
 
                 Spacer(minLength: 10)
 
-                Text("Due \(Self.dateFormatter.string(from: assignment.dueDate))")
+                Text(IlluminedL10n.format("Due %@", Self.dateFormatter.string(from: assignment.dueDate)))
                     .font(IlluminedTheme.font(size: 11, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
             }
@@ -921,7 +994,7 @@ private struct AssignmentRow: View {
                     }
 
                     if assignment.linkedLessons.count > 3 {
-                        Text("+ \(assignment.linkedLessons.count - 3) more lessons")
+                        Text(IlluminedL10n.format("+ %d more lessons", assignment.linkedLessons.count - 3))
                             .font(IlluminedTheme.font(size: 12, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                     }
@@ -929,7 +1002,7 @@ private struct AssignmentRow: View {
             }
 
             if assignment.hasAssignedReading {
-                Label("\(assignment.assignedReadings.count) reading\(assignment.assignedReadings.count == 1 ? "" : "s")", systemImage: "doc.text")
+                Label(IlluminedL10n.count(assignment.assignedReadings.count, singular: "%d reading", plural: "%d readings"), systemImage: "doc.text")
                     .font(IlluminedTheme.font(size: 12))
                     .foregroundStyle(IlluminedTheme.gold)
                     .lineLimit(1)
@@ -1018,7 +1091,7 @@ private struct AssignmentReadingDetailView: View {
                             isSaving = false
                         }
                     } label: {
-                        Label(isCompleted ? "Mark Reading Incomplete" : "Mark Reading Completed", systemImage: isCompleted ? "checkmark.circle.fill" : "circle")
+                        Label(IlluminedL10n.string(isCompleted ? "Mark Reading Incomplete" : "Mark Reading Completed"), systemImage: isCompleted ? "checkmark.circle.fill" : "circle")
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
@@ -1050,7 +1123,7 @@ private struct AssignmentLinkedLessonsView: View {
                                 .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Choose a lesson to begin.")
+                            Text(IlluminedL10n.string("Choose a lesson to begin."))
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                         }
@@ -1110,6 +1183,8 @@ private struct OCIAClassSession: Identifiable {
 
 private struct NextScheduledDayCard: View {
     let sessions: [OCIAClassSession]
+    let classId: String
+    let userId: String
 
     private static let displayFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -1128,7 +1203,7 @@ private struct NextScheduledDayCard: View {
                     .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Upcoming")
+                    Text(IlluminedL10n.string("Upcoming"))
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
@@ -1146,10 +1221,11 @@ private struct NextScheduledDayCard: View {
                             .font(IlluminedTheme.font(size: 15))
                             .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                     } else {
-                        Text("No class scheduled")
+                        Text(IlluminedL10n.string("No class scheduled"))
                             .font(IlluminedTheme.font(size: 19, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
                     }
+                    RefreshmentSignupView(classId: classId, userId: userId)
                 }
 
                 Spacer(minLength: 0)
@@ -1169,11 +1245,11 @@ private struct PrayerRequestsCard: View {
         IlluminedCard {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Prayer Requests")
+                    Text(IlluminedL10n.string("Prayer Requests"))
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text("Invite your class to pray with you")
+                    Text(IlluminedL10n.string("Invite your class to pray with you"))
                         .font(IlluminedTheme.font(size: 13))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
@@ -1182,7 +1258,7 @@ private struct PrayerRequestsCard: View {
                 Button {
                     onNewRequest()
                 } label: {
-                    Label("New Prayer Request", systemImage: "plus.circle.fill")
+                    Label(IlluminedL10n.string("New Prayer Request"), systemImage: "plus.circle.fill")
                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                         .frame(maxWidth: .infinity)
                 }
@@ -1190,7 +1266,7 @@ private struct PrayerRequestsCard: View {
                 .disabled(!canPost)
 
                 if requests.isEmpty {
-                    Text("No active prayer requests yet. Be the first to invite the class to pray.")
+                    Text(IlluminedL10n.string("No active prayer requests yet. Be the first to invite the class to pray."))
                         .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, 8)
@@ -1242,7 +1318,7 @@ private struct PrayerRequestRow: View {
                     .lineLimit(2)
 
                 if detailPreview.isEmpty {
-                    Text("No additional details.")
+                    Text(IlluminedL10n.string("No additional details."))
                         .font(IlluminedTheme.font(size: 12))
                         .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                 } else {
@@ -1294,7 +1370,7 @@ private struct PrayerRequestDetailView: View {
                         Divider()
 
                         if request.details.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Text("No additional details were added.")
+                            Text(IlluminedL10n.string("No additional details were added."))
                                 .foregroundStyle(IlluminedTheme.ink.opacity(0.62))
                         } else {
                             Text(request.details)
@@ -1305,7 +1381,7 @@ private struct PrayerRequestDetailView: View {
 
                         Divider()
 
-                        Text("Prayer acknowledgements")
+                        Text(IlluminedL10n.string("Prayer acknowledgements"))
                             .font(IlluminedTheme.font(size: 15, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
 
@@ -1323,7 +1399,7 @@ private struct PrayerRequestDetailView: View {
                                 } label: {
                                     VStack(spacing: 4) {
                                         Text(option.1)
-                                        Text("\(option.2)\(count > 0 ? " · \(count)" : "")")
+                                        Text("\(IlluminedL10n.string(option.2))\(count > 0 ? " · \(count)" : "")")
                                             .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                     }
                                     .frame(maxWidth: .infinity)
@@ -1336,7 +1412,11 @@ private struct PrayerRequestDetailView: View {
                         }
 
                         if request.requesterId == currentUserId {
-                            Text("Classmates can acknowledge this request. \(request.reactionMap.count) response\(request.reactionMap.count == 1 ? "" : "s") received.")
+                            Text(IlluminedL10n.count(
+                                request.reactionMap.count,
+                                singular: "Classmates can acknowledge this request. %d response received.",
+                                plural: "Classmates can acknowledge this request. %d responses received."
+                            ))
                                 .font(IlluminedTheme.font(size: 12))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                         }
@@ -1346,9 +1426,7 @@ private struct PrayerRequestDetailView: View {
                 .padding()
             }
         }
-        .navigationTitle("Prayer Request")
-        .navigationBarTitleDisplayMode(.inline)
-        .illuminedNavigation()
+        .illuminedBrandHeader()
     }
 }
 
@@ -1370,11 +1448,11 @@ private struct PrayerRequestComposerView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("New Prayer Request")
+                                Text(IlluminedL10n.string("New Prayer Request"))
                                     .font(IlluminedTheme.font(size: 26, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
-                                Text("Share a request with your class so they can pray with you.")
+                                Text(IlluminedL10n.string("Share a request with your class so they can pray with you."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -1383,17 +1461,17 @@ private struct PrayerRequestComposerView: View {
 
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 14) {
-                                Text("Prayer Request")
+                                Text(IlluminedL10n.string("Prayer Request"))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
                                 IlluminedTextField(
-                                    title: "Title",
+                                    title: IlluminedL10n.string("Title"),
                                     text: $title,
                                     autocapitalization: .sentences
                                 )
 
-                                TextField("", text: $details, prompt: Text("Optional details").foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
+                                TextField("", text: $details, prompt: Text(IlluminedL10n.string("Optional details")).foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
                                     .font(IlluminedTheme.font(size: 17))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -1410,7 +1488,7 @@ private struct PrayerRequestComposerView: View {
 
                         IlluminedCard {
                             Label {
-                                Text("Requests stay visible for 3 days and then expire from the board.")
+                                Text(IlluminedL10n.string("Requests stay visible for 3 days and then expire from the board."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -1448,7 +1526,7 @@ private struct PrayerRequestComposerView: View {
                     .disabled(isPosting)                }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isPosting ? "Posting..." : "Post") {
+                    Button(IlluminedL10n.string(isPosting ? "Posting..." : "Post")) {
                         post()
                     }
                     .font(IlluminedTheme.font(size: 15, weight: .semibold))
@@ -1473,7 +1551,7 @@ private struct PrayerRequestComposerView: View {
     }
 }
 
-private struct StatPill: View {
+struct StatPill: View {
     let title: String
     let value: String
     let color: Color

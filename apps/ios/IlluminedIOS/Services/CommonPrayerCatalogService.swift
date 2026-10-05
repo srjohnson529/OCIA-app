@@ -22,7 +22,7 @@ final class CommonPrayerCatalogService: ObservableObject {
     }
 
     func names(for prayerIds: [String]) -> [String] {
-        let prayerById = Dictionary(uniqueKeysWithValues: prayers.map { ($0.id, $0.title) })
+        let prayerById = Dictionary(uniqueKeysWithValues: prayers.map { ($0.id, $0.localizedTitle) })
 
         return prayerIds
             .sorted()
@@ -33,6 +33,11 @@ final class CommonPrayerCatalogService: ObservableObject {
 struct CommonPrayerSummary: Identifiable, Decodable, Equatable {
     let id: String
     let title: String
+    let titleEs: String?
+
+    var localizedTitle: String {
+        Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true ? (titleEs ?? title) : title
+    }
 }
 
 private struct FormationPrayerCatalog: Decodable {

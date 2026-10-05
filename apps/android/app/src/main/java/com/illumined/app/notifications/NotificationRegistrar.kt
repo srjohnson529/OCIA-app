@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
+import java.util.Locale
 
 class NotificationRegistrar(
     private val messaging: FirebaseMessaging = FirebaseMessaging.getInstance(),
@@ -43,6 +44,7 @@ class NotificationRegistrar(
                 "fcmTokens" to FieldValue.arrayUnion(token),
                 "lastFcmToken" to token,
                 "notificationPlatform" to "android",
+                "notificationLanguage" to if (Locale.getDefault().language == "es") "es" else "en",
                 "notificationClassId" to classId,
                 "notificationUpdatedAt" to FieldValue.serverTimestamp(),
                 "notificationNewPrayerRequests" to notificationsEnabled,

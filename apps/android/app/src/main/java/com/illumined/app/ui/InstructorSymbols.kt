@@ -39,9 +39,9 @@ internal fun instructorSymbol(systemName: String) = when (systemName) {
     else -> InstructorSymbolKind.Tools
 }
 
-internal fun instructorToolSymbol(key: String) = instructorSymbol(when(key){
-    "classes"->"person.3";"announcements"->"megaphone";"schedule"->"calendar.badge.clock";"assignments"->"checklist";"discussions"->"text.bubble";"progress"->"chart.bar";else->"key"
-})
+internal fun instructorToolSymbol(key: String) = instructorSymbol(
+    InstructorToolPresentation.items.firstOrNull { it.key == key }?.symbolName ?: "person.text.rectangle"
+)
 
 @Composable internal fun InstructorSymbol(kind: InstructorSymbolKind, color: Color, modifier: Modifier = Modifier) {
     when(kind) {

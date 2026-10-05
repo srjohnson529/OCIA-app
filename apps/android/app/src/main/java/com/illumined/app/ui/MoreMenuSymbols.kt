@@ -10,22 +10,24 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 
-internal enum class MoreMenuSymbolKind { Awards, Chat, Account, Notifications, Games, InstructorTools, AdminTools }
+internal enum class MoreMenuSymbolKind { Guides, Awards, Chat, Account, Notifications, Games, InstructorTools, AdminTools }
 
 internal fun moreMenuSymbol(title: String) = when (title) {
-    "Awards" -> MoreMenuSymbolKind.Awards
+    "My Guides", "Mis guías" -> MoreMenuSymbolKind.Guides
+    "Awards", "Premios" -> MoreMenuSymbolKind.Awards
     "Chat" -> MoreMenuSymbolKind.Chat
-    "Account" -> MoreMenuSymbolKind.Account
-    "Notifications" -> MoreMenuSymbolKind.Notifications
-    "Games" -> MoreMenuSymbolKind.Games
-    "Instructor Tools" -> MoreMenuSymbolKind.InstructorTools
-    "Admin Tools" -> MoreMenuSymbolKind.AdminTools
+    "Account", "Cuenta" -> MoreMenuSymbolKind.Account
+    "Notifications", "Notificaciones" -> MoreMenuSymbolKind.Notifications
+    "Games", "Juegos" -> MoreMenuSymbolKind.Games
+    "Instructor Tools", "Herramientas del instructor" -> MoreMenuSymbolKind.InstructorTools
+    "Admin Tools", "Herramientas administrativas" -> MoreMenuSymbolKind.AdminTools
     else -> MoreMenuSymbolKind.Games
 }
 
 @Composable
 internal fun MoreMenuSymbol(kind: MoreMenuSymbolKind, color: Color, modifier: Modifier = Modifier) {
     when (kind) {
+        MoreMenuSymbolKind.Guides -> AccountSymbol(AccountSymbolKind.Book, color, modifier)
         MoreMenuSymbolKind.Awards -> AccountSymbol(AccountSymbolKind.Rosette, color, modifier)
         MoreMenuSymbolKind.Chat -> ChatSymbol(ChatSymbolKind.Message, color, modifier)
         MoreMenuSymbolKind.Account -> AccountSymbol(AccountSymbolKind.Person, color, modifier)

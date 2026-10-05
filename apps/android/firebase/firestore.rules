@@ -41,7 +41,7 @@ service cloud.firestore {
     }
 
     function isInClass(classId) {
-      return hasProfile() && classId in userProfile().classIds;
+      return hasProfile() && classId in userProfile().classIds && !(classId in userProfile().get('removedClassIds', []));
     }
 
     function classIsActive(classId) {
@@ -126,14 +126,16 @@ service cloud.firestore {
           !("activeClassId" in request.resource.data) ||
           (
             request.resource.data.activeClassId is string &&
-            request.resource.data.activeClassId in request.resource.data.classIds
+            (request.resource.data.activeClassId in request.resource.data.classIds ||
+              (request.resource.data.activeClassId == '' && request.resource.data.classIds.size() == 0))
           )
         ) &&
         (
           !("classId" in request.resource.data) ||
           (
             request.resource.data.classId is string &&
-            request.resource.data.classId in request.resource.data.classIds
+            (request.resource.data.classId in request.resource.data.classIds ||
+              (request.resource.data.classId == '' && request.resource.data.classIds.size() == 0))
           )
         );
     }
@@ -160,12 +162,14 @@ service cloud.firestore {
 
     function validOwnProfileCreate(userId) {
       return isOwnDocument(userId) &&
+        request.resource.data.get('inactiveClassIds', []) == [] &&
+        request.resource.data.get('removedClassIds', []) == [] &&
         request.resource.data.userId == request.auth.uid &&
         validActiveClassSelection() &&
         classWillBeActive(request.resource.data.activeClassId) &&
         (!("isAdmin" in request.resource.data) || request.resource.data.isAdmin == false) &&
         (
-          request.resource.data.isInstructor == false ||
+          // Student enrollment is performed only by joinStudentClass.
           validInstructorInviteClaim() ||
           validNewClassClaim()
         );
@@ -173,11 +177,15 @@ service cloud.firestore {
 
     function validOwnProfileUpdate(userId) {
       return isOwnDocument(userId) &&
+        request.resource.data.get('inactiveClassIds', []) == resource.data.get('inactiveClassIds', []) &&
+        request.resource.data.get('removedClassIds', []) == resource.data.get('removedClassIds', []) &&
+        !request.resource.data.classIds.hasAny(resource.data.get('removedClassIds', [])) &&
         request.resource.data.userId == request.auth.uid &&
         validActiveClassSelection() &&
         (!("isAdmin" in request.resource.data) || request.resource.data.isAdmin == false) &&
         (
-          request.resource.data.isInstructor == false ||
+          (request.resource.data.isInstructor == false && resource.data.isInstructor == false &&
+            request.resource.data.classIds == resource.data.classIds) ||
           (
             request.resource.data.isInstructor == resource.data.isInstructor &&
             request.resource.data.classIds == resource.data.classIds
@@ -220,12 +228,45 @@ service cloud.firestore {
         classId in getAfter(profilePath()).data.classIds;
     }
 
+    match /walkthroughContent/{version} {
+      allow get: if isAdmin() || (version == 'published' && isInstructor());
+      allow create, update: if isAdmin() && version in ['draft', 'published'] &&
+        request.resource.data.keys().hasOnly(['steps', 'revision', 'updatedBy', 'updatedAt']) &&
+        request.resource.data.steps is map && request.resource.data.steps.size() <= 150 &&
+        request.resource.data.revision is string && request.resource.data.revision.size() == 36 &&
+        request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /walkthroughSettings/instructors {
+      allow get: if isInstructor() || isAdmin();
+      allow create, update: if isAdmin() &&
+        request.resource.data.keys().hasOnly(['revision', 'updatedBy', 'updatedAt']) &&
+        request.resource.data.revision is string &&
+        request.resource.data.revision.size() == 36 &&
+        request.resource.data.updatedBy == request.auth.uid &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /instructorUpdates/{updateId} {
+      allow read: if isInstructor() || isAdmin();
+      allow write: if false;
+    }
+    match /userProfiles/{userId}/instructorUpdateReceipts/{updateId} {
+      allow read: if isOwnDocument(userId) && (isInstructor() || isAdmin());
+      allow create, update: if isOwnDocument(userId) && (isInstructor() || isAdmin()) &&
+        request.resource.data.keys().hasOnly(['dismissedAt']) &&
+        request.resource.data.dismissedAt == request.time &&
+        exists(/databases/$(database)/documents/instructorUpdates/$(updateId));
+    }
+
     match /userProfiles/{userId} {
       allow create: if validOwnProfileCreate(userId);
       allow get: if isOwnDocument(userId) || isAdmin() ||
-        (isInstructor() && resource.data.classIds.hasAny(userProfile().classIds));
+        (isInstructor() && (resource.data.classIds.hasAny(userProfile().classIds) || resource.data.get('removedClassIds', []).hasAny(userProfile().classIds)));
       allow list: if isAdmin() ||
-        (isInstructor() && resource.data.classIds.hasAny([activeProfileClassId()]));
+        (isInstructor() && (resource.data.classIds.hasAny([activeProfileClassId()]) || resource.data.get('removedClassIds', []).hasAny([activeProfileClassId()])));
       allow update: if isAdmin() || validOwnProfileUpdate(userId);
       allow delete: if isAdmin();
     }
@@ -251,16 +292,109 @@ service cloud.firestore {
       allow update: if isAdmin() || validParishSetupClaim();
     }
 
+    // Shared inbox: a student and CURRENT classroom instructors only.
+    function inboxMember(classId) {
+      let p = userProfile();
+      return signedIn() && classId in p.get('classIds', []) &&
+        !(classId in p.get('removedClassIds', [])) &&
+        !(classId in p.get('inactiveClassIds', [])) &&
+        !(classId in p.get('archivedClassIds', [])) &&
+        exists(/databases/$(database)/documents/classrooms/$(classId)) &&
+        get(/databases/$(database)/documents/classrooms/$(classId)).data.get('isArchived', false) == false;
+    }
+    function inboxParticipant(data) {
+      return inboxMember(data.classId) &&
+        (request.auth.uid == data.studentId || userProfile().get('isInstructor', false) == true);
+    }
+    function inboxName(name) {
+      return name is string && name.size() > 0 && name.size() <= 200 &&
+        (name == userProfile().get('displayName', '') || name == userProfile().get('username', ''));
+    }
+    match /instructorConversations/{conversationId} {
+      function eligibleStudent(data) {
+        let student = get(/databases/$(database)/documents/userProfiles/$(data.studentId)).data;
+        return student.get('isInstructor', false) == false && student.get('isAdmin', false) == false &&
+          data.classId in student.get('classIds', []) &&
+          !(data.classId in student.get('removedClassIds', [])) &&
+          !(data.classId in student.get('inactiveClassIds', [])) &&
+          !(data.classId in student.get('archivedClassIds', [])) &&
+          data.studentName is string && data.studentName.size() > 0 && data.studentName.size() <= 200 &&
+          (data.studentName == student.get('displayName', '') || data.studentName == student.get('username', ''));
+      }
+      allow read: if inboxParticipant(resource.data);
+      allow create: if inboxMember(request.resource.data.classId) &&
+        (request.resource.data.studentId == request.auth.uid || userProfile().get('isInstructor', false) == true) &&
+        eligibleStudent(request.resource.data) &&
+        conversationId == request.resource.data.classId + '__' + request.resource.data.studentId &&
+        request.resource.data.keys().hasOnly(['classId','studentId','studentName','updatedAt','lastSenderId']) &&
+        request.resource.data.lastSenderId == request.auth.uid &&
+        request.resource.data.updatedAt == request.time;
+      allow update: if inboxParticipant(resource.data) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','lastSenderId']) &&
+        request.resource.data.lastSenderId == request.auth.uid &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+      match /messages/{messageId} {
+        function conversation() {
+          return get(/databases/$(database)/documents/instructorConversations/$(conversationId)).data;
+        }
+        allow read: if inboxParticipant(conversation());
+        allow create: if inboxParticipant(getAfter(/databases/$(database)/documents/instructorConversations/$(conversationId)).data) &&
+          request.resource.data.keys().hasOnly(['senderId','senderName','message','timestamp']) &&
+          request.resource.data.senderId == request.auth.uid &&
+          inboxName(request.resource.data.senderName) &&
+          request.resource.data.message is string &&
+          request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 4000 &&
+          request.resource.data.timestamp == request.time;
+        allow update, delete: if false;
+      }
+    }
+
+    function existingChatMember(classId) {
+      let p = userProfile();
+      return signedIn() && classId in p.get('classIds', []) &&
+        !(classId in p.get('removedClassIds', [])) &&
+        !(classId in p.get('inactiveClassIds', [])) &&
+        !(classId in p.get('archivedClassIds', [])) &&
+        (!exists(/databases/$(database)/documents/classrooms/$(classId)) ||
+         get(/databases/$(database)/documents/classrooms/$(classId)).data.get('isArchived', false) == false);
+    }
+    function validChatReaction() {
+      let before = resource.data.get('reactions', {});
+      let after = request.resource.data.get('reactions', {});
+      return after is map &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']) &&
+        after.diff(before).affectedKeys().hasOnly([request.auth.uid]) &&
+        (!(request.auth.uid in after) || after[request.auth.uid] in ['🙏','❤️','👍']);
+    }
+    match /refreshmentSignups/{signupId} {
+      function enabled() {
+        let path = /databases/$(database)/documents/classrooms/$(resource.data.classId)/settings/refreshments;
+        return !exists(path) || get(path).data.get('enabled', true) != false;
+      }
+      allow read: if existingChatMember(resource.data.classId) && (enabled() || userProfile().get('isInstructor',false)==true);
+      // Callable transactions enforce one volunteer per classroom/date.
+      allow write: if false;
+    }
     match /chatMessages/{messageId} {
       allow read: if canReadClass(resource.data.classId);
       allow create: if signedIn() &&
         request.resource.data.senderId == request.auth.uid &&
-        isInActiveClass(request.resource.data.classId);
-      allow update: if signedIn() && sameClass() &&
-        request.resource.data.senderId == resource.data.senderId &&
-        (resource.data.senderId == request.auth.uid || isInstructorForClass(resource.data.classId));
-      allow delete: if signedIn() &&
-        (resource.data.senderId == request.auth.uid || isInstructorForClass(resource.data.classId));
+        existingChatMember(request.resource.data.classId) && inboxName(request.resource.data.senderName) &&
+        request.resource.data.keys().hasOnly(['classId','senderId','senderName','senderEmail','message','timestamp','replyTo']) &&
+        request.resource.data.message is string && request.resource.data.message.size() > 0 &&
+        request.resource.data.message.size() <= 4000 && request.resource.data.timestamp == request.time &&
+        (!('replyTo' in request.resource.data) ||
+          (request.resource.data.replyTo is string &&
+           get(/databases/$(database)/documents/chatMessages/$(request.resource.data.replyTo)).data.classId == request.resource.data.classId));
+      allow update: if signedIn() && existingChatMember(resource.data.classId) &&
+        (validChatReaction() ||
+          (resource.data.senderId == request.auth.uid &&
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message','editedAt']) &&
+           request.resource.data.message is string && request.resource.data.message.size() > 0 &&
+           request.resource.data.message.size() <= 4000 && request.resource.data.editedAt == request.time));
+      allow delete: if signedIn() && existingChatMember(resource.data.classId) &&
+        (resource.data.senderId == request.auth.uid || userProfile().get('isInstructor', false) == true);
     }
 
     match /prayerRequests/{requestId} {
@@ -400,7 +534,7 @@ service cloud.firestore {
 
     match /classrooms/{classId}/settings/{settingId} {
       allow read: if isInClass(classId);
-      allow create, update, delete: if isInstructorForClass(classId);
+      allow create, update, delete: if settingId != 'refreshments' && isInstructorForClass(classId);
     }
 
     match /classrooms/{classId}/dailyFormation/{date} {
@@ -428,8 +562,70 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+
+    // Rite preparations are class-scoped. A receipt is not sacramental attendance.
+    function riteMember(classId) {
+      return isInClass(classId) &&
+        (!exists(/databases/$(database)/documents/classrooms/$(classId)) ||
+         get(/databases/$(database)/documents/classrooms/$(classId)).data.get('isArchived', false) == false);
+    }
+    function riteTeacher(classId) { return isInstructor() && riteMember(classId); }
+    function validRite() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['title','meaning','context','studentActions','ministerActions','preparation',
+        'riteDate','timeZone','expiresAt','published','revision','createdBy','updatedBy','updatedAt',
+        'meaningHeading','contextHeading','studentActionsHeading','ministerActionsHeading','preparationHeading','deleted']) &&
+        (!('deleted' in d) || (d.deleted is bool && (!d.deleted || d.published == false))) &&
+        (!('meaningHeading' in d) || (d.meaningHeading is string && d.meaningHeading.size() > 0 && d.meaningHeading.size() <= 160)) &&
+        (!('contextHeading' in d) || (d.contextHeading is string && d.contextHeading.size() > 0 && d.contextHeading.size() <= 160)) &&
+        (!('studentActionsHeading' in d) || (d.studentActionsHeading is string && d.studentActionsHeading.size() > 0 && d.studentActionsHeading.size() <= 160)) &&
+        (!('ministerActionsHeading' in d) || (d.ministerActionsHeading is string && d.ministerActionsHeading.size() > 0 && d.ministerActionsHeading.size() <= 160)) &&
+        (!('preparationHeading' in d) || (d.preparationHeading is string && d.preparationHeading.size() > 0 && d.preparationHeading.size() <= 160)) &&
+        d.title is string && d.title.size() > 0 && d.title.size() <= 160 &&
+        d.meaning is string && d.meaning.size() > 0 && d.meaning.size() <= 12000 &&
+        d.context is string && d.context.size() > 0 && d.context.size() <= 12000 &&
+        d.studentActions is string && d.studentActions.size() > 0 && d.studentActions.size() <= 12000 &&
+        d.ministerActions is string && d.ministerActions.size() > 0 && d.ministerActions.size() <= 12000 &&
+        d.preparation is string && d.preparation.size() > 0 && d.preparation.size() <= 12000 &&
+        d.riteDate is string && d.riteDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}') &&
+        d.timeZone is string && d.timeZone.size() > 0 && d.timeZone.size() <= 100 &&
+        d.expiresAt is timestamp && d.published is bool &&
+        (!d.published || d.expiresAt > request.time) &&
+        d.revision is string && d.revision.size() > 0 && d.revision.size() <= 100 &&
+        d.updatedBy == request.auth.uid && d.updatedAt == request.time;
+    }
+    match /classrooms/{classId}/ritePreparations/{riteId} {
+      allow read: if riteTeacher(classId) || (riteMember(classId) && resource.data.published == true);
+      allow create: if riteTeacher(classId) && validRite() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if riteTeacher(classId) && validRite() &&
+        resource.data.get('deleted', false) == false &&
+        request.resource.data.createdBy == resource.data.createdBy &&
+        request.resource.data.revision != resource.data.revision;
+      allow delete: if false; // Unpublish instead; preserve acknowledgment records.
+      match /acknowledgments/{userId} {
+        allow get: if riteTeacher(classId) || (riteMember(classId) && isOwnDocument(userId));
+        allow list: if riteTeacher(classId);
+        allow create, update: if riteMember(classId) && isOwnDocument(userId) &&
+          request.resource.data.keys().hasOnly(['userId','revision','acknowledgedAt']) &&
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.acknowledgedAt == request.time &&
+          get(/databases/$(database)/documents/classrooms/$(classId)/ritePreparations/$(riteId)).data.published == true &&
+          get(/databases/$(database)/documents/classrooms/$(classId)/ritePreparations/$(riteId)).data.expiresAt > request.time &&
+          request.resource.data.revision ==
+            get(/databases/$(database)/documents/classrooms/$(classId)/ritePreparations/$(riteId)).data.revision;
+        allow delete: if false;
+      }
+    }
+
     match /lessons/{lessonId} {
       allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // No public reads of directory documents: the callable returns a limited, filtered projection.
+    match /classroomJoinRequests/{userId} {
+      allow get: if isOwnDocument(userId) || isInstructorForClass(resource.data.classId);
+      allow list: if isInstructorForClass(resource.data.classId);
       allow write: if false;
     }
 

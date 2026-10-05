@@ -6,6 +6,8 @@
       "id": "foundations-complete",
       "name": "Foundations Master",
       "description": "Complete all lessons in 'The Profession of Faith' category.",
+      "nameEs": "Maestro de los fundamentos",
+      "descriptionEs": "Completa todas las lecciones de la categoría «Profesión de fe».",
       "imageUrl": "images/badge_foundations.png",
       "requiredCategory": "The Profession of Faith",
       "symbolName": "cross.fill"
@@ -14,6 +16,8 @@
       "id": "celebration-complete",
       "name": "Liturgical Expert",
       "description": "Complete all lessons in 'The Celebration of the Christian Mysteries' category.",
+      "nameEs": "Experto en liturgia",
+      "descriptionEs": "Completa todas las lecciones de la categoría «Celebración del misterio cristiano».",
       "imageUrl": "images/badge_celebration.png",
       "requiredCategory": "The Celebration of the Christian Mysteries",
       "symbolName": "sparkles"
@@ -22,6 +26,8 @@
       "id": "life-in-christ-complete",
       "name": "Moral Champion",
       "description": "Complete all lessons in the 'Life in Christ' category.",
+      "nameEs": "Campeón de la vida moral",
+      "descriptionEs": "Completa todas las lecciones de la categoría «Vida en Cristo».",
       "imageUrl": "images/badge_morality.png",
       "requiredCategory": "Life in Christ",
       "symbolName": "heart.fill"
@@ -30,6 +36,8 @@
       "id": "prayer-complete",
       "name": "Prayer Warrior",
       "description": "Complete all lessons in the 'Christian Prayer' category.",
+      "nameEs": "Guerrero de la oración",
+      "descriptionEs": "Completa todas las lecciones de la categoría «Oración cristiana».",
       "imageUrl": "images/prayer_badge.png",
       "requiredCategory": "Christian Prayer",
       "symbolName": "hands.sparkles.fill"
@@ -38,6 +46,8 @@
       "id": "illumined-graduate",
       "name": "Illumined Graduate",
       "description": "Complete all lessons in the app.",
+      "nameEs": "Graduado de Illumined",
+      "descriptionEs": "Completa todas las lecciones de la aplicación.",
       "imageUrl": "images/badge_graduate.png",
       "requiredCategory": "all",
       "symbolName": "graduationcap.fill"
@@ -46,6 +56,8 @@
       "id": "rosary-joyful",
       "name": "Joyful Mysteries",
       "description": "Complete a guided prayer of the Joyful Mysteries.",
+      "nameEs": "Misterios gozosos",
+      "descriptionEs": "Completa una oración guiada de los Misterios gozosos.",
       "imageUrl": "images/badge_joyful.png",
       "requiredMystery": "joyful",
       "symbolName": "sun.max.fill"
@@ -54,6 +66,8 @@
       "id": "rosary-luminous",
       "name": "Luminous Mysteries",
       "description": "Complete a guided prayer of the Luminous Mysteries.",
+      "nameEs": "Misterios luminosos",
+      "descriptionEs": "Completa una oración guiada de los Misterios luminosos.",
       "imageUrl": "images/badge_luminous.png",
       "requiredMystery": "luminous",
       "symbolName": "lightbulb.fill"
@@ -62,6 +76,8 @@
       "id": "rosary-sorrowful",
       "name": "Sorrowful Mysteries",
       "description": "Complete a guided prayer of the Sorrowful Mysteries.",
+      "nameEs": "Misterios dolorosos",
+      "descriptionEs": "Completa una oración guiada de los Misterios dolorosos.",
       "imageUrl": "images/badge_sorrowful.png",
       "requiredMystery": "sorrowful",
       "symbolName": "drop.fill"
@@ -70,6 +86,8 @@
       "id": "rosary-glorious",
       "name": "Glorious Mysteries",
       "description": "Complete a guided prayer of the Glorious Mysteries.",
+      "nameEs": "Misterios gloriosos",
+      "descriptionEs": "Completa una oración guiada de los Misterios gloriosos.",
       "imageUrl": "images/badge_glorious.png",
       "requiredMystery": "glorious",
       "symbolName": "crown.fill"

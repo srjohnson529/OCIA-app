@@ -20,11 +20,11 @@ struct InstructorDiscussionPromptsView: View {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 16) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Discussion Boards", systemImage: "text.bubble")
+                                Label(IlluminedL10n.string("Discussion Boards"), systemImage: "text.bubble")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Create discussion prompts and place them as the final step of an assignment.")
+                                Text(IlluminedL10n.string("Create discussion prompts and place them as the final step of an assignment."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -33,7 +33,7 @@ struct InstructorDiscussionPromptsView: View {
                             Button {
                                 isShowingEditor = true
                             } label: {
-                                Label("New Discussion", systemImage: "plus.circle.fill")
+                                Label(IlluminedL10n.string("New Discussion"), systemImage: "plus.circle.fill")
                                     .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -45,9 +45,9 @@ struct InstructorDiscussionPromptsView: View {
                     if editablePrompts.isEmpty {
                         IlluminedCard {
                             ContentUnavailableView(
-                                "No Discussion Boards",
+                                IlluminedL10n.string("No Discussion Boards"),
                                 systemImage: "text.bubble",
-                                description: Text("Create your first assignment-linked discussion prompt.")
+                                description: Text(IlluminedL10n.string("Create your first assignment-linked discussion prompt."))
                             )
                         }
                     } else {
@@ -101,13 +101,13 @@ struct InstructorDiscussionPromptsView: View {
                 )
             )
         }
-        .alert("Discussion Error", isPresented: Binding(
+        .alert(IlluminedL10n.string("Discussion Error"), isPresented: Binding(
             get: { discussionService.errorMessage != nil },
             set: { if !$0 { discussionService.errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { discussionService.errorMessage = nil }
+            Button(IlluminedL10n.string("OK"), role: .cancel) { discussionService.errorMessage = nil }
         } message: {
-            Text(discussionService.errorMessage ?? "")
+            Text(IlluminedL10n.string(discussionService.errorMessage ?? ""))
         }
     }
 }
@@ -147,7 +147,7 @@ private struct InstructorDiscussionPromptCard: View {
                     .foregroundStyle(IlluminedTheme.secondaryText)
                     .lineLimit(3)
 
-                Text(prompt.isVisible ? "Visible to students" : "Hidden from students")
+                Text(IlluminedL10n.string(prompt.isVisible ? "Visible to students" : "Hidden from students"))
                     .font(IlluminedTheme.font(size: 11, weight: .semibold))
                     .foregroundStyle(prompt.isVisible ? IlluminedTheme.blue : IlluminedTheme.secondaryText)
             }
@@ -176,9 +176,9 @@ private struct DiscussionPromptEditorView: View {
     private var screenTitle: String {
         switch mode {
         case .create:
-            return "New Discussion"
+            return IlluminedL10n.string("New Discussion")
         case .edit:
-            return "Edit Discussion"
+            return IlluminedL10n.string("Edit Discussion")
         }
     }
 
@@ -233,9 +233,9 @@ private struct DiscussionPromptEditorView: View {
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                IlluminedTextField(title: "Discussion Title", text: $title, autocapitalization: .sentences)
+                                IlluminedTextField(title: IlluminedL10n.string("Discussion Title"), text: $title, autocapitalization: .sentences)
 
-                                TextField("", text: $promptText, prompt: Text("Discussion Prompt").foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
+                                TextField("", text: $promptText, prompt: Text(IlluminedL10n.string("Discussion Prompt")).foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
                                     .font(IlluminedTheme.font(size: 17))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -250,7 +250,7 @@ private struct DiscussionPromptEditorView: View {
 
                                 Divider()
 
-                                Text("Linked Assignment")
+                                Text(IlluminedL10n.string("Linked Assignment"))
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -262,10 +262,10 @@ private struct DiscussionPromptEditorView: View {
                                             Image(systemName: selectedAssignmentId.isEmpty ? "checkmark.circle.fill" : "circle")
                                                 .foregroundStyle(IlluminedTheme.blue)
                                             VStack(alignment: .leading, spacing: 3) {
-                                                Text("Discussion Activity")
+                                                Text(IlluminedL10n.string("Discussion Activity"))
                                                     .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                                     .foregroundStyle(IlluminedTheme.ink)
-                                                Text("Available immediately and not part of an assignment.")
+                                                Text(IlluminedL10n.string("Available immediately and not part of an assignment."))
                                                     .font(IlluminedTheme.font(size: 12))
                                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                             }
@@ -283,13 +283,13 @@ private struct DiscussionPromptEditorView: View {
                                                 .foregroundStyle(IlluminedTheme.blue)
                                                 .lineLimit(2)
                                         } else {
-                                            Text("Choose the assignment this discussion completes.")
+                                            Text(IlluminedL10n.string("Choose the assignment this discussion completes."))
                                                 .font(IlluminedTheme.font(size: 13))
                                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                         }
 
                                         if assignmentHasAnotherDiscussion {
-                                            Text("That assignment already has a discussion step.")
+                                            Text(IlluminedL10n.string("That assignment already has a discussion step."))
                                                 .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                                 .foregroundStyle(.red)
                                         }
@@ -315,7 +315,7 @@ private struct DiscussionPromptEditorView: View {
                                     }
                                 }
 
-                                Toggle("Visible to Students", isOn: $isActive)
+                                Toggle(IlluminedL10n.string("Visible to Students"), isOn: $isActive)
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -325,7 +325,7 @@ private struct DiscussionPromptEditorView: View {
                         Button {
                             save()
                         } label: {
-                            Text(isSaving ? "Saving..." : "Save Discussion")
+                            Text(IlluminedL10n.string(isSaving ? "Saving..." : "Save Discussion"))
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
@@ -336,7 +336,7 @@ private struct DiscussionPromptEditorView: View {
                             Button(role: .destructive) {
                                 isConfirmingDelete = true
                             } label: {
-                                Label("Delete Discussion", systemImage: "trash")
+                                Label(IlluminedL10n.string("Delete Discussion"), systemImage: "trash")
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -351,17 +351,17 @@ private struct DiscussionPromptEditorView: View {
             .illuminedNavigation()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(IlluminedL10n.string("Cancel")) {
                         isPresented = false
                     }
                     .disabled(isSaving)
                 }
             }
-            .confirmationDialog("Delete this discussion?", isPresented: $isConfirmingDelete, titleVisibility: .visible) {
-                Button("Delete", role: .destructive) {
+            .confirmationDialog(IlluminedL10n.string("Delete this discussion?"), isPresented: $isConfirmingDelete, titleVisibility: .visible) {
+                Button(IlluminedL10n.string("Delete"), role: .destructive) {
                     deletePrompt()
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(IlluminedL10n.string("Cancel"), role: .cancel) {}
             }
         }
     }
@@ -439,7 +439,9 @@ private struct SingleLessonCategoryPickerSection: View {
                             .font(IlluminedTheme.font(size: 15, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
 
-                        Text(selectedCount == 0 ? "\(category.lessons.count) lessons" : "Selected in this category")
+                        Text(selectedCount == 0
+                            ? IlluminedL10n.count(category.lessons.count, singular: "%d lesson", plural: "%d lessons")
+                            : IlluminedL10n.string("Selected in this category"))
                             .font(IlluminedTheme.font(size: 12))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }

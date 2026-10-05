@@ -61,6 +61,16 @@ private struct CommonPrayer: Identifiable, Decodable {
     let id: String
     let title: String
     let text: String
+    let titleEs: String?
+    let textEs: String?
+
+    var localizedTitle: String {
+        Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true ? (titleEs ?? title) : title
+    }
+
+    var localizedText: String {
+        Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true ? (textEs ?? text) : text
+    }
 }
 
 private struct HTMLSection: Identifiable, Decodable {
@@ -69,18 +79,42 @@ private struct HTMLSection: Identifiable, Decodable {
     let contentHTML: String?
     let description: String?
     let hours: [PrayerHour]?
+    let titleEs: String?
+    let contentHTMLEs: String?
+    let descriptionEs: String?
+
+    var localizedTitle: String {
+        Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true ? (titleEs ?? title) : title
+    }
+
+    var localizedContentHTML: String {
+        if Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true {
+            return contentHTMLEs ?? descriptionEs ?? contentHTML ?? description ?? ""
+        }
+        return contentHTML ?? description ?? ""
+    }
 }
 
 private struct LiturgyOfTheHours: Decodable {
     let title: String
     let description: String
     let hours: [PrayerHour]
+    let titleEs: String?
+    let descriptionEs: String?
+
+    var localizedTitle: String { rosaryPrefersSpanish ? (titleEs ?? title) : title }
+    var localizedDescription: String { rosaryPrefersSpanish ? (descriptionEs ?? description) : description }
 }
 
 private struct PrayerHour: Identifiable, Decodable {
     let id: String
     let title: String
     let description: String
+    let titleEs: String?
+    let descriptionEs: String?
+
+    var localizedTitle: String { rosaryPrefersSpanish ? (titleEs ?? title) : title }
+    var localizedDescription: String { rosaryPrefersSpanish ? (descriptionEs ?? description) : description }
 }
 
 private struct RosaryCatalog: Decodable {
@@ -97,6 +131,27 @@ private struct RosaryPrayers: Decodable {
     let fatimaPrayer: String
     let hailHolyQueen: String
     let concludingPrayer: String
+    let signOfTheCrossEs: String?
+    let apostlesCreedEs: String?
+    let ourFatherEs: String?
+    let hailMaryEs: String?
+    let gloryBeEs: String?
+    let fatimaPrayerEs: String?
+    let hailHolyQueenEs: String?
+    let concludingPrayerEs: String?
+
+    private func localized(_ english: String, _ spanish: String?) -> String {
+        rosaryPrefersSpanish ? (spanish ?? english) : english
+    }
+
+    var localizedSignOfTheCross: String { localized(signOfTheCross, signOfTheCrossEs) }
+    var localizedApostlesCreed: String { localized(apostlesCreed, apostlesCreedEs) }
+    var localizedOurFather: String { localized(ourFather, ourFatherEs) }
+    var localizedHailMary: String { localized(hailMary, hailMaryEs) }
+    var localizedGloryBe: String { localized(gloryBe, gloryBeEs) }
+    var localizedFatimaPrayer: String { localized(fatimaPrayer, fatimaPrayerEs) }
+    var localizedHailHolyQueen: String { localized(hailHolyQueen, hailHolyQueenEs) }
+    var localizedConcludingPrayer: String { localized(concludingPrayer, concludingPrayerEs) }
 }
 
 private struct RosaryMysterySet: Identifiable, Decodable {
@@ -105,56 +160,95 @@ private struct RosaryMysterySet: Identifiable, Decodable {
     let name: String
     let descriptionHTML: String
     let mysteries: [RosaryMystery]
+    let titleEs: String?
+    let nameEs: String?
+    let descriptionHTMLEs: String?
+
+    var localizedTitle: String { rosaryPrefersSpanish ? (titleEs ?? title) : title }
+    var localizedName: String { rosaryPrefersSpanish ? (nameEs ?? name) : name }
+    var localizedDescriptionHTML: String { rosaryPrefersSpanish ? (descriptionHTMLEs ?? descriptionHTML) : descriptionHTML }
 }
 
 private struct RosaryMystery: Identifiable, Decodable {
     let id: String
     let title: String
     let scripture: String
+    let titleEs: String?
+    let scriptureEs: String?
+
+    var localizedTitle: String { rosaryPrefersSpanish ? (titleEs ?? title) : title }
+    var localizedScripture: String { rosaryPrefersSpanish ? (scriptureEs ?? scripture) : scripture }
+}
+
+private var rosaryPrefersSpanish: Bool {
+    Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true
 }
 
 private struct SpiritualFormationMenuView: View {
     @EnvironmentObject private var profileService: ProfileService
     @EnvironmentObject private var dailyFormation: DailyFormationService
+    @EnvironmentObject private var walkthrough: InstructorWalkthrough
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let formation: SpiritualFormationCatalog
 
     var body: some View {
+        ScrollViewReader { reader in
         ScrollView {
             VStack(spacing: 14) {
                 NavigationLink {
                     PrayerHubView(formation: formation)
                 } label: {
-                    SpiritualMenuRow(title: "Prayers", subtitle: "Common prayers, rosary, lectio divina, and the hours", systemImage: "hands.sparkles")
+                    SpiritualMenuRow(
+                        title: examLocalized("Prayers", "Oraciones"),
+                        subtitle: examLocalized("Common prayers, rosary, lectio divina, and the hours", "Oraciones comunes, rosario, Lectio Divina y Liturgia de las Horas"),
+                        systemImage: "hands.sparkles"
+                    )
+                    .walkthroughAnchor("content-formation")
                 }
                 .buttonStyle(.plain)
+                .id("formation")
 
                 NavigationLink {
                     ExaminationHubView()
                 } label: {
-                    SpiritualMenuRow(title: "Examination of Conscience", subtitle: "Prepare for Reconciliation or pray a daily examen", systemImage: "magnifyingglass")
+                    SpiritualMenuRow(
+                        title: examLocalized("Examination of Conscience", "Examen de conciencia"),
+                        subtitle: examLocalized("Prepare for Reconciliation or pray a daily examen", "Prepárate para la Reconciliación o reza un examen diario"),
+                        systemImage: "magnifyingglass"
+                    )
                 }
                 .buttonStyle(.plain)
+                .walkthroughAnchor("formation-examination")
+                .id("formation-examination")
 
                 NavigationLink {
                     MassGuideView()
                 } label: {
-                    SpiritualMenuRow(title: "Guide to the Mass", subtitle: "Walk through the order, prayers, readings, and Eucharistic Prayer", systemImage: "house.lodge")
+                    SpiritualMenuRow(title: examLocalized("Guide to the Mass", "Guía de la Misa"), subtitle: examLocalized("Walk through the order, prayers, readings, and Eucharistic Prayer", "Recorre el orden, las oraciones, las lecturas y la Plegaria eucarística"), systemImage: "house.lodge")
                 }
                 .buttonStyle(.plain)
+                .walkthroughAnchor("formation-mass")
+                .id("formation-mass")
 
                 NavigationLink {
                     SpiritualPracticesView(practices: formation.spiritualPractices)
                 } label: {
-                    SpiritualMenuRow(title: "Spiritual Practices", subtitle: "Works of mercy, precepts, habits, and Catholic living", systemImage: "figure.walk")
+                    SpiritualMenuRow(
+                        title: examLocalized("Spiritual Practices", "Prácticas espirituales"),
+                        subtitle: examLocalized("Works of mercy, precepts, habits, and Catholic living", "Obras de misericordia, preceptos, hábitos y vida católica"),
+                        systemImage: "figure.walk"
+                    )
                 }
                 .buttonStyle(.plain)
+                .walkthroughAnchor("formation-practices")
+                .id("formation-practices")
 
                 IlluminedCard {
                     VStack(alignment: .leading, spacing: 14) {
-                        Label("Daily Formation", systemImage: "calendar.badge.clock")
+                        Label(examLocalized("Daily Formation", "Formación diaria"), systemImage: "calendar.badge.clock")
                             .font(IlluminedTheme.font(size: 22, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
-                        Text("Open today’s liturgical fact, saint, or note from your class.")
+                        Text(examLocalized("Open today’s liturgical fact, saint, or note from your class.", "Abre el dato, santo o nota litúrgica de hoy para tu clase."))
                             .font(IlluminedTheme.font(size: 16))
                             .foregroundStyle(IlluminedTheme.ink)
                             .fixedSize(horizontal: false, vertical: true)
@@ -162,12 +256,14 @@ private struct SpiritualFormationMenuView: View {
                             guard let profile = profileService.profile else { return }
                             Task { await dailyFormation.load(profile: profile, force: true) }
                         } label: {
-                            Label("Open Today’s Card", systemImage: "arrow.up.right.square")
+                            Label(examLocalized("Open Today’s Card", "Abrir la tarjeta de hoy"), systemImage: "arrow.up.right.square")
                                 .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(IlluminedPrimaryButtonStyle())
                         .disabled(profileService.profile == nil)
+                        .walkthroughAnchor("formation-daily-open")
+                        .id("formation-daily-open")
                         if let message = dailyFormation.statusMessage {
                             Text(message)
                                 .font(IlluminedTheme.font(size: 14))
@@ -175,8 +271,21 @@ private struct SpiritualFormationMenuView: View {
                         }
                     }
                 }
+                .walkthroughAnchor("formation-daily")
+                .id("formation-daily")
             }
             .padding()
+        }
+        .walkthroughAnchor("viewport-formation")
+        .task(id: walkthrough.target) {
+            guard walkthrough.active, walkthrough.screen == "formation" else { return }
+            await Task.yield()
+            guard !Task.isCancelled else { return }
+            withAnimation(walkthrough.animatesStep && !reduceMotion
+                          ? .easeInOut(duration: InstructorWalkthrough.movementDuration) : nil) {
+                reader.scrollTo(walkthrough.target, anchor: .top)
+            }
+        }
         }
     }
 }
@@ -198,7 +307,7 @@ private struct PrayerHubView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("Prayer")
+                    Text(examLocalized("Prayer", "Oración"))
                         .font(IlluminedTheme.font(size: 22, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
                         .padding(.horizontal, 4)
@@ -206,32 +315,36 @@ private struct PrayerHubView: View {
                     NavigationLink {
                         CommonPrayersView(prayers: formation.commonPrayers)
                     } label: {
-                        SpiritualMenuRow(title: "Common Prayers", subtitle: "\(formation.commonPrayers.count) prayers", systemImage: "book.closed")
+                        SpiritualMenuRow(
+                            title: examLocalized("Common Prayers", "Oraciones comunes"),
+                            subtitle: examLocalized("\(formation.commonPrayers.count) prayers", "\(formation.commonPrayers.count) oraciones"),
+                            systemImage: "book.closed"
+                        )
                     }
                     .buttonStyle(.plain)
 
                     Button {
                         isShowingRosary = true
                     } label: {
-                        SpiritualMenuRow(title: "Guided Rosary", subtitle: "Pray the mysteries step by step", systemImage: "circle.grid.cross")
+                        SpiritualMenuRow(title: rosaryPrefersSpanish ? "Rosario guiado" : "Guided Rosary", subtitle: rosaryPrefersSpanish ? "Reza los misterios paso a paso" : "Pray the mysteries step by step", systemImage: "circle.grid.cross")
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink {
                         HTMLFormationView(
-                            title: formation.lectioDivina.title,
-                            html: formation.lectioDivina.contentHTML ?? "",
+                            title: formation.lectioDivina.localizedTitle,
+                            html: formation.lectioDivina.localizedContentHTML,
                             showsDailyGospelCard: true
                         )
                     } label: {
-                        SpiritualMenuRow(title: "Guided Lectio Divina", subtitle: "Read, meditate, pray, contemplate", systemImage: "text.book.closed")
+                        SpiritualMenuRow(title: rosaryPrefersSpanish ? "Lectio Divina guiada" : "Guided Lectio Divina", subtitle: rosaryPrefersSpanish ? "Lee, medita, ora y contempla" : "Read, meditate, pray, contemplate", systemImage: "text.book.closed")
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink {
                         LiturgyOfTheHoursView(hours: formation.liturgyOfTheHours)
                     } label: {
-                        SpiritualMenuRow(title: "Liturgy of the Hours", subtitle: "The daily prayer of the Church", systemImage: "clock")
+                        SpiritualMenuRow(title: rosaryPrefersSpanish ? "Liturgia de las Horas" : "Liturgy of the Hours", subtitle: rosaryPrefersSpanish ? "La oración diaria de la Iglesia" : "The daily prayer of the Church", systemImage: "clock")
                     }
                     .buttonStyle(.plain)
 
@@ -240,8 +353,8 @@ private struct PrayerHubView: View {
                             SelectedPrayersView(prayers: selectedPrayers)
                         } label: {
                             SpiritualMenuRow(
-                                title: "Saved Prayers",
-                                subtitle: "\(selectedPrayers.count) saved for easy access",
+                                title: examLocalized("Saved Prayers", "Oraciones guardadas"),
+                                subtitle: examLocalized("\(selectedPrayers.count) saved for easy access", "\(selectedPrayers.count) guardadas para acceso rápido"),
                                 systemImage: "bookmark.fill"
                             )
                         }
@@ -298,6 +411,7 @@ private struct SpiritualMenuRow: View {
 
 private struct CommonPrayersView: View {
     @EnvironmentObject private var profileService: ProfileService
+    @State private var openedPrayer: CommonPrayer?
 
     let prayers: [CommonPrayer]
 
@@ -316,8 +430,8 @@ private struct CommonPrayersView: View {
             ScrollView {
                 VStack(spacing: 12) {
                     ForEach(prayers) { prayer in
-                        NavigationLink {
-                            CommonPrayerDetailView(prayer: prayer)
+                        Button {
+                            openedPrayer = prayer
                         } label: {
                             CommonPrayerRow(
                                 prayer: prayer,
@@ -333,6 +447,9 @@ private struct CommonPrayersView: View {
         }
         .illuminedBrandHeader()
         .illuminedNavigation()
+        .fullScreenCover(item: $openedPrayer) { prayer in
+            CommonPrayerDetailView(prayer: prayer) { openedPrayer = nil }
+        }
     }
 }
 
@@ -351,12 +468,12 @@ private struct CommonPrayerRow: View {
                     .background((isMemorized ? IlluminedTheme.blue : IlluminedTheme.gold).opacity(0.12), in: Circle())
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(prayer.title)
+                    Text(prayer.localizedTitle)
                         .font(IlluminedTheme.font(size: 18, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
                     if isMemorized || isSelected {
-                        Text([isSelected ? "Selected" : nil, isMemorized ? "Memorized" : nil].compactMap { $0 }.joined(separator: " • "))
+                        Text([isSelected ? examLocalized("Selected", "Seleccionada") : nil, isMemorized ? examLocalized("Memorized", "Memorizada") : nil].compactMap { $0 }.joined(separator: " • "))
                             .font(IlluminedTheme.font(size: 13))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
@@ -374,6 +491,7 @@ private struct CommonPrayerRow: View {
 
 private struct SelectedPrayersView: View {
     @EnvironmentObject private var profileService: ProfileService
+    @State private var openedPrayer: CommonPrayer?
 
     let prayers: [CommonPrayer]
 
@@ -390,7 +508,7 @@ private struct SelectedPrayersView: View {
                 LazyVStack(spacing: 12) {
                     if visiblePrayers.isEmpty {
                         IlluminedCard {
-                            Text("No prayers are selected. Return to Common Prayers to add one.")
+                            Text(examLocalized("No prayers are selected. Return to Common Prayers to add one.", "No hay oraciones seleccionadas. Vuelve a Oraciones comunes para agregar una."))
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .multilineTextAlignment(.center)
@@ -398,7 +516,7 @@ private struct SelectedPrayersView: View {
                         }
                     } else {
                         ForEach(visiblePrayers) { prayer in
-                            SelectedPrayerRow(prayer: prayer)
+                            SelectedPrayerRow(prayer: prayer) { openedPrayer = prayer }
                         }
                     }
                 }
@@ -407,6 +525,9 @@ private struct SelectedPrayersView: View {
         }
         .illuminedBrandHeader()
         .illuminedNavigation()
+        .fullScreenCover(item: $openedPrayer) { prayer in
+            CommonPrayerDetailView(prayer: prayer) { openedPrayer = nil }
+        }
     }
 }
 
@@ -414,13 +535,12 @@ private struct SelectedPrayerRow: View {
     @EnvironmentObject private var profileService: ProfileService
 
     let prayer: CommonPrayer
+    let open: () -> Void
 
     var body: some View {
         IlluminedCard {
             HStack(spacing: 12) {
-                NavigationLink {
-                    CommonPrayerDetailView(prayer: prayer)
-                } label: {
+                Button(action: open) {
                     HStack(spacing: 12) {
                         Image(systemName: "bookmark.fill")
                             .font(IlluminedTheme.font(size: 21, weight: .semibold))
@@ -428,7 +548,7 @@ private struct SelectedPrayerRow: View {
                             .frame(width: 38, height: 38)
                             .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
-                        Text(prayer.title)
+                        Text(prayer.localizedTitle)
                             .font(IlluminedTheme.font(size: 18, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -454,7 +574,7 @@ private struct SelectedPrayerRow: View {
                         .frame(width: 38, height: 38)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Remove \(prayer.title) from Selected Prayers")
+                .accessibilityLabel(examLocalized("Remove \(prayer.localizedTitle) from Selected Prayers", "Quitar \(prayer.localizedTitle) de las oraciones seleccionadas"))
             }
         }
     }
@@ -462,94 +582,97 @@ private struct SelectedPrayerRow: View {
 
 private struct CommonPrayerDetailView: View {
     @EnvironmentObject private var profileService: ProfileService
-
+    @ScaledMetric(relativeTo: .title3) private var prayerTextSize: CGFloat = 20.5
+    @State private var saving = false
     let prayer: CommonPrayer
+    let close: () -> Void
+    private let accent = Color(red: 239 / 255, green: 208 / 255, blue: 138 / 255)
 
     private var isMemorized: Bool {
         profileService.profile?.memorizedPrayerIds.contains(prayer.id) == true
     }
-
     private var isSelected: Bool {
         profileService.profile?.selectedPrayerIds.contains(prayer.id) == true
     }
 
     var body: some View {
         ZStack {
-            IlluminedBackground()
-
+            IlluminedTheme.blue.ignoresSafeArea()
             ScrollView {
-                VStack(spacing: 18) {
-                    IlluminedCard {
-                        VStack(alignment: .leading, spacing: 14) {
-                            Text(prayer.title)
-                                .font(IlluminedTheme.font(size: 24, weight: .semibold))
-                                .foregroundStyle(IlluminedTheme.blue)
-
-                            Text(prayer.text)
-                                .font(IlluminedTheme.font(size: 20))
-                                .lineSpacing(7)
-                                .foregroundStyle(IlluminedTheme.ink)
-                        }
+                VStack(spacing: 22) {
+                    Text(examLocalized("COMMON PRAYERS", "ORACIONES COMUNES"))
+                        .font(.headline).tracking(2)
+                    Text(prayer.localizedTitle)
+                        .font(.largeTitle.bold())
+                        .multilineTextAlignment(.center)
+                        .accessibilityAddTraits(.isHeader)
+                    Rectangle().fill(accent).frame(width: 90, height: 3)
+                    Text(prayer.localizedText)
+                        .font(.system(size: prayerTextSize))
+                        .lineSpacing(6)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                    if let error = profileService.errorMessage {
+                        Text(error).font(.caption)
                     }
-
-                    IlluminedCard {
-                        Button {
-                            Task {
-                                await profileService.setCommonPrayerMemorized(prayer.id, isMemorized: !isMemorized)
-                            }
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: isMemorized ? "checkmark.square.fill" : "square")
-                                    .font(IlluminedTheme.font(size: 24, weight: .semibold))
-                                    .foregroundStyle(isMemorized ? IlluminedTheme.blue : IlluminedTheme.secondaryText)
-
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("Memorized")
-                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
-                                        .foregroundStyle(IlluminedTheme.ink)
-                                    Text(isMemorized ? "Marked as memorized" : "Tap when you have memorized this prayer")
-                                        .font(IlluminedTheme.font(size: 13))
-                                        .foregroundStyle(IlluminedTheme.secondaryText)
-                                }
-
-                                Spacer()
-                            }
-                        }
-                        .buttonStyle(.plain)
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 10) { actions }
+                        VStack(spacing: 12) { actions }
                     }
-
-                    IlluminedCard {
-                        Button {
-                            Task {
-                                await profileService.setCommonPrayerSelected(prayer.id, isSelected: !isSelected)
-                            }
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: isSelected ? "bookmark.fill" : "bookmark")
-                                    .font(IlluminedTheme.font(size: 24, weight: .semibold))
-                                    .foregroundStyle(isSelected ? IlluminedTheme.gold : IlluminedTheme.secondaryText)
-
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(isSelected ? "Remove from Selected Prayers" : "Add to Selected Prayers")
-                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
-                                        .foregroundStyle(IlluminedTheme.ink)
-                                    Text(isSelected ? "Available in your personal prayer list" : "Keep this prayer close at hand")
-                                        .font(IlluminedTheme.font(size: 13))
-                                        .foregroundStyle(IlluminedTheme.secondaryText)
-                                }
-
-                                Spacer()
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
+                    prayerButton(examLocalized("Close", "Cerrar"), action: close)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .padding()
+                .foregroundStyle(.white)
+                .padding(30)
+                .frame(maxWidth: 700)
+                .frame(maxWidth: .infinity)
             }
         }
-        .illuminedBrandHeader()
-        .illuminedNavigation()
+        .accessibilityAction(.escape, close)
+    }
+
+    @ViewBuilder private var actions: some View {
+        prayerSecondaryAction(isMemorized ? examLocalized("Memorized", "Memorizada") : examLocalized("Mark Memorized", "Marcar memorizada"), symbol: isMemorized ? "checkmark.circle.fill" : "checkmark.circle", selected: isMemorized) {
+            saving = true
+            profileService.errorMessage = nil
+            Task {
+                await profileService.setCommonPrayerMemorized(prayer.id, isMemorized: !isMemorized)
+                saving = false
+            }
+        }.disabled(saving)
+        prayerSecondaryAction(isSelected ? examLocalized("Saved", "Guardada") : examLocalized("Save Prayer", "Guardar oración"), symbol: isSelected ? "bookmark.fill" : "bookmark", selected: isSelected) {
+            saving = true
+            profileService.errorMessage = nil
+            Task {
+                await profileService.setCommonPrayerSelected(prayer.id, isSelected: !isSelected)
+                saving = false
+            }
+        }.disabled(saving)
+    }
+
+    private func prayerSecondaryAction(_ title: String, symbol: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 9) {
+                Image(systemName: symbol)
+                    .font(.system(size: 24, weight: .regular))
+                    .foregroundStyle(accent)
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity, minHeight: 70)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private func prayerButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(title, action: action)
+            .buttonStyle(.borderedProminent)
+            .tint(accent)
+            .foregroundStyle(.black)
+            .buttonBorderShape(.capsule)
     }
 }
 
@@ -583,6 +706,10 @@ private struct HTMLFormationView: View {
     }
 }
 
+private func examLocalized(_ english: String, _ spanish: String) -> String {
+    Locale.current.languageCode == "es" ? spanish : english
+}
+
 private struct ExaminationHubView: View {
     var body: some View {
         ZStack {
@@ -594,8 +721,8 @@ private struct ExaminationHubView: View {
                         DailyExamenMethodsView()
                     } label: {
                         SpiritualMenuRow(
-                            title: "Daily Examen",
-                            subtitle: "Four prayerful ways to review the day with God",
+                            title: examLocalized("Daily Examen", "Examen diario"),
+                            subtitle: examLocalized("Four prayerful ways to review the day with God", "Cuatro maneras orantes de revisar el día con Dios"),
                             systemImage: "moon.stars"
                         )
                     }
@@ -605,8 +732,8 @@ private struct ExaminationHubView: View {
                         ExaminationIntroView()
                     } label: {
                         SpiritualMenuRow(
-                            title: "Preparation for Reconciliation",
-                            subtitle: "A thorough, private examination before Confession",
+                            title: examLocalized("Preparation for Reconciliation", "Preparación para la Reconciliación"),
+                            subtitle: examLocalized("A thorough, private examination before Confession", "Un examen privado y completo antes de la Confesión"),
                             systemImage: "checklist"
                         )
                     }
@@ -623,10 +750,21 @@ private struct ExaminationHubView: View {
 private struct DailyExamenMethod: Identifiable {
     let id: String
     let title: String
+    let titleEs: String
     let subtitle: String
+    let subtitleEs: String
     let introduction: String
+    let introductionEs: String
     let steps: [String]
+    let stepsEs: [String]
     let closingPrayer: String
+    let closingPrayerEs: String
+
+    var localizedTitle: String { examLocalized(title, titleEs) }
+    var localizedSubtitle: String { examLocalized(subtitle, subtitleEs) }
+    var localizedIntroduction: String { examLocalized(introduction, introductionEs) }
+    var localizedSteps: [String] { Locale.current.languageCode == "es" ? stepsEs : steps }
+    var localizedClosingPrayer: String { examLocalized(closingPrayer, closingPrayerEs) }
 }
 
 private enum DailyExamenCatalog {
@@ -634,8 +772,11 @@ private enum DailyExamenCatalog {
         DailyExamenMethod(
             id: "ignatian",
             title: "Ignatian Examen",
+            titleEs: "Examen ignaciano",
             subtitle: "Gratitude, light, review, mercy, and grace for tomorrow",
+            subtitleEs: "Gratitud, luz, revisión, misericordia y gracia para mañana",
             introduction: "Pray slowly through the day in God’s presence. Notice not only failures, but also where God was near and how grace was moving.",
+            introductionEs: "Recorre lentamente el día en oración ante la presencia de Dios. Observa no solo las faltas, sino también dónde estuvo Dios cerca y cómo actuó la gracia.",
             steps: [
                 "Become aware of God’s presence and rest quietly before Him.",
                 "Give thanks for the gifts of this day, naming particular people, moments, and graces.",
@@ -643,13 +784,24 @@ private enum DailyExamenCatalog {
                 "Review the day from beginning to end. Notice consolation, resistance, choices, feelings, and invitations from God.",
                 "Ask forgiveness where needed, receive God’s mercy, and ask for the grace you need tomorrow."
             ],
-            closingPrayer: "Lord, thank You for remaining with me through this day. Show me how to receive tomorrow as Your gift and to respond more freely to Your grace. Amen."
+            stepsEs: [
+                "Hazte consciente de la presencia de Dios y descansa en silencio ante Él.",
+                "Da gracias por los dones de este día, nombrando personas, momentos y gracias concretas.",
+                "Pide al Espíritu Santo luz para ver el día con verdad y con la compasión de Dios.",
+                "Repasa el día de principio a fin. Observa la consolación, la resistencia, las decisiones, los sentimientos y las invitaciones de Dios.",
+                "Pide perdón donde sea necesario, recibe la misericordia de Dios y pide la gracia que necesitas para mañana."
+            ],
+            closingPrayer: "Lord, thank You for remaining with me through this day. Show me how to receive tomorrow as Your gift and to respond more freely to Your grace. Amen.",
+            closingPrayerEs: "Señor, gracias por permanecer conmigo durante este día. Muéstrame cómo recibir el mañana como don tuyo y responder con mayor libertad a tu gracia. Amén."
         ),
         DailyExamenMethod(
             id: "francis-de-sales",
             title: "St. Francis de Sales Evening Examen",
+            titleEs: "Examen vespertino de san Francisco de Sales",
             subtitle: "A gentle review before rest from Introduction to the Devout Life",
+            subtitleEs: "Una revisión serena antes del descanso, inspirada en Introducción a la vida devota",
             introduction: "St. Francis de Sales recommends recollecting yourself before Christ and closing the day with gratitude, honest review, pardon, and trust.",
+            introductionEs: "San Francisco de Sales recomienda recogerse ante Cristo y concluir el día con gratitud, revisión sincera, perdón y confianza.",
             steps: [
                 "Place yourself in the presence of Christ and briefly renew a grace or holy desire from your morning prayer.",
                 "Thank God for preserving you and accompanying you throughout the day.",
@@ -657,13 +809,24 @@ private enum DailyExamenCatalog {
                 "Thank God for whatever was good. Ask pardon for faults in thought, word, deed, or omission, and resolve with grace to do better.",
                 "Commend your body and soul, the Church, your family, friends, and all in need to God before resting."
             ],
-            closingPrayer: "Jesus, receive all that this day has held. Forgive my faults, strengthen every good desire, and keep me and those I love in Your peace. Amen."
+            stepsEs: [
+                "Ponte en la presencia de Cristo y renueva brevemente una gracia o un deseo santo de tu oración de la mañana.",
+                "Da gracias a Dios por haberte guardado y acompañado durante todo el día.",
+                "Recuerda dónde estuviste, con quién te encontraste y qué hiciste. Revisa tu conducta con sencillez y sinceridad.",
+                "Da gracias a Dios por todo lo bueno. Pide perdón por las faltas de pensamiento, palabra, obra u omisión y propón, con su gracia, obrar mejor.",
+                "Antes de descansar, encomienda a Dios tu cuerpo y tu alma, la Iglesia, tu familia, tus amigos y todos los necesitados."
+            ],
+            closingPrayer: "Jesus, receive all that this day has held. Forgive my faults, strengthen every good desire, and keep me and those I love in Your peace. Amen.",
+            closingPrayerEs: "Jesús, recibe todo lo que ha contenido este día. Perdona mis faltas, fortalece todo buen deseo y guarda en tu paz a quienes amo y a mí. Amén."
         ),
         DailyExamenMethod(
             id: "benedictine",
             title: "Benedictine Daily Review",
+            titleEs: "Revisión diaria benedictina",
             subtitle: "Listen for God through prayer, work, relationships, and humility",
+            subtitleEs: "Escucha a Dios en la oración, el trabajo, las relaciones y la humildad",
             introduction: "Inspired by the Benedictine call to continual conversion, this review listens for God in the ordinary rhythm of the day.",
+            introductionEs: "Inspirada en la llamada benedictina a la conversión continua, esta revisión escucha a Dios en el ritmo ordinario del día.",
             steps: [
                 "Be still before God and listen: what word, event, or person is He bringing to mind?",
                 "Give thanks for the day’s prayer, work, rest, and encounters.",
@@ -671,13 +834,24 @@ private enum DailyExamenCatalog {
                 "Notice where self-will, distraction, resentment, or excess disturbed peace and charity.",
                 "Choose one small act of conversion for tomorrow and entrust it to God’s help."
             ],
-            closingPrayer: "God of peace, gather my work and rest into Your love. Teach me to listen, begin again, and seek You faithfully in the ordinary duties of tomorrow. Amen."
+            stepsEs: [
+                "Permanece en silencio ante Dios y escucha: ¿qué palabra, acontecimiento o persona trae Él a tu memoria?",
+                "Da gracias por la oración, el trabajo, el descanso y los encuentros del día.",
+                "Revisa cómo practicaste la humildad, la paciencia, la obediencia, la hospitalidad y el cuidado de los demás.",
+                "Observa dónde la voluntad propia, la distracción, el resentimiento o el exceso perturbaron la paz y la caridad.",
+                "Elige un pequeño acto de conversión para mañana y confíalo a la ayuda de Dios."
+            ],
+            closingPrayer: "God of peace, gather my work and rest into Your love. Teach me to listen, begin again, and seek You faithfully in the ordinary duties of tomorrow. Amen.",
+            closingPrayerEs: "Dios de paz, acoge mi trabajo y mi descanso en tu amor. Enséñame a escuchar, comenzar de nuevo y buscarte fielmente en los deberes ordinarios de mañana. Amén."
         ),
         DailyExamenMethod(
             id: "gospel-love",
             title: "Gospel Examen of Love",
+            titleEs: "Examen evangélico del amor",
             subtitle: "Review the day through love of God and neighbor",
+            subtitleEs: "Revisa el día desde el amor a Dios y al prójimo",
             introduction: "Let Jesus’ two great commandments provide a simple lens for seeing the day and choosing a concrete response of love.",
+            introductionEs: "Deja que los dos grandes mandamientos de Jesús te ofrezcan una mirada sencilla para contemplar el día y elegir una respuesta concreta de amor.",
             steps: [
                 "Thank God for one moment in which you received or gave love today.",
                 "Where did you love God with your attention, trust, prayer, or choices?",
@@ -685,12 +859,21 @@ private enum DailyExamenCatalog {
                 "Where did you withhold love or fail to recognize another person’s dignity? Ask for mercy without discouragement.",
                 "Choose one specific way to love God or neighbor tomorrow, and ask for the grace to follow through."
             ],
-            closingPrayer: "Jesus, form my heart after Your own. Heal what was lacking in love today and make me attentive, courageous, and generous tomorrow. Amen."
+            stepsEs: [
+                "Da gracias a Dios por un momento en el que hoy recibiste o diste amor.",
+                "¿Dónde amaste a Dios con tu atención, confianza, oración o decisiones?",
+                "¿Dónde amaste al prójimo mediante la paciencia, la verdad, la misericordia, la generosidad o el servicio?",
+                "¿Dónde negaste amor o no reconociste la dignidad de otra persona? Pide misericordia sin desanimarte.",
+                "Elige una manera concreta de amar mañana a Dios o al prójimo y pide la gracia de llevarla a cabo."
+            ],
+            closingPrayer: "Jesus, form my heart after Your own. Heal what was lacking in love today and make me attentive, courageous, and generous tomorrow. Amen.",
+            closingPrayerEs: "Jesús, forma mi corazón según el tuyo. Sana lo que hoy faltó al amor y hazme atento, valiente y generoso mañana. Amén."
         )
     ]
 }
 
 private struct DailyExamenMethodsView: View {
+    @State private var openedMethod: DailyExamenMethod?
     var body: some View {
         ZStack {
             IlluminedBackground()
@@ -699,10 +882,10 @@ private struct DailyExamenMethodsView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Daily Examen")
+                            Text(examLocalized("Daily Examen", "Examen diario"))
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
-                            Text("Choose a method and spend a few quiet minutes reviewing your day with God. A daily examen is prayer for gratitude, discernment, mercy, and growth; it is not a replacement for sacramental Confession.")
+                            Text(examLocalized("Choose a method and spend a few quiet minutes reviewing your day with God. A daily examen is prayer for gratitude, discernment, mercy, and growth; it is not a replacement for sacramental Confession.", "Elige un método y dedica unos minutos de silencio a revisar tu día con Dios. El examen diario es una oración de gratitud, discernimiento, misericordia y crecimiento; no sustituye la Confesión sacramental."))
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
@@ -710,10 +893,10 @@ private struct DailyExamenMethodsView: View {
                     }
 
                     ForEach(DailyExamenCatalog.methods) { method in
-                        NavigationLink {
-                            DailyExamenDetailView(method: method)
+                        Button {
+                            openedMethod = method
                         } label: {
-                            SpiritualMenuRow(title: method.title, subtitle: method.subtitle, systemImage: "sparkles")
+                            SpiritualMenuRow(title: method.localizedTitle, subtitle: method.localizedSubtitle, systemImage: "sparkles")
                         }
                         .buttonStyle(.plain)
                     }
@@ -723,61 +906,61 @@ private struct DailyExamenMethodsView: View {
         }
         .illuminedBrandHeader()
         .illuminedNavigation()
+        .fullScreenCover(item: $openedMethod) { method in
+            DailyExamenDetailView(method: method) { openedMethod = nil }
+        }
     }
 }
 
 private struct DailyExamenDetailView: View {
     let method: DailyExamenMethod
+    let close: () -> Void
+    @ScaledMetric(relativeTo: .title3) private var textSize: CGFloat = 20.5
+    private let accent = Color(red: 239 / 255, green: 208 / 255, blue: 138 / 255)
 
     var body: some View {
         ZStack {
-            IlluminedBackground()
-
+            IlluminedTheme.blue.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    IlluminedCard {
+                VStack(spacing: 22) {
+                    Text(examLocalized("DAILY EXAMEN", "EXAMEN DIARIO"))
+                        .font(.headline).tracking(2)
+                    Text(method.localizedTitle)
+                        .font(.largeTitle.bold()).multilineTextAlignment(.center)
+                        .accessibilityAddTraits(.isHeader)
+                    Rectangle().fill(accent).frame(width: 90, height: 3)
+                    readingText(method.localizedIntroduction)
+                    ForEach(Array(method.localizedSteps.enumerated()), id: \.offset) { index, step in
                         VStack(alignment: .leading, spacing: 10) {
-                            Text(method.title)
-                                .font(IlluminedTheme.font(size: 24, weight: .semibold))
-                                .foregroundStyle(IlluminedTheme.blue)
-                            Text(method.introduction)
-                                .font(IlluminedTheme.font(size: 16))
-                                .foregroundStyle(IlluminedTheme.secondaryText)
-                                .lineSpacing(4)
+                            Text(examLocalized("Step \(index + 1)", "Paso \(index + 1)"))
+                                .font(.title3.bold()).foregroundStyle(accent)
+                                .accessibilityAddTraits(.isHeader)
+                            readingText(step)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-
-                    ForEach(Array(method.steps.enumerated()), id: \.offset) { index, step in
-                        IlluminedCard {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Step \(index + 1)")
-                                    .font(IlluminedTheme.font(size: 18, weight: .semibold))
-                                    .foregroundStyle(IlluminedTheme.blue)
-                                Text(step)
-                                    .font(IlluminedTheme.font(size: 17))
-                                    .foregroundStyle(IlluminedTheme.ink)
-                                    .lineSpacing(5)
-                            }
-                        }
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(examLocalized("Closing Prayer", "Oración final"))
+                            .font(.title3.bold()).foregroundStyle(accent)
+                            .accessibilityAddTraits(.isHeader)
+                        readingText(method.localizedClosingPrayer)
                     }
-
-                    IlluminedCard {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Closing Prayer")
-                                .font(IlluminedTheme.font(size: 20, weight: .semibold))
-                                .foregroundStyle(IlluminedTheme.blue)
-                            Text(method.closingPrayer)
-                                .font(IlluminedTheme.font(size: 18))
-                                .foregroundStyle(IlluminedTheme.ink)
-                                .lineSpacing(6)
-                        }
-                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    Button(examLocalized("Close", "Cerrar"), action: close)
+                        .buttonStyle(.borderedProminent).tint(accent)
+                        .foregroundStyle(.black).buttonBorderShape(.capsule)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .padding()
+                .foregroundStyle(.white).padding(30)
+                .frame(maxWidth: 700).frame(maxWidth: .infinity)
             }
         }
-        .illuminedBrandHeader()
-        .illuminedNavigation()
+        .accessibilityAction(.escape, close)
+    }
+
+    private func readingText(_ text: String) -> some View {
+        Text(text).font(.system(size: textSize)).lineSpacing(6)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -790,28 +973,28 @@ private struct ExaminationIntroView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 14) {
-                            Text("Examination of Conscience")
+                            Text(examLocalized("Examination of Conscience", "Examen de conciencia"))
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
                             ExaminationIntroSection(
-                                title: "I. What is an Examination of Conscience?",
-                                text: "An examination of conscience is a prayerful self-reflection on our thoughts, words, deeds, and omissions, measured against God’s commandments and the teaching of the Church. Its purpose is to recognize sins honestly, acknowledge God’s mercy, prepare for Confession, and form the conscience over time."
+                                title: examLocalized("I. What is an Examination of Conscience?", "I. ¿Qué es un examen de conciencia?"),
+                                text: examLocalized("An examination of conscience is a prayerful self-reflection on our thoughts, words, deeds, and omissions, measured against God’s commandments and the teaching of the Church. Its purpose is to recognize sins honestly, acknowledge God’s mercy, prepare for Confession, and form the conscience over time.", "Un examen de conciencia es una reflexión orante sobre nuestros pensamientos, palabras, obras y omisiones a la luz de los mandamientos de Dios y de la enseñanza de la Iglesia. Nos ayuda a reconocer los pecados con sinceridad, acoger la misericordia de Dios, prepararnos para la Confesión y formar la conciencia.")
                             )
 
                             ExaminationIntroSection(
-                                title: "II. Why is it Important?",
-                                text: "A good confession requires that we know and confess our sins honestly. Regular examination also fosters humility, self-awareness, growth in holiness, and a better alignment of conscience with God’s will."
+                                title: examLocalized("II. Why is it Important?", "II. ¿Por qué es importante?"),
+                                text: examLocalized("A good confession requires that we know and confess our sins honestly. Regular examination also fosters humility, self-awareness, growth in holiness, and a better alignment of conscience with God’s will.", "Una buena confesión requiere conocer y confesar nuestros pecados con sinceridad. El examen frecuente también fomenta la humildad, el conocimiento propio, el crecimiento en santidad y una conciencia más conforme con la voluntad de Dios.")
                             )
 
                             ExaminationIntroSection(
-                                title: "III. When and How Often?",
-                                text: "A thorough examination should be done before sacramental confession. A brief daily examen can be prayed at the end of the day. A deeper examination can also be helpful before retreats, spiritual direction, or major decisions."
+                                title: examLocalized("III. When and How Often?", "III. ¿Cuándo y con qué frecuencia?"),
+                                text: examLocalized("A thorough examination should be done before sacramental confession. A brief daily examen can be prayed at the end of the day. A deeper examination can also be helpful before retreats, spiritual direction, or major decisions.", "Conviene hacer un examen detenido antes de la Confesión sacramental. Al final del día puede rezarse un examen breve. Un examen más profundo también ayuda antes de retiros, dirección espiritual o decisiones importantes.")
                             )
 
                             ExaminationIntroSection(
-                                title: "IV. Dispositions for a Good Examination",
-                                text: "Begin prayerfully. Ask the Holy Spirit for light and honesty. Avoid self-justification. Call sins what they are. Keep hope in God’s mercy, avoid despair, and renew your desire to amend your life."
+                                title: examLocalized("IV. Dispositions for a Good Examination", "IV. Disposiciones para un buen examen"),
+                                text: examLocalized("Begin prayerfully. Ask the Holy Spirit for light and honesty. Avoid self-justification. Call sins what they are. Keep hope in God’s mercy, avoid despair, and renew your desire to amend your life.", "Comienza en oración y pide al Espíritu Santo luz y sinceridad. Evita justificarte y llama a los pecados por su nombre. Mantén la esperanza en la misericordia de Dios y renueva tu propósito de enmienda.")
                             )
                         }
                     }
@@ -819,13 +1002,13 @@ private struct ExaminationIntroView: View {
                     NavigationLink {
                         ExaminationStartView()
                     } label: {
-                        Label("Begin Examination", systemImage: "play.circle.fill")
+                        Label(examLocalized("Begin Examination", "Comenzar el examen"), systemImage: "play.circle.fill")
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(IlluminedPrimaryButtonStyle())
 
-                    Text("Private: your checked items are only kept on this screen while you pray. They are not saved, uploaded, or shared with your instructor.")
+                    Text(examLocalized("Private: your checked items are only kept on this screen while you pray. They are not saved, uploaded, or shared with your instructor.", "Privado: los elementos marcados solo permanecen en esta pantalla mientras oras. No se guardan, no se suben ni se comparten con tu instructor."))
                         .font(IlluminedTheme.font(size: 13))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                         .multilineTextAlignment(.center)
@@ -867,11 +1050,11 @@ private struct ExaminationStartView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 14) {
-                            Text("Prayer Before Examination")
+                            Text(examLocalized("Prayer Before Examination", "Oración antes del examen"))
                                 .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text(ExaminationPathCatalog.preExamPrayer)
+                            Text(ExaminationPathCatalog.localizedPreExamPrayer)
                                 .font(IlluminedTheme.font(size: 18))
                                 .foregroundStyle(IlluminedTheme.ink)
                                 .lineSpacing(6)
@@ -880,11 +1063,11 @@ private struct ExaminationStartView: View {
 
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Examination of Conscience")
+                            Text(examLocalized("Examination of Conscience", "Examen de conciencia"))
                                 .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Move prayerfully through the commandments, the deadly sins, sins of omission, and final questions about love. Check only what helps you prepare honestly before God.")
+                            Text(examLocalized("Move prayerfully through the commandments, the deadly sins, sins of omission, and final questions about love. Check only what helps you prepare honestly before God.", "Recorre en oración los mandamientos, los pecados capitales, los pecados de omisión y las preguntas finales sobre el amor. Marca solo lo que te ayude a prepararte con sinceridad ante Dios."))
                                 .font(IlluminedTheme.font(size: 16))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
@@ -894,7 +1077,7 @@ private struct ExaminationStartView: View {
                     NavigationLink {
                         ExaminationChecklistView(path: ExaminationPathCatalog.thoroughExamination)
                     } label: {
-                        Label("Begin Checklist", systemImage: "checklist")
+                        Label(examLocalized("Begin Checklist", "Comenzar la lista"), systemImage: "checklist")
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
@@ -924,11 +1107,11 @@ private struct ExaminationChecklistView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(path.title)
+                            Text(ExaminationPathCatalog.localizedPathTitle)
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Check the items that you prayerfully recognize. This list is private and disappears when you leave the examination.")
+                            Text(examLocalized("Check the items that you prayerfully recognize. This list is private and disappears when you leave the examination.", "Marca los elementos que reconoces en oración. Esta lista es privada y desaparece cuando sales del examen."))
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
@@ -938,7 +1121,7 @@ private struct ExaminationChecklistView: View {
                     ForEach(path.sections) { section in
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(section.title)
+                                Text(section.localizedTitle)
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -951,7 +1134,7 @@ private struct ExaminationChecklistView: View {
                                                 .font(IlluminedTheme.font(size: 21, weight: .semibold))
                                                 .foregroundStyle(checkedItemIds.contains(item.id) ? IlluminedTheme.blue : IlluminedTheme.secondaryText)
 
-                                            Text(item.text)
+                                            Text(item.localizedText)
                                                 .font(IlluminedTheme.font(size: 15))
                                                 .foregroundStyle(IlluminedTheme.ink)
                                                 .fixedSize(horizontal: false, vertical: true)
@@ -968,7 +1151,7 @@ private struct ExaminationChecklistView: View {
                     NavigationLink {
                         ExaminationSummaryView(path: path, checkedItems: checkedItems)
                     } label: {
-                        Label("Complete Examination", systemImage: "checkmark.seal.fill")
+                        Label(examLocalized("Complete Examination", "Completar el examen"), systemImage: "checkmark.seal.fill")
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
@@ -1002,15 +1185,15 @@ private struct ExaminationSummaryView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("Private Examination Summary")
+                            Text(examLocalized("Private Examination Summary", "Resumen privado del examen"))
                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text(path.title)
+                            Text(ExaminationPathCatalog.localizedPathTitle)
                                 .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
 
-                            Text("Use this only for your own prayer and preparation. Nothing on this page is saved or shared.")
+                            Text(examLocalized("Use this only for your own prayer and preparation. Nothing on this page is saved or shared.", "Usa esto únicamente para tu oración y preparación personal. Nada de esta página se guarda ni se comparte."))
                                 .font(IlluminedTheme.font(size: 14))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                         }
@@ -1018,17 +1201,17 @@ private struct ExaminationSummaryView: View {
 
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Items Checked")
+                            Text(examLocalized("Items Checked", "Elementos marcados"))
                                 .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.ink)
 
                             if checkedItems.isEmpty {
-                                Text("No items were checked.")
+                                Text(examLocalized("No items were checked.", "No se marcó ningún elemento."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                             } else {
                                 ForEach(checkedItems) { item in
-                                    Label(item.text, systemImage: "checkmark.circle.fill")
+                                    Label(item.localizedText, systemImage: "checkmark.circle.fill")
                                         .font(IlluminedTheme.font(size: 14))
                                         .foregroundStyle(IlluminedTheme.blue)
                                         .fixedSize(horizontal: false, vertical: true)
@@ -1039,11 +1222,11 @@ private struct ExaminationSummaryView: View {
 
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 14) {
-                            Text("Act of Contrition")
+                            Text(examLocalized("Act of Contrition", "Acto de contrición"))
                                 .font(IlluminedTheme.font(size: 20, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text(ExaminationPathCatalog.actOfContrition)
+                            Text(ExaminationPathCatalog.localizedActOfContrition)
                                 .font(IlluminedTheme.font(size: 18))
                                 .foregroundStyle(IlluminedTheme.ink)
                                 .lineSpacing(6)
@@ -1070,17 +1253,269 @@ private struct ExaminationSection: Identifiable {
     let id: String
     let title: String
     let items: [ExaminationItem]
+
+    var localizedTitle: String {
+        examLocalized(title, ExaminationPathCatalog.sectionTitlesEs[id] ?? title)
+    }
 }
 
 private struct ExaminationItem: Identifiable {
     let id: String
     let text: String
+
+    var localizedText: String {
+        examLocalized(text, ExaminationPathCatalog.itemTextsEs[id] ?? text)
+    }
 }
 
 private enum ExaminationPathCatalog {
+    static let sectionTitlesEs: [String: String] = [
+        "first-faith": "Primer mandamiento: Fe",
+        "first-hope": "Primer mandamiento: Esperanza",
+        "first-charity": "Primer mandamiento: Caridad",
+        "first-worship": "Primer mandamiento: Culto",
+        "first-false-religion": "Primer mandamiento: Falsa religión",
+        "first-superstition": "Primer mandamiento: Superstición",
+        "first-idolatry": "Primer mandamiento: Idolatría",
+        "second-reverence": "Segundo mandamiento: Reverencia",
+        "second-speech": "Segundo mandamiento: Palabras",
+        "second-promises": "Segundo mandamiento: Promesas",
+        "second-witness": "Segundo mandamiento: Testimonio",
+        "third-mass": "Tercer mandamiento: Misa dominical",
+        "third-participation": "Tercer mandamiento: Participación",
+        "third-rest": "Tercer mandamiento: Descanso y culto",
+        "fourth-parents": "Cuarto mandamiento: Padres",
+        "fourth-marriage": "Cuarto mandamiento: Matrimonio e hijos",
+        "fourth-authority": "Cuarto mandamiento: Autoridad y deberes",
+        "fifth-violence": "Quinto mandamiento: Violencia e ira",
+        "fifth-life": "Quinto mandamiento: Respeto por la vida y por uno mismo",
+        "fifth-scandal": "Quinto mandamiento: Escándalo y caridad",
+        "sixth-purity": "Sexto y noveno mandamientos: Pureza",
+        "sixth-dating-marriage": "Sexto y noveno mandamientos: Noviazgo y matrimonio",
+        "sixth-eyes-thoughts": "Sexto y noveno mandamientos: Mirada y pensamientos",
+        "seventh-theft": "Séptimo y décimo mandamientos: Robo y honradez",
+        "seventh-generosity": "Séptimo y décimo mandamientos: Generosidad, envidia y administración",
+        "eighth-truth": "Octavo mandamiento: Veracidad y chismes",
+        "eighth-judgment": "Octavo mandamiento: Calumnia, juicio y confidencialidad",
+        "deadly-sins": "Los siete pecados capitales",
+        "sins-omission": "Pecados de omisión",
+        "love-questions": "Preguntas sobre el amor"
+    ]
+
+    static let itemTextsEs: [String: String] = [
+        "first-faith-1": "¿He dudado deliberadamente o negado alguna enseñanza de la Iglesia católica?",
+        "first-faith-2": "¿He descuidado aprender mi fe?",
+        "first-faith-3": "¿He rechazado la autoridad de la Iglesia o la enseñanza del Magisterio?",
+        "first-faith-4": "¿Me he avergonzado de identificarme como católico?",
+        "first-faith-5": "¿He alejado a otros de la fe?",
+        "first-hope-1": "¿He desesperado de la misericordia de Dios?",
+        "first-hope-2": "¿He presumido que Dios me perdonará sin arrepentirme?",
+        "first-hope-3": "¿Me he dejado dominar por la ansiedad porque confío más en mí mismo que en Dios?",
+        "first-hope-4": "¿He buscado seguridad más en el dinero, la política, el éxito o la comodidad que en Dios?",
+        "first-charity-1": "¿Amo verdaderamente a Dios sobre todas las cosas?",
+        "first-charity-2": "¿He elegido conscientemente algo por encima de Dios?",
+        "first-charity-3": "¿Hay algún apego al que me negaría a renunciar si Dios me lo pidiera?",
+        "first-worship-1": "¿He descuidado la oración diaria?",
+        "first-worship-2": "¿Rezo solamente cuando necesito algo?",
+        "first-worship-3": "¿He rezado con descuido o distracción sin esforzarme por concentrarme?",
+        "first-worship-4": "¿He ignorado oportunidades de adoración eucarística?",
+        "first-worship-5": "¿He descuidado la lectura espiritual?",
+        "first-false-1": "¿He participado en prácticas ocultistas?",
+        "first-false-2": "¿He utilizado tablas ouija?",
+        "first-false-3": "¿He consultado a videntes o médiums?",
+        "first-false-4": "¿He tomado en serio los horóscopos?",
+        "first-false-5": "¿He practicado espiritualidades de la Nueva Era?",
+        "first-false-6": "¿He utilizado cristales o sanación energética con creencias supersticiosas?",
+        "first-false-7": "¿He practicado brujería o magia?",
+        "first-false-8": "¿He participado en sesiones espiritistas?",
+        "first-superstition-1": "¿He tratado los sacramentales como amuletos de buena suerte?",
+        "first-superstition-2": "¿He confiado más en señales o presagios que en la Providencia?",
+        "first-superstition-3": "¿He creído que ciertos objetos poseen poder espiritual al margen de Dios?",
+        "first-idolatry-1": "¿Gobierna realmente mi vida mi carrera profesional?",
+        "first-idolatry-2": "¿Gobierna realmente mi vida el dinero?",
+        "first-idolatry-3": "¿Gobierna realmente mi vida la política?",
+        "first-idolatry-4": "¿Gobierna realmente mi vida el entretenimiento?",
+        "first-idolatry-5": "¿Gobiernan mi vida los deportes, la condición física, las redes sociales, la reputación o la comodidad personal?",
+        "first-idolatry-6": "¿He puesto a mi familia por encima de Dios?",
+        "first-idolatry-7": "¿Podría alguien que observa mi vida concluir que estas cosas me importan más que Dios?",
+        "second-reverence-1": "¿He usado el nombre de Dios sin respeto?",
+        "second-reverence-2": "¿He maldecido usando el nombre de Dios?",
+        "second-reverence-3": "¿He usado irreverentemente el nombre de Jesús?",
+        "second-reverence-4": "¿Me he burlado de las cosas santas?",
+        "second-speech-1": "¿He hecho bromas que ridiculizan la religión?",
+        "second-speech-2": "¿He hablado irreverentemente de los santos?",
+        "second-speech-3": "¿He hablado irreverentemente de la Santísima Virgen María?",
+        "second-speech-4": "¿He hablado irreverentemente del Papa o del clero sin caridad?",
+        "second-promises-1": "¿He quebrantado promesas hechas a Dios?",
+        "second-promises-2": "¿He dejado de cumplir votos?",
+        "second-promises-3": "¿He dejado intencionalmente de cumplir una penitencia?",
+        "second-witness-1": "¿He negado mi fe mediante el silencio cuando la caridad exigía que hablara?",
+        "second-witness-2": "¿He actuado públicamente en contra de la enseñanza católica?",
+        "third-mass-1": "¿He faltado deliberadamente a la Misa dominical?",
+        "third-mass-2": "¿He faltado a Misa en días de precepto?",
+        "third-mass-3": "¿He llegado tarde intencionalmente?",
+        "third-mass-4": "¿Me he marchado antes sin necesidad?",
+        "third-participation-1": "¿He estado atento durante la Misa?",
+        "third-participation-2": "¿He recibido indignamente la Sagrada Comunión?",
+        "third-participation-3": "¿He recibido la Comunión siendo consciente de estar en pecado mortal?",
+        "third-rest-1": "¿He trabajado innecesariamente el domingo?",
+        "third-rest-2": "¿He hecho trabajar a otros sin necesidad?",
+        "third-rest-3": "¿He dejado de pasar tiempo con mi familia por trabajo o entretenimiento innecesarios?",
+        "third-rest-4": "¿Me preparo para la Misa mediante la oración?",
+        "third-rest-5": "¿Doy gracias después?",
+        "fourth-parents-1": "¿He desobedecido a mis padres?",
+        "fourth-parents-2": "¿Les he faltado al respeto?",
+        "fourth-parents-3": "¿He descuidado a mis padres ancianos?",
+        "fourth-parents-4": "¿Me he negado a perdonar?",
+        "fourth-parents-5": "¿He sido impaciente?",
+        "fourth-marriage-1": "¿He amado a mi cónyuge con espíritu de sacrificio?",
+        "fourth-marriage-2": "¿He hablado con dureza?",
+        "fourth-marriage-3": "¿He descuidado la intimidad emocional?",
+        "fourth-marriage-4": "¿He sido controlador o egoísta?",
+        "fourth-children-1": "¿He dejado de enseñar la fe a mis hijos?",
+        "fourth-children-2": "¿He dejado de corregirlos adecuadamente?",
+        "fourth-children-3": "¿Los he corregido con ira?",
+        "fourth-children-4": "¿He descuidado el afecto?",
+        "fourth-children-5": "¿He dejado de rezar con ellos?",
+        "fourth-authority-1": "¿He obedecido a la autoridad legítima?",
+        "fourth-authority-2": "¿He sido deshonesto con mis empleadores?",
+        "fourth-authority-3": "¿He descuidado mis deberes laborales?",
+        "fourth-authority-4": "¿He sido perezoso?",
+        "fourth-authority-5": "¿He robado tiempo en el trabajo?",
+        "fourth-authority-6": "¿He dejado de votar responsablemente?",
+        "fourth-authority-7": "¿He rechazado obligaciones cívicas legítimas?",
+        "fourth-authority-8": "¿He apoyado conscientemente una injusticia grave?",
+        "fifth-violence-1": "¿He causado daño físico a otra persona?",
+        "fifth-violence-2": "¿He amenazado con violencia?",
+        "fifth-violence-3": "¿He fomentado la violencia?",
+        "fifth-anger-1": "¿He guardado rencor?",
+        "fifth-anger-2": "¿Me he negado a perdonar?",
+        "fifth-anger-3": "¿He deseado vengarme?",
+        "fifth-anger-4": "¿Me he alegrado del sufrimiento ajeno?",
+        "fifth-anger-5": "¿He alimentado el odio?",
+        "fifth-life-1": "¿He apoyado el aborto?",
+        "fifth-life-2": "¿He alentado a alguien a abortar?",
+        "fifth-life-3": "¿He procurado un aborto?",
+        "fifth-life-4": "¿He colaborado con la eutanasia?",
+        "fifth-life-5": "¿He aprobado el suicidio asistido?",
+        "fifth-self-1": "¿He abusado del alcohol?",
+        "fifth-self-2": "¿He consumido drogas ilegales?",
+        "fifth-self-3": "¿He conducido temerariamente?",
+        "fifth-self-4": "¿He descuidado atención médica seria?",
+        "fifth-self-5": "¿Me he hecho daño intencionalmente?",
+        "fifth-scandal-1": "¿He llevado a otra persona al pecado?",
+        "fifth-scandal-2": "¿He fomentado una conducta inmoral?",
+        "fifth-scandal-3": "¿Me he burlado de la virtud?",
+        "fifth-charity-1": "¿He ignorado a alguien con una necesidad grave?",
+        "fifth-charity-2": "¿He dejado de defender al inocente?",
+        "fifth-charity-3": "¿He sido cruel con mis palabras?",
+        "sixth-purity-1": "¿He visto pornografía?",
+        "sixth-purity-2": "¿He leído material sexualmente explícito?",
+        "sixth-purity-3": "¿He visto entretenimiento inmoral buscando excitación sexual?",
+        "sixth-purity-4": "¿He practicado la masturbación?",
+        "sixth-purity-5": "¿He consentido fantasías lujuriosas?",
+        "sixth-purity-6": "¿He buscado estimulación sexual fuera del matrimonio?",
+        "sixth-dating-1": "¿He mantenido actividad sexual fuera del matrimonio?",
+        "sixth-dating-2": "¿He convivido como pareja fuera del matrimonio?",
+        "sixth-dating-3": "¿He fomentado la impureza?",
+        "sixth-marriage-1": "¿He sido infiel emocionalmente?",
+        "sixth-marriage-2": "¿He coqueteado de manera inapropiada?",
+        "sixth-marriage-3": "¿He usado anticonceptivos?",
+        "sixth-marriage-4": "¿He rechazado egoístamente la intimidad conyugal?",
+        "sixth-marriage-5": "¿He usado a mi cónyuge solamente para obtener placer?",
+        "sixth-eyes-1": "¿He mirado deliberadamente con lujuria?",
+        "sixth-eyes-2": "¿He buscado imágenes impúdicas?",
+        "sixth-eyes-3": "¿He dejado de evitar ocasiones de pecado?",
+        "sixth-thoughts-1": "¿He consentido fantasías en vez de rechazarlas?",
+        "sixth-thoughts-2": "¿He tratado a otra persona como un objeto?",
+        "seventh-theft-1": "¿He tomado algo que no me pertenecía?",
+        "seventh-theft-2": "¿He hecho trampa?",
+        "seventh-theft-3": "¿He pirateado conscientemente programas o contenido multimedia?",
+        "seventh-theft-4": "¿He dejado de pagar mis deudas?",
+        "seventh-theft-5": "¿He dañado la propiedad ajena?",
+        "seventh-honesty-1": "¿He defraudado en los impuestos?",
+        "seventh-honesty-2": "¿He engañado a clientes?",
+        "seventh-honesty-3": "¿He defraudado a empleadores?",
+        "seventh-honesty-4": "¿He aceptado pagos deshonestos?",
+        "seventh-generosity-1": "¿He sido codicioso?",
+        "seventh-generosity-2": "¿He descuidado a los pobres?",
+        "seventh-generosity-3": "¿He rechazado una ayuda caritativa razonable?",
+        "seventh-envy-1": "¿He sentido celos del éxito ajeno?",
+        "seventh-envy-2": "¿Me he alegrado cuando otros fracasaron?",
+        "seventh-envy-3": "¿He resentido las bendiciones recibidas por otra persona?",
+        "seventh-stewardship-1": "¿He desperdiciado recursos?",
+        "seventh-stewardship-2": "¿He sido irresponsable con el dinero?",
+        "seventh-stewardship-3": "¿He apostado en exceso?",
+        "eighth-truth-1": "¿He mentido?",
+        "eighth-truth-2": "¿He exagerado?",
+        "eighth-truth-3": "¿He engañado a otros?",
+        "eighth-truth-4": "¿He ocultado injustamente la verdad?",
+        "eighth-gossip-1": "¿He difundido rumores?",
+        "eighth-gossip-2": "¿He divulgado innecesariamente las faltas de otra persona?",
+        "eighth-gossip-3": "¿He escuchado chismes con interés?",
+        "eighth-gossip-4": "¿He destruido la reputación de otra persona?",
+        "eighth-calumny-1": "¿He acusado falsamente a alguien?",
+        "eighth-calumny-2": "¿He repetido acusaciones sin saber si eran verdaderas?",
+        "eighth-judgment-1": "¿He atribuido malas intenciones a otra persona?",
+        "eighth-judgment-2": "¿He juzgado sin pruebas suficientes?",
+        "eighth-judgment-3": "¿Me he negado a interpretar caritativamente las acciones ajenas?",
+        "eighth-confidence-1": "¿He quebrantado una confidencia legítima?",
+        "eighth-confidence-2": "¿He revelado secretos innecesariamente?",
+        "deadly-pride-1": "Soberbia: ¿Busco admiración?",
+        "deadly-pride-2": "¿Rechazo la corrección?",
+        "deadly-pride-3": "¿Me considero moralmente superior?",
+        "deadly-pride-4": "¿Necesito ganar todas las discusiones?",
+        "deadly-greed-1": "¿Es el dinero mi principal preocupación?",
+        "deadly-greed-2": "¿Acumulo bienes sin necesidad?",
+        "deadly-greed-3": "¿Me niego a ser generoso?",
+        "deadly-lust-1": "Lujuria: ¿Me entrego a una curiosidad impura?",
+        "deadly-lust-2": "¿Busco placer al margen del designio de Dios?",
+        "deadly-envy-1": "Envidia: ¿Me entristece el éxito de los demás?",
+        "deadly-gluttony-1": "Gula: ¿Como en exceso?",
+        "deadly-gluttony-2": "¿Bebo en exceso?",
+        "deadly-gluttony-3": "¿Me falta moderación?",
+        "deadly-wrath-1": "Ira: ¿Pierdo el control de mi temperamento?",
+        "deadly-wrath-2": "¿Hablo de manera abusiva?",
+        "deadly-wrath-3": "¿Guardo resentimiento?",
+        "deadly-sloth-1": "Pereza: ¿Descuido la oración?",
+        "deadly-sloth-2": "¿Desperdicio demasiado tiempo?",
+        "deadly-sloth-3": "¿Aplazo mis deberes?",
+        "deadly-sloth-4": "¿Descuido mi crecimiento espiritual?",
+        "omission-1": "¿He descuidado la oración?",
+        "omission-2": "¿He dejado de perdonar?",
+        "omission-3": "¿He dejado de evangelizar cuando era oportuno?",
+        "omission-4": "¿He descuidado las obras de misericordia corporales?",
+        "omission-5": "¿He descuidado las obras de misericordia espirituales?",
+        "omission-6": "¿He dejado de defender a alguien?",
+        "omission-7": "¿He dejado de consolar a quien sufre?",
+        "omission-8": "¿He dejado de visitar a los enfermos?",
+        "omission-9": "¿He dejado de animar a alguien en la fe?",
+        "omission-10": "¿He dejado de corregir caritativamente a alguien cuando era necesario?",
+        "love-1": "¿He amado a Dios con todo mi corazón?",
+        "love-2": "¿He amado a mi cónyuge y a mi familia con espíritu de sacrificio?",
+        "love-3": "¿He amado a mi prójimo como a mí mismo?",
+        "love-4": "¿He sido paciente?",
+        "love-5": "¿He sido amable?",
+        "love-6": "¿He sido humilde?",
+        "love-7": "¿He sido honesto?",
+        "love-8": "¿He sido casto?",
+        "love-9": "¿He sido misericordioso?",
+        "love-10": "¿He sabido perdonar?",
+        "love-11": "¿He sido generoso?",
+        "love-12": "¿He sido fiel?",
+        "love-13": "¿He rechazado la gracia ignorando impulsos de hacer el bien, evitar el mal o practicar la virtud?",
+        "love-14": "¿He resistido repetidamente al Espíritu Santo?"
+    ]
+
     static let preExamPrayer = "Come, Holy Spirit, enlighten my mind and open my heart. Help me to see my life truthfully in the light of God’s mercy. Give me courage to acknowledge my sins, sorrow for having offended God, and confidence in the forgiveness won by Jesus Christ. Amen."
+    static let preExamPrayerEs = "Ven, Espíritu Santo, ilumina mi mente y abre mi corazón. Ayúdame a ver mi vida con verdad a la luz de la misericordia de Dios. Dame valor para reconocer mis pecados, dolor por haber ofendido a Dios y confianza en el perdón obtenido por Jesucristo. Amén."
 
     static let actOfContrition = "O my God, I am heartily sorry for having offended You, and I detest all my sins because of Your just punishments, but most of all because they offend You, my God, who are all-good and deserving of all my love. I firmly resolve, with the help of Your grace, to sin no more and to avoid the near occasions of sin. Amen."
+    static let actOfContritionEs = "Dios mío, me arrepiento de todo corazón de haberte ofendido y detesto todos mis pecados por tus justos castigos, pero sobre todo porque te ofenden a Ti, Dios mío, que eres todo bondad y digno de todo mi amor. Propongo firmemente, con la ayuda de tu gracia, no pecar más y evitar las ocasiones próximas de pecado. Amén."
+
+    static var localizedPreExamPrayer: String { examLocalized(preExamPrayer, preExamPrayerEs) }
+    static var localizedActOfContrition: String { examLocalized(actOfContrition, actOfContritionEs) }
+    static var localizedPathTitle: String { examLocalized("Examination tool", "Herramienta de examen") }
 
     static let thoroughExamination = ExaminationPath(
         id: "thorough-examination",
@@ -1364,17 +1799,17 @@ private struct DailyGospelCard: View {
     var body: some View {
         IlluminedCard {
             VStack(alignment: .leading, spacing: 14) {
-                Label("Daily Gospel", systemImage: "calendar.badge.clock")
+                Label(rosaryPrefersSpanish ? "Evangelio del día" : "Daily Gospel", systemImage: "calendar.badge.clock")
                     .font(IlluminedTheme.font(size: 20, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.blue)
 
-                Text("Use today's Gospel as the scripture passage for Lectio Divina. The official USCCB daily readings page updates each day with the Church's lectionary readings.")
+                Text(rosaryPrefersSpanish ? "Usa el Evangelio de hoy como pasaje para la Lectio Divina. La página oficial de lecturas diarias de la USCCB se actualiza cada día con las lecturas del leccionario de la Iglesia." : "Use today's Gospel as the scripture passage for Lectio Divina. The official USCCB daily readings page updates each day with the Church's lectionary readings.")
                     .font(IlluminedTheme.font(size: 16))
                     .foregroundStyle(IlluminedTheme.ink)
                     .lineSpacing(4)
 
                 Link(destination: dailyReadingsURL) {
-                    Label("Open Today's Gospel", systemImage: "arrow.up.right.square")
+                    Label(rosaryPrefersSpanish ? "Abrir el Evangelio de hoy" : "Open Today's Gospel", systemImage: "arrow.up.right.square")
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                 }
@@ -1394,11 +1829,11 @@ private struct MassGuideView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 12) {
-                            Label("Order of Mass", systemImage: "church")
+                            Label(examLocalized("Order of Mass", "Ordinario de la Misa"), systemImage: "church")
                                 .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("The celebration of the Mass consists of four major parts: The Introductory Rite, the Liturgy of the Word, The Liturgy of the Eucharist, and the Concluding Rite. Use this guide to follow along with the Mass and learn more about each part.")
+                            Text(examLocalized("The celebration of the Mass consists of four major parts: The Introductory Rite, the Liturgy of the Word, The Liturgy of the Eucharist, and the Concluding Rite. Use this guide to follow along with the Mass and learn more about each part.", "La celebración de la Misa consta de cuatro partes principales: los Ritos iniciales, la Liturgia de la Palabra, la Liturgia de la Eucaristía y los Ritos de conclusión. Usa esta guía para seguir la Misa y conocer mejor cada parte."))
                                 .font(IlluminedTheme.font(size: 16))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
@@ -1451,12 +1886,12 @@ private struct MassGuidePartDetailView: View {
                                     .frame(width: 36, height: 36)
                                     .background(IlluminedTheme.blue, in: Circle())
 
-                                Label(part.title, systemImage: part.systemImage)
+                                Label(part.localizedTitle, systemImage: part.systemImage)
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
                             }
 
-                            Text(part.detail)
+                            Text(part.localizedDetail)
                                 .font(IlluminedTheme.font(size: 16))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
@@ -1479,7 +1914,7 @@ private struct MassGuidePartDetailView: View {
                         NavigationLink {
                             MassGuidePartDetailView(part: nextPart)
                         } label: {
-                            Label("Continue to \(nextPart.title)", systemImage: "arrow.right.circle.fill")
+                            Label(examLocalized("Continue to \(nextPart.title)", "Continuar a \(nextPart.localizedTitle)"), systemImage: "arrow.right.circle.fill")
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
@@ -1487,11 +1922,11 @@ private struct MassGuidePartDetailView: View {
                     } else {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Mass Guide Complete", systemImage: "checkmark.seal")
+                                Label(examLocalized("Mass Guide Complete", "Guía de la Misa completada"), systemImage: "checkmark.seal")
                                     .font(IlluminedTheme.font(size: 20, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("You have walked through the full movement of the Mass, from gathering to mission.")
+                                Text(examLocalized("You have walked through the full movement of the Mass, from gathering to mission.", "Has recorrido todo el movimiento de la Misa, desde la reunión hasta la misión."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                             }
@@ -1514,13 +1949,13 @@ private struct MassGuideStepCard: View {
         IlluminedCard {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(row.title)
+                    Text(row.localizedTitle)
                         .font(IlluminedTheme.font(size: 21, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
                     Spacer(minLength: 8)
 
-                    if let posture = row.posture {
+                    if let posture = row.localizedPosture {
                         Text(posture)
                             .font(IlluminedTheme.font(size: 12, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
@@ -1530,12 +1965,12 @@ private struct MassGuideStepCard: View {
                     }
                 }
 
-                Text(row.detail)
+                Text(row.localizedDetail)
                     .font(IlluminedTheme.font(size: 16))
                     .foregroundStyle(IlluminedTheme.secondaryText)
                     .lineSpacing(4)
 
-                if let response = row.response {
+                if let response = row.localizedResponse {
                     Label(response, systemImage: "quote.bubble")
                         .font(IlluminedTheme.font(size: 14, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.gold)
@@ -1555,11 +1990,11 @@ private struct MassGuideStepCard: View {
                                         .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(option.title)
+                                        Text(option.localizedTitle)
                                             .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                             .foregroundStyle(IlluminedTheme.ink)
 
-                                        Text("Open prayer and guide text")
+                                        Text(examLocalized("Open prayer and guide text", "Abrir la oración y la guía"))
                                             .font(IlluminedTheme.font(size: 12))
                                             .foregroundStyle(IlluminedTheme.secondaryText)
                                     }
@@ -1600,17 +2035,17 @@ private struct MassGuideEmbeddedPartCard: View {
                         .background(IlluminedTheme.blue.opacity(0.1), in: Circle())
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(part.title)
+                        Text(part.localizedTitle)
                             .font(IlluminedTheme.font(size: 22, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
 
-                        Text(part.subtitle)
+                        Text(part.localizedSubtitle)
                             .font(IlluminedTheme.font(size: 14))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
                 }
 
-                Text(part.detail)
+                Text(part.localizedDetail)
                     .font(IlluminedTheme.font(size: 16))
                     .foregroundStyle(IlluminedTheme.secondaryText)
                     .lineSpacing(4)
@@ -1631,13 +2066,13 @@ private struct MassGuideSubStepCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(row.title)
+                Text(row.localizedTitle)
                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.ink)
 
                 Spacer(minLength: 8)
 
-                if let posture = row.posture {
+                if let posture = row.localizedPosture {
                     Text(posture)
                         .font(IlluminedTheme.font(size: 12, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.blue)
@@ -1647,12 +2082,12 @@ private struct MassGuideSubStepCard: View {
                 }
             }
 
-            Text(row.detail)
+            Text(row.localizedDetail)
                 .font(IlluminedTheme.font(size: 15))
                 .foregroundStyle(IlluminedTheme.secondaryText)
                 .lineSpacing(3)
 
-            if let response = row.response {
+            if let response = row.localizedResponse {
                 Label(response, systemImage: "quote.bubble")
                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.gold)
@@ -1671,7 +2106,7 @@ private struct MassGuideSubStepCard: View {
                                     .frame(width: 30, height: 30)
                                     .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
-                                Text(option.title)
+                                Text(option.localizedTitle)
                                     .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .lineLimit(2)
@@ -1710,11 +2145,11 @@ private struct MassGuideReadingsCard: View {
     var body: some View {
         IlluminedCard {
             VStack(alignment: .leading, spacing: 14) {
-                Label("Readings", systemImage: "book.closed")
+                Label(examLocalized("Readings", "Lecturas"), systemImage: "book.closed")
                     .font(IlluminedTheme.font(size: 21, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.ink)
 
-                Text("The Church listens to the Word of God, responds in prayer, and stands to welcome Christ speaking in the Gospel.")
+                Text(examLocalized("The Church listens to the Word of God, responds in prayer, and stands to welcome Christ speaking in the Gospel.", "La Iglesia escucha la Palabra de Dios, responde en oración y se pone de pie para acoger a Cristo que habla en el Evangelio."))
                     .font(IlluminedTheme.font(size: 16))
                     .foregroundStyle(IlluminedTheme.secondaryText)
                     .lineSpacing(4)
@@ -1723,13 +2158,13 @@ private struct MassGuideReadingsCard: View {
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 5) {
                             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Text(row.title)
+                                Text(row.localizedTitle)
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
                                 Spacer(minLength: 8)
 
-                                if let posture = row.posture {
+                                if let posture = row.localizedPosture {
                                     Text(posture)
                                         .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.blue)
@@ -1739,12 +2174,12 @@ private struct MassGuideReadingsCard: View {
                                 }
                             }
 
-                            Text(row.detail)
+                            Text(row.localizedDetail)
                                 .font(IlluminedTheme.font(size: 14))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(3)
 
-                            if let response = row.response {
+                            if let response = row.localizedResponse {
                                 Label(response, systemImage: "quote.bubble")
                                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.gold)
@@ -1759,7 +2194,7 @@ private struct MassGuideReadingsCard: View {
                 }
 
                 Link(destination: dailyReadingsURL) {
-                    Label("Open USCCB Daily Readings", systemImage: "arrow.up.right.square")
+                    Label(examLocalized("Open USCCB Daily Readings", "Abrir las lecturas diarias de la USCCB"), systemImage: "arrow.up.right.square")
                         .font(IlluminedTheme.font(size: 16, weight: .semibold))
                         .frame(maxWidth: .infinity)
                 }
@@ -1783,11 +2218,11 @@ private struct MassGuidePartCard: View {
                     .background(IlluminedTheme.blue, in: Circle())
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(part.title)
+                    Text(part.localizedTitle)
                         .font(IlluminedTheme.font(size: 20, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text(part.subtitle)
+                    Text(part.localizedSubtitle)
                         .font(IlluminedTheme.font(size: 14))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                         .lineLimit(2)
@@ -1852,13 +2287,13 @@ private struct MassGuideSectionCard: View {
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Text(row.title)
+                                Text(row.localizedTitle)
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
                                 Spacer(minLength: 8)
 
-                                if let posture = row.posture {
+                                if let posture = row.localizedPosture {
                                     Text(posture)
                                         .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.blue)
@@ -1868,12 +2303,12 @@ private struct MassGuideSectionCard: View {
                                 }
                             }
 
-                            Text(row.detail)
+                            Text(row.localizedDetail)
                                 .font(IlluminedTheme.font(size: 14))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(3)
 
-                            if let response = row.response {
+                            if let response = row.localizedResponse {
                                 Label(response, systemImage: "quote.bubble")
                                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.gold)
@@ -1899,6 +2334,69 @@ private struct MassGuideRow: Identifiable {
     let posture: String?
     let response: String?
     let prayerOptions: [MassPrayerOption]
+
+    var localizedTitle: String {
+        guard Locale.current.languageCode == "es" else { return title }
+        return [
+            "Entrance": "Entrada", "Sign of the Cross and Greeting": "Señal de la cruz y saludo",
+            "Penitential Act": "Acto penitencial", "Gloria": "Gloria", "Collect": "Oración colecta",
+            "First Reading": "Primera lectura", "Responsorial Psalm": "Salmo responsorial",
+            "Second Reading": "Segunda lectura", "Gospel Acclamation and Gospel": "Aclamación al Evangelio y Evangelio",
+            "Homily": "Homilía", "Profession of Faith": "Profesión de fe", "Universal Prayer": "Oración universal",
+            "Preparation of the Gifts": "Preparación de los dones", "Prayer over the Offerings": "Oración sobre las ofrendas",
+            "Preface Dialogue": "Diálogo del prefacio", "Eucharistic Prayer": "Plegaria eucarística",
+            "Holy, Holy, Holy": "Santo, Santo, Santo", "Institution Narrative and Consecration": "Relato de la institución y consagración",
+            "Memorial Acclamation": "Aclamación memorial", "Great Amen": "Gran Amén",
+            "Lord’s Prayer": "Padre nuestro", "Sign of Peace": "Rito de la paz", "Lamb of God": "Cordero de Dios",
+            "Holy Communion": "Sagrada Comunión", "Prayer after Communion": "Oración después de la Comunión",
+            "Announcements": "Avisos", "Blessing": "Bendición", "Dismissal": "Despedida", "Recessional": "Procesión de salida"
+        ][title] ?? title
+    }
+
+    var localizedDetail: String {
+        guard Locale.current.languageCode == "es" else { return detail }
+        return [
+            "Entrance": "La entrada es la procesión y rito inicial de la Misa católica. El sacerdote, el diácono y los servidores del altar avanzan hacia el altar. Esto simboliza nuestro camino hacia el cielo. Un canto de entrada une a la asamblea en la alabanza.",
+            "Sign of the Cross and Greeting": "La Misa comienza en el nombre del Padre, y del Hijo, y del Espíritu Santo.",
+            "Penitential Act": "El Acto penitencial tiene lugar al comienzo de la Misa y prepara a los fieles para celebrar dignamente los sagrados misterios, reconociendo sus pecados y pidiendo la misericordia de Dios. Puede adoptar varias formas: el Yo confieso, un diálogo, invocaciones con el Kyrie eleison o la aspersión con agua.",
+            "Gloria": "El Gloria es un antiguo himno gozoso de alabanza y adoración. Glorifica a la Trinidad, une el canto de los ángeles en el nacimiento de Jesús con la acción de gracias y pide misericordia. Se canta los domingos fuera de Adviento y Cuaresma, y en solemnidades y fiestas.",
+            "Collect": "La oración colecta concluye los Ritos iniciales antes de la Liturgia de la Palabra. Reúne las oraciones e intenciones silenciosas de la asamblea en una petición unificada ofrecida a Dios.",
+            "First Reading": "Normalmente se toma del Antiguo Testamento, excepto durante la Pascua, cuando suele leerse el libro de los Hechos.",
+            "Responsorial Psalm": "El pueblo responde a la Palabra de Dios mediante una oración cantada o recitada.",
+            "Second Reading": "Los domingos y solemnidades suele tomarse de una carta apostólica o del Apocalipsis.",
+            "Gospel Acclamation and Gospel": "La asamblea se pone de pie para acoger a Cristo que habla en el Evangelio.",
+            "Homily": "La homilía es la predicación del sacerdote o diácono durante la Liturgia de la Palabra. Explica las lecturas y ayuda a la asamblea a aplicar la Palabra de Dios a la vida diaria.",
+            "Profession of Faith": "La Profesión de fe, o Credo, es la declaración solemne de las creencias fundamentales que se recita después de la homilía. Une a la asamblea en una misma fe y responde a la Palabra de Dios.",
+            "Universal Prayer": "La Oración universal, también llamada Oración de los fieles, reúne peticiones por la Iglesia, los gobernantes, los enfermos y el mundo.",
+            "Preparation of the Gifts": "El pan, el vino y la ofrenda del pueblo se llevan al altar.",
+            "Prayer over the Offerings": "El sacerdote pide que Dios reciba y santifique los dones.",
+            "Preface Dialogue": "El sacerdote invita al pueblo a elevar el corazón y dar gracias.",
+            "Eucharistic Prayer": "La Iglesia da gracias, invoca al Espíritu Santo, recuerda el sacrificio salvador de Cristo y presenta sus intercesiones.",
+            "Holy, Holy, Holy": "La Iglesia se une a los ángeles y santos en la alabanza antes de la consagración.",
+            "Institution Narrative and Consecration": "Por las palabras de Cristo y el poder del Espíritu Santo, el pan y el vino se convierten en el Cuerpo y la Sangre de Cristo.",
+            "Memorial Acclamation": "La asamblea proclama el misterio de la muerte y resurrección de Cristo.",
+            "Great Amen": "El pueblo confirma toda la Plegaria eucarística con un Amén solemne.",
+            "Lord’s Prayer": "La Iglesia reza la oración que Jesús nos enseñó.",
+            "Sign of Peace": "Los fieles expresan la paz y la caridad antes de recibir la Comunión.",
+            "Lamb of God": "La Iglesia invoca a Cristo, el Cordero que quita el pecado del mundo.",
+            "Holy Communion": "Quienes están debidamente dispuestos reciben el Cuerpo y la Sangre de Cristo.",
+            "Prayer after Communion": "El sacerdote pide que el sacramento dé fruto en la vida de los fieles.",
+            "Announcements": "Después de la Comunión pueden darse breves avisos parroquiales.",
+            "Blessing": "El sacerdote bendice a los fieles en el nombre de la Trinidad.",
+            "Dismissal": "El pueblo es enviado a glorificar al Señor con su vida.",
+            "Recessional": "Los ministros se retiran y los fieles salen para vivir el misterio que han recibido."
+        ][title] ?? detail
+    }
+
+    var localizedPosture: String? {
+        guard Locale.current.languageCode == "es" else { return posture }
+        return ["Stand": "De pie", "Sit": "Sentado", "Kneel": "De rodillas", "Stand/Kneel": "De pie/De rodillas", "Kneel/Stand": "De rodillas/De pie", "Sit/Stand": "Sentado/De pie", "Process": "Procesión"][posture ?? ""] ?? posture
+    }
+
+    var localizedResponse: String? {
+        guard Locale.current.languageCode == "es" else { return response }
+        return ["Amen.": "Amén.", "Thanks be to God.": "Te alabamos, Señor.", "And with your spirit.": "Y con tu espíritu.", "Amen. / And with your spirit.": "Amén. / Y con tu espíritu.", "Lord, have mercy.": "Señor, ten piedad.", "Lord, hear our prayer.": "Te rogamos, óyenos.", "Glory to you, O Lord. / Praise to you, Lord Jesus Christ.": "Gloria a ti, Señor. / Gloria a ti, Señor Jesús."][response ?? ""] ?? response
+    }
 
     init(
         title: String,
@@ -1932,6 +2430,24 @@ private struct MassGuidePart: Identifiable {
     let rows: [MassGuideRow]
     let prayerGroups: [MassPrayerGroup]
     let showsDailyReadings: Bool
+    var localizedTitle: String {
+        guard Locale.current.languageCode == "es" else { return title }
+        return ["introductory-rites": "Ritos iniciales", "liturgy-word": "Liturgia de la Palabra", "liturgy-eucharist": "Liturgia de la Eucaristía", "communion-rite": "Rito de la Comunión", "concluding-rites": "Ritos de conclusión"][id] ?? title
+    }
+    var localizedSubtitle: String {
+        guard Locale.current.languageCode == "es" else { return subtitle }
+        return ["introductory-rites": "Reunirse, arrepentirse, alabar y orar.", "liturgy-word": "Escuchar, responder, profesar e interceder.", "liturgy-eucharist": "Ofrecer, consagrar, recordar y adorar.", "communion-rite": "Orar, compartir la paz, recibir y dar gracias.", "concluding-rites": "Recibir la bendición y ser enviados."][id] ?? subtitle
+    }
+    var localizedDetail: String {
+        guard Locale.current.languageCode == "es" else { return detail }
+        return [
+            "introductory-rites": "Los Ritos iniciales abren la Misa católica y preparan a los fieles para escuchar la Palabra de Dios y celebrar la Eucaristía. Incluyen la procesión de entrada, la veneración del altar, la señal de la cruz, el saludo, el acto penitencial, el Gloria y la oración colecta.",
+            "liturgy-word": "En la Liturgia de la Palabra, Dios habla a la Iglesia mediante la Sagrada Escritura. El pueblo escucha, responde con el salmo y la aclamación, profesa el Credo y ora por las necesidades del mundo.",
+            "liturgy-eucharist": "La Liturgia de la Eucaristía es el centro y culmen de la Misa. Se preparan los dones, se reza la Plegaria eucarística y Cristo se hace verdaderamente presente bajo las especies de pan y vino.",
+            "communion-rite": "El Rito de la Comunión prepara a los fieles para recibir al Señor. La Iglesia reza el Padre nuestro, pide la paz, invoca al Cordero de Dios y recibe la Sagrada Comunión.",
+            "concluding-rites": "La Misa concluye con la bendición y el envío. Los fieles salen para glorificar al Señor con su vida."
+        ][id] ?? detail
+    }
     var readingsGroup: [MassGuideRow]? {
         guard showsDailyReadings else { return nil }
         let readingTitles = ["First Reading", "Responsorial Psalm", "Second Reading", "Gospel Acclamation and Gospel"]
@@ -2272,11 +2788,11 @@ private struct MassPrayerLinkCard: View {
                                     .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(option.title)
+                                    Text(option.localizedTitle)
                                         .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.ink)
 
-                                    Text(option.summary)
+                                    Text(option.localizedSummary)
                                         .font(IlluminedTheme.font(size: 13))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                         .lineLimit(2)
@@ -2314,16 +2830,16 @@ private struct MassPrayerDetailView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 10) {
-                            Label(option.title, systemImage: option.systemImage)
+                            Label(option.localizedTitle, systemImage: option.systemImage)
                                 .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text(option.summary)
+                            Text(option.localizedSummary)
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
 
-                            if let note = option.note {
+                            if let note = option.localizedNote {
                                 Text(note)
                                     .font(IlluminedTheme.font(size: 13))
                                     .foregroundStyle(IlluminedTheme.gold)
@@ -2334,7 +2850,7 @@ private struct MassPrayerDetailView: View {
 
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 14) {
-                            Text(option.textHeading)
+                            Text(option.localizedTextHeading)
                                 .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
@@ -2343,7 +2859,7 @@ private struct MassPrayerDetailView: View {
                                 .foregroundStyle(IlluminedTheme.ink)
                                 .lineSpacing(6)
 
-                            if let textNote = option.textNote {
+                            if let textNote = option.localizedTextNote {
                                 Text(textNote)
                                     .font(IlluminedTheme.font(size: 13))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
@@ -2370,9 +2886,50 @@ private struct MassPrayerOption: Identifiable, Equatable {
     let note: String?
     let textNote: String?
 
+    var localizedTitle: String {
+        guard Locale.current.languageCode == "es" else { return title }
+        return ["confiteor":"Acto penitencial: Yo confieso","dialogue":"Acto penitencial: Diálogo","tropes":"Acto penitencial: Invocaciones con el Kyrie","sprinkling":"Rito de la aspersión","gloria":"Gloria","collect":"Oración colecta","nicene":"Credo niceno-constantinopolitano","apostles":"Credo de los Apóstoles","universal-prayer":"Oración universal","presentation-gifts":"Preparación de los dones","prayer-over-offerings":"Oración sobre las ofrendas","preface-dialogue":"Diálogo del prefacio","ep1":"Plegaria eucarística I: Canon romano","ep2":"Plegaria eucarística II","ep3":"Plegaria eucarística III","ep4":"Plegaria eucarística IV","sanctus":"Santo, Santo, Santo","memorial-acclamation":"Aclamaciones memoriales","great-amen":"Gran Amén","lords-prayer":"Padre nuestro","agnus-dei":"Cordero de Dios","communion-invitation":"Invitación a la Comunión","prayer-after-communion":"Oración después de la Comunión","final-blessing":"Bendición final","dismissal":"Despedida"][id] ?? title
+    }
+
+    var localizedSummary: String {
+        guard Locale.current.languageCode == "es" else { return summary }
+        return [
+            "confiteor":"El pueblo confiesa unido sus pecados, reconoce a los santos y a la comunidad, y pide oración y misericordia.",
+            "dialogue":"El sacerdote guía breves invocaciones y el pueblo pide al Señor misericordia y salvación.",
+            "tropes":"Se invoca a Cristo con breves títulos y el pueblo responde pidiendo misericordia.",
+            "sprinkling":"Especialmente en Pascua, el sacerdote puede asperjar al pueblo con agua bendita como recuerdo del Bautismo.",
+            "gloria":"Himno de alabanza que se canta normalmente los domingos fuera de Adviento y Cuaresma, y en solemnidades y fiestas.",
+            "collect":"Oración propia del día que reúne la oración de la Iglesia y la dirige a Dios.",
+            "nicene":"Profesión de fe dominical que proclama la Trinidad, la Encarnación, la Iglesia, el Bautismo, la Resurrección y la vida eterna.",
+            "apostles":"Credo bautismal más breve que puede usarse especialmente en Cuaresma y Pascua.",
+            "universal-prayer":"Peticiones después del Credo, también llamadas Oración de los fieles.",
+            "presentation-gifts":"Se preparan el pan y el vino, y la ofrenda del pueblo se une al sacrificio de Cristo.",
+            "prayer-over-offerings":"El sacerdote pide que Dios reciba y santifique los dones preparados para la Eucaristía.",
+            "preface-dialogue":"El sacerdote invita al pueblo a elevar el corazón y dar gracias al Señor.",
+            "ep1":"El antiguo Canon romano, de carácter solemne, con amplias conmemoraciones e intercesiones.",
+            "ep2":"Plegaria concisa con acción de gracias, epíclesis, relato de la institución, memorial, ofrenda e intercesión.",
+            "ep3":"Plegaria frecuente en domingos y fiestas que destaca el sacrificio de Cristo y la unidad de los fieles.",
+            "ep4":"Plegaria con prefacio propio que recorre la historia de la salvación.",
+            "sanctus":"Aclamación anterior a la Plegaria eucarística que une la alabanza de ángeles y santos.",
+            "memorial-acclamation":"El pueblo aclama el misterio de la fe después de la consagración.",
+            "great-amen":"El pueblo confirma solemnemente la Plegaria eucarística al concluir.",
+            "lords-prayer":"La oración enseñada por Jesús, rezada por toda la Iglesia en el Rito de la Comunión.",
+            "agnus-dei":"Letanía cantada o recitada durante la fracción del pan antes de la Comunión.",
+            "communion-invitation":"El sacerdote muestra la Eucaristía e invita a los fieles a la cena del Cordero.",
+            "prayer-after-communion":"El sacerdote pide que el sacramento recibido dé fruto en la vida de los fieles.",
+            "final-blessing":"El sacerdote bendice a los fieles antes de enviarlos.",
+            "dismissal":"El pueblo es enviado a vivir el misterio que ha celebrado."
+        ][id] ?? summary
+    }
+
+    var localizedNote: String? { Locale.current.languageCode == "es" && note != nil ? "Consulta el misal parroquial o el subsidio litúrgico aprobado." : note }
+    var localizedTextNote: String? { Locale.current.languageCode == "es" ? "Para el texto litúrgico oficial en español, usa un Misal Romano o subsidio aprobado." : textNote }
+
     var textHeading: String {
         fullText.hasPrefix("For full text") ? "Text Placeholder" : "Prayer Text"
     }
+
+    var localizedTextHeading: String { Locale.current.languageCode == "es" ? "Texto y guía" : textHeading }
 
     static let penitentialActs: [MassPrayerOption] = [
         MassPrayerOption(
@@ -2812,7 +3369,7 @@ private struct RosaryMysteryPickerView: View {
                                 onRosaryCompleted: onRosaryCompleted
                             )
                         } label: {
-                            SpiritualMenuRow(title: mysterySet.title, subtitle: "\(mysterySet.mysteries.count) mysteries", systemImage: "circle.grid.cross")
+                            SpiritualMenuRow(title: mysterySet.localizedTitle, subtitle: rosaryPrefersSpanish ? "\(mysterySet.mysteries.count) misterios" : "\(mysterySet.mysteries.count) mysteries", systemImage: "circle.grid.cross")
                         }
                         .buttonStyle(.plain)
                     }
@@ -2839,7 +3396,7 @@ private struct RosaryIntroView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     IlluminedCard {
-                        HTMLContentView(html: mysterySet.descriptionHTML, calculatedHeight: $htmlHeight)
+                        HTMLContentView(html: mysterySet.localizedDescriptionHTML, calculatedHeight: $htmlHeight)
                             .frame(height: htmlHeight)
                     }
 
@@ -2850,7 +3407,7 @@ private struct RosaryIntroView: View {
                             onRosaryCompleted: onRosaryCompleted
                         )
                     } label: {
-                        Label("Start Rosary", systemImage: "play.circle.fill")
+                        Label(rosaryPrefersSpanish ? "Comenzar el Rosario" : "Start Rosary", systemImage: "play.circle.fill")
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
@@ -2887,8 +3444,8 @@ private struct GuidedRosaryView: View {
                     .tint(IlluminedTheme.gold)
                     .padding(.horizontal)
                     .padding(.top)
-                    .accessibilityLabel("Rosary progress")
-                    .accessibilityValue("Step \(stepIndex + 1) of \(sequence.count)")
+                    .accessibilityLabel(IlluminedL10n.string("Rosary progress"))
+                    .accessibilityValue(IlluminedL10n.format("Step %d of %d", stepIndex + 1, sequence.count))
 
                     ScrollView {
                         VStack {
@@ -2932,7 +3489,7 @@ private struct GuidedRosaryView: View {
                     }
 
                     HStack {
-                        Button("Back") {
+                        Button(IlluminedL10n.string("Back")) {
                             stepIndex = max(stepIndex - 1, 0)
                         }
                         .disabled(stepIndex == 0)
@@ -2977,29 +3534,29 @@ private struct RosaryStep: Identifiable {
 private enum RosarySequenceBuilder {
     static func build(rosary: RosaryCatalog, mysterySet: RosaryMysterySet) -> [RosaryStep] {
         var sequence = [
-            RosaryStep(title: "Sign of the Cross", text: rosary.prayers.signOfTheCross, decadeCount: nil),
-            RosaryStep(title: "Apostles' Creed", text: rosary.prayers.apostlesCreed, decadeCount: nil),
-            RosaryStep(title: "Our Father", text: rosary.prayers.ourFather, decadeCount: nil),
-            RosaryStep(title: "Hail Mary (for Faith)", text: rosary.prayers.hailMary, decadeCount: nil),
-            RosaryStep(title: "Hail Mary (for Hope)", text: rosary.prayers.hailMary, decadeCount: nil),
-            RosaryStep(title: "Hail Mary (for Charity)", text: rosary.prayers.hailMary, decadeCount: nil),
-            RosaryStep(title: "Glory Be", text: rosary.prayers.gloryBe, decadeCount: nil)
+            RosaryStep(title: rosaryPrefersSpanish ? "La señal de la cruz" : "Sign of the Cross", text: rosary.prayers.localizedSignOfTheCross, decadeCount: nil),
+            RosaryStep(title: rosaryPrefersSpanish ? "Credo de los Apóstoles" : "Apostles' Creed", text: rosary.prayers.localizedApostlesCreed, decadeCount: nil),
+            RosaryStep(title: rosaryPrefersSpanish ? "Padre nuestro" : "Our Father", text: rosary.prayers.localizedOurFather, decadeCount: nil),
+            RosaryStep(title: rosaryPrefersSpanish ? "Ave María (por la fe)" : "Hail Mary (for Faith)", text: rosary.prayers.localizedHailMary, decadeCount: nil),
+            RosaryStep(title: rosaryPrefersSpanish ? "Ave María (por la esperanza)" : "Hail Mary (for Hope)", text: rosary.prayers.localizedHailMary, decadeCount: nil),
+            RosaryStep(title: rosaryPrefersSpanish ? "Ave María (por la caridad)" : "Hail Mary (for Charity)", text: rosary.prayers.localizedHailMary, decadeCount: nil),
+            RosaryStep(title: rosaryPrefersSpanish ? "Gloria al Padre" : "Glory Be", text: rosary.prayers.localizedGloryBe, decadeCount: nil)
         ]
 
         for (index, mystery) in mysterySet.mysteries.enumerated() {
-            sequence.append(RosaryStep(title: "Mystery \(index + 1): \(mystery.title)", text: mystery.scripture, decadeCount: nil))
-            sequence.append(RosaryStep(title: "Our Father", text: rosary.prayers.ourFather, decadeCount: nil))
+            sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Misterio \(index + 1): \(mystery.localizedTitle)" : "Mystery \(index + 1): \(mystery.localizedTitle)", text: mystery.localizedScripture, decadeCount: nil))
+            sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Padre nuestro" : "Our Father", text: rosary.prayers.localizedOurFather, decadeCount: nil))
             for count in 1...10 {
-                sequence.append(RosaryStep(title: "Hail Mary", text: rosary.prayers.hailMary, decadeCount: count))
+                sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Ave María" : "Hail Mary", text: rosary.prayers.localizedHailMary, decadeCount: count))
             }
-            sequence.append(RosaryStep(title: "Glory Be", text: rosary.prayers.gloryBe, decadeCount: nil))
-            sequence.append(RosaryStep(title: "Fatima Prayer", text: rosary.prayers.fatimaPrayer, decadeCount: nil))
+            sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Gloria al Padre" : "Glory Be", text: rosary.prayers.localizedGloryBe, decadeCount: nil))
+            sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Oración de Fátima" : "Fatima Prayer", text: rosary.prayers.localizedFatimaPrayer, decadeCount: nil))
         }
 
-        sequence.append(RosaryStep(title: "Hail, Holy Queen", text: rosary.prayers.hailHolyQueen, decadeCount: nil))
-        sequence.append(RosaryStep(title: "Concluding Prayer", text: rosary.prayers.concludingPrayer, decadeCount: nil))
-        sequence.append(RosaryStep(title: "Final Sign of the Cross", text: rosary.prayers.signOfTheCross, decadeCount: nil))
-        sequence.append(RosaryStep(title: "Rosary Completed", text: "You have completed the Holy Rosary. Peace be with you.", decadeCount: nil))
+        sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Salve, Reina y Madre" : "Hail, Holy Queen", text: rosary.prayers.localizedHailHolyQueen, decadeCount: nil))
+        sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Oración final" : "Concluding Prayer", text: rosary.prayers.localizedConcludingPrayer, decadeCount: nil))
+        sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Señal de la cruz final" : "Final Sign of the Cross", text: rosary.prayers.localizedSignOfTheCross, decadeCount: nil))
+        sequence.append(RosaryStep(title: rosaryPrefersSpanish ? "Rosario completado" : "Rosary Completed", text: rosaryPrefersSpanish ? "Has completado el santo Rosario. La paz esté contigo." : "You have completed the Holy Rosary. Peace be with you.", decadeCount: nil))
         return sequence
     }
 }
@@ -3011,48 +3568,64 @@ private struct LiturgyOfTheHoursView: View {
         BreviaryPrayerLink(
             title: "iBreviary",
             subtitle: "Full daily breviary with all hours",
+            titleEs: "iBreviary",
+            subtitleEs: "Breviario diario completo con todas las horas",
             systemImage: "book.closed",
             url: URL(string: "https://www.ibreviary.com/m2/breviario.php")!
         ),
         BreviaryPrayerLink(
             title: "Office of Readings",
             subtitle: "Longer readings and psalmody",
+            titleEs: "Oficio de Lecturas",
+            subtitleEs: "Lecturas más extensas y salmodia",
             systemImage: "text.book.closed",
             url: URL(string: "https://www.ibreviary.com/m2/breviario.php?s=ufficio_delle_letture")!
         ),
         BreviaryPrayerLink(
             title: "Morning Prayer",
             subtitle: "Lauds for today",
+            titleEs: "Laudes",
+            subtitleEs: "Oración de la mañana de hoy",
             systemImage: "sunrise",
             url: URL(string: "https://www.ibreviary.com/m2/breviario.php?s=lodi")!
         ),
         BreviaryPrayerLink(
             title: "Daytime Prayer",
             subtitle: "Midday prayer from the daily office",
+            titleEs: "Hora intermedia",
+            subtitleEs: "Oración del oficio para el mediodía",
             systemImage: "sun.max",
             url: URL(string: "https://www.ibreviary.com/m2/breviario.php?s=ora_media")!
         ),
         BreviaryPrayerLink(
             title: "Evening Prayer",
             subtitle: "Vespers for today",
+            titleEs: "Vísperas",
+            subtitleEs: "Oración de la tarde de hoy",
             systemImage: "sunset",
             url: URL(string: "https://www.ibreviary.com/m2/breviario.php?s=vespri")!
         ),
         BreviaryPrayerLink(
             title: "Night Prayer",
             subtitle: "Compline before rest",
+            titleEs: "Completas",
+            subtitleEs: "Oración antes del descanso nocturno",
             systemImage: "moon.stars",
             url: URL(string: "https://www.ibreviary.com/m2/breviario.php?s=compieta")!
         ),
         BreviaryPrayerLink(
             title: "Divine Office Audio",
             subtitle: "Pray with audio and spoken office",
+            titleEs: "Oficio Divino en audio",
+            subtitleEs: "Reza con audio y el oficio recitado",
             systemImage: "speaker.wave.2",
             url: URL(string: "https://divineoffice.org/")!
         ),
         BreviaryPrayerLink(
             title: "Sing the Hours",
             subtitle: "Chanted Liturgy of the Hours on YouTube",
+            titleEs: "Cantar las Horas",
+            subtitleEs: "Liturgia de las Horas cantada en YouTube",
             systemImage: "music.note.tv",
             url: URL(string: "https://www.youtube.com/@SingtheHours/videos")!
         )
@@ -3065,7 +3638,7 @@ private struct LiturgyOfTheHoursView: View {
             ScrollView {
                 VStack(spacing: 14) {
                     IlluminedCard {
-                        Text(hours.description)
+                        Text(hours.localizedDescription)
                             .font(IlluminedTheme.font(size: 16))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                             .lineSpacing(4)
@@ -3073,11 +3646,11 @@ private struct LiturgyOfTheHoursView: View {
 
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 14) {
-                            Label("Open Today's Breviary", systemImage: "link")
+                            Label(rosaryPrefersSpanish ? "Abrir el breviario de hoy" : "Open Today's Breviary", systemImage: "link")
                                 .font(IlluminedTheme.font(size: 20, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Use these links to pray the current Liturgy of the Hours outside the app. The pages update daily.")
+                            Text(rosaryPrefersSpanish ? "Usa estos enlaces para rezar la Liturgia de las Horas del día fuera de la aplicación. Las páginas se actualizan diariamente." : "Use these links to pray the current Liturgy of the Hours outside the app. The pages update daily.")
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .lineSpacing(4)
@@ -3104,8 +3677,13 @@ private struct BreviaryPrayerLink: Identifiable {
     let id = UUID()
     let title: String
     let subtitle: String
+    let titleEs: String
+    let subtitleEs: String
     let systemImage: String
     let url: URL
+
+    var localizedTitle: String { rosaryPrefersSpanish ? titleEs : title }
+    var localizedSubtitle: String { rosaryPrefersSpanish ? subtitleEs : subtitle }
 }
 
 private struct BreviaryPrayerLinkRow: View {
@@ -3121,11 +3699,11 @@ private struct BreviaryPrayerLinkRow: View {
                     .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(link.title)
+                    Text(link.localizedTitle)
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text(link.subtitle)
+                    Text(link.localizedSubtitle)
                         .font(IlluminedTheme.font(size: 14))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 }
@@ -3149,6 +3727,7 @@ private struct BreviaryPrayerLinkRow: View {
 
 private struct SpiritualPracticesView: View {
     let practices: [HTMLSection]
+    @State private var openedPractice: HTMLSection?
 
     var body: some View {
         ZStack {
@@ -3157,8 +3736,8 @@ private struct SpiritualPracticesView: View {
             ScrollView {
                 VStack(spacing: 12) {
                     ForEach(practices) { practice in
-                        NavigationLink {
-                            HTMLFormationView(title: practice.title, html: practice.contentHTML ?? "")
+                        Button {
+                            openedPractice = practice
                         } label: {
                             SpiritualPracticeCard(practice: practice)
                         }
@@ -3170,6 +3749,61 @@ private struct SpiritualPracticesView: View {
         }
         .illuminedBrandHeader()
         .illuminedNavigation()
+        .fullScreenCover(item: $openedPractice) { practice in
+            SpiritualPracticeReader(practice: practice) { openedPractice = nil }
+        }
+    }
+}
+
+private struct SpiritualPracticeReader: View {
+    let practice: HTMLSection
+    let close: () -> Void
+    @State private var htmlHeight: CGFloat = 700
+    @ScaledMetric(relativeTo: .title3) private var textSize: CGFloat = 20.5
+    private let accent = Color(red: 239 / 255, green: 208 / 255, blue: 138 / 255)
+
+    private var readingHTML: String {
+        """
+        <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif !important; color: white !important; font-size: \(textSize)px !important; line-height: 1.55; background: transparent !important; }
+        body > h2:first-of-type { display: none; }
+        .content-wrapper { background: transparent !important; padding: 0 !important; }
+        h1,h2,h3,h4,a { color: #efd08a !important; }
+        h3,h4 { margin-top: 24px; }
+        p,li { color: white; }
+        li { margin-bottom: 8px; }
+        blockquote { background: transparent !important; color: white !important; border-color: #efd08a !important; }
+        img,video,iframe { max-width: 100%; }
+        </style>
+        \(practice.localizedContentHTML)
+        """
+    }
+
+    var body: some View {
+        ZStack {
+            IlluminedTheme.blue.ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: 22) {
+                    Text(examLocalized("SPIRITUAL PRACTICES", "PRÁCTICAS ESPIRITUALES"))
+                        .font(.headline).tracking(2)
+                    Text(practice.localizedTitle)
+                        .font(.largeTitle.bold()).multilineTextAlignment(.center)
+                        .accessibilityAddTraits(.isHeader)
+                    Rectangle().fill(accent).frame(width: 90, height: 3)
+                    HTMLContentView(html: readingHTML, calculatedHeight: $htmlHeight)
+                        .frame(height: htmlHeight)
+                    Button(examLocalized("Close", "Cerrar"), action: close)
+                        .buttonStyle(.borderedProminent).tint(accent)
+                        .foregroundStyle(.black).buttonBorderShape(.capsule)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .foregroundStyle(.white)
+                .padding(30)
+                .frame(maxWidth: 700)
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .accessibilityAction(.escape, close)
     }
 }
 
@@ -3180,53 +3814,54 @@ private struct SpiritualPracticeCardStyle {
     let accentColor: Color
 
     static func style(for practice: HTMLSection) -> SpiritualPracticeCardStyle {
+        let spanish = Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true
         switch practice.title {
         case "Works of Mercy":
             return SpiritualPracticeCardStyle(
-                displayTitle: practice.title,
-                subtitle: "Corporal and spiritual works of charity",
+                displayTitle: practice.localizedTitle,
+                subtitle: spanish ? "Obras corporales y espirituales de caridad" : "Corporal and spiritual works of charity",
                 systemImage: "heart.text.square",
                 accentColor: IlluminedTheme.gold
             )
         case "Precepts of the Church":
             return SpiritualPracticeCardStyle(
-                displayTitle: practice.title,
-                subtitle: "The basic obligations of Catholic life",
+                displayTitle: practice.localizedTitle,
+                subtitle: spanish ? "Las obligaciones fundamentales de la vida católica" : "The basic obligations of Catholic life",
                 systemImage: "checklist.checked",
                 accentColor: IlluminedTheme.gold
             )
         case "Penitential Practices":
             return SpiritualPracticeCardStyle(
-                displayTitle: practice.title,
-                subtitle: "Prayer, fasting, almsgiving, and conversion",
+                displayTitle: practice.localizedTitle,
+                subtitle: spanish ? "Oración, ayuno, limosna y conversión" : "Prayer, fasting, almsgiving, and conversion",
                 systemImage: "leaf",
                 accentColor: IlluminedTheme.gold
             )
         case "Habit Building":
             return SpiritualPracticeCardStyle(
-                displayTitle: practice.title,
-                subtitle: "Small faithful practices repeated with intention",
+                displayTitle: practice.localizedTitle,
+                subtitle: spanish ? "Pequeñas prácticas fieles repetidas con intención" : "Small faithful practices repeated with intention",
                 systemImage: "calendar.badge.checkmark",
                 accentColor: IlluminedTheme.gold
             )
         case "Social Teachings in Action":
             return SpiritualPracticeCardStyle(
-                displayTitle: practice.title,
-                subtitle: "Live Catholic teaching in daily responsibilities",
+                displayTitle: practice.localizedTitle,
+                subtitle: spanish ? "Vive la enseñanza católica en las responsabilidades diarias" : "Live Catholic teaching in daily responsibilities",
                 systemImage: "person.2.wave.2",
                 accentColor: IlluminedTheme.gold
             )
         case "Liturgical & Sacramental Living":
             return SpiritualPracticeCardStyle(
-                displayTitle: practice.title,
-                subtitle: "Shape daily life around worship and grace",
+                displayTitle: practice.localizedTitle,
+                subtitle: spanish ? "Ordena la vida diaria en torno al culto y la gracia" : "Shape daily life around worship and grace",
                 systemImage: "sparkles.rectangle.stack",
                 accentColor: IlluminedTheme.gold
             )
         default:
             return SpiritualPracticeCardStyle(
-                displayTitle: practice.title,
-                subtitle: practice.description ?? "Open practice guide",
+                displayTitle: practice.localizedTitle,
+                subtitle: spanish ? (practice.descriptionEs ?? practice.description ?? "Abrir la guía de la práctica") : (practice.description ?? "Open practice guide"),
                 systemImage: "figure.walk",
                 accentColor: IlluminedTheme.gold
             )

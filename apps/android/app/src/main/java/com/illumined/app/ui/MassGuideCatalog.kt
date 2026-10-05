@@ -8,6 +8,49 @@ internal data class MassPrayerOption(
     val note: String? = null,
     val textNote: String? = null,
 ) {
+    val localizedTitle get() = if (java.util.Locale.getDefault().language == "es") when (id) {
+        "confiteor" -> "Acto penitencial: Yo confieso"; "dialogue" -> "Acto penitencial: Diálogo"
+        "tropes" -> "Acto penitencial: Invocaciones con el Kyrie"; "sprinkling" -> "Rito de la aspersión"
+        "gloria" -> "Gloria"; "collect" -> "Oración colecta"; "nicene" -> "Credo niceno-constantinopolitano"
+        "apostles" -> "Credo de los Apóstoles"; "universal-prayer" -> "Oración universal"
+        "presentation-gifts" -> "Preparación de los dones"; "prayer-over-offerings" -> "Oración sobre las ofrendas"
+        "preface-dialogue" -> "Diálogo del prefacio"; "ep1" -> "Plegaria eucarística I: Canon romano"
+        "ep2" -> "Plegaria eucarística II"; "ep3" -> "Plegaria eucarística III"; "ep4" -> "Plegaria eucarística IV"
+        "sanctus" -> "Santo, Santo, Santo"; "memorial-acclamation" -> "Aclamaciones memoriales"
+        "great-amen" -> "Gran Amén"; "lords-prayer" -> "Padre nuestro"; "agnus-dei" -> "Cordero de Dios"
+        "communion-invitation" -> "Invitación a la Comunión"; "prayer-after-communion" -> "Oración después de la Comunión"
+        "final-blessing" -> "Bendición final"; "dismissal" -> "Despedida"; else -> title
+    } else title
+    val localizedSummary get() = if (java.util.Locale.getDefault().language == "es") when (id) {
+        "confiteor" -> "El pueblo confiesa unido sus pecados, reconoce a los santos y a la comunidad, y pide oración y misericordia."
+        "dialogue" -> "El sacerdote guía breves invocaciones y el pueblo pide al Señor misericordia y salvación."
+        "tropes" -> "Se invoca a Cristo con breves títulos y el pueblo responde pidiendo misericordia."
+        "sprinkling" -> "Especialmente en Pascua, el sacerdote puede bendecir y asperjar al pueblo con agua bendita como recuerdo del Bautismo."
+        "gloria" -> "Himno de alabanza que se canta normalmente los domingos fuera de Adviento y Cuaresma, y en solemnidades y fiestas."
+        "collect" -> "Oración propia del día que reúne la oración de la Iglesia y la dirige a Dios."
+        "nicene" -> "Profesión de fe dominical que proclama la Trinidad, la Encarnación, la Iglesia, el Bautismo, la Resurrección y la vida eterna."
+        "apostles" -> "Credo bautismal más breve que puede usarse en determinados tiempos, especialmente Cuaresma y Pascua."
+        "universal-prayer" -> "Peticiones después del Credo, también llamadas Oración de los fieles."
+        "presentation-gifts" -> "Se preparan el pan y el vino, y la ofrenda del pueblo se une al sacrificio de Cristo."
+        "prayer-over-offerings" -> "El sacerdote pide que Dios reciba y santifique los dones preparados para la Eucaristía."
+        "preface-dialogue" -> "El sacerdote invita al pueblo a elevar el corazón y dar gracias al Señor."
+        "ep1" -> "El antiguo Canon romano, de carácter solemne, con amplias conmemoraciones e intercesiones."
+        "ep2" -> "Plegaria eucarística concisa con acción de gracias, epíclesis, relato de la institución, memorial, ofrenda e intercesión."
+        "ep3" -> "Plegaria frecuente en domingos y fiestas que destaca el sacrificio de Cristo y la unidad de los fieles."
+        "ep4" -> "Plegaria con prefacio propio que recorre la historia de la salvación desde la creación hasta Cristo y el Espíritu."
+        "sanctus" -> "Aclamación anterior a la Plegaria eucarística que une la alabanza de ángeles y santos."
+        "memorial-acclamation" -> "El pueblo aclama el misterio de la fe después de la consagración."
+        "great-amen" -> "El pueblo confirma solemnemente la Plegaria eucarística al concluir."
+        "lords-prayer" -> "La oración enseñada por Jesús, rezada por toda la Iglesia en el Rito de la Comunión."
+        "agnus-dei" -> "Letanía cantada o recitada durante la fracción del pan antes de la Comunión."
+        "communion-invitation" -> "El sacerdote muestra la Eucaristía e invita a los fieles a la cena del Cordero."
+        "prayer-after-communion" -> "El sacerdote pide que el sacramento recibido dé fruto en la vida de los fieles."
+        "final-blessing" -> "El sacerdote bendice a los fieles antes de enviarlos."
+        "dismissal" -> "El pueblo es enviado a vivir el misterio que ha celebrado."; else -> summary
+    } else summary
+    val localizedNote get() = if (java.util.Locale.getDefault().language == "es" && note != null) "Consulta el misal parroquial o el subsidio litúrgico aprobado." else note
+    val localizedTextNote get() = if (java.util.Locale.getDefault().language == "es") "Para el texto litúrgico oficial en español, usa un Misal Romano o subsidio aprobado." else textNote
+    val localizedTextHeading: String get() = if (java.util.Locale.getDefault().language == "es") "Texto y guía" else if (fullText.startsWith("Full official text")) "Text Placeholder" else "Prayer Text"
     val textHeading: String get() = if (fullText.startsWith("Full official text")) "Text Placeholder" else "Prayer Text"
 }
 
@@ -17,7 +60,79 @@ internal data class MassGuideRow(
     val posture: String? = null,
     val response: String? = null,
     val prayerIds: List<String> = emptyList(),
-)
+) {
+    val localizedTitle get() = if (java.util.Locale.getDefault().language == "es") when (title) {
+        "Entrance" -> "Entrada"; "Sign of the Cross and Greeting" -> "Señal de la cruz y saludo"
+        "Penitential Act" -> "Acto penitencial"; "Gloria" -> "Gloria"; "Collect" -> "Oración colecta"
+        "First Reading" -> "Primera lectura"; "Responsorial Psalm" -> "Salmo responsorial"
+        "Second Reading" -> "Segunda lectura"; "Gospel Acclamation and Gospel" -> "Aclamación al Evangelio y Evangelio"
+        "Homily" -> "Homilía"; "Profession of Faith" -> "Profesión de fe"; "Universal Prayer" -> "Oración universal"
+        "Preparation of the Gifts" -> "Preparación de los dones"
+        "Prayer over the Offerings" -> "Oración sobre las ofrendas"
+        "Preface Dialogue" -> "Diálogo del prefacio"
+        "Eucharistic Prayer" -> "Plegaria eucarística"
+        "Holy, Holy, Holy" -> "Santo, Santo, Santo"
+        "Institution Narrative and Consecration" -> "Relato de la institución y consagración"
+        "Memorial Acclamation" -> "Aclamación memorial"
+        "Great Amen" -> "Gran Amén"
+        "Lord’s Prayer" -> "Padre nuestro"
+        "Sign of Peace" -> "Rito de la paz"
+        "Lamb of God" -> "Cordero de Dios"
+        "Holy Communion" -> "Sagrada Comunión"
+        "Prayer after Communion" -> "Oración después de la Comunión"
+        "Announcements" -> "Avisos"
+        "Blessing" -> "Bendición"
+        "Dismissal" -> "Despedida"
+        "Recessional" -> "Procesión de salida"
+        else -> title
+    } else title
+    val localizedDetail get() = if (java.util.Locale.getDefault().language == "es") when (title) {
+        "Entrance" -> "La entrada es la procesión y rito inicial de la Misa católica. El sacerdote, el diácono y los servidores del altar avanzan hacia el altar. Esto simboliza nuestro camino hacia el cielo. Un canto de entrada une a la asamblea en la alabanza."
+        "Sign of the Cross and Greeting" -> "La Misa comienza en el nombre del Padre, y del Hijo, y del Espíritu Santo."
+        "Penitential Act" -> "El Acto penitencial tiene lugar al comienzo de la Misa y prepara a los fieles para celebrar dignamente los sagrados misterios, reconociendo sus pecados y pidiendo la misericordia de Dios. Puede adoptar varias formas: el Yo confieso, un diálogo, invocaciones con el Kyrie eleison o la aspersión con agua."
+        "Gloria" -> "El Gloria es un antiguo himno gozoso de alabanza y adoración. Glorifica a la Trinidad, une el canto de los ángeles en el nacimiento de Jesús con la acción de gracias y pide misericordia. Se canta los domingos fuera de Adviento y Cuaresma, y en solemnidades y fiestas."
+        "Collect" -> "La oración colecta concluye los Ritos iniciales antes de la Liturgia de la Palabra. Reúne las oraciones e intenciones silenciosas de la asamblea en una petición unificada ofrecida a Dios."
+        "First Reading" -> "Normalmente se toma del Antiguo Testamento, excepto durante la Pascua, cuando suele leerse el libro de los Hechos."
+        "Responsorial Psalm" -> "El pueblo responde a la Palabra de Dios mediante una oración cantada o recitada."
+        "Second Reading" -> "Los domingos y solemnidades suele tomarse de una carta apostólica o del Apocalipsis."
+        "Gospel Acclamation and Gospel" -> "La asamblea se pone de pie para acoger a Cristo que habla en el Evangelio."
+        "Homily" -> "La homilía es la predicación del sacerdote o diácono durante la Liturgia de la Palabra. Explica las lecturas y ayuda a la asamblea a aplicar la Palabra de Dios a la vida diaria."
+        "Profession of Faith" -> "La Profesión de fe, o Credo, es la declaración solemne de las creencias fundamentales que se recita después de la homilía. Une a la asamblea en una misma fe y responde a la Palabra de Dios."
+        "Universal Prayer" -> "La Oración universal, también llamada Oración de los fieles, reúne peticiones por la Iglesia, los gobernantes, los enfermos y el mundo."
+        "Preparation of the Gifts" -> "El pan, el vino y la ofrenda del pueblo se llevan al altar."
+        "Prayer over the Offerings" -> "El sacerdote pide que Dios reciba y santifique los dones."
+        "Preface Dialogue" -> "El sacerdote invita al pueblo a elevar el corazón y dar gracias."
+        "Eucharistic Prayer" -> "La Iglesia da gracias, invoca al Espíritu Santo, recuerda el sacrificio salvador de Cristo y presenta sus intercesiones."
+        "Holy, Holy, Holy" -> "La Iglesia se une a los ángeles y santos en la alabanza antes de la consagración."
+        "Institution Narrative and Consecration" -> "Por las palabras de Cristo y el poder del Espíritu Santo, el pan y el vino se convierten en el Cuerpo y la Sangre de Cristo."
+        "Memorial Acclamation" -> "La asamblea proclama el misterio de la muerte y resurrección de Cristo."
+        "Great Amen" -> "El pueblo confirma toda la Plegaria eucarística con un Amén solemne."
+        "Lord’s Prayer" -> "La Iglesia reza la oración que Jesús nos enseñó."
+        "Sign of Peace" -> "Los fieles expresan la paz y la caridad antes de recibir la Comunión."
+        "Lamb of God" -> "La Iglesia invoca a Cristo, el Cordero que quita el pecado del mundo."
+        "Holy Communion" -> "Quienes están debidamente dispuestos reciben el Cuerpo y la Sangre de Cristo."
+        "Prayer after Communion" -> "El sacerdote pide que el sacramento dé fruto en la vida de los fieles."
+        "Announcements" -> "Después de la Comunión pueden darse breves avisos parroquiales."
+        "Blessing" -> "El sacerdote bendice a los fieles en el nombre de la Trinidad."
+        "Dismissal" -> "El pueblo es enviado a glorificar al Señor con su vida."
+        "Recessional" -> "Los ministros se retiran y los fieles salen para vivir el misterio que han recibido."
+        else -> detail
+    } else detail
+    val localizedPosture get() = if (java.util.Locale.getDefault().language == "es") when (posture) {
+        "Stand" -> "De pie"; "Sit" -> "Sentado"; "Kneel" -> "De rodillas"
+        "Stand/Kneel" -> "De pie/De rodillas"; "Kneel/Stand" -> "De rodillas/De pie"
+        "Sit/Stand" -> "Sentado/De pie"; "Process" -> "Procesión"; else -> posture
+    } else posture
+    val localizedResponse get() = if (java.util.Locale.getDefault().language == "es") when (response) {
+        "Amen." -> "Amén."; "Thanks be to God." -> "Te alabamos, Señor."
+        "And with your spirit." -> "Y con tu espíritu."
+        "Amen. / And with your spirit." -> "Amén. / Y con tu espíritu."
+        "Lord, have mercy." -> "Señor, ten piedad."
+        "Lord, hear our prayer." -> "Te rogamos, óyenos."
+        "Glory to you, O Lord. / Praise to you, Lord Jesus Christ." -> "Gloria a ti, Señor. / Gloria a ti, Señor Jesús."
+        else -> response
+    } else response
+}
 
 internal data class MassGuidePart(
     val id: String,
@@ -27,7 +142,27 @@ internal data class MassGuidePart(
     val detail: String,
     val rows: List<MassGuideRow>,
     val showsDailyReadings: Boolean = false,
-)
+) {
+    val localizedTitle get() = if (java.util.Locale.getDefault().language == "es") when (id) {
+        "introductory-rites" -> "Ritos iniciales"; "liturgy-word" -> "Liturgia de la Palabra"
+        "liturgy-eucharist" -> "Liturgia de la Eucaristía"; "communion-rite" -> "Rito de la Comunión"
+        "concluding-rites" -> "Ritos de conclusión"; else -> title
+    } else title
+    val localizedSubtitle get() = if (java.util.Locale.getDefault().language == "es") when (id) {
+        "introductory-rites" -> "Reunirse, arrepentirse, alabar y orar."
+        "liturgy-word" -> "Escuchar, responder, profesar e interceder."
+        "liturgy-eucharist" -> "Ofrecer, consagrar, recordar y adorar."
+        "communion-rite" -> "Orar, compartir la paz, recibir y dar gracias."
+        "concluding-rites" -> "Recibir la bendición y ser enviados."; else -> subtitle
+    } else subtitle
+    val localizedDetail get() = if (java.util.Locale.getDefault().language == "es") when (id) {
+        "introductory-rites" -> "Los Ritos iniciales abren la Misa católica y preparan a los fieles para escuchar la Palabra de Dios y celebrar la Eucaristía. Incluyen la procesión de entrada, la veneración del altar, la señal de la cruz, el saludo, el acto penitencial, el Gloria y la oración colecta."
+        "liturgy-word" -> "En la Liturgia de la Palabra, Dios habla a la Iglesia mediante la Sagrada Escritura. El pueblo escucha, responde con el salmo y la aclamación, profesa el Credo y ora por las necesidades del mundo."
+        "liturgy-eucharist" -> "La Liturgia de la Eucaristía es el centro y culmen de la Misa. Se preparan los dones, se reza la Plegaria eucarística y Cristo se hace verdaderamente presente bajo las especies de pan y vino."
+        "communion-rite" -> "El Rito de la Comunión prepara a los fieles para recibir al Señor. La Iglesia reza el Padre nuestro, pide la paz, invoca al Cordero de Dios y recibe la Sagrada Comunión."
+        "concluding-rites" -> "La Misa concluye con la bendición y el envío. Los fieles salen para glorificar al Señor con su vida."; else -> detail
+    } else detail
+}
 
 internal object MassGuideCatalog {
     const val dailyReadingsUrl = "https://bible.usccb.org/daily-bible-reading"

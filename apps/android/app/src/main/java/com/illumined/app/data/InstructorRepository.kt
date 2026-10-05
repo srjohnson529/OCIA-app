@@ -351,23 +351,23 @@ class InstructorRepository(
         db.collection("assignments").document(id).delete().addOnSuccessListener { success() }.addOnFailureListener(error)
     }
 
-    fun createDiscussion(profile: UserProfile, title: String, prompt: String, lessonId: String,
-        lessonTitle: String, required: Boolean, active: Boolean, success: () -> Unit, error: (Throwable) -> Unit) {
+    fun createDiscussion(profile: UserProfile, title: String, prompt: String, assignmentId: String,
+        assignmentTitle: String, required: Boolean, active: Boolean, success: () -> Unit, error: (Throwable) -> Unit) {
         val creator = creator(profile, "Please sign in before creating a discussion.", "Only instructors can create discussion prompts.", error) ?: return
         InstructorWriteValidation.discussionError(title, prompt)?.let { return error(IllegalArgumentException(it)) }
         val id = "discussion-${java.util.UUID.randomUUID()}"
-        db.collection("discussionPrompts").document(id).set(mapOf("id" to id, "lessonId" to lessonId, "lessonTitle" to lessonTitle,
+        db.collection("discussionPrompts").document(id).set(mapOf("id" to id, "assignmentId" to assignmentId, "assignmentTitle" to assignmentTitle, "lessonId" to "", "lessonTitle" to "",
             "title" to title.trim(), "prompt" to prompt.trim(), "requiredForAssignment" to required, "classId" to creator.classId,
             "createdBy" to creator.userId, "createdByName" to creator.name, "isActive" to active, "createdAt" to FieldValue.serverTimestamp(), "updatedAt" to FieldValue.serverTimestamp()))
             .addOnSuccessListener { success() }.addOnFailureListener(error)
     }
 
-    fun updateDiscussion(profile: UserProfile, id: String, title: String, prompt: String, lessonId: String, lessonTitle: String, required: Boolean,
+    fun updateDiscussion(profile: UserProfile, id: String, title: String, prompt: String, assignmentId: String, assignmentTitle: String, required: Boolean,
         active: Boolean, success: () -> Unit, error: (Throwable) -> Unit) {
         creator(profile, "Please sign in before editing a discussion prompt.", "Only instructors can edit discussion prompts.", error) ?: return
         InstructorWriteValidation.discussionError(title, prompt)?.let { return error(IllegalArgumentException(it)) }
         db.collection("discussionPrompts").document(id)
-        .update(mapOf("title" to title.trim(), "prompt" to prompt.trim(), "lessonId" to lessonId, "lessonTitle" to lessonTitle,
+        .update(mapOf("title" to title.trim(), "prompt" to prompt.trim(), "assignmentId" to assignmentId, "assignmentTitle" to assignmentTitle, "lessonId" to "", "lessonTitle" to "",
             "requiredForAssignment" to required, "isActive" to active, "updatedAt" to FieldValue.serverTimestamp()))
         .addOnSuccessListener { success() }.addOnFailureListener(error)
     }
@@ -395,15 +395,23 @@ class InstructorRepository(
                     requiredForAssignment = document.getBoolean("requiredForAssignment") == true,
                     classId = document.getString("classId"),
                     isVisible = document.getBoolean("isActive") != false,
+                    assignmentId = document.getString("assignmentId").orEmpty(),
+                    assignmentTitle = document.getString("assignmentTitle").orEmpty(),
                 )
             }.sortedBy { it.title.lowercase() })
         }
 
-    fun listenStudents(classId: String, update: (List<UserProfile>) -> Unit, error: (Throwable) -> Unit): ListenerRegistration =
-        db.collection("userProfiles").whereArrayContains("classIds", classId).addSnapshotListener { snapshot, problem ->
+    fun listenStudents(classId: String, update: (List<UserProfile>) -> Unit, error: (Throwable) -> Unit, includeRoster: Boolean = false): ListenerRegistration {
+        val batches = mutableMapOf<String, List<UserProfile>>()
+        var stopped = false
+        val listeners = (if (includeRoster) listOf("classIds", "removedClassIds") else listOf("classIds")).map { field ->
+        db.collection("userProfiles").whereArrayContains(field, classId).addSnapshotListener { snapshot, problem ->
+            if (stopped) return@addSnapshotListener
             if (problem != null) return@addSnapshotListener error(problem)
-            update(snapshot?.documents.orEmpty().map { d -> UserProfile(
+            batches[field] = snapshot?.documents.orEmpty().map { d -> UserProfile(
                 displayName = d.getString("displayName") ?: d.getString("username") ?: "Student",
+                inactiveClassIds = (d.get("inactiveClassIds") as? List<*>)?.filterIsInstance<String>().orEmpty(),
+                removedClassIds = (d.get("removedClassIds") as? List<*>)?.filterIsInstance<String>().orEmpty(),
                 classIds = (d.get("classIds") as? List<*>)?.filterIsInstance<String>().orEmpty(),
                 completedLessons = (d.get("completedLessons") as? List<*>)?.filterIsInstance<String>().orEmpty().toSet(),
                 memorizedPrayerIds = (d.get("memorizedPrayerIds") as? List<*>)?.filterIsInstance<String>().orEmpty().toSet(),
@@ -415,6 +423,11 @@ class InstructorRepository(
                 userId = d.getString("userId") ?: d.id,
                 email = d.getString("email").orEmpty(),
                 currentLessonIndex = d.getLong("currentLessonIndex")?.toInt() ?: 0,
-            ) }.filterNot { it.isInstructor })
+            ) }
+            val merged = (batches["removedClassIds"].orEmpty() + batches["classIds"].orEmpty()).associateBy { it.userId }.values
+            update(merged.filter { !it.isInstructor && !it.isAdmin && (includeRoster || (classId !in it.inactiveClassIds && classId !in it.removedClassIds)) })
         }
+        }
+        return object : ListenerRegistration { override fun remove() { stopped = true; listeners.forEach { it.remove() } } }
+    }
 }

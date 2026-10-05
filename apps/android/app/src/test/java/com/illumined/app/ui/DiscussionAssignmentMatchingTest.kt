@@ -2,6 +2,7 @@ package com.illumined.app.ui
 
 import com.illumined.app.data.Assignment
 import com.illumined.app.data.AssignmentLessonLink
+import com.illumined.app.data.DiscussionPrompt
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -12,11 +13,19 @@ class DiscussionAssignmentMatchingTest {
 
     @Test fun findsEveryAssignmentLinkedToPromptLesson() {
         val assignments = listOf(assignment("one", "lesson-a"), assignment("two", "lesson-b", "lesson-a"), assignment("three", "lesson-c"))
-        assertEquals(listOf("one", "two"), matchingDiscussionAssignments("lesson-a", assignments).map { it.id })
+        val prompt = DiscussionPrompt("prompt", "lesson-a", "Title", "Prompt", "Lesson A", true)
+        assertEquals(listOf("one", "two"), matchingDiscussionAssignments(prompt, assignments).map { it.id })
     }
 
     @Test fun doesNotMatchLegacyPrimaryIdWithoutCanonicalLink() {
         val legacyOnly = Assignment("legacy", "class", "Legacy", "lesson-a", "Lesson A", emptyList(), "", emptyList(), true, null)
-        assertEquals(emptyList<Assignment>(), matchingDiscussionAssignments("lesson-a", listOf(legacyOnly)))
+        val prompt = DiscussionPrompt("prompt", "lesson-a", "Title", "Prompt", "Lesson A", true)
+        assertEquals(emptyList<Assignment>(), matchingDiscussionAssignments(prompt, listOf(legacyOnly)))
+    }
+
+    @Test fun assignmentLinkTakesPrecedenceOverLessonLinks() {
+        val assignments = listOf(assignment("one", "lesson-a"), assignment("two", "lesson-b"))
+        val prompt = DiscussionPrompt("prompt", "lesson-a", "Title", "Prompt", "Lesson A", true, assignmentId = "two", assignmentTitle = "Two")
+        assertEquals(listOf("two"), matchingDiscussionAssignments(prompt, assignments).map { it.id })
     }
 }

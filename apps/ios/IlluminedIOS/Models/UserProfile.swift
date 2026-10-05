@@ -10,6 +10,8 @@ struct UserProfile: Identifiable, Codable, Equatable {
     var isAdmin: Bool
     var classIds: [String]
     var archivedClassIds: [String]
+    var inactiveClassIds: [String] = []
+    var removedClassIds: [String] = []
     var activeClassId: String
     var completedLessons: [String]
     var earnedBadges: [String]
@@ -44,6 +46,8 @@ struct UserProfile: Identifiable, Codable, Equatable {
         case isAdmin
         case classIds
         case archivedClassIds
+        case inactiveClassIds
+        case removedClassIds
         case activeClassId
         case completedLessons
         case earnedBadges
@@ -125,6 +129,8 @@ struct UserProfile: Identifiable, Codable, Equatable {
         isAdmin = try container.decodeIfPresent(Bool.self, forKey: .isAdmin) ?? false
         classIds = try container.decodeIfPresent([String].self, forKey: .classIds) ?? []
         archivedClassIds = try container.decodeIfPresent([String].self, forKey: .archivedClassIds) ?? []
+        inactiveClassIds = try container.decodeIfPresent([String].self, forKey: .inactiveClassIds) ?? []
+        removedClassIds = try container.decodeIfPresent([String].self, forKey: .removedClassIds) ?? []
         activeClassId = try container.decodeIfPresent(String.self, forKey: .activeClassId) ?? ""
         completedLessons = try container.decodeIfPresent([String].self, forKey: .completedLessons) ?? []
         earnedBadges = try container.decodeIfPresent([String].self, forKey: .earnedBadges) ?? []

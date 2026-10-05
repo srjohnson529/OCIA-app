@@ -160,11 +160,12 @@ test("learners can read their class content but cannot read another class", asyn
 
 test("chat ownership and instructor moderation cannot change class or sender", async () => {
   const learner = environment.authenticatedContext("studentA").firestore();
-  await assertSucceeds(setDoc(doc(learner, "chatMessages", "newChat"), { classId: "classA", senderId: "studentA", message: "Hello" }));
+  await assertSucceeds(setDoc(doc(learner, "chatMessages", "newChat"), { classId: "classA", senderId: "studentA", senderName: "studentA", message: "Hello", timestamp: serverTimestamp() }));
   await assertFails(setDoc(doc(learner, "chatMessages", "forgedChat"), { classId: "classA", senderId: "instructorA", message: "Forged" }));
   await assertFails(updateDoc(doc(learner, "chatMessages", "chatA"), { senderId: "studentB" }));
   const instructor = environment.authenticatedContext("instructorA").firestore();
-  await assertSucceeds(updateDoc(doc(instructor, "chatMessages", "chatA"), { message: "Moderated" }));
+  // Moderation removes messages; instructors cannot rewrite a student's words.
+  await assertFails(updateDoc(doc(instructor, "chatMessages", "chatA"), { message: "Moderated", editedAt: serverTimestamp() }));
   await assertFails(updateDoc(doc(instructor, "chatMessages", "chatA"), { classId: "classB" }));
   await assertFails(deleteDoc(doc(instructor, "chatMessages", "chatB")));
 });
@@ -391,7 +392,9 @@ test("a new learner can join and use a legacy class without a classroom document
   await assertSucceeds(setDoc(doc(db, "chatMessages", "legacyChat"), {
     classId: "legacyClass",
     senderId: "legacyStudent",
+    senderName: "Legacy Student",
     message: "Hello",
+    timestamp: serverTimestamp(),
   }));
 });
 

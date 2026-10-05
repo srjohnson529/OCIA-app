@@ -2,11 +2,25 @@ import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
-import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import {deleteUserPhoto} from './profile-images.js';
+import {removeInstructorInboxData} from './instructor-inbox-cleanup.js';
+export {classroomRefreshments,sendRefreshmentReminders} from './refreshments.js';
+import {activeMessageMember, messageRecipients, newReactionActors} from './message-notification-policy.js';
+export {manageProfileImage} from './profile-images.js';
+import { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
+export { updateAssignmentAfterReading, updateAssignmentAfterResponse, updateAssignmentAfterLesson, updateAssignmentAfterRequirements, updateAssignmentAfterPrompt, refreshAssignmentProgress } from './assignment-progress-sync.js';
+import { reconcileAssignment } from './assignment-progress-sync.js';
+export { manageStudentRoster } from './student-roster.js';
+import { receivesClassNotifications } from './student-roster.js';
+export {manageStudentInvitation,joinStudentClass} from './student-invitations.js';
+export {manageClassroomListing, findClassrooms, requestClassroomEnrollment, reviewClassroomEnrollment, startParishClass, getParishAccess, activateParishAccess, createParishCheckout} from './classroom-discovery.js';
 
 initializeApp();
+export { publishInstructorUpdate } from './instructor-updates.js';
+export { adminDirectory, adminClassSupport } from './admin-support.js';
+export { manageInstructorUpdates, publishScheduledInstructorUpdates } from './update-management.js';
 
 const db = getFirestore();
 const MAX_TITLE_LENGTH = 120;
@@ -52,6 +66,15 @@ function notificationEnabled(document, preference) {
   return document.get("notificationsEnabled") !== false && document.get(preference) !== false;
 }
 
+function notificationLanguage(profile) {
+  return profile.get("notificationLanguage") === "es" ? "es" : "en";
+}
+
+function localizedNotificationText(value, language) {
+  if (typeof value === "string") return value;
+  return language === "es" ? value.es : value.en;
+}
+
 async function removeInvalidTokens(tokens) {
   await Promise.all([...tokens].map((token) =>
     db.collection("userProfiles").where("fcmTokens", "array-contains", token).get().then((matches) =>
@@ -61,25 +84,35 @@ async function removeInvalidTokens(tokens) {
 }
 
 async function sendProfileNotifications(profiles, title, body, data) {
-  const tokens = [...new Set(profiles.flatMap((document) => stringArray(document.get("fcmTokens"))))];
   let delivered = 0;
+  let tokenCount = 0;
   const invalidTokens = new Set();
-  for (const tokenGroup of chunks(tokens, 500)) {
-    const result = await getMessaging().sendEachForMulticast({
-      tokens: tokenGroup,
-      notification: { title, body },
-      data,
-      android: { notification: { channelId: "illumined_class_updates" } },
-    });
-    delivered += result.successCount;
-    result.responses.forEach((response, index) => {
-      if (["messaging/registration-token-not-registered", "messaging/invalid-registration-token"].includes(response.error?.code)) {
-        invalidTokens.add(tokenGroup[index]);
-      }
-    });
+  for (const language of ["en", "es"]) {
+    const tokens = [...new Set(profiles
+      .filter((profile) => receivesClassNotifications(profile.data(), data.classId))
+      .filter((profile) => notificationLanguage(profile) === language)
+      .flatMap((profile) => stringArray(profile.get("fcmTokens"))))];
+    tokenCount += tokens.length;
+    for (const tokenGroup of chunks(tokens, 500)) {
+      const result = await getMessaging().sendEachForMulticast({
+        tokens: tokenGroup,
+        notification: {
+          title: localizedNotificationText(title, language),
+          body: localizedNotificationText(body, language),
+        },
+        data,
+        android: { notification: { channelId: "illumined_class_updates" } },
+      });
+      delivered += result.successCount;
+      result.responses.forEach((response, index) => {
+        if (["messaging/registration-token-not-registered", "messaging/invalid-registration-token"].includes(response.error?.code)) {
+          invalidTokens.add(tokenGroup[index]);
+        }
+      });
+    }
   }
   if (invalidTokens.size) await removeInvalidTokens(invalidTokens);
-  return { delivered, tokenCount: tokens.length };
+  return { delivered, tokenCount };
 }
 
 function classArchiveProfileUpdates(profile, classId, archived) {
@@ -201,6 +234,15 @@ export const deleteOwnAccount = onCall({ region: "us-central1" }, async (request
 
   let deletedDocumentCount = 0;
   let anonymizedDocumentCount = 0;
+  await removeInstructorInboxData(db, userId);
+  const refreshments = await db.collection('refreshmentSignups').where('volunteerId','==',userId).get();
+  await deleteDocuments('refreshmentReminderDeliveries','userId',userId);
+  for (const signup of refreshments.docs) {
+    await db.runTransaction(async tx => {
+      const current = await tx.get(signup.ref);
+      if (current.get('volunteerId') === userId) tx.update(signup.ref, {volunteerId:'',volunteerName:'',notes:'',updatedBy:'',revision:(current.get('revision')||0)+1});
+    });
+  }
   for (const [collectionName, field] of personalCollections) {
     deletedDocumentCount += await deleteDocuments(collectionName, field, userId);
   }
@@ -231,6 +273,8 @@ export const deleteOwnAccount = onCall({ region: "us-central1" }, async (request
     usedByName: "Deleted account",
   });
 
+  await deleteUserPhoto(userId);
+  await db.collection("profileImageLimits").doc(userId).delete();
   await db.collection("userProfiles").doc(userId).delete();
   deletedDocumentCount += 1;
   await getAuth().deleteUser(userId);
@@ -260,7 +304,7 @@ async function changeClassArchiveState(request, archived) {
     if (!profileSnapshot.exists || profile?.isInstructor !== true || !classIds.includes(classId)) {
       throw new HttpsError("permission-denied", "Only an instructor assigned to this class can manage it.");
     }
-    if (!classroomSnapshot.exists || (classroom?.createdBy !== request.auth.uid && classroom?.instructorId !== request.auth.uid)) {
+    if (!classroomSnapshot.exists || (classroom?.instructorId || classroom?.createdBy) !== request.auth.uid) {
       throw new HttpsError("permission-denied", "Only the instructor who created this class can archive or restore it.");
     }
     if (archived && activeClassIds.length <= 1) {
@@ -418,6 +462,7 @@ export const createClassAnnouncement = onCall({ region: "us-central1" }, async (
   const members = await db.collection("userProfiles").where("classIds", "array-contains", classId).get();
   const tokens = [...new Set(members.docs.flatMap((document) => {
     if (document.id === request.auth.uid) return [];
+    if (!receivesClassNotifications(document.data(), classId)) return [];
     if (document.get("notificationsEnabled") === false) return [];
     const value = document.get("fcmTokens");
     return Array.isArray(value) ? value.filter((token) => typeof token === "string" && token) : [];
@@ -456,6 +501,72 @@ export const createClassAnnouncement = onCall({ region: "us-central1" }, async (
   return { announcementId: announcement.id, recipientCount: delivered };
 });
 
+async function messageMembers(classId, requireClassroom = false) {
+  const classroom = await db.collection('classrooms').doc(classId).get();
+  if ((requireClassroom && !classroom.exists) || classroom.get('isArchived') === true) return [];
+  const result = await db.collection('userProfiles').where('classIds', 'array-contains', classId).get();
+  return result.docs;
+}
+
+async function sendMessageAlerts(members, senderId, classId, title, body, data, studentId = null, targetId = null) {
+  const allowed = new Set(messageRecipients(members.map(p => ({...p.data(), id: p.id})), classId, senderId, studentId).map(p => p.id));
+  const recipients = members.filter(p => allowed.has(p.id) && (!targetId || p.id === targetId));
+  // Never include message text, student names or email addresses in push payloads.
+  // Individual recipient IDs let the apps reject taps after an account switch.
+  await Promise.all(recipients.map(p => sendProfileNotifications([p], title, body, {...data, classId, recipientId: p.id})));
+}
+
+export const notifyClassroomMessage = onDocumentCreated(
+  {document: 'chatMessages/{messageId}', region: 'us-central1'}, async event => {
+    const message = event.data?.data();
+    if (!message?.classId || !message.senderId) return;
+    const members = await messageMembers(message.classId);
+    if (!members.some(p => p.id === message.senderId && activeMessageMember(p.data(), message.classId))) return;
+    let replyAuthor = null;
+    if (message.replyTo) {
+      const parent = await db.collection('chatMessages').doc(message.replyTo).get();
+      if (parent.get('classId') === message.classId) replyAuthor = parent.get('senderId');
+    }
+    const data = {type: 'classroom_message', messageId: event.params.messageId};
+    await sendMessageAlerts(members.filter(p => p.id !== replyAuthor), message.senderId, message.classId,
+      {en: 'New classroom message', es: 'Nuevo mensaje de la clase'},
+      {en: 'Open Illumined to read your classroom messages.', es: 'Abre Illumined para leer los mensajes de tu clase.'}, data);
+    if (replyAuthor) await sendMessageAlerts(members, message.senderId, message.classId,
+      {en: 'New reply to your message', es: 'Nueva respuesta a tu mensaje'},
+      {en: 'Someone replied to your classroom message.', es: 'Alguien respondió a tu mensaje de la clase.'}, {...data, type: 'chat_reply'}, null, replyAuthor);
+  });
+
+export const notifyPrivateMessage = onDocumentCreated(
+  {document: 'instructorConversations/{conversationId}/messages/{messageId}', region: 'us-central1'}, async event => {
+    const message = event.data?.data();
+    const conversation = await db.collection('instructorConversations').doc(event.params.conversationId).get();
+    const classId = conversation.get('classId'), studentId = conversation.get('studentId');
+    if (!classId || !studentId || !message?.senderId) return;
+    const members = await messageMembers(classId, true);
+    const sender = members.find(p => p.id === message.senderId);
+    if (!sender || !activeMessageMember(sender.data(), classId) || (sender.id !== studentId && sender.get('isInstructor') !== true)) return;
+    await sendMessageAlerts(members, message.senderId, classId,
+      {en: 'New private message', es: 'Nuevo mensaje privado'},
+      {en: 'Open Illumined to read your private conversation.', es: 'Abre Illumined para leer tu conversación privada.'},
+      {type: 'private_message', conversationId: event.params.conversationId, messageId: event.params.messageId}, studentId);
+  });
+
+export const notifyChatReaction = onDocumentUpdated(
+  {document: 'chatMessages/{messageId}', region: 'us-central1'}, async event => {
+    const before = event.data?.before.data(), after = event.data?.after.data();
+    if (!after?.classId || !after.senderId) return;
+    const actors = newReactionActors(before?.reactions, after.reactions).filter(id => id !== after.senderId);
+    if (!actors.length) return; // Editing text and removing reactions stay silent.
+    const members = await messageMembers(after.classId);
+    for (const actor of actors) {
+      if (!members.some(p => p.id === actor && activeMessageMember(p.data(), after.classId))) continue;
+      await sendMessageAlerts(members, actor, after.classId,
+        {en: 'New reaction to your message', es: 'Nueva reacción a tu mensaje'},
+        {en: 'Someone reacted to your classroom message.', es: 'Alguien reaccionó a tu mensaje de la clase.'},
+        {type: 'chat_reaction', messageId: event.params.messageId}, null, after.senderId);
+    }
+  });
+
 export const notifyNewPrayerRequest = onDocumentCreated(
   { document: "prayerRequests/{requestId}", region: "us-central1" },
   async (event) => {
@@ -466,8 +577,11 @@ export const notifyNewPrayerRequest = onDocumentCreated(
       profile.id !== request.requesterId && notificationEnabled(profile, "notificationNewPrayerRequests"));
     await sendProfileNotifications(
       recipients,
-      "New Prayer Request",
-      request.title || `${request.requesterName || "A class member"} shared a prayer request.`,
+      { en: "New Prayer Request", es: "Nueva petición de oración" },
+      request.title || {
+        en: `${request.requesterName || "A class member"} shared a prayer request.`,
+        es: `${request.requesterName || "Un miembro de la clase"} compartió una petición de oración.`,
+      },
       { type: "prayer_request", prayerRequestId: event.params.requestId, classId: request.classId },
     );
   },
@@ -493,12 +607,23 @@ export const notifyPrayerReaction = onDocumentUpdated(
     if (!stringArray(reactor.get("classIds")).includes(after.classId)) return;
     if (!notificationEnabled(recipient, "notificationNewPrayerRequests")) return;
 
-    const labels = { praying: "is praying for you", with_you: "is with you in prayer", amen: "said Amen" };
-    const reactionText = labels[afterReactions[addedUserId]] || "acknowledged your prayer request";
+    const labels = {
+      praying: { en: "is praying for you", es: "está orando por ti" },
+      with_you: { en: "is with you in prayer", es: "te acompaña en la oración" },
+      amen: { en: "said Amen", es: "dijo Amén" },
+    };
+    const reactionText = labels[afterReactions[addedUserId]] || {
+      en: "acknowledged your prayer request",
+      es: "respondió a tu petición de oración",
+    };
+    const reactorName = reactor.get("displayName");
     await sendProfileNotifications(
       [recipient],
-      "Your Prayer Was Acknowledged",
-      `${reactor.get("displayName") || "A classmate"} ${reactionText}.`,
+      { en: "Your Prayer Was Acknowledged", es: "Respondieron a tu oración" },
+      {
+        en: `${reactorName || "A classmate"} ${reactionText.en}.`,
+        es: `${reactorName || "Un compañero de clase"} ${reactionText.es}.`,
+      },
       { type: "prayer_reaction", prayerRequestId: event.params.requestId, classId: after.classId },
     );
   },
@@ -515,8 +640,8 @@ export const notifyNewAssignment = onDocumentCreated(
       notificationEnabled(profile, "notificationNewAssignments"));
     await sendProfileNotifications(
       recipients,
-      "New Assignment",
-      assignment.title || "A new assignment is available.",
+      { en: "New Assignment", es: "Nueva tarea" },
+      assignment.title || { en: "A new assignment is available.", es: "Hay una nueva tarea disponible." },
       { type: "assignment", assignmentId: event.params.assignmentId, classId: assignment.classId },
     );
   },
@@ -534,10 +659,55 @@ export const notifyDiscussionReply = onDocumentCreated(
     if (!author.exists || !notificationEnabled(author, "notificationDiscussionReplies")) return;
     await sendProfileNotifications(
       [author],
-      "New Discussion Reply",
-      `${reply.authorName || "Someone"} replied to your discussion post.`,
-      { type: "discussion_reply", replyId: event.params.replyId, postId: reply.postId, promptId: reply.promptId || "", classId: reply.classId || "" },
+      { en: "New Discussion Reply", es: "Nueva respuesta en el debate" },
+      {
+        en: `${reply.authorName || "Someone"} replied to your discussion post.`,
+        es: `${reply.authorName || "Alguien"} respondió a tu publicación en el debate.`,
+      },
+      { type: "discussion_reply", replyId: event.params.replyId, postId: reply.postId, promptId: reply.promptId || "", classId: post.get("classId") || reply.classId || "" },
     );
+  },
+);
+
+export const reopenAssignmentWhenDiscussionResponseDeleted = onDocumentDeleted(
+  "discussionPosts/{postId}",
+  async (event) => {
+    const post = event.data;
+    if (!post) return;
+
+    const userId = post.get("authorId");
+    const classId = post.get("classId");
+    if (typeof userId !== "string" || !userId) return;
+
+    const assignmentIds = new Set();
+    let assignmentId = post.get("assignmentId");
+    let lessonId = post.get("lessonId");
+    const promptId = post.get("promptId");
+
+    if (typeof promptId === "string" && promptId &&
+        (typeof assignmentId !== "string" || !assignmentId || typeof lessonId !== "string" || !lessonId)) {
+      const prompt = await db.collection("discussionPrompts").doc(promptId).get();
+      if (prompt.exists) {
+        if (typeof assignmentId !== "string" || !assignmentId) assignmentId = prompt.get("assignmentId");
+        if (typeof lessonId !== "string" || !lessonId) lessonId = prompt.get("lessonId");
+      }
+    }
+
+    if (typeof assignmentId === "string" && assignmentId) assignmentIds.add(assignmentId);
+
+    // Compatibility for discussions created before assignment-level linking existed.
+    if (!assignmentIds.size && typeof lessonId === "string" && lessonId && typeof classId === "string" && classId) {
+      const assignments = await db.collection("assignments").where("classId", "==", classId).get();
+      assignments.docs.forEach((assignment) => {
+        if (assignment.get("isActive") === false) return;
+        const links = Array.isArray(assignment.get("lessonLinks")) ? assignment.get("lessonLinks") : [];
+        const linked = links.some((link) => link && typeof link === "object" && link.lessonId === lessonId) ||
+          assignment.get("lessonId") === lessonId;
+        if (linked) assignmentIds.add(assignment.id);
+      });
+    }
+
+    for (const linkedAssignmentId of assignmentIds) await reconcileAssignment(linkedAssignmentId, userId);
   },
 );
 
@@ -566,8 +736,8 @@ export const sendAssignmentDueReminders = onSchedule(
         notificationEnabled(profile, "notificationAssignmentReminders"));
       await sendProfileNotifications(
         recipients,
-        "Assignment Due in Two Days",
-        assignment.title || "You have an assignment due soon.",
+        { en: "Assignment Due in Two Days", es: "Tarea pendiente en dos días" },
+        assignment.title || { en: "You have an assignment due soon.", es: "Tienes una tarea próxima a vencer." },
         { type: "assignment_reminder", assignmentId: assignmentDocument.id, classId: assignment.classId },
       );
     }

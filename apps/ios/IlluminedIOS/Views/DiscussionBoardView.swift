@@ -69,7 +69,7 @@ struct DiscussionBoardView: View {
                                     .font(IlluminedTheme.font(size: 21, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text(prompt.linkedContentTitle)
+                                Text(IlluminedL10n.string(prompt.linkedContentTitle))
                                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.gold)
 
@@ -79,7 +79,7 @@ struct DiscussionBoardView: View {
                                     .lineSpacing(4)
 
                                 if prompt.requiredForAssignment && !matchingAssignments.isEmpty {
-                                    Label("Post a response to complete the discussion assignment.", systemImage: "checkmark.seal")
+                                    Label(Locale.current.language.languageCode?.identifier == "es" ? "Publica una respuesta para completar la parte de discusión." : "Post a response to complete the discussion part.", systemImage: "checkmark.seal")
                                         .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                 }
@@ -89,9 +89,9 @@ struct DiscussionBoardView: View {
                         if discussionService.posts.isEmpty {
                             IlluminedCard {
                                 ContentUnavailableView(
-                                    "No Responses Yet",
+                                    IlluminedL10n.string("No Responses Yet"),
                                     systemImage: "text.bubble",
-                                    description: Text("Be the first to respond to this prompt.")
+                                    description: Text(IlluminedL10n.string("Be the first to respond to this prompt."))
                                 )
                             }
                         } else {
@@ -202,7 +202,7 @@ struct DiscussionBoardView: View {
             assignmentService.stopListening()
             completionService.stopListening()
         }
-        .alert("Discussion Error", isPresented: Binding(
+        .alert(IlluminedL10n.string("Discussion Error"), isPresented: Binding(
             get: {
                 discussionService.errorMessage != nil ||
                 assignmentService.errorMessage != nil ||
@@ -216,13 +216,13 @@ struct DiscussionBoardView: View {
                 }
             }
         )) {
-            Button("OK", role: .cancel) {
+            Button(IlluminedL10n.string("OK"), role: .cancel) {
                 discussionService.errorMessage = nil
                 assignmentService.errorMessage = nil
                 completionService.errorMessage = nil
             }
         } message: {
-            Text(discussionService.errorMessage ?? assignmentService.errorMessage ?? completionService.errorMessage ?? "")
+            Text(IlluminedL10n.string(discussionService.errorMessage ?? assignmentService.errorMessage ?? completionService.errorMessage ?? ""))
         }
     }
 
@@ -244,9 +244,7 @@ struct DiscussionBoardView: View {
 
             if didPost {
                 draft = ""
-                for assignment in matchingAssignments {
-                    await completionService.setCompleted(true, assignment: assignment, profile: profile)
-                }
+                // The shared completion service evaluates every assignment part.
             }
 
             isPosting = false
@@ -292,11 +290,7 @@ struct DiscussionBoardView: View {
         Task {
             let didDelete = await discussionService.deletePost(post, prompt: prompt)
             if didDelete {
-                if let profile = profileService.profile {
-                    for assignment in matchingAssignments {
-                        await completionService.setCompleted(false, assignment: assignment, profile: profile)
-                    }
-                }
+                // The backend reevaluates required parts after deleting the response.
                 editDrafts[postId] = nil
                 replyDrafts[postId] = nil
                 if editingPostId == postId {
@@ -363,9 +357,9 @@ private struct DiscussionPostCard: View {
 
                 if isEditing {
                     TextField(
-                        "Edit your response",
+                        IlluminedL10n.string("Edit your response"),
                         text: $editDraft,
-                        prompt: Text("Edit your response")
+                        prompt: Text(IlluminedL10n.string("Edit your response"))
                             .foregroundStyle(IlluminedTheme.secondaryText),
                         axis: .vertical
                     )
@@ -382,7 +376,7 @@ private struct DiscussionPostCard: View {
                         }
 
                     HStack {
-                        Button("Cancel", action: onCancelEdit)
+                        Button(IlluminedL10n.string("Cancel"), action: onCancelEdit)
                             .font(IlluminedTheme.font(size: 13, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.secondaryText)
 
@@ -392,7 +386,7 @@ private struct DiscussionPostCard: View {
                             if isSavingEdit {
                                 ProgressView()
                             } else {
-                                Label("Save", systemImage: "checkmark")
+                                Label(IlluminedL10n.string("Save"), systemImage: "checkmark")
                                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                             }
                         }
@@ -410,7 +404,7 @@ private struct DiscussionPostCard: View {
 
                 HStack(spacing: 18) {
                     Button(action: onToggleReply) {
-                        Label(isReplying ? "Cancel Reply" : "Reply", systemImage: "arrowshape.turn.up.left")
+                        Label(IlluminedL10n.string(isReplying ? "Cancel Reply" : "Reply"), systemImage: "arrowshape.turn.up.left")
                             .font(IlluminedTheme.font(size: 13, weight: .semibold))
                     }
                     .buttonStyle(.plain)
@@ -418,7 +412,7 @@ private struct DiscussionPostCard: View {
 
                     if isCurrentUser && !isEditing {
                         Button(action: onBeginEdit) {
-                            Label("Edit", systemImage: "pencil")
+                            Label(IlluminedL10n.string("Edit"), systemImage: "pencil")
                                 .font(IlluminedTheme.font(size: 13, weight: .semibold))
                         }
                         .buttonStyle(.plain)
@@ -428,7 +422,7 @@ private struct DiscussionPostCard: View {
                             if isDeleting {
                                 ProgressView()
                             } else {
-                                Label("Delete", systemImage: "trash")
+                                Label(IlluminedL10n.string("Delete"), systemImage: "trash")
                                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                             }
                         }
@@ -458,9 +452,9 @@ private struct DiscussionPostCard: View {
                 if isReplying {
                     VStack(spacing: 10) {
                         TextField(
-                            "Write a reply",
+                            IlluminedL10n.string("Write a reply"),
                             text: $replyDraft,
-                            prompt: Text("Write a reply")
+                            prompt: Text(IlluminedL10n.string("Write a reply"))
                                 .foregroundStyle(IlluminedTheme.secondaryText),
                             axis: .vertical
                         )
@@ -481,7 +475,7 @@ private struct DiscussionPostCard: View {
                                 ProgressView()
                                     .frame(maxWidth: .infinity)
                             } else {
-                                Text("Post Reply")
+                                Text(IlluminedL10n.string("Post Reply"))
                                     .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -530,11 +524,11 @@ private struct DiscussionPostedNotice: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Your response has been posted.", systemImage: "checkmark.seal.fill")
+            Label(IlluminedL10n.string("Your response has been posted."), systemImage: "checkmark.seal.fill")
                 .font(IlluminedTheme.font(size: 14, weight: .semibold))
                 .foregroundStyle(IlluminedTheme.blue)
 
-            Text("You may edit or delete your original response above. To continue the conversation, reply to classmates and instructors.")
+            Text(IlluminedL10n.string("You may edit or delete your original response above. To continue the conversation, reply to classmates and instructors."))
                 .font(IlluminedTheme.font(size: 13))
                 .foregroundStyle(IlluminedTheme.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
@@ -560,9 +554,9 @@ private struct DiscussionInputBar: View {
     var body: some View {
         VStack(spacing: 10) {
             TextField(
-                "Write your response",
+                IlluminedL10n.string("Write your response"),
                 text: $draft,
-                prompt: Text("Write your response")
+                prompt: Text(IlluminedL10n.string("Write your response"))
                     .foregroundStyle(IlluminedTheme.secondaryText),
                 axis: .vertical
             )
@@ -583,7 +577,7 @@ private struct DiscussionInputBar: View {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                 } else {
-                    Label("Post Response", systemImage: "paperplane.fill")
+                    Label(IlluminedL10n.string("Post Response"), systemImage: "paperplane.fill")
                         .font(IlluminedTheme.font(size: 16, weight: .semibold))
                         .frame(maxWidth: .infinity)
                 }

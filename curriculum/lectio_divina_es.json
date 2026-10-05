@@ -1,0 +1,26 @@
+{
+  "titleEs": "Lectio Divina",
+  "contentHTMLEs": "<h2>Lectio Divina</h2>\n<p><em>Lectio Divina</em>, que significa «lectura divina», es una práctica monástica tradicional de oración con las Sagradas Escrituras. Es una manera lenta y contemplativa de leer la Palabra de Dios, permitiendo que hable a nuestro corazón y transforme nuestra vida.</p>\n<div class=\"content-wrapper\"><h3>Los cuatro pasos de la Lectio Divina</h3><ol><li><strong>Lectio (Lectura):</strong> Lee lentamente y con atención un breve pasaje de la Escritura. Escucha una palabra o frase que llame especialmente tu atención.</li><li><strong>Meditatio (Meditación):</strong> Reflexiona sobre esa palabra o frase. ¿Qué significa? ¿Cómo se relaciona con tu vida? Medítala en tu corazón.</li><li><strong>Oratio (Oración):</strong> Responde a Dios en la oración. Háblale desde el corazón sobre lo que has leído y meditado. Puede ser una oración de alabanza, acción de gracias, arrepentimiento o petición.</li><li><strong>Contemplatio (Contemplación):</strong> Descansa en silencio en la presencia de Dios. Deja a un lado tus propios pensamientos y permanece sencillamente con Él, permitiendo que obre en tu alma.</li></ol></div>\n<div class=\"content-wrapper\"><h3>Recomendación: ora con una de las lecturas del día</h3></div>",
+  "steps": [
+    {
+      "id": "lectio",
+      "titleEs": "Lectio (Lectura)",
+      "descriptionEs": "Lee lentamente y con atención un breve pasaje de la Escritura. Escucha una palabra o frase que llame especialmente tu atención."
+    },
+    {
+      "id": "meditatio",
+      "titleEs": "Meditatio (Meditación)",
+      "descriptionEs": "Reflexiona sobre esa palabra o frase. ¿Qué significa? ¿Cómo se relaciona con tu vida?"
+    },
+    {
+      "id": "oratio",
+      "titleEs": "Oratio (Oración)",
+      "descriptionEs": "Responde a Dios en la oración desde lo profundo de tu corazón."
+    },
+    {
+      "id": "contemplatio",
+      "titleEs": "Contemplatio (Contemplación)",
+      "descriptionEs": "Descansa en silencio en la presencia de Dios y permite que Él obre en tu alma."
+    }
+  ]
+}

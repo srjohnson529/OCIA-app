@@ -98,19 +98,29 @@ final class LessonCatalogService: ObservableObject {
 
     private func lesson(from data: [String: Any]?, id: String, fallback: Lesson?) -> Lesson {
         guard let data else { return fallback! }
-        let quiz = (data["quiz"] as? [[String: Any]] ?? []).compactMap { item -> QuizQuestion? in
-            guard let question = item["question"] as? String,
-                  let options = item["options"] as? [String] else { return nil }
-            let correct = item["correct"] as? Int ?? item["correctAnswerIndex"] as? Int ?? 0
-            return QuizQuestion(id: item["id"] as? String ?? UUID().uuidString, question: question, options: options, correct: correct)
+        func questions(from value: Any?) -> [QuizQuestion]? {
+            guard let items = value as? [[String: Any]] else { return nil }
+            return items.compactMap { item -> QuizQuestion? in
+                guard let question = item["question"] as? String,
+                      let options = item["options"] as? [String] else { return nil }
+                let correct = item["correct"] as? Int ?? item["correctAnswerIndex"] as? Int ?? 0
+                return QuizQuestion(id: item["id"] as? String ?? UUID().uuidString, question: question, options: options, correct: correct)
+            }
         }
+        let quiz = questions(from: data["quiz"]) ?? []
+        let quizEs = data.keys.contains("quizEs") ? questions(from: data["quizEs"]) : fallback?.quizEs
         return Lesson(
             id: id,
             title: data["title"] as? String ?? fallback?.title ?? "Lesson",
             category: data["category"] as? String ?? fallback?.category ?? "Classroom Lessons",
             contentHTML: data["content"] as? String ?? data["contentHTML"] as? String ?? fallback?.contentHTML ?? "",
             videoURL: data["videoUrl"] as? String ?? fallback?.videoURL,
-            quiz: data["quiz"] == nil ? (fallback?.quiz ?? []) : quiz
+            quiz: data["quiz"] == nil ? (fallback?.quiz ?? []) : quiz,
+            titleEs: data.keys.contains("titleEs") ? data["titleEs"] as? String : fallback?.titleEs,
+            contentHTMLEs: data.keys.contains("contentEs") || data.keys.contains("contentHTMLEs")
+                ? data["contentEs"] as? String ?? data["contentHTMLEs"] as? String
+                : fallback?.contentHTMLEs,
+            quizEs: quizEs
         )
     }
 

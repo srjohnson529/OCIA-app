@@ -88,24 +88,8 @@ final class ProfileService: ObservableObject {
 
         do {
             errorMessage = nil
-            try await db.collection("userProfiles").document(user.uid).setData([
-                "userId": user.uid,
-                "email": user.email ?? "",
-                "displayName": cleanedName,
-                "isInstructor": false,
-                "isAdmin": false,
-                "classIds": [cleanedClass],
-                "activeClassId": cleanedClass,
-                "completedLessons": [],
-                "earnedBadges": [],
-                "completedMysteries": [],
-                "memorizedPrayerIds": [],
-                "selectedPrayerIds": [],
-                "currentLessonIndex": 0,
-                "createdAt": FieldValue.serverTimestamp(),
-                "username": cleanedName,
-                "classId": cleanedClass
-            ], merge: true)
+            _ = try await Functions.functions(region: "us-central1").httpsCallable("joinStudentClass")
+                .call(["displayName": cleanedName, "code": cleanedClass])
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -230,118 +214,33 @@ final class ProfileService: ObservableObject {
         }
     }
 
-    func startNewClass(displayName: String, parishName: String, classId: String, setupCode: String) async {
+    func hasAccountParishAccess() async throws -> Bool {
+        guard let uid = Auth.auth().currentUser?.uid else { return false }
+        let result = try await Functions.functions(region: "us-central1").httpsCallable("getParishAccess").call()
+        guard !Task.isCancelled, Auth.auth().currentUser?.uid == uid else { return false }
+        guard let status = (result.data as? [String: Any])?["status"] as? String,
+              ["ready", "not_activated", "completed"].contains(status) else {
+            throw NSError(domain: "ParishAccess", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not confirm parish access. Please retry."])
+        }
+        return (result.data as? [String: Any])?["status"] as? String == "ready"
+    }
+
+    func startNewClass(displayName: String, parishName: String, setupCode: String, city: String) async {
         guard let user = Auth.auth().currentUser else {
-            errorMessage = "Please sign in before starting a new class."
+            errorMessage = "Please sign in before starting a class."
             return
         }
-
-        let cleanedName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanedParishName = parishName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanedClass = classId.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        let cleanedSetupCode = setupCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-
-        guard !cleanedName.isEmpty, !cleanedParishName.isEmpty, !cleanedClass.isEmpty, !cleanedSetupCode.isEmpty else {
-            errorMessage = "Please enter your name, parish name, class ID, and setup code."
-            return
-        }
-
-        let profileRef = db.collection("userProfiles").document(user.uid)
-        let setupCodeRef = db.collection("parishSetupCodes").document(cleanedSetupCode)
-        let classroomRef = db.collection("classrooms").document(cleanedClass)
-
-        await withCheckedContinuation { continuation in
-            errorMessage = nil
-
-            db.runTransaction({ transaction, errorPointer -> Any? in
-                let profileSnapshot: DocumentSnapshot
-                let setupCodeSnapshot: DocumentSnapshot
-
-                do {
-                    profileSnapshot = try transaction.getDocument(profileRef)
-                    setupCodeSnapshot = try transaction.getDocument(setupCodeRef)
-                } catch let error as NSError {
-                    errorPointer?.pointee = error
-                    return nil
-                }
-
-                guard setupCodeSnapshot.exists, let setupCodeData = setupCodeSnapshot.data() else {
-                    errorPointer?.pointee = Self.profileError("That parish setup code was not found.")
-                    return nil
-                }
-
-                let isActive = setupCodeData["isActive"] as? Bool ?? false
-                let usedBy = setupCodeData["usedBy"] as? String
-
-                guard isActive, usedBy?.isEmpty != false else {
-                    errorPointer?.pointee = Self.profileError("That parish setup code has already been used.")
-                    return nil
-                }
-
-                let existingClassIds = profileSnapshot.data()?["classIds"] as? [String] ?? []
-                let combinedClassIds = (existingClassIds + [cleanedClass]).reduce(into: [String]()) { result, classId in
-                    if !result.contains(classId) { result.append(classId) }
-                }
-
-                var profileData: [String: Any] = [
-                    "userId": user.uid,
-                    "email": user.email ?? "",
-                    "displayName": cleanedName,
-                    "isInstructor": true,
-                    "isAdmin": false,
-                    "classIds": combinedClassIds,
-                    "activeClassId": cleanedClass,
-                    "parishSetupCode": cleanedSetupCode,
-                    "username": cleanedName,
-                    "classId": cleanedClass
-                ]
-                if !profileSnapshot.exists {
-                    profileData.merge([
-                        "completedLessons": [],
-                        "earnedBadges": [],
-                        "completedMysteries": [],
-                        "memorizedPrayerIds": [],
-                        "selectedPrayerIds": [],
-                        "currentLessonIndex": 0,
-                        "createdAt": FieldValue.serverTimestamp()
-                    ]) { current, _ in current }
-                }
-                transaction.setData(profileData, forDocument: profileRef, merge: true)
-
-                transaction.setData([
-                    "id": cleanedClass,
-                    "classId": cleanedClass,
-                    "name": cleanedParishName,
-                    "parishName": cleanedParishName,
-                    "instructorId": user.uid,
-                    "instructorName": cleanedName,
-                    "studentIds": [],
-                    "createdAt": FieldValue.serverTimestamp(),
-                    "createdBy": user.uid,
-                    "isArchived": false
-                ], forDocument: classroomRef)
-
-                transaction.updateData([
-                    "isActive": false,
-                    "usedBy": user.uid,
-                    "usedByEmail": user.email ?? "",
-                    "usedByName": cleanedName,
-                    "classId": cleanedClass,
-                    "parishName": cleanedParishName,
-                    "usedAt": FieldValue.serverTimestamp()
-                ], forDocument: setupCodeRef)
-
-                return nil
-            }, completion: { [weak self] _, error in
-                Task { @MainActor in
-                    if let error {
-                        self?.errorMessage = error.localizedDescription
-                    } else {
-                        self?.errorMessage = nil
-                    }
-                    continuation.resume()
-                }
-            })
+        if profile?.isInstructor != true { InstructorWalkthrough.markInstructorSetup(user.uid) }
+        errorMessage = nil
+        do {
+            _ = try await Functions.functions().httpsCallable("startParishClass").call([
+                "displayName": displayName.trimmingCharacters(in: .whitespacesAndNewlines),
+                "parishName": parishName.trimmingCharacters(in: .whitespacesAndNewlines),
+                "city": city.trimmingCharacters(in: .whitespacesAndNewlines),
+                "setupCode": setupCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+            ])
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 
@@ -349,6 +248,7 @@ final class ProfileService: ObservableObject {
         let profileRef = db.collection("userProfiles").document(user.uid)
         let inviteRef = db.collection("instructorInviteCodes").document(code)
 
+        if profile?.isInstructor != true { InstructorWalkthrough.markInstructorSetup(user.uid) }
         await withCheckedContinuation { continuation in
             errorMessage = nil
 
@@ -450,15 +350,18 @@ final class ProfileService: ObservableObject {
         return "Your profile could not be loaded. Please enter your profile information again."
     }
 
-    func markLessonCompleted(_ lessonId: String) async {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+    @discardableResult
+    func markLessonCompleted(_ lessonId: String) async -> Bool {
+        guard let uid = Auth.auth().currentUser?.uid else { return false }
 
         do {
             try await db.collection("userProfiles").document(uid).updateData([
                 "completedLessons": FieldValue.arrayUnion([lessonId])
             ])
+            return true
         } catch {
             errorMessage = error.localizedDescription
+            return false
         }
     }
 

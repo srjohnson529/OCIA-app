@@ -1,0 +1,31 @@
+{
+  "titleEs": "Liturgia de las Horas",
+  "descriptionEs": "La Liturgia de las Horas es la oración diaria de la Iglesia, que santifica el día con salmos, lecturas de la Sagrada Escritura e intercesiones.",
+  "hours": [
+    {
+      "id": "office-of-readings",
+      "titleEs": "Oficio de Lecturas",
+      "descriptionEs": "Un tiempo más prolongado dedicado a la Sagrada Escritura y a la lectura espiritual."
+    },
+    {
+      "id": "morning-prayer",
+      "titleEs": "Laudes (Oración de la mañana)",
+      "descriptionEs": "Comienza el día con alabanza e intercesión."
+    },
+    {
+      "id": "daytime-prayer",
+      "titleEs": "Hora intermedia",
+      "descriptionEs": "Haz una pausa en el trabajo para volver a ofrecer el día a Dios."
+    },
+    {
+      "id": "evening-prayer",
+      "titleEs": "Vísperas (Oración de la tarde)",
+      "descriptionEs": "Da gracias a Dios al terminar el día."
+    },
+    {
+      "id": "night-prayer",
+      "titleEs": "Completas (Oración de la noche)",
+      "descriptionEs": "Examina el día y confía la noche a Dios."
+    }
+  ]
+}

@@ -24,11 +24,11 @@ struct InstructorNotificationsView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 12) {
-                            Label("Push Notifications", systemImage: "bell.badge")
+                            Label(IlluminedL10n.string("Push Notifications"), systemImage: "bell.badge")
                                 .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.blue)
 
-                            Text("Send a brief alert to everyone in this class who has turned on notifications. This uses the shared Illumined notification queue, so iOS and Android can use the same system.")
+                            Text(IlluminedL10n.string("Send a brief alert to everyone in this class who has turned on notifications. This uses the shared Illumined notification queue, so iOS and Android can use the same system."))
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -43,13 +43,13 @@ struct InstructorNotificationsView: View {
 
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 14) {
-                            Text("Notification")
+                            Text(IlluminedL10n.string("Notification"))
                                 .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.ink)
 
-                            IlluminedTextField(title: "Title", text: $title, autocapitalization: .sentences)
+                            IlluminedTextField(title: IlluminedL10n.string("Title"), text: $title, autocapitalization: .sentences)
 
-                            TextField("", text: $message, prompt: Text("Message").foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
+                            TextField("", text: $message, prompt: Text(IlluminedL10n.string("Message")).foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
                                 .font(IlluminedTheme.font(size: 17))
                                 .foregroundStyle(IlluminedTheme.ink)
                                 .tint(IlluminedTheme.blue)
@@ -62,7 +62,7 @@ struct InstructorNotificationsView: View {
                                         .stroke(IlluminedTheme.gold.opacity(0.22), lineWidth: 1)
                                 )
 
-                            Text("Keep alerts short and important. Longer details can go in announcements, assignments, or discussions.")
+                            Text(IlluminedL10n.string("Keep alerts short and important. Longer details can go in announcements, assignments, or discussions."))
                                 .font(IlluminedTheme.font(size: 13))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -71,7 +71,7 @@ struct InstructorNotificationsView: View {
 
                     if let statusMessage = notificationService.statusMessage {
                         IlluminedCard {
-                            Label(statusMessage, systemImage: "checkmark.circle")
+                            Label(IlluminedL10n.string(statusMessage), systemImage: "checkmark.circle")
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(IlluminedTheme.blue)
                         }
@@ -79,7 +79,7 @@ struct InstructorNotificationsView: View {
 
                     if let errorMessage = notificationService.errorMessage {
                         IlluminedCard {
-                            Label(errorMessage, systemImage: "exclamationmark.triangle")
+                            Label(IlluminedL10n.string(errorMessage), systemImage: "exclamationmark.triangle")
                                 .font(IlluminedTheme.font(size: 15))
                                 .foregroundStyle(.red)
                         }
@@ -93,7 +93,7 @@ struct InstructorNotificationsView: View {
                                 .tint(.white)
                                 .frame(maxWidth: .infinity)
                         } else {
-                            Label("Send Notification", systemImage: "paperplane.fill")
+                            Label(IlluminedL10n.string("Send Notification"), systemImage: "paperplane.fill")
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }

@@ -1,0 +1,146 @@
+{
+  "prayers": {
+    "signOfTheCrossEs": "En el nombre del Padre, y del Hijo, y del Espíritu Santo. Amén.",
+    "apostlesCreedEs": "Creo en Dios, Padre todopoderoso, Creador del cielo y de la tierra. Creo en Jesucristo, su único Hijo, nuestro Señor, que fue concebido por obra y gracia del Espíritu Santo, nació de santa María Virgen, padeció bajo el poder de Poncio Pilato, fue crucificado, muerto y sepultado, descendió a los infiernos, al tercer día resucitó de entre los muertos, subió a los cielos y está sentado a la derecha de Dios, Padre todopoderoso. Desde allí ha de venir a juzgar a vivos y muertos. Creo en el Espíritu Santo, la santa Iglesia católica, la comunión de los santos, el perdón de los pecados, la resurrección de la carne y la vida eterna. Amén.",
+    "ourFatherEs": "Padre nuestro, que estás en el cielo, santificado sea tu Nombre; venga a nosotros tu reino; hágase tu voluntad en la tierra como en el cielo. Danos hoy nuestro pan de cada día; perdona nuestras ofensas, como también nosotros perdonamos a los que nos ofenden; no nos dejes caer en la tentación, y líbranos del mal. Amén.",
+    "hailMaryEs": "Dios te salve, María, llena eres de gracia; el Señor es contigo. Bendita tú eres entre todas las mujeres, y bendito es el fruto de tu vientre, Jesús. Santa María, Madre de Dios, ruega por nosotros, pecadores, ahora y en la hora de nuestra muerte. Amén.",
+    "gloryBeEs": "Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.",
+    "fatimaPrayerEs": "Oh Jesús mío, perdona nuestros pecados, líbranos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia. Amén.",
+    "hailHolyQueenEs": "Dios te salve, Reina y Madre de misericordia, vida, dulzura y esperanza nuestra; Dios te salve. A ti llamamos los desterrados hijos de Eva; a ti suspiramos, gimiendo y llorando en este valle de lágrimas. Ea, pues, Señora, abogada nuestra, vuelve a nosotros esos tus ojos misericordiosos; y después de este destierro, muéstranos a Jesús, fruto bendito de tu vientre. ¡Oh clementísima, oh piadosa, oh dulce Virgen María! Ruega por nosotros, santa Madre de Dios, para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo.",
+    "concludingPrayerEs": "Oh Dios, cuyo Hijo unigénito, con su vida, muerte y resurrección, nos alcanzó el premio de la vida eterna: concédenos, te rogamos, que, meditando estos misterios del santísimo Rosario de la bienaventurada Virgen María, imitemos lo que contienen y alcancemos lo que prometen. Por el mismo Jesucristo nuestro Señor. Amén."
+  },
+  "mysteries": [
+    {
+      "id": "joyful",
+      "titleEs": "Misterios gozosos",
+      "nameEs": "Los misterios gozosos",
+      "descriptionHTMLEs": "<p>Los <strong>misterios gozosos</strong> nos invitan a contemplar la Encarnación y los primeros años de la vida de Jesús. Tradicionalmente se rezan los <strong>lunes</strong> y <strong>sábados</strong>, y los domingos de Adviento.</p><ol><li><strong>La Anunciación</strong> – El ángel Gabriel anuncia a María que concebirá al Hijo de Dios por obra del Espíritu Santo.<br><em>Fruto:</em> Humildad</li><li><strong>La Visitación</strong> – María visita a su prima Isabel, que espera a Juan el Bautista.<br><em>Fruto:</em> Caridad</li><li><strong>El Nacimiento de Jesús</strong> – Jesús nace en Belén y es acostado en un pesebre.<br><em>Fruto:</em> Pobreza de espíritu</li><li><strong>La Presentación</strong> – María y José presentan a Jesús en el Templo.<br><em>Fruto:</em> Obediencia</li><li><strong>El Niño Jesús hallado en el Templo</strong> – Jesús es hallado enseñando a los maestros y revela su misión de cumplir la voluntad del Padre.<br><em>Fruto:</em> Celo por Dios</li></ol>",
+      "mysteries": [
+        {
+          "id": "joyful-1",
+          "titleEs": "La Anunciación",
+          "scriptureEs": "Lucas 1, 26-38\n\nEl ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una virgen desposada con un hombre llamado José, de la casa de David; el nombre de la virgen era María. El ángel entró donde ella estaba y le dijo: «Alégrate, llena de gracia, el Señor está contigo». Ella se turbó por estas palabras y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No temas, María, porque has hallado gracia ante Dios. Concebirás y darás a luz un hijo, y le pondrás por nombre Jesús. Él será grande y será llamado Hijo del Altísimo». María preguntó: «¿Cómo será esto, puesto que no conozco varón?». El ángel respondió: «El Espíritu Santo vendrá sobre ti y el poder del Altísimo te cubrirá con su sombra; por eso el que nacerá será santo y será llamado Hijo de Dios. Para Dios nada hay imposible». María dijo: «He aquí la esclava del Señor; hágase en mí según tu palabra». Y el ángel se retiró."
+        },
+        {
+          "id": "joyful-2",
+          "titleEs": "La Visitación",
+          "scriptureEs": "Lucas 1, 39-56\n\nMaría se levantó y fue de prisa a la región montañosa, a una ciudad de Judá. Entró en casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, el niño saltó en su seno e Isabel quedó llena del Espíritu Santo. Exclamó: «Bendita tú entre las mujeres y bendito el fruto de tu vientre. ¿Quién soy yo para que la madre de mi Señor venga a visitarme? Dichosa tú, que has creído que se cumpliría lo que te fue dicho de parte del Señor». Entonces María dijo: «Proclama mi alma la grandeza del Señor y mi espíritu se alegra en Dios mi Salvador, porque ha mirado la humildad de su sierva. Desde ahora me felicitarán todas las generaciones, porque el Poderoso ha hecho obras grandes por mí; su nombre es santo»."
+        },
+        {
+          "id": "joyful-3",
+          "titleEs": "El Nacimiento de Jesús",
+          "scriptureEs": "Lucas 2, 1-20\n\nJosé subió desde Nazaret a Belén, la ciudad de David, para empadronarse con María, su esposa, que estaba encinta. Mientras estaban allí, se cumplieron los días del parto. María dio a luz a su hijo primogénito, lo envolvió en pañales y lo recostó en un pesebre, porque no había lugar para ellos en la posada. Un ángel del Señor se apareció a unos pastores y les dijo: «No teman. Les anuncio una gran alegría para todo el pueblo: hoy les ha nacido, en la ciudad de David, un Salvador, que es el Mesías, el Señor». Los pastores fueron de prisa y encontraron a María, a José y al niño acostado en el pesebre. María guardaba todas estas cosas, meditándolas en su corazón."
+        },
+        {
+          "id": "joyful-4",
+          "titleEs": "La Presentación",
+          "scriptureEs": "Lucas 2, 22-38\n\nCuando llegó el tiempo de la purificación, María y José llevaron a Jesús a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre justo y piadoso llamado Simeón. Movido por el Espíritu, fue al Templo, tomó al niño en sus brazos y bendijo a Dios diciendo: «Ahora, Señor, puedes dejar que tu siervo se vaya en paz, porque mis ojos han visto tu salvación, luz para alumbrar a las naciones y gloria de tu pueblo Israel». También la profetisa Ana daba gracias a Dios y hablaba del niño a todos los que esperaban la redención de Jerusalén."
+        },
+        {
+          "id": "joyful-5",
+          "titleEs": "El Niño Jesús hallado en el Templo",
+          "scriptureEs": "Lucas 2, 41-52\n\nLos padres de Jesús iban cada año a Jerusalén para la fiesta de la Pascua. Cuando Jesús tenía doce años, subieron según la costumbre. Al regresar, el niño Jesús se quedó en Jerusalén sin que sus padres lo supieran. Después de tres días lo encontraron en el Templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas. Su madre le dijo: «Hijo, ¿por qué nos has hecho esto? Tu padre y yo te buscábamos angustiados». Él respondió: «¿Por qué me buscaban? ¿No sabían que debo ocuparme de las cosas de mi Padre?». Bajó con ellos a Nazaret y vivía sujeto a ellos. María guardaba todas estas cosas en su corazón."
+        }
+      ]
+    },
+    {
+      "id": "luminous",
+      "titleEs": "Misterios luminosos",
+      "nameEs": "Los misterios luminosos",
+      "descriptionHTMLEs": "<p>Los <strong>misterios luminosos</strong>, o misterios de la luz, fueron propuestos por san Juan Pablo II y contemplan el ministerio público de Jesús. Tradicionalmente se rezan los <strong>jueves</strong>.</p><ol><li><strong>El Bautismo de Jesús en el Jordán</strong><br><em>Fruto:</em> Apertura al Espíritu Santo</li><li><strong>Las bodas de Caná</strong><br><em>Fruto:</em> Confianza en la intercesión de María</li><li><strong>El anuncio del Reino de Dios</strong><br><em>Fruto:</em> Conversión del corazón</li><li><strong>La Transfiguración</strong><br><em>Fruto:</em> Deseo de santidad</li><li><strong>La institución de la Eucaristía</strong><br><em>Fruto:</em> Amor a la Eucaristía</li></ol>",
+      "mysteries": [
+        {
+          "id": "luminous-1",
+          "titleEs": "El Bautismo de Jesús en el Jordán",
+          "scriptureEs": "Mateo 3, 13-17\n\nJesús fue desde Galilea al Jordán y se presentó a Juan para ser bautizado. Juan intentaba impedírselo: «Soy yo quien necesita ser bautizado por ti, ¿y tú vienes a mí?». Jesús le respondió: «Déjalo ahora; conviene que cumplamos así toda justicia». Entonces Juan accedió. Apenas bautizado, Jesús salió del agua; se abrieron los cielos y vio al Espíritu de Dios bajar como una paloma y posarse sobre él. Y una voz del cielo dijo: «Este es mi Hijo amado, en quien me complazco»."
+        },
+        {
+          "id": "luminous-2",
+          "titleEs": "Las bodas de Caná",
+          "scriptureEs": "Juan 2, 1-11\n\nSe celebraba una boda en Caná de Galilea y la madre de Jesús estaba allí. También fueron invitados Jesús y sus discípulos. Al faltar el vino, María dijo a Jesús: «No tienen vino». Luego dijo a los sirvientes: «Hagan lo que él les diga». Jesús mandó llenar de agua seis tinajas de piedra. Cuando el mayordomo probó el agua convertida en vino, llamó al esposo y le dijo: «Tú has guardado el vino bueno hasta ahora». Este fue el primero de los signos de Jesús; manifestó su gloria y sus discípulos creyeron en él."
+        },
+        {
+          "id": "luminous-3",
+          "titleEs": "El anuncio del Reino de Dios",
+          "scriptureEs": "Marcos 1, 14-15\n\nDespués de que Juan fue arrestado, Jesús fue a Galilea proclamando el Evangelio de Dios: «El tiempo se ha cumplido y el Reino de Dios está cerca; conviértanse y crean en el Evangelio»."
+        },
+        {
+          "id": "luminous-4",
+          "titleEs": "La Transfiguración",
+          "scriptureEs": "Mateo 17, 1-8\n\nJesús tomó consigo a Pedro, Santiago y Juan, y los llevó a un monte alto. Allí se transfiguró delante de ellos: su rostro resplandeció como el sol y sus vestidos se volvieron blancos como la luz. Moisés y Elías aparecieron conversando con él. Una nube luminosa los cubrió y desde la nube se oyó una voz: «Este es mi Hijo amado, en quien me complazco; escúchenlo». Los discípulos cayeron rostro en tierra, llenos de temor. Jesús se acercó, los tocó y dijo: «Levántense, no teman». Al alzar los ojos, no vieron a nadie sino a Jesús."
+        },
+        {
+          "id": "luminous-5",
+          "titleEs": "La institución de la Eucaristía",
+          "scriptureEs": "Mateo 26, 26-30\n\nMientras cenaban, Jesús tomó pan, pronunció la bendición, lo partió y lo dio a sus discípulos diciendo: «Tomen y coman; esto es mi cuerpo». Después tomó una copa, dio gracias y se la entregó diciendo: «Beban todos de ella, porque esta es mi sangre de la alianza, que se derrama por muchos para el perdón de los pecados». Después de cantar los salmos, salieron hacia el monte de los Olivos."
+        }
+      ]
+    },
+    {
+      "id": "sorrowful",
+      "titleEs": "Misterios dolorosos",
+      "nameEs": "Los misterios dolorosos",
+      "descriptionHTMLEs": "<p>Los <strong>misterios dolorosos</strong> contemplan la Pasión y Muerte de Cristo. Tradicionalmente se rezan los <strong>martes</strong> y <strong>viernes</strong>, y los domingos de Cuaresma.</p><ol><li><strong>La oración de Jesús en el Huerto</strong><br><em>Fruto:</em> Entrega a la voluntad de Dios</li><li><strong>La flagelación del Señor</strong><br><em>Fruto:</em> Pureza y mortificación</li><li><strong>La coronación de espinas</strong><br><em>Fruto:</em> Valor y humildad</li><li><strong>Jesús con la cruz a cuestas</strong><br><em>Fruto:</em> Paciencia en el sufrimiento</li><li><strong>La crucifixión y muerte de Jesús</strong><br><em>Fruto:</em> Amor y perdón</li></ol>",
+      "mysteries": [
+        {
+          "id": "sorrowful-1",
+          "titleEs": "La oración de Jesús en el Huerto",
+          "scriptureEs": "Mateo 26, 36-46\n\nJesús fue con sus discípulos a un lugar llamado Getsemaní y les dijo: «Siéntense aquí mientras yo voy allá a orar». Tomó consigo a Pedro y a los dos hijos de Zebedeo, y comenzó a sentir tristeza y angustia. Les dijo: «Mi alma está triste hasta la muerte; quédense aquí y velen conmigo». Se adelantó un poco, cayó rostro en tierra y oró: «Padre mío, si es posible, que pase de mí este cáliz; pero no se haga como yo quiero, sino como quieres tú». Volvió y los encontró dormidos. Les dijo: «Velen y oren para no caer en tentación». Oró de nuevo: «Padre mío, si este cáliz no puede pasar sin que yo lo beba, hágase tu voluntad»."
+        },
+        {
+          "id": "sorrowful-2",
+          "titleEs": "La flagelación del Señor",
+          "scriptureEs": "Juan 19, 1\n\nEntonces Pilato tomó a Jesús y mandó azotarlo."
+        },
+        {
+          "id": "sorrowful-3",
+          "titleEs": "La coronación de espinas",
+          "scriptureEs": "Mateo 27, 27-31\n\nLos soldados llevaron a Jesús al pretorio y reunieron a toda la tropa. Lo desnudaron, le pusieron un manto escarlata y, trenzando una corona de espinas, se la colocaron en la cabeza. Arrodillándose ante él, se burlaban: «¡Salve, rey de los judíos!». Le escupieron, tomaron la caña y le golpearon la cabeza. Después de burlarse de él, le quitaron el manto, le pusieron sus ropas y lo llevaron para crucificarlo."
+        },
+        {
+          "id": "sorrowful-4",
+          "titleEs": "Jesús con la cruz a cuestas",
+          "scriptureEs": "Juan 19, 17\n\nJesús salió cargando él mismo con la cruz hacia el lugar llamado de la Calavera, que en hebreo se dice Gólgota."
+        },
+        {
+          "id": "sorrowful-5",
+          "titleEs": "La crucifixión y muerte de Jesús",
+          "scriptureEs": "Juan 19, 18-30\n\nAllí crucificaron a Jesús y con él a otros dos, uno a cada lado. Pilato mandó escribir un letrero: «Jesús Nazareno, Rey de los judíos». Junto a la cruz estaban su madre, la hermana de su madre, María de Cleofás y María Magdalena. Al ver a su madre y al discípulo amado, Jesús dijo: «Mujer, ahí tienes a tu hijo». Luego dijo al discípulo: «Ahí tienes a tu madre». Sabiendo que todo estaba cumplido, Jesús dijo: «Tengo sed». Le acercaron una esponja empapada en vinagre. Después de tomarlo, dijo: «Todo está cumplido». E inclinando la cabeza, entregó el espíritu."
+        }
+      ]
+    },
+    {
+      "id": "glorious",
+      "titleEs": "Misterios gloriosos",
+      "nameEs": "Los misterios gloriosos",
+      "descriptionHTMLEs": "<p>Los <strong>misterios gloriosos</strong> celebran la Resurrección y la gloria de Jesús y María. Tradicionalmente se rezan los <strong>miércoles</strong> y <strong>domingos</strong> fuera de Adviento y Cuaresma.</p><ol><li><strong>La Resurrección del Señor</strong><br><em>Fruto:</em> Fe y alegría</li><li><strong>La Ascensión del Señor</strong><br><em>Fruto:</em> Esperanza y deseo del cielo</li><li><strong>La venida del Espíritu Santo</strong><br><em>Fruto:</em> Celo y guía del Espíritu Santo</li><li><strong>La Asunción de María</strong><br><em>Fruto:</em> Devoción a María y esperanza de la resurrección</li><li><strong>La Coronación de María</strong><br><em>Fruto:</em> Confianza en la intercesión de María</li></ol>",
+      "mysteries": [
+        {
+          "id": "glorious-1",
+          "titleEs": "La Resurrección del Señor",
+          "scriptureEs": "Juan 20, 1-9\n\nEl primer día de la semana, María Magdalena fue al sepulcro muy temprano, cuando todavía estaba oscuro, y vio que la piedra había sido retirada. Corrió a Simón Pedro y al discípulo amado y les dijo: «Se han llevado del sepulcro al Señor y no sabemos dónde lo han puesto». Pedro y el otro discípulo salieron hacia el sepulcro. El otro discípulo llegó primero, se inclinó y vio los lienzos, pero no entró. Luego llegó Pedro y entró; vio los lienzos y el sudario doblado aparte. Entonces entró también el otro discípulo: vio y creyó, pues todavía no habían comprendido que Jesús debía resucitar de entre los muertos."
+        },
+        {
+          "id": "glorious-2",
+          "titleEs": "La Ascensión del Señor",
+          "scriptureEs": "Lucas 24, 50-53\n\nJesús llevó a sus discípulos hasta cerca de Betania y, levantando las manos, los bendijo. Mientras los bendecía, se separó de ellos y fue llevado al cielo. Ellos lo adoraron y regresaron a Jerusalén con gran alegría; permanecían continuamente en el Templo bendiciendo a Dios."
+        },
+        {
+          "id": "glorious-3",
+          "titleEs": "La venida del Espíritu Santo",
+          "scriptureEs": "Hechos 2, 1-4\n\nAl llegar el día de Pentecostés, estaban todos reunidos en un mismo lugar. De repente vino del cielo un ruido semejante a una ráfaga de viento impetuoso que llenó toda la casa. Aparecieron lenguas como de fuego, que se repartieron y se posaron sobre cada uno. Todos quedaron llenos del Espíritu Santo y comenzaron a hablar en otras lenguas, según el Espíritu les concedía expresarse."
+        },
+        {
+          "id": "glorious-4",
+          "titleEs": "La Asunción de María",
+          "scriptureEs": "Apocalipsis 12, 1\n\nApareció en el cielo una gran señal: una mujer vestida del sol, con la luna bajo sus pies y una corona de doce estrellas sobre su cabeza."
+        },
+        {
+          "id": "glorious-5",
+          "titleEs": "La Coronación de María",
+          "scriptureEs": "Apocalipsis 12, 1\n\nApareció en el cielo una gran señal: una mujer vestida del sol, con la luna bajo sus pies y una corona de doce estrellas sobre su cabeza."
+        }
+      ]
+    }
+  ]
+}

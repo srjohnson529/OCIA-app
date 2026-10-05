@@ -30,11 +30,11 @@ struct InstructorAssignmentsView: View {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 16) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Assignments", systemImage: "checklist")
+                                Label(IlluminedL10n.string("Assignments"), systemImage: "checklist")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Post readings, lesson work, and preparation tasks for students.")
+                                Text(IlluminedL10n.string("Post readings, lesson work, and preparation tasks for students."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -43,7 +43,7 @@ struct InstructorAssignmentsView: View {
                             Button {
                                 isShowingEditor = true
                             } label: {
-                                Label("New Assignment", systemImage: "plus.circle.fill")
+                                Label(IlluminedL10n.string("New Assignment"), systemImage: "plus.circle.fill")
                                     .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -64,7 +64,7 @@ struct InstructorAssignmentsView: View {
                             ContentUnavailableView(
                                 "No Assignments",
                                 systemImage: "checklist",
-                                description: Text("Create your first assignment for this class.")
+                                description: Text(IlluminedL10n.string("Create your first assignment for this class."))
                             )
                         }
                     } else {
@@ -137,14 +137,14 @@ struct InstructorAssignmentsView: View {
                 }
             }
         )) {
-            Button("OK", role: .cancel) {
+            Button(IlluminedL10n.string("OK"), role: .cancel) {
                 assignmentService.errorMessage = nil
                 completionService.errorMessage = nil
                 progressService.errorMessage = nil
                 scheduleService.errorMessage = nil
             }
         } message: {
-            Text(assignmentService.errorMessage ?? completionService.errorMessage ?? progressService.errorMessage ?? scheduleService.errorMessage ?? "")
+            Text(IlluminedL10n.string(assignmentService.errorMessage ?? completionService.errorMessage ?? progressService.errorMessage ?? scheduleService.errorMessage ?? ""))
         }
     }
 }
@@ -196,7 +196,7 @@ private struct InstructorAssignmentCard: View {
                             .foregroundStyle(IlluminedTheme.ink)
                             .lineLimit(2)
 
-                        Text("Due \(Self.dateFormatter.string(from: assignment.dueDate))")
+                        Text(IlluminedL10n.format("Due %@", Self.dateFormatter.string(from: assignment.dueDate)))
                             .font(IlluminedTheme.font(size: 13, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
                     }
@@ -218,7 +218,7 @@ private struct InstructorAssignmentCard: View {
                         }
 
                         if assignment.linkedLessons.count > 3 {
-                            Text("+ \(assignment.linkedLessons.count - 3) more lessons")
+                            Text(IlluminedL10n.format("+ %d more lessons", assignment.linkedLessons.count - 3))
                                 .font(IlluminedTheme.font(size: 12, weight: .semibold))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                         }
@@ -226,7 +226,7 @@ private struct InstructorAssignmentCard: View {
                 }
 
                 if assignment.hasAssignedReading {
-                    Label("\(assignment.assignedReadings.count) reading\(assignment.assignedReadings.count == 1 ? "" : "s")", systemImage: "doc.text")
+                    Label(IlluminedL10n.count(assignment.assignedReadings.count, singular: "%d reading", plural: "%d readings"), systemImage: "doc.text")
                         .font(IlluminedTheme.font(size: 13))
                         .foregroundStyle(IlluminedTheme.gold)
                         .lineLimit(1)
@@ -240,13 +240,13 @@ private struct InstructorAssignmentCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Text(assignment.isActive ? "Visible to students" : "Hidden from students")
+                Text(IlluminedL10n.string(assignment.isActive ? "Visible to students" : "Hidden from students"))
                     .font(IlluminedTheme.font(size: 11, weight: .semibold))
                     .foregroundStyle(assignment.isActive ? IlluminedTheme.blue : IlluminedTheme.secondaryText)
 
                 VStack(alignment: .leading, spacing: 7) {
                     HStack {
-                        Text("Completed")
+                        Text(IlluminedL10n.string("Completed"))
                             .font(IlluminedTheme.font(size: 12, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                         Spacer()
@@ -259,7 +259,7 @@ private struct InstructorAssignmentCard: View {
                         .tint(IlluminedTheme.gold)
 
                     if !incompleteStudentNames.isEmpty {
-                        Text("Still waiting on \(incompleteStudentNames.prefix(3).joined(separator: ", "))")
+                        Text(IlluminedL10n.format("Still waiting on %@", incompleteStudentNames.prefix(3).joined(separator: ", ")))
                             .font(IlluminedTheme.font(size: 12))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                             .lineLimit(2)
@@ -321,7 +321,7 @@ private struct AssignmentReadinessCard: View {
                         .foregroundStyle(isClassTomorrow ? IlluminedTheme.gold : IlluminedTheme.blue)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(isClassTomorrow ? "Tomorrow's Class Readiness" : "Next Class Readiness")
+                        Text(IlluminedL10n.string(isClassTomorrow ? "Tomorrow's Class Readiness" : "Next Class Readiness"))
                             .font(IlluminedTheme.font(size: 18, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
 
@@ -330,7 +330,7 @@ private struct AssignmentReadinessCard: View {
                                 .font(IlluminedTheme.font(size: 13))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                         } else {
-                            Text("Add a class schedule item to activate readiness tracking.")
+                            Text(IlluminedL10n.string("Add a class schedule item to activate readiness tracking."))
                                 .font(IlluminedTheme.font(size: 13))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                         }
@@ -338,16 +338,16 @@ private struct AssignmentReadinessCard: View {
                 }
 
                 if totalNeeded == 0 {
-                    Text("No assignments are due before the next class yet.")
+                                Text(IlluminedL10n.string("No assignments are due before the next class yet."))
                         .font(IlluminedTheme.font(size: 14))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 } else {
                     HStack {
-                        Text("\(readinessPercent)% ready")
+                        Text(IlluminedL10n.format("%d%% ready", readinessPercent))
                             .font(IlluminedTheme.font(size: 22, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
                         Spacer()
-                        Text("\(completedCount)/\(totalNeeded) checks")
+                        Text(IlluminedL10n.format("%d/%d checks", completedCount, totalNeeded))
                             .font(IlluminedTheme.font(size: 13, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
@@ -356,7 +356,7 @@ private struct AssignmentReadinessCard: View {
                         .tint(readinessPercent >= 80 ? IlluminedTheme.blue : IlluminedTheme.gold)
 
                     if isClassTomorrow && readinessPercent < 80 {
-                        Text("Readiness alert: follow up with students who still have assignments unchecked.")
+                                Text(IlluminedL10n.string("Readiness alert: follow up with students who still have assignments unchecked."))
                             .font(IlluminedTheme.font(size: 13, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.gold)
                     }
@@ -449,7 +449,7 @@ private struct AssignmentEditorView: View {
 
                                 IlluminedTextField(title: "Title", text: $title, autocapitalization: .sentences)
 
-                                TextField("", text: $instructions, prompt: Text("Instructions").foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
+                                TextField("", text: $instructions, prompt: Text(IlluminedL10n.string("Instructions")).foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
                                     .font(IlluminedTheme.font(size: 17))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -464,7 +464,7 @@ private struct AssignmentEditorView: View {
 
                                 Divider()
 
-                                Text("Optional Lesson Links")
+                                Text(IlluminedL10n.string("Optional Lesson Links"))
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -478,11 +478,11 @@ private struct AssignmentEditorView: View {
                                 } else {
                                     VStack(alignment: .leading, spacing: 10) {
                                         if selectedLessonIds.isEmpty {
-                                            Text("No linked lessons selected.")
+                                    Text(IlluminedL10n.string("No linked lessons selected."))
                                                 .font(IlluminedTheme.font(size: 13))
                                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                         } else {
-                                            Text("\(selectedLessonIds.count) lesson\(selectedLessonIds.count == 1 ? "" : "s") selected")
+                                            Text(IlluminedL10n.count(selectedLessonIds.count, singular: "%d lesson selected", plural: "%d lessons selected"))
                                                 .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                                 .foregroundStyle(IlluminedTheme.blue)
                                         }
@@ -502,16 +502,16 @@ private struct AssignmentEditorView: View {
 
                                 Divider()
 
-                                Text("Optional Assigned Readings")
+                                Text(IlluminedL10n.string("Optional Assigned Readings"))
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
-                                Text("Add one or more readings when you want students to open and complete text-based assignments.")
+                                Text(IlluminedL10n.string("Add one or more readings when you want students to open and complete text-based assignments."))
                                     .font(IlluminedTheme.font(size: 13))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
 
                                 if readings.isEmpty {
-                                    Text("No readings added.")
+                                    Text(IlluminedL10n.string("No readings added."))
                                         .font(IlluminedTheme.font(size: 13))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                 } else {
@@ -525,13 +525,13 @@ private struct AssignmentEditorView: View {
                                 Button {
                                     addReading()
                                 } label: {
-                                    Label("Add Reading", systemImage: "plus.circle.fill")
+                                    Label(IlluminedL10n.string("Add Reading"), systemImage: "plus.circle.fill")
                                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(IlluminedSecondaryButtonStyle())
 
-                                Toggle("Visible to Students", isOn: $isActive)
+                                Toggle(IlluminedL10n.string("Visible to Students"), isOn: $isActive)
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -541,7 +541,7 @@ private struct AssignmentEditorView: View {
                         Button {
                             save()
                         } label: {
-                            Text(isSaving ? "Saving..." : "Save Assignment")
+                            Text(IlluminedL10n.string(isSaving ? "Saving..." : "Save Assignment"))
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
@@ -552,7 +552,7 @@ private struct AssignmentEditorView: View {
                             Button(role: .destructive) {
                                 isConfirmingDelete = true
                             } label: {
-                                Label("Delete Assignment", systemImage: "trash")
+                                Label(IlluminedL10n.string("Delete Assignment"), systemImage: "trash")
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -567,17 +567,17 @@ private struct AssignmentEditorView: View {
             .illuminedNavigation()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(IlluminedL10n.string("Cancel")) {
                         isPresented = false
                     }
                     .disabled(isSaving)
                 }
             }
-            .confirmationDialog("Delete this assignment?", isPresented: $isConfirmingDelete, titleVisibility: .visible) {
-                Button("Delete", role: .destructive) {
+            .confirmationDialog(IlluminedL10n.string("Delete this assignment?"), isPresented: $isConfirmingDelete, titleVisibility: .visible) {
+                Button(IlluminedL10n.string("Delete"), role: .destructive) {
                     deleteAssignment()
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(IlluminedL10n.string("Cancel"), role: .cancel) {}
             }
             .task {
                 lessonService.loadLessons()
@@ -673,7 +673,7 @@ private struct AssignmentReadingEditorCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label("Reading", systemImage: "doc.text")
+                            Label(IlluminedL10n.string("Reading"), systemImage: "doc.text")
                     .font(IlluminedTheme.font(size: 14, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.blue)
 
@@ -688,7 +688,7 @@ private struct AssignmentReadingEditorCard: View {
 
             IlluminedTextField(title: "Reading Title", text: $reading.title, autocapitalization: .sentences)
 
-            TextField("", text: $reading.text, prompt: Text("Paste full reading text").foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
+                        TextField("", text: $reading.text, prompt: Text(IlluminedL10n.string("Paste full reading text")).foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
                 .font(IlluminedTheme.font(size: 17))
                 .foregroundStyle(IlluminedTheme.ink)
                 .tint(IlluminedTheme.blue)
@@ -729,7 +729,9 @@ private struct LessonCategoryPickerSection: View {
                             .font(IlluminedTheme.font(size: 15, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
 
-                        Text(selectedCount == 0 ? "\(category.lessons.count) lessons" : "\(selectedCount) of \(category.lessons.count) selected")
+                        Text(selectedCount == 0
+                            ? IlluminedL10n.count(category.lessons.count, singular: "%d lesson", plural: "%d lessons")
+                            : IlluminedL10n.format("%d of %d selected", selectedCount, category.lessons.count))
                             .font(IlluminedTheme.font(size: 12))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }

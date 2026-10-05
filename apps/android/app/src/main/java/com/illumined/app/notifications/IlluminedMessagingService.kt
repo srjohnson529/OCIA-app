@@ -41,9 +41,15 @@ class IlluminedMessagingService : FirebaseMessagingService() {
         IlluminedNotificationChannel.create(this)
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         val opensDailyFormation = message.data["type"] == "daily_formation"
-        val openApp = PendingIntent.getActivity(this, if (opensDailyFormation) 41 else 0, Intent(this, MainActivity::class.java).apply {
+        val openApp = PendingIntent.getActivity(this, (message.messageId ?: message.data.toString()).hashCode(), Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra("openDailyFormation", opensDailyFormation)
+            message.data.forEach { (key, value) -> putExtra(key, value) }
+            if (opensDailyFormation) {
+                putExtra("type", "daily_formation")
+                message.data["classId"]?.let { putExtra("classId", it) }
+                message.data["date"]?.let { putExtra("date", it) }
+            }
         }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val builder = NotificationCompat.Builder(this, NotificationChannelPolicy.ID)
             .setSmallIcon(R.drawable.ic_notification)

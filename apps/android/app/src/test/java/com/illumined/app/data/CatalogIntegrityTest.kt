@@ -22,14 +22,14 @@ class CatalogIntegrityTest {
 
     @Test fun lessonCatalogMatchesIosInventory() {
         val lessons = raw("lessons")
-        // Each lesson and each quiz question has an ID: 73 + 805.
-        assertEquals(878, count("\\\"id\\\"\\s*:", lessons))
+        // English and Spanish questions both carry IDs: 73 + (805 * 2).
+        assertEquals(1683, count("\\\"id\\\"\\s*:", lessons))
         assertEquals(73, count("\\\"title\\\"\\s*:", lessons))
         assertEquals(32, count("\\\"category\\\"\\s*:\\s*\\\"Profession of Faith\\\"", lessons))
         assertEquals(12, count("\\\"category\\\"\\s*:\\s*\\\"Celebration of the Christian Mysteries\\\"", lessons))
         assertEquals(24, count("\\\"category\\\"\\s*:\\s*\\\"Life in Christ\\\"", lessons))
         assertEquals(5, count("\\\"category\\\"\\s*:\\s*\\\"Christian Prayer\\\"", lessons))
-        assertEquals(805, count("\\\"question\\\"\\s*:", lessons))
+        assertEquals(1610, count("\\\"question\\\"\\s*:", lessons))
         assertTrue(lessons.contains("\"lessons\""))
     }
 

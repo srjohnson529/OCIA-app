@@ -35,8 +35,9 @@ import java.text.DateFormat
 import java.util.Date
 
 @Composable
-fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
+fun NotificationSettingsExperience(profile: UserProfile?, embedded: Boolean = false, onBack: () -> Unit) {
     val context = LocalContext.current; val registrar = remember { NotificationRegistrar() }
+    val spanish = java.util.Locale.getDefault().language == "es"
     val lifecycleOwner = LocalLifecycleOwner.current
     val preferences = remember { context.getSharedPreferences("illumined_notification_settings", android.content.Context.MODE_PRIVATE) }
     val runtimePermissionRequired = Build.VERSION.SDK_INT >= 33
@@ -55,13 +56,14 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
         val registeredAt = Date()
         working = false; enabled = true; savedAt = registeredAt
         preferences.edit().putLong("last_registered_at", registeredAt.time).apply()
-        status = "Notifications are ready for ${profile?.selectedClassId?.ifBlank { "your class" } ?: "your class"}."
-    }, { working = false; error = "Notification registration could not be saved." }) }
+        val className = profile?.selectedClassId?.ifBlank { if (spanish) "tu clase" else "your class" } ?: if (spanish) "tu clase" else "your class"
+        status = if (spanish) "Las notificaciones están listas para $className." else "Notifications are ready for $className."
+    }, { working = false; error = if (spanish) "No se pudo guardar el registro de notificaciones." else "Notification registration could not be saved." }) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         permissionRequested = true
         preferences.edit().putBoolean("permission_requested", true).apply()
         enabled = granted && notificationsEnabled()
-        if (granted) register() else status = "Notifications are off. You can turn them on later in Android Settings."
+        if (granted) register() else status = if (spanish) "Las notificaciones están desactivadas. Puedes activarlas más tarde en Configuración de Android." else "Notifications are off. You can turn them on later in Android Settings."
     }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) enabled = notificationsEnabled() }
@@ -71,21 +73,21 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
     LaunchedEffect(enabled, profile) {
         val current = profile ?: return@LaunchedEffect
         val allMatch = listOf(current.notificationsEnabled, current.notificationNewPrayerRequests, current.notificationNewAssignments, current.notificationAssignmentReminders, current.notificationDiscussionReplies, current.notificationDailyFormation).all { it == enabled }
-        if (!allMatch) registrar.updateAllPreferences(enabled, error = { error = "Notification status could not be synchronized." })
+        if (!allMatch) registrar.updateAllPreferences(enabled, error = { error = if (spanish) "No se pudo sincronizar el estado de las notificaciones." else "Notification status could not be synchronized." })
     }
-    Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f))) {
-        NotificationPageHeading(onBack)
-        Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+    Column(if (embedded) Modifier.fillMaxWidth() else Modifier.fillMaxSize().background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f))) {
+        if (!embedded) NotificationPageHeading(onBack)
+        Column(if (embedded) Modifier.fillMaxWidth() else Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Surface(shape = RoundedCornerShape(16.dp), color = Color.White.copy(.94f), shadowElevation = 6.dp, border = BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.22f))) { Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 MoreMenuSymbol(MoreMenuSymbolKind.Notifications, IlluminedThemeTokens.Blue, Modifier.size(24.dp))
-                Text("Notifications", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                Text(if (spanish) "Notificaciones" else "Notifications", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
             }
-            Text("Receive alerts for class announcements, assignments, prayer requests, discussion activity, and Daily Formation. All alert types follow the notification status shown below.", color = IlluminedThemeTokens.SecondaryText)
-            Row { Text("Status", fontSize = 17.sp, fontWeight = FontWeight.SemiBold); Spacer(Modifier.weight(1f)); Text(NotificationPermissionPolicy.statusText(enabled, permissionRequested), color = if (enabled) IlluminedThemeTokens.Blue else IlluminedThemeTokens.SecondaryText, fontWeight = FontWeight.SemiBold) }
-            savedAt?.let { Text("Last registered ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(it)}.", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText) }
+            Text(if (spanish) "Recibe alertas de anuncios, tareas, peticiones de oración, actividad de discusión, mensajes de clase y privados, respuestas, reacciones y Formación diaria. Todos los tipos de alerta siguen el estado de notificaciones que aparece abajo." else "Receive alerts for class announcements, assignments, prayer requests, discussion activity, classroom and private messages, replies, reactions, and Daily Formation. All alert types follow the notification status shown below.", color = IlluminedThemeTokens.SecondaryText)
+            Row { Text(if (spanish) "Estado" else "Status", fontSize = 17.sp, fontWeight = FontWeight.SemiBold); Spacer(Modifier.weight(1f)); Text(if (spanish) when (NotificationPermissionPolicy.statusText(enabled, permissionRequested)) { "Enabled" -> "Activadas"; "Off" -> "Desactivadas"; else -> "Sin configurar" } else NotificationPermissionPolicy.statusText(enabled, permissionRequested), color = if (enabled) IlluminedThemeTokens.Blue else IlluminedThemeTokens.SecondaryText, fontWeight = FontWeight.SemiBold) }
+            savedAt?.let { Text(if (spanish) "Último registro: ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(it)}." else "Last registered ${DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(it)}.", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText) }
         } }
-        status?.let { Text(it, Modifier.padding(horizontal = 4.dp), color = IlluminedThemeTokens.Blue, fontSize = 15.sp) }; error?.let { Text(it, Modifier.padding(horizontal = 4.dp), color = Color.Red, fontSize = 15.sp) }
+        status?.let { Text(it, Modifier.padding(horizontal = 4.dp), color = IlluminedThemeTokens.Blue, fontSize = 15.sp) }; error?.let { Text(localizedUserMessage(it), Modifier.padding(horizontal = 4.dp), color = Color.Red, fontSize = 15.sp) }
         Button(onClick = {
             error = null; status = null
             when {
@@ -93,8 +95,8 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
                 runtimePermissionRequired && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED -> launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 else -> register()
             }
-        }, enabled = profile != null && !working, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text(if (working) "Setting Up…" else if (requiresSettings) "Open Android Settings" else if (enabled) "Refresh Notification Setup" else "Turn On Notifications", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
-        if (enabled) OutlinedButton(onClick = ::openSettings, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text("Manage in Android Settings", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
+        }, enabled = profile != null && !working, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text(if (working) (if (spanish) "Configurando…" else "Setting Up…") else if (requiresSettings) (if (spanish) "Abrir Configuración de Android" else "Open Android Settings") else if (enabled) (if (spanish) "Actualizar configuración de notificaciones" else "Refresh Notification Setup") else (if (spanish) "Activar notificaciones" else "Turn On Notifications"), fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
+        if (enabled) OutlinedButton(onClick = ::openSettings, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp)) { Text(if (spanish) "Administrar en Configuración de Android" else "Manage in Android Settings", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) }
         }
     }
 }
@@ -102,7 +104,8 @@ fun NotificationSettingsExperience(profile: UserProfile?, onBack: () -> Unit) {
 @Composable
 private fun NotificationPageHeading(onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-        TextButton(onClick = onBack) { Text("‹ Back") }
-        Text("Notifications", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+        val spanish = java.util.Locale.getDefault().language == "es"
+        TextButton(onClick = onBack) { Text(if (spanish) "‹ Volver" else "‹ Back") }
+        Text(if (spanish) "Notificaciones" else "Notifications", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
     }
 }

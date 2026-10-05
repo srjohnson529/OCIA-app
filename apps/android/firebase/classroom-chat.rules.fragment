@@ -1,0 +1,37 @@
+    function existingChatMember(classId) {
+      let p = userProfile();
+      return signedIn() && classId in p.get('classIds', []) &&
+        !(classId in p.get('removedClassIds', [])) &&
+        !(classId in p.get('inactiveClassIds', [])) &&
+        !(classId in p.get('archivedClassIds', [])) &&
+        (!exists(/databases/$(database)/documents/classrooms/$(classId)) ||
+         get(/databases/$(database)/documents/classrooms/$(classId)).data.get('isArchived', false) == false);
+    }
+    function validChatReaction() {
+      let before = resource.data.get('reactions', {});
+      let after = request.resource.data.get('reactions', {});
+      return after is map &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']) &&
+        after.diff(before).affectedKeys().hasOnly([request.auth.uid]) &&
+        (!(request.auth.uid in after) || after[request.auth.uid] in ['🙏','❤️','👍']);
+    }
+    match /chatMessages/{messageId} {
+      allow read: if canReadClass(resource.data.classId);
+      allow create: if signedIn() &&
+        request.resource.data.senderId == request.auth.uid &&
+        existingChatMember(request.resource.data.classId) && inboxName(request.resource.data.senderName) &&
+        request.resource.data.keys().hasOnly(['classId','senderId','senderName','senderEmail','message','timestamp','replyTo']) &&
+        request.resource.data.message is string && request.resource.data.message.size() > 0 &&
+        request.resource.data.message.size() <= 4000 && request.resource.data.timestamp == request.time &&
+        (!('replyTo' in request.resource.data) ||
+          (request.resource.data.replyTo is string &&
+           get(/databases/$(database)/documents/chatMessages/$(request.resource.data.replyTo)).data.classId == request.resource.data.classId));
+      allow update: if signedIn() && existingChatMember(resource.data.classId) &&
+        (validChatReaction() ||
+          (resource.data.senderId == request.auth.uid &&
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message','editedAt']) &&
+           request.resource.data.message is string && request.resource.data.message.size() > 0 &&
+           request.resource.data.message.size() <= 4000 && request.resource.data.editedAt == request.time));
+      allow delete: if signedIn() && existingChatMember(resource.data.classId) &&
+        (resource.data.senderId == request.auth.uid || userProfile().get('isInstructor', false) == true);
+    }

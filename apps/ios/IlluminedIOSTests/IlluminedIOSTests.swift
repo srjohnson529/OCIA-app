@@ -80,7 +80,10 @@ struct IlluminedIOSTests {
     @Test func inviteLinksRoundTripAndRejectMissingPrivilegedCodes() throws {
         let instructor = IlluminedInviteLink(role: .instructor, classId: "OCIA", code: "ABCD-2345")
         #expect(IlluminedInviteLink.parse(instructor.url) == instructor)
-        #expect(IlluminedInviteLink.parse(URL(string: "illumined://join?role=student&classId=OCIA")!)?.role == .student)
+        let student = IlluminedInviteLink(role: .student, classId: "", code: "ABC2345678")
+        #expect(IlluminedInviteLink.parse(student.url) == student)
+        #expect(IlluminedInviteLink.parse(URL(string: "illumined://join?role=student&classId=OCIA")!) == nil)
+        #expect(IlluminedInviteLink.parse(URL(string: "illumined://join?role=instructor&code=ABCD-2345")!) == nil)
         #expect(IlluminedInviteLink.parse(URL(string: "https://illumined.net/join?role=instructor&classId=OCIA&code=ABCD-2345")!) == instructor)
         #expect(IlluminedInviteLink.parse(URL(string: "illumined://join?role=instructor&classId=OCIA")!) == nil)
         #expect(IlluminedInviteLink.parse(URL(string: "illumined://join?role=parish")!) == nil)

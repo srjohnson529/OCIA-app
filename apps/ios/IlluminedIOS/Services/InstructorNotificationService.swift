@@ -46,7 +46,11 @@ final class InstructorNotificationService: ObservableObject {
                 "isActive": true
             ])
             let recipients = (result.data as? [String: Any])?["recipientCount"] as? Int ?? 0
-            statusMessage = "Announcement sent to \(recipients) device\(recipients == 1 ? "" : "s")."
+            statusMessage = IlluminedL10n.count(
+                recipients,
+                singular: "Announcement sent to %d device.",
+                plural: "Announcement sent to %d devices."
+            )
             return true
         } catch {
             errorMessage = error.localizedDescription

@@ -15,11 +15,11 @@ struct InstructorAnnouncementsView: View {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 16) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Announcements", systemImage: "megaphone")
+                                Label(IlluminedL10n.string("Announcements"), systemImage: "megaphone")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Create updates that appear on the student dashboard.")
+                                Text(IlluminedL10n.string("Create updates that appear on the student dashboard."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -28,7 +28,7 @@ struct InstructorAnnouncementsView: View {
                             Button {
                                 isShowingComposer = true
                             } label: {
-                                Label("New Announcement", systemImage: "plus.circle.fill")
+                                Label(IlluminedL10n.string("New Announcement"), systemImage: "plus.circle.fill")
                                     .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -40,9 +40,9 @@ struct InstructorAnnouncementsView: View {
                     if announcementService.announcements.isEmpty {
                         IlluminedCard {
                             ContentUnavailableView(
-                                "No Announcements",
+                                IlluminedL10n.string("No Announcements"),
                                 systemImage: "megaphone",
-                                description: Text("Create your first announcement for this class.")
+                                description: Text(IlluminedL10n.string("Create your first announcement for this class."))
                             )
                         }
                     } else {
@@ -89,13 +89,13 @@ struct InstructorAnnouncementsView: View {
                 )
             )
         }
-        .alert("Announcement Error", isPresented: Binding(
+        .alert(IlluminedL10n.string("Announcement Error"), isPresented: Binding(
             get: { announcementService.errorMessage != nil },
             set: { if !$0 { announcementService.errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { announcementService.errorMessage = nil }
+            Button(IlluminedL10n.string("OK"), role: .cancel) { announcementService.errorMessage = nil }
         } message: {
-            Text(announcementService.errorMessage ?? "")
+            Text(IlluminedL10n.string(announcementService.errorMessage ?? ""))
         }
     }
 }
@@ -124,7 +124,7 @@ private struct InstructorAnnouncementCard: View {
                             .foregroundStyle(IlluminedTheme.ink)
                             .lineLimit(2)
 
-                        Text(announcement.isActive ? "Active" : "Hidden")
+                        Text(IlluminedL10n.string(announcement.isActive ? "Active" : "Hidden"))
                             .font(IlluminedTheme.font(size: 12, weight: .semibold))
                             .foregroundStyle(announcement.isActive ? IlluminedTheme.blue : IlluminedTheme.secondaryText)
                     }
@@ -142,7 +142,7 @@ private struct InstructorAnnouncementCard: View {
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("Updated \(Self.dateFormatter.string(from: announcement.updatedDate))")
+                Text(IlluminedL10n.format("Updated %@", Self.dateFormatter.string(from: announcement.updatedDate)))
                     .font(IlluminedTheme.font(size: 11))
                     .foregroundStyle(IlluminedTheme.secondaryText)
             }
@@ -171,9 +171,9 @@ private struct AnnouncementEditorView: View {
     private var screenTitle: String {
         switch mode {
         case .create:
-            return "New Announcement"
+            return IlluminedL10n.string("New Announcement")
         case .edit:
-            return "Edit Announcement"
+            return IlluminedL10n.string("Edit Announcement")
         }
     }
 
@@ -207,9 +207,9 @@ private struct AnnouncementEditorView: View {
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                IlluminedTextField(title: "Title", text: $title, autocapitalization: .sentences)
+                                IlluminedTextField(title: IlluminedL10n.string("Title"), text: $title, autocapitalization: .sentences)
 
-                                TextField("", text: $message, prompt: Text("Message").foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
+                                TextField("", text: $message, prompt: Text(IlluminedL10n.string("Message")).foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
                                     .font(IlluminedTheme.font(size: 17))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -222,7 +222,7 @@ private struct AnnouncementEditorView: View {
                                             .stroke(IlluminedTheme.gold.opacity(0.22), lineWidth: 1)
                                     )
 
-                                Toggle("Visible to Students", isOn: $isActive)
+                                Toggle(IlluminedL10n.string("Visible to Students"), isOn: $isActive)
                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -231,11 +231,11 @@ private struct AnnouncementEditorView: View {
                                     VStack(alignment: .leading, spacing: 6) {
                                         Toggle(isOn: $sendPushNotification) {
                                             VStack(alignment: .leading, spacing: 3) {
-                                                Text("Send push notification")
+                                                Text(IlluminedL10n.string("Send push notification"))
                                                     .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                                     .foregroundStyle(IlluminedTheme.ink)
 
-                                                Text("Alert class members who have notifications enabled.")
+                                                Text(IlluminedL10n.string("Alert class members who have notifications enabled."))
                                                     .font(IlluminedTheme.font(size: 13))
                                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                             }
@@ -244,7 +244,7 @@ private struct AnnouncementEditorView: View {
                                         .disabled(!isActive)
 
                                         if !isActive && sendPushNotification {
-                                            Text("Make the announcement visible before sending it as a push notification.")
+                                            Text(IlluminedL10n.string("Make the announcement visible before sending it as a push notification."))
                                                 .font(IlluminedTheme.font(size: 12))
                                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                         }
@@ -255,7 +255,7 @@ private struct AnnouncementEditorView: View {
 
                         if let statusMessage = notificationService.statusMessage {
                             IlluminedCard {
-                                Label(statusMessage, systemImage: "checkmark.circle")
+                                Label(IlluminedL10n.string(statusMessage), systemImage: "checkmark.circle")
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.blue)
                             }
@@ -263,7 +263,7 @@ private struct AnnouncementEditorView: View {
 
                         if let errorMessage = notificationService.errorMessage {
                             IlluminedCard {
-                                Label(errorMessage, systemImage: "exclamationmark.triangle")
+                                Label(IlluminedL10n.string(errorMessage), systemImage: "exclamationmark.triangle")
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(.red)
                             }
@@ -272,7 +272,7 @@ private struct AnnouncementEditorView: View {
                         Button {
                             save()
                         } label: {
-                            Text(isSaving ? "Saving..." : "Save Announcement")
+                            Text(IlluminedL10n.string(isSaving ? "Saving..." : "Save Announcement"))
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
@@ -283,7 +283,7 @@ private struct AnnouncementEditorView: View {
                             Button(role: .destructive) {
                                 isConfirmingDelete = true
                             } label: {
-                                Label("Delete Announcement", systemImage: "trash")
+                                Label(IlluminedL10n.string("Delete Announcement"), systemImage: "trash")
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -298,17 +298,17 @@ private struct AnnouncementEditorView: View {
             .illuminedNavigation()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(IlluminedL10n.string("Cancel")) {
                         isPresented = false
                     }
                     .disabled(isSaving)
                 }
             }
-            .confirmationDialog("Delete this announcement?", isPresented: $isConfirmingDelete, titleVisibility: .visible) {
-                Button("Delete", role: .destructive) {
+            .confirmationDialog(IlluminedL10n.string("Delete this announcement?"), isPresented: $isConfirmingDelete, titleVisibility: .visible) {
+                Button(IlluminedL10n.string("Delete"), role: .destructive) {
                     deleteAnnouncement()
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(IlluminedL10n.string("Cancel"), role: .cancel) {}
             }
             .onChange(of: isActive) { _, newValue in
                 if !newValue {

@@ -1,27 +1,66 @@
 import Combine
 import CoreImage.CIFilterBuiltins
 import FirebaseFirestore
+import FirebaseFunctions
 import SwiftUI
+
+private struct ClassroomManagementRow: View {
+    let title: String
+    let symbol: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(IlluminedTheme.gold)
+                .frame(width: 32, height: 32)
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.custom(IlluminedTheme.fontName, size: 17, relativeTo: .body).weight(.semibold))
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .accessibilityHidden(true)
+        }
+        .foregroundStyle(IlluminedTheme.blue)
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 56)
+        .background(IlluminedTheme.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(IlluminedTheme.gold.opacity(0.22), lineWidth: 1))
+        .contentShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .combine)
+    }
+}
 import UIKit
 import UniformTypeIdentifiers
 
 struct InstructorDashboardView: View {
     @EnvironmentObject private var profileService: ProfileService
+    @EnvironmentObject private var walkthrough: InstructorWalkthrough
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         NavigationStack {
             ZStack {
                 IlluminedBackground()
 
+                ScrollViewReader { reader in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 10) {
-                                Label("Instructor Tools", systemImage: "person.text.rectangle")
+                                Label(IlluminedL10n.string("Instructor Tools"), systemImage: "person.text.rectangle")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Manage class content for \(profileService.profile?.primaryClassId.isEmpty == false ? profileService.profile?.primaryClassId ?? "your class" : "your class").")
+                                Text(IlluminedL10n.format(
+                                    "Manage class content for %@.",
+                                    profileService.profile?.primaryClassId.isEmpty == false
+                                        ? profileService.profile?.primaryClassId ?? IlluminedL10n.string("your class")
+                                        : IlluminedL10n.string("your class")
+                                ))
                                     .font(IlluminedTheme.font(size: 16))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .lineSpacing(4)
@@ -29,7 +68,17 @@ struct InstructorDashboardView: View {
                             }
                         }
 
+                        .walkthroughAnchor("tools-overview")
+                        .id("tools-overview")
+
                         VStack(spacing: 14) {
+                            if let profile = profileService.profile, profile.isInstructor, walkthrough.showsToolEntry {
+                                Button { NotificationCenter.default.post(name:InstructorWalkthrough.replay,object:nil) } label: {
+                                    InstructorToolCard(title:Locale.current.language.languageCode?.identifier == "es" ? "Explora Illumined" : "Explore Illumined", subtitle:Locale.current.language.languageCode?.identifier == "es" ? "Recorre las páginas y tarjetas de tu aula." : "Walk through your classroom’s pages and cards.", systemImage:"play.rectangle", status:Locale.current.language.languageCode?.identifier == "es" ? "Explorar" : "Explore")
+                                }.buttonStyle(.plain)
+                                .walkthroughAnchor("tools-explore")
+                                .id("tools-explore")
+                            }
                             NavigationLink {
                                 InstructorAnnouncementsView()
                             } label: {
@@ -41,6 +90,8 @@ struct InstructorDashboardView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-announcements")
+                            .id("tools-announcements")
 
                             NavigationLink {
                                 InstructorAssignmentsView()
@@ -53,30 +104,38 @@ struct InstructorDashboardView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-assignments")
+                            .id("tools-assignments")
 
                             NavigationLink {
                                 InstructorDiscussionPromptsView()
                             } label: {
                                 InstructorToolCard(
                                     title: "Discussion Boards",
-                                    subtitle: "Create lesson-linked discussion prompts.",
+                                    subtitle: "Create assignment-linked discussion prompts.",
                                     systemImage: "text.bubble",
                                     status: "Open"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-discussions")
+                            .id("tools-discussions")
 
+                            if walkthrough.active {
                             NavigationLink {
                                 InstructorStudentProgressView()
                             } label: {
                                 InstructorToolCard(
-                                    title: "Student Progress",
-                                    subtitle: "Review lesson completion by student.",
+                                    title: "Student Details",
+                                    subtitle: "Review progress and manage your classroom roster.",
                                     systemImage: "chart.bar",
                                     status: "Open"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-students")
+                            .id("tools-students")
+                            }
 
                             NavigationLink {
                                 InstructorClassScheduleView()
@@ -89,6 +148,8 @@ struct InstructorDashboardView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-schedule")
+                            .id("tools-schedule")
 
                             NavigationLink {
                                 InstructorDailyFormationView()
@@ -101,44 +162,91 @@ struct InstructorDashboardView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-daily")
+                            .id("tools-daily")
+
+                            NavigationLink {
+                                InstructorRitePreparationView()
+                            } label: {
+                                InstructorToolCard(
+                                    title: Locale.current.language.languageCode?.identifier == "es" ? "Preparación para ritos y sacramentos" : "Rite and Sacrament Preparation",
+                                    subtitle: Locale.current.language.languageCode?.identifier == "es" ? "Publica guías y revisa las confirmaciones de lectura." : "Publish preparation guides and review acknowledgments.",
+                                    systemImage: "calendar.badge.clock",
+                                    status: "Open"
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-guides")
+                            .id("tools-guides")
 
                             NavigationLink {
                                 InstructorClassesView()
                             } label: {
                                 InstructorToolCard(
-                                    title: "Classes",
+                                    title: "Classroom Management",
                                     subtitle: "Create, switch, archive, and restore your classes.",
                                     systemImage: "person.3",
                                     status: "Open"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-classes")
+                            .id("tools-classes")
 
+                            if walkthrough.active {
                             NavigationLink {
                                 InstructorInviteCodesView()
                             } label: {
                                 InstructorToolCard(
-                                    title: "Instructor Invites",
-                                    subtitle: "Create one-use codes for new instructors.",
+                                    title: "Classroom Codes",
+                                    subtitle: "Manage invitation codes for students and instructors.",
                                     systemImage: "key",
                                     status: "Open"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-codes")
+                            .id("tools-codes")
+                            }
+
+                            NavigationLink {
+                                InstructorUpdatesView()
+                            } label: {
+                                InstructorToolCard(
+                                    title: Locale.current.language.languageCode?.identifier == "es" ? "De Illumined" : "From Illumined",
+                                    subtitle: Locale.current.language.languageCode?.identifier == "es" ? "Noticias e información de Illumined." : "App news and information from Illumined.",
+                                    systemImage: "bell.badge",
+                                    status: "Open"
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .walkthroughAnchor("tools-updates")
+                            .id("tools-updates")
                         }
                     }
                     .padding()
                 }
+                .walkthroughAnchor("viewport-more")
+                .task(id: walkthrough.target) {
+                    guard walkthrough.active, walkthrough.screen == "instructor-tools" else { return }
+                    await Task.yield()
+                    guard !Task.isCancelled else { return }
+                    withAnimation(walkthrough.animatesStep && !reduceMotion
+                                  ? .easeInOut(duration: InstructorWalkthrough.movementDuration) : nil) {
+                        reader.scrollTo(walkthrough.target, anchor: .top)
+                    }
+                }
+                }
             }
             .illuminedNavigation()
             .illuminedBrandHeader()
-            .alert("Class Error", isPresented: Binding(
+            .alert(IlluminedL10n.string("Class Error"), isPresented: Binding(
                 get: { profileService.errorMessage != nil },
                 set: { if !$0 { profileService.errorMessage = nil } }
             )) {
-                Button("OK") { profileService.errorMessage = nil }
+                Button(IlluminedL10n.string("OK")) { profileService.errorMessage = nil }
             } message: {
-                Text(profileService.errorMessage ?? "")
+                Text(IlluminedL10n.string(profileService.errorMessage ?? ""))
             }
         }
     }
@@ -169,43 +277,44 @@ private struct InstructorClassesView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Label("Classes", systemImage: "person.3")
-                                    .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                            VStack(alignment: .leading, spacing: 16) {
+                                Label(classroomT("Classroom Management", "Administración del aula"), systemImage: "person.3")
+                                    .font(.custom(IlluminedTheme.fontName, size: 24, relativeTo: .title2).weight(.semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
-                                Spacer()
+                                    .accessibilityAddTraits(.isHeader)
+                                Text(classroomT("People, invitations, and settings for your classrooms.", "Personas, invitaciones y ajustes de tus aulas."))
+                                    .font(.body).foregroundStyle(IlluminedTheme.ink)
                                 Button {
                                     showCreateClass = true
                                 } label: {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 28))
+                                    Label(classroomT("New classroom", "Nueva aula"), systemImage: "plus")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
                                 }
-                                .accessibilityLabel("Create a new class")
+                                .buttonStyle(IlluminedPrimaryButtonStyle())
+                                .accessibilityLabel(IlluminedL10n.string("Create a new class"))
                                 .disabled(workingClassId != nil)
                             }
 
-                            Text("Create classes, choose the active class, or archive a class while preserving its records.")
-                                .font(IlluminedTheme.font(size: 15))
-                                .foregroundStyle(IlluminedTheme.secondaryText)
                         }
                     }
 
                     if showCreateClass {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Create a Class")
+                                Text(IlluminedL10n.string("Create a Class"))
                                     .font(IlluminedTheme.font(size: 19, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
-                                Text("Students will enter this class ID when setting up their accounts.")
+                                Text(IlluminedL10n.string("Students will enter this class ID when setting up their accounts."))
                                     .font(IlluminedTheme.font(size: 13))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
-                                TextField("New class ID", text: $newClassId)
+                                TextField(IlluminedL10n.string("New class ID"), text: $newClassId)
                                     .autocorrectionDisabled()
                                     .textInputAutocapitalization(.never)
                                     .textFieldStyle(.roundedBorder)
                                     .disabled(workingClassId != nil)
                                 HStack {
-                                    Button("Cancel") {
+                                    Button(IlluminedL10n.string("Cancel")) {
                                         showCreateClass = false
                                         newClassId = ""
                                     }
@@ -213,7 +322,7 @@ private struct InstructorClassesView: View {
 
                                     Spacer()
 
-                                    Button(workingClassId == newClassId.trimmingCharacters(in: .whitespacesAndNewlines) ? "Creating..." : "Create") {
+                                    Button(IlluminedL10n.string(workingClassId == newClassId.trimmingCharacters(in: .whitespacesAndNewlines) ? "Creating..." : "Create")) {
                                         let requestedId = newClassId.trimmingCharacters(in: .whitespacesAndNewlines)
                                         workingClassId = requestedId
                                         Task {
@@ -222,7 +331,7 @@ private struct InstructorClassesView: View {
                                             if profileService.errorMessage == nil {
                                                 newClassId = ""
                                                 showCreateClass = false
-                                                statusMessage = "\(requestedId) was created and is now active."
+                                                statusMessage = IlluminedL10n.format("%@ was created and is now active.", requestedId)
                                             }
                                         }
                                     }
@@ -234,17 +343,18 @@ private struct InstructorClassesView: View {
                     }
 
                     if let statusMessage {
-                        Text(statusMessage)
+                        Text(IlluminedL10n.string(statusMessage))
                             .font(IlluminedTheme.font(size: 14, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
                     }
 
-                    Text("Active Classes")
-                        .font(IlluminedTheme.font(size: 21, weight: .semibold))
+                    Text(IlluminedL10n.string("Active Classes"))
+                        .font(.title2.weight(.semibold))
+                        .accessibilityAddTraits(.isHeader)
 
                     if activeClasses.isEmpty {
                         IlluminedCard {
-                            Text("No active classes.")
+                            Text(IlluminedL10n.string("No active classes."))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                         }
                     }
@@ -252,47 +362,86 @@ private struct InstructorClassesView: View {
                     ForEach(activeClasses, id: \.self) { classId in
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                HStack {
+                                VStack(alignment: .leading, spacing: 8) {
                                     Label(classId, systemImage: "person.3")
-                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
-                                    Spacer()
+                                        .font(.custom(IlluminedTheme.fontName, size: 21, relativeTo: .title3).weight(.semibold))
+                                        .accessibilityAddTraits(.isHeader)
                                     if classId == profileService.profile?.primaryClassId {
-                                        Text("Active")
-                                            .font(IlluminedTheme.font(size: 13, weight: .semibold))
+                                        Label(classroomT("Current classroom", "Aula actual"), systemImage: "checkmark.circle.fill")
+                                            .font(.subheadline.weight(.semibold))
                                             .foregroundStyle(IlluminedTheme.blue)
                                     }
                                 }
 
+                                    VStack(spacing: 10) {
+                                    NavigationLink {
+                                        ScrollView { VStack(spacing: 18) { ProfilePhotoEditor(scope: "classroom", target: classId); ClassroomListingEditor(classId: classId) }.padding() }.illuminedBrandHeader()
+                                    } label: {
+                                        ClassroomManagementRow(title: classroomT("Classroom Details & Photo", "Datos y foto del aula"), symbol: "photo")
+                                    }
+                                    NavigationLink { InstructorStudentProgressView(classIdOverride: classId) } label: {
+                                        ClassroomManagementRow(title: classroomT("Students & Progress", "Estudiantes y progreso"), symbol: "person.2")
+                                    }
+                                    NavigationLink { InstructorInviteCodesView(classIdOverride: classId) } label: {
+                                        ClassroomManagementRow(title: classroomT("Invitations & Codes", "Invitaciones y códigos"), symbol: "qrcode")
+                                    }
+                                    NavigationLink { ClassroomRequestsPage(classId: classId) } label: {
+                                        ClassroomManagementRow(title: classroomT("Join Requests", "Solicitudes de ingreso"), symbol: "person.badge.plus")
+                                    }
+                                    }.buttonStyle(.plain)
+                                    Divider().padding(.vertical, 4)
+                                    DisclosureGroup {
+                                        RefreshmentSettingView(classId: classId).padding(.vertical, 12)
+                                    } label: {
+                                        Label(classroomT("Classroom settings", "Ajustes del aula"), systemImage: "slider.horizontal.3")
+                                            .font(.headline).frame(minHeight: 44)
+                                    }.tint(IlluminedTheme.blue)
+
                                 if classId != profileService.profile?.primaryClassId {
-                                    Button("Select") {
+                                    Button {
                                         workingClassId = classId
                                         Task {
                                             await profileService.setActiveClass(classId)
                                             workingClassId = nil
                                         }
+                                    } label: {
+                                        Label(classroomT("Make Active Classroom", "Activar aula"), systemImage: "checkmark.circle")
+                                            .frame(maxWidth: .infinity, minHeight: 44)
                                     }
-                                    .buttonStyle(.bordered)
-                                    .frame(maxWidth: .infinity)
+                                    .buttonStyle(IlluminedSecondaryButtonStyle())
                                     .disabled(workingClassId != nil)
                                 }
 
-                                Button("Archive Class") {
+                                DisclosureGroup {
+                                Text(classroomT("Archiving pauses class activity and preserves its records.", "Archivar pausa la actividad del aula y conserva sus registros."))
+                                    .font(.body).padding(.vertical, 8)
+                                Button {
                                     archiveCandidate = classId
+                                } label: {
+                                    Label(IlluminedL10n.string("Archive Class"), systemImage: "archivebox")
+                                        .font(IlluminedTheme.font(size: 16, weight: .semibold))
+                                        .frame(maxWidth: .infinity, minHeight: 44)
+                                        .foregroundStyle(activeClasses.count <= 1 ? IlluminedTheme.secondaryText : IlluminedTheme.blue)
+                                        .background(IlluminedTheme.gold.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
                                 }
-                                .foregroundStyle(IlluminedTheme.blue)
+                                .opacity(activeClasses.count <= 1 ? 0.55 : 1)
                                 .disabled(activeClasses.count <= 1 || workingClassId != nil)
 
                                 if activeClasses.count <= 1 {
-                                    Text("Create or restore another class before archiving this one.")
-                                        .font(IlluminedTheme.font(size: 12))
+                                    Text(IlluminedL10n.string("Create or restore another class before archiving this one."))
+                                        .font(.footnote)
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                 }
+                                } label: {
+                                    Label(classroomT("Archive options", "Opciones de archivo"), systemImage: "archivebox")
+                                        .font(.headline).frame(minHeight: 44)
+                                }.tint(IlluminedTheme.blue)
                             }
                         }
                     }
 
                     if !archivedClasses.isEmpty {
-                        Text("Archived Classes")
+                        Text(IlluminedL10n.string("Archived Classes"))
                             .font(IlluminedTheme.font(size: 21, weight: .semibold))
 
                         ForEach(archivedClasses, id: \.self) { classId in
@@ -300,14 +449,14 @@ private struct InstructorClassesView: View {
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text(classId)
                                         .font(IlluminedTheme.font(size: 18, weight: .semibold))
-                                    Text("Records are preserved. New class activity is paused.")
+                                    Text(IlluminedL10n.string("Records are preserved. New class activity is paused."))
                                         .font(IlluminedTheme.font(size: 13))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
-                                    Button(workingClassId == classId ? "Restoring..." : "Restore Class") {
+                                    Button(IlluminedL10n.string(workingClassId == classId ? "Restoring..." : "Restore Class")) {
                                         workingClassId = classId
                                         Task {
                                             if await profileService.restoreInstructorClass(classId) {
-                                                statusMessage = "\(classId) was restored."
+                                                statusMessage = IlluminedL10n.format("%@ was restored.", classId)
                                             }
                                             workingClassId = nil
                                         }
@@ -323,37 +472,37 @@ private struct InstructorClassesView: View {
             }
         }
         .illuminedNavigation()
-        .illuminedBrandHeader("Classes")
+        .illuminedBrandHeader()
         .confirmationDialog(
-            "Archive \(archiveCandidate ?? "this class")?",
+            IlluminedL10n.format("Archive %@?", archiveCandidate ?? IlluminedL10n.string("this class")),
             isPresented: Binding(
                 get: { archiveCandidate != nil },
                 set: { if !$0 { archiveCandidate = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Archive") {
+            Button(IlluminedL10n.string("Archive")) {
                 guard let classId = archiveCandidate else { return }
                 archiveCandidate = nil
                 workingClassId = classId
                 Task {
                     if await profileService.archiveInstructorClass(classId) {
-                        statusMessage = "\(classId) was archived."
+                        statusMessage = IlluminedL10n.format("%@ was archived.", classId)
                     }
                     workingClassId = nil
                 }
             }
-            Button("Cancel", role: .cancel) { archiveCandidate = nil }
+            Button(IlluminedL10n.string("Cancel"), role: .cancel) { archiveCandidate = nil }
         } message: {
-            Text("New activity will pause, but all class records will be preserved and can be restored later.")
+            Text(IlluminedL10n.string("New activity will pause, but all class records will be preserved and can be restored later."))
         }
-        .alert("Class Error", isPresented: Binding(
+        .alert(IlluminedL10n.string("Class Error"), isPresented: Binding(
             get: { profileService.errorMessage != nil },
             set: { if !$0 { profileService.errorMessage = nil } }
         )) {
-            Button("OK") { profileService.errorMessage = nil }
+            Button(IlluminedL10n.string("OK")) { profileService.errorMessage = nil }
         } message: {
-            Text(profileService.errorMessage ?? "")
+            Text(IlluminedL10n.string(profileService.errorMessage ?? ""))
         }
     }
 }
@@ -473,99 +622,141 @@ private final class InstructorInviteCodeService: ObservableObject {
     }
 }
 
-private struct InstructorInviteCodesView: View {
+struct InstructorInviteCodesView: View {
+    var classIdOverride: String? = nil
+    private var selectedClassId: String? { classIdOverride ?? profileService.profile?.primaryClassId }
     @EnvironmentObject private var profileService: ProfileService
+    @EnvironmentObject private var walkthrough: InstructorWalkthrough
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var inviteService = InstructorInviteCodeService()
+    private var touring: Bool { walkthrough.active && walkthrough.screen == "classroom-codes" }
 
     var body: some View {
         ZStack {
             IlluminedBackground()
 
+            ScrollViewReader { reader in
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 16) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Instructor Invites", systemImage: "key")
+                                Label(classroomT("Instructor Class Link", "Enlace para instructores"), systemImage: "key")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Create one-use instructor codes for \(profileService.profile?.primaryClassId ?? "your class"). Give the code to a new instructor, and they can enter it while setting up their profile. Once used, the code is automatically closed.")
+                                Text(IlluminedL10n.format(
+                                    "Create one-use instructor codes for %@. Give the code to a new instructor, and they can enter it while setting up their profile. Once used, the code is automatically closed.",
+                                    selectedClassId ?? IlluminedL10n.string("your class")
+                                ))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .lineSpacing(4)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
 
+                            VStack(alignment: .leading, spacing: 16) {
+                                if inviteService.inviteCodes.filter({ $0.isActive }).isEmpty {
+                                    Text(IlluminedL10n.string("Create a code when you need to add another instructor."))
+                                        .font(.callout).foregroundStyle(IlluminedTheme.secondaryText)
+                                }
+                                ForEach(inviteService.inviteCodes.filter { $0.isActive }) { inviteCode in
+                                    InstructorInviteCodeCard(inviteCode: inviteCode) {
+                                        Task { await inviteService.deactivateInviteCode(inviteCode) }
+                                    }
+                                }
+                            }
+                            .disabled(touring)
+                            .walkthroughAnchor("codes-instructor-share")
+                            .walkthroughAnchor("codes-instructor-join")
+                            .walkthroughAnchor("codes-instructor-status")
+                            .id("codes-instructors")
+
                             Button {
                                 Task {
-                                    if let profile = profileService.profile {
+                                    if var profile = profileService.profile {
+                                        if let classIdOverride { profile.activeClassId = classIdOverride }
                                         await inviteService.createInviteCode(profile: profile)
                                     }
                                 }
                             } label: {
-                                Label("New Code", systemImage: "plus.circle.fill")
+                                Label(classroomT("New Instructor Code", "Nuevo código de instructor"), systemImage: "plus.circle.fill")
                                     .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(IlluminedPrimaryButtonStyle())
-                            .disabled(profileService.profile?.primaryClassId.isEmpty != false)
+                            .disabled(selectedClassId?.isEmpty != false)
+                            .disabled(touring)
+                            if inviteService.inviteCodes.contains(where: { !$0.isActive }) {
+                                DisclosureGroup(classroomT("Previous instructor codes", "Códigos anteriores de instructores")) {
+                                    VStack(spacing: 16) {
+                                        ForEach(inviteService.inviteCodes.filter { !$0.isActive }) { inviteCode in
+                                            Divider()
+                                            InstructorInviteCodeCard(inviteCode: inviteCode) { }
+                                        }
+                                    }.padding(.top, 12)
+                                }.tint(IlluminedTheme.blue)
+                            }
                         }
                     }
+                    .walkthroughAnchor("codes-overview")
+                    .walkthroughAnchor("codes-instructor-create")
+                    .id("codes-header")
 
-                    if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
+                    if let classId = selectedClassId, !classId.isEmpty {
+                        
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 10) {
-                                Label("Student Class Link", systemImage: "person.badge.plus")
-                                    .font(IlluminedTheme.font(size: 18, weight: .semibold))
+                                Label(IlluminedL10n.string("Student Class Link"), systemImage: "person.badge.plus")
+                                    .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
-                                Text("Share this reusable link with students joining class \(classId).")
+                                Text(IlluminedL10n.format("Share this reusable link with students joining class %@.", classId))
                                     .font(IlluminedTheme.font(size: 14))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
-                                InviteShareControls(invite: IlluminedInviteLink(role: .student, classId: classId, code: ""))
+                                StudentInvitationControls(classId: classId, readOnlyTour: touring)
                             }
                         }
+                        .walkthroughAnchor("codes-student-create")
+                        .walkthroughAnchor("codes-student-share")
+                        .walkthroughAnchor("codes-student-join")
+                        .walkthroughAnchor("codes-student-renew")
+                        .id("codes-students")
                     }
 
-                    if inviteService.inviteCodes.isEmpty {
-                        IlluminedCard {
-                            ContentUnavailableView(
-                                "No Invite Codes",
-                                systemImage: "key",
-                                description: Text("Create a code when you need to add another instructor.")
-                            )
-                        }
-                    } else {
-                        VStack(spacing: 12) {
-                            ForEach(inviteService.inviteCodes) { inviteCode in
-                                InstructorInviteCodeCard(inviteCode: inviteCode) {
-                                    Task {
-                                        await inviteService.deactivateInviteCode(inviteCode)
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
                 .padding()
+            }
+            .walkthroughAnchor("viewport-more")
+            .task(id: walkthrough.target) {
+                guard touring else { return }
+                await Task.yield()
+                guard !Task.isCancelled else { return }
+                let target = walkthrough.target
+                let card = target.hasPrefix("codes-student-") ? "codes-students"
+                    : (target == "codes-overview" || target == "codes-instructor-create" ? "codes-header" : "codes-instructors")
+                withAnimation(walkthrough.animatesStep && !reduceMotion
+                              ? .easeInOut(duration: InstructorWalkthrough.movementDuration) : nil) {
+                    reader.scrollTo(card, anchor: .top)
+                }
+            }
             }
         }
         .illuminedBrandHeader()
         .illuminedNavigation()
-        .task(id: profileService.profile?.primaryClassId) {
-            if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
+        .task(id: selectedClassId) {
+            if let classId = selectedClassId, !classId.isEmpty {
                 inviteService.listen(classId: classId)
             } else {
                 inviteService.stopListening()
             }
         }
-        .alert("Invite Code Error", isPresented: Binding(
+        .alert(IlluminedL10n.string("Invite Code Error"), isPresented: Binding(
             get: { inviteService.errorMessage != nil },
             set: { if !$0 { inviteService.errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { inviteService.errorMessage = nil }
+            Button(IlluminedL10n.string("OK"), role: .cancel) { inviteService.errorMessage = nil }
         } message: {
-            Text(inviteService.errorMessage ?? "")
+            Text(IlluminedL10n.string(inviteService.errorMessage ?? ""))
         }
     }
 }
@@ -575,15 +766,18 @@ private struct InstructorInviteCodeCard: View {
     let onDeactivate: () -> Void
 
     var body: some View {
-        IlluminedCard {
+        Group {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(inviteCode.displayCode)
                             .font(IlluminedTheme.font(size: 26, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.blue)
+                            .textSelection(.enabled)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
 
-                        Text(inviteCode.statusText)
+                        Text(IlluminedL10n.string(inviteCode.statusText))
                             .font(IlluminedTheme.font(size: 14, weight: .semibold))
                             .foregroundStyle(inviteCode.isActive ? IlluminedTheme.gold : IlluminedTheme.secondaryText)
                     }
@@ -591,26 +785,26 @@ private struct InstructorInviteCodeCard: View {
                     Spacer()
 
                     if inviteCode.isActive {
-                        Button("Deactivate", role: .destructive, action: onDeactivate)
+                        Button(IlluminedL10n.string("Deactivate"), role: .destructive, action: onDeactivate)
                             .font(IlluminedTheme.font(size: 14, weight: .semibold))
                     }
                 }
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("Class: \(inviteCode.classId)")
+                    Text(IlluminedL10n.format("Class: %@", inviteCode.classId))
                         .font(IlluminedTheme.font(size: 14))
                         .foregroundStyle(IlluminedTheme.secondaryText)
 
                     if let usedByName = inviteCode.usedByName, !usedByName.isEmpty {
-                        Text("Used by: \(usedByName)")
+                        Text(IlluminedL10n.format("Used by: %@", usedByName))
                             .font(IlluminedTheme.font(size: 14))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     } else if let usedByEmail = inviteCode.usedByEmail, !usedByEmail.isEmpty {
-                        Text("Used by: \(usedByEmail)")
+                        Text(IlluminedL10n.format("Used by: %@", usedByEmail))
                             .font(IlluminedTheme.font(size: 14))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     } else {
-                        Text("Unused codes can be shared with one new instructor.")
+                        Text(IlluminedL10n.string("Unused codes can be shared with one new instructor."))
                             .font(IlluminedTheme.font(size: 14))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
@@ -628,6 +822,75 @@ private struct InstructorInviteCodeCard: View {
     }
 }
 
+private struct StudentInvitationControls: View {
+    let classId: String
+    var readOnlyTour = false
+    @State private var code = ""
+    @State private var working = false
+    @State private var error = ""
+    @State private var pendingAction: String?
+    private func t(_ en: String, _ es: String) -> String { Locale.current.language.languageCode?.identifier == "es" ? es : en }
+    private func load(_ action: String) async {
+        working = true; error = ""
+        do {
+            let result = try await Functions.functions(region: "us-central1").httpsCallable("manageStudentInvitation").call(["classId": classId, "action": action])
+            code = (result.data as? [String: Any])?["code"] as? String ?? ""
+        } catch { self.error = error.localizedDescription }
+        working = false
+    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if readOnlyTour {
+                Text(t("Walkthrough preview: student codes and sharing controls load when you open this page after the tour. No invitation is created here.", "Vista del recorrido: los códigos y controles para compartir se cargan al abrir esta página después del recorrido. Aquí no se crea ninguna invitación."))
+                    .font(IlluminedTheme.font(size: 14))
+                    .foregroundStyle(IlluminedTheme.secondaryText)
+            }
+            if !code.isEmpty {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(code)
+                            .font(IlluminedTheme.font(size: 26, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.blue)
+                            .textSelection(.enabled)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Text(t("Active · Reusable", "Activo · Reutilizable"))
+                            .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                            .foregroundStyle(IlluminedTheme.gold)
+                    }
+                    Spacer()
+                    Button(IlluminedL10n.string("Deactivate"), role: .destructive) { pendingAction = "disable" }
+                        .font(IlluminedTheme.font(size: 14, weight: .semibold))
+                }
+            }
+            Text(t("Codes expire after 90 days. Replacing or disabling a code does not remove enrolled students.", "Los códigos vencen a los 90 días. Reemplazar o desactivar un código no retira a los estudiantes inscritos."))
+                .font(IlluminedTheme.font(size: 14))
+                .foregroundStyle(IlluminedTheme.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+            if !code.isEmpty {
+                InviteShareControls(invite: IlluminedInviteLink(role: .student, classId: classId, code: code))
+            }
+            Button { pendingAction = "regenerate" } label: {
+                Label(t("New Student Code", "Nuevo código de estudiante"), systemImage: "plus.circle.fill")
+                    .font(IlluminedTheme.font(size: 17, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(IlluminedPrimaryButtonStyle())
+            if working { ProgressView() }
+            if !error.isEmpty { Text(error).font(IlluminedTheme.font(size: 14)).foregroundStyle(.red) }
+        }
+        .disabled(working || readOnlyTour)
+        .task(id: "\(classId):\(readOnlyTour)") {
+            code = ""
+            guard !readOnlyTour else { return }
+            await load("get")
+        }
+        .confirmationDialog(t("This will invalidate the previous invitation.", "Esto invalidará la invitación anterior."), isPresented: Binding(get: { pendingAction != nil }, set: { if !$0 { pendingAction = nil } })) {
+            Button(t("Confirm", "Confirmar"), role: .destructive) { let action = pendingAction; pendingAction = nil; if let action { Task { await load(action) } } }
+        }
+    }
+}
+
 struct InviteShareControls: View {
     let invite: IlluminedInviteLink
     @Environment(\.openURL) private var openURL
@@ -640,19 +903,19 @@ struct InviteShareControls: View {
                 UIPasteboard.general.string = invite.url.absoluteString
                 copied = true
             } label: {
-                Label(copied ? "Copied" : "Copy Link", systemImage: copied ? "checkmark" : "doc.on.doc")
+                Label(IlluminedL10n.string(copied ? "Copied" : "Copy Link"), systemImage: copied ? "checkmark" : "doc.on.doc")
             }
 
             Button {
                 showingQR = true
             } label: {
-                Label("QR Code", systemImage: "qrcode")
+                Label(IlluminedL10n.string("QR Code"), systemImage: "qrcode")
             }
 
             Button {
                 if let emailURL { openURL(emailURL) }
             } label: {
-                Label("Email", systemImage: "envelope")
+                Label(IlluminedL10n.string("Email"), systemImage: "envelope")
             }
         }
         .font(IlluminedTheme.font(size: 13, weight: .semibold))
@@ -670,16 +933,16 @@ struct InviteShareControls: View {
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: 280, maxHeight: 280)
-                            .accessibilityLabel("QR code for \(invite.title)")
+                            .accessibilityLabel(IlluminedL10n.format("QR code for %@", invite.title))
                     }
-                    Text(invite.classId.isEmpty ? invite.code : "Class \(invite.classId)")
+                    Text(invite.classId.isEmpty ? invite.code : IlluminedL10n.format("Class %@", invite.classId))
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 }
                 .padding(28)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { showingQR = false }
+                        Button(IlluminedL10n.string("Done")) { showingQR = false }
                     }
                 }
             }
@@ -730,10 +993,10 @@ private struct InstructorDailyFormationView: View {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 16) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Daily Formation", systemImage: "calendar.badge.clock")
+                                Label(IlluminedL10n.string("Daily Formation"), systemImage: "calendar.badge.clock")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
-                                Text("Create entries one at a time, or import a full liturgical calendar from a spreadsheet.")
+                                Text(IlluminedL10n.string("Create entries one at a time, or import a full liturgical calendar from a spreadsheet."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -743,7 +1006,7 @@ private struct InstructorDailyFormationView: View {
                                 Button {
                                     editorTarget = InstructorDailyFormationEditorTarget(entry: nil)
                                 } label: {
-                                    Label("New Entry", systemImage: "plus.circle.fill")
+                                    Label(IlluminedL10n.string("New Entry"), systemImage: "plus.circle.fill")
                                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
@@ -753,7 +1016,7 @@ private struct InstructorDailyFormationView: View {
                                 Button {
                                     showingCSVImport = true
                                 } label: {
-                                    Label("Import", systemImage: "square.and.arrow.down")
+                                    Label(IlluminedL10n.string("Import"), systemImage: "square.and.arrow.down")
                                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
@@ -764,47 +1027,19 @@ private struct InstructorDailyFormationView: View {
                     }
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 14) {
-                            Text("Settings")
+                            Text(IlluminedL10n.string("Settings"))
                                 .font(IlluminedTheme.font(size: 19, weight: .semibold))
-                            Toggle("Enable Daily Formation", isOn: $enabled)
-                            Text("Choose when the daily reminder should be sent to users who have not already opened and dismissed today’s card. The time zone determines how that reminder time is interpreted.")
+                            Toggle(IlluminedL10n.string("Enable Daily Formation"), isOn: $enabled)
+                            Text(IlluminedL10n.string("Choose when the daily reminder should be sent to users who have not already opened and dismissed today’s card. The time zone determines how that reminder time is interpreted."))
                                 .font(IlluminedTheme.font(size: 13))
                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                 .fixedSize(horizontal: false, vertical: true)
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("Daily reminder time")
-                                    .font(IlluminedTheme.font(size: 14, weight: .semibold))
-                                TextField("HH:mm", text: $reminderTime)
-                                    .textFieldStyle(.plain)
-                                    .foregroundStyle(IlluminedTheme.ink)
-                                    .tint(IlluminedTheme.blue)
-                                    .padding(.horizontal, 12)
-                                    .frame(minHeight: 46)
-                                    .background(Color.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                            .stroke(IlluminedTheme.gold.opacity(0.24), lineWidth: 1)
-                                    )
-                            }
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("Time zone")
-                                    .font(IlluminedTheme.font(size: 14, weight: .semibold))
-                                TextField("America/New_York", text: $timeZone)
-                                    .textFieldStyle(.plain)
-                                    .foregroundStyle(IlluminedTheme.ink)
-                                    .tint(IlluminedTheme.blue)
-                                    .padding(.horizontal, 12)
-                                    .frame(minHeight: 46)
-                                    .background(Color.white.opacity(0.96), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                            .stroke(IlluminedTheme.gold.opacity(0.24), lineWidth: 1)
-                                    )
-                            }
+                            ParishReminderTimePicker(value: $reminderTime)
+                            ParishTimeZonePicker(selection: $timeZone)
                             Button {
                                 Task { await service.saveSettings(ManagedDailyFormationSettings(enabled: enabled, notificationTime: reminderTime, timeZone: timeZone)) }
                             } label: {
-                                Text("Save Settings")
+                                Text(IlluminedL10n.string("Save Settings"))
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -812,17 +1047,17 @@ private struct InstructorDailyFormationView: View {
                         }
                     }
                     if let message = service.statusMessage {
-                        Text(message).font(IlluminedTheme.font(size: 14)).foregroundStyle(IlluminedTheme.blue)
+                        Text(IlluminedL10n.string(message)).font(IlluminedTheme.font(size: 14)).foregroundStyle(IlluminedTheme.blue)
                     }
                     if let error = service.errorMessage {
-                        Text(error).font(IlluminedTheme.font(size: 14)).foregroundStyle(.red)
+                        Text(IlluminedL10n.string(error)).font(IlluminedTheme.font(size: 14)).foregroundStyle(.red)
                     }
                     if service.entries.isEmpty {
                         IlluminedCard {
                             ContentUnavailableView(
-                                "No Daily Formation Entries",
+                                IlluminedL10n.string("No Daily Formation Entries"),
                                 systemImage: "calendar.badge.clock",
-                                description: Text("Create or import the first daily card for this group.")
+                                description: Text(IlluminedL10n.string("Create or import the first daily card for this group."))
                             )
                         }
                     }
@@ -841,7 +1076,7 @@ private struct InstructorDailyFormationView: View {
                                         Text(entry.title).font(IlluminedTheme.font(size: 18, weight: .semibold)).foregroundStyle(IlluminedTheme.ink)
                                         Text(entry.date)
                                             .font(IlluminedTheme.font(size: 13, weight: .semibold)).foregroundStyle(IlluminedTheme.blue)
-                                        Text("\(entry.type.capitalized) · \(entry.colorCode) · \(entry.isPublished ? "Published" : "Draft")")
+                                        Text("\(IlluminedL10n.string(entry.type.capitalized)) · \(IlluminedL10n.string(entry.colorCode.capitalized)) · \(IlluminedL10n.string(entry.isPublished ? "Published" : "Draft"))")
                                             .font(IlluminedTheme.font(size: 13)).foregroundStyle(IlluminedTheme.secondaryText)
                                     }
                                     Spacer()
@@ -897,21 +1132,21 @@ date,type,title,details,color
                     VStack(alignment: .leading, spacing: 18) {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Label("Import Daily Formation", systemImage: "square.and.arrow.down")
+                                Label(IlluminedL10n.string("Import Daily Formation"), systemImage: "square.and.arrow.down")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
-                                Text("Use this when you already have your liturgical calendar in Numbers, Excel, or Google Sheets. Choose the CSV file or paste its rows below, preview the cards, then publish them.")
+                                Text(IlluminedL10n.string("Use this when you already have your liturgical calendar in Numbers, Excel, or Google Sheets. Choose the CSV file or paste its rows below, preview the cards, then publish them."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
 
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text("Expected columns")
+                                    Text(IlluminedL10n.string("Expected columns"))
                                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.ink)
-                                    Text("date, type, title, details, color")
+                                    Text(IlluminedL10n.string("date, type, title, details, color"))
                                         .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.gold)
-                                    Text("Use YYYY-MM-DD dates; fact, saint, or note types; and WHITE, GOLD, GREEN, RED, PURPLE, or ROSE colors.")
+                                    Text(IlluminedL10n.string("Use YYYY-MM-DD dates; fact, saint, or note types; and WHITE, GOLD, GREEN, RED, PURPLE, or ROSE colors."))
                                         .font(IlluminedTheme.font(size: 13))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                 }
@@ -919,11 +1154,11 @@ date,type,title,details,color
                         }
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Choose or Paste Calendar")
+                                Text(IlluminedL10n.string("Choose or Paste Calendar"))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
                                 Button { showingFileImporter = true } label: {
-                                    Label("Choose CSV File", systemImage: "doc.badge.plus")
+                                    Label(IlluminedL10n.string("Choose CSV File"), systemImage: "doc.badge.plus")
                                         .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
@@ -942,7 +1177,7 @@ date,type,title,details,color
                                     )
                                     .onChange(of: csvText) { _ in preview = nil }
                                 Button { preview = service.parseCSV(csvText) } label: {
-                                    Text("Preview Calendar")
+                                    Text(IlluminedL10n.string("Preview Calendar"))
                                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
@@ -954,15 +1189,15 @@ date,type,title,details,color
                         if let preview {
                             IlluminedCard {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("Preview")
+                                    Text(IlluminedL10n.string("Preview"))
                                         .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.ink)
-                                    Text("\(preview.validRows.count) valid of \(preview.totalRows) entries ready to publish.")
+                                    Text(IlluminedL10n.format("%d valid of %d entries ready to publish.", preview.validRows.count, preview.totalRows))
                                         .font(IlluminedTheme.font(size: 14))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                     if !preview.issues.isEmpty {
                                         ForEach(preview.issues.prefix(12)) { issue in
-                                            Text("Row \(issue.rowNumber): \(issue.message)")
+                                            Text(IlluminedL10n.format("Row %d: %@", issue.rowNumber, issue.message))
                                                 .font(IlluminedTheme.font(size: 13, weight: .semibold))
                                                 .foregroundStyle(.red)
                                         }
@@ -977,7 +1212,7 @@ date,type,title,details,color
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(row.title).font(IlluminedTheme.font(size: 15, weight: .semibold)).foregroundStyle(IlluminedTheme.ink)
                                                 Text(row.date).font(IlluminedTheme.font(size: 13, weight: .semibold)).foregroundStyle(IlluminedTheme.blue)
-                                                Text("Row \(row.rowNumber) · \(row.type.capitalized) · \(row.colorCode)")
+                                                Text(IlluminedL10n.format("Row %d · %@ · %@", row.rowNumber, IlluminedL10n.string(row.type.capitalized), IlluminedL10n.string(row.colorCode.capitalized)))
                                                     .font(IlluminedTheme.font(size: 12)).foregroundStyle(IlluminedTheme.secondaryText)
                                             }
                                             Spacer(minLength: 0)
@@ -986,10 +1221,10 @@ date,type,title,details,color
                                         .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                                     }
                                     if preview.validRows.count > 20 {
-                                        Text("Plus \(preview.validRows.count - 20) more valid entries.")
+                                        Text(IlluminedL10n.format("Plus %d more valid entries.", preview.validRows.count - 20))
                                             .font(IlluminedTheme.font(size: 13)).foregroundStyle(IlluminedTheme.secondaryText)
                                     }
-                                    Text("An imported row replaces the entry with the same date in this classroom only.")
+                                    Text(IlluminedL10n.string("An imported row replaces the entry with the same date in this classroom only."))
                                         .font(IlluminedTheme.font(size: 13)).foregroundStyle(IlluminedTheme.secondaryText)
                                 }
                             }
@@ -1000,7 +1235,7 @@ date,type,title,details,color
                                     importing = false
                                 }
                             } label: {
-                                Text(importing ? "Publishing…" : "Publish Calendar")
+                                Text(IlluminedL10n.string(importing ? "Publishing…" : "Publish Calendar"))
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -1013,7 +1248,7 @@ date,type,title,details,color
             }
             .illuminedBrandHeader()
             .illuminedNavigation()
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(importing) } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(IlluminedL10n.string("Cancel")) { dismiss() }.disabled(importing) } }
             .fileImporter(isPresented: $showingFileImporter, allowedContentTypes: [.commaSeparatedText, .plainText]) { result in
                 do {
                     let url = try result.get()
@@ -1023,7 +1258,7 @@ date,type,title,details,color
                     preview = nil
                     fileError = nil
                 } catch {
-                    fileError = "The CSV file could not be opened: \(error.localizedDescription)"
+                    fileError = IlluminedL10n.format("The CSV file could not be opened: %@", error.localizedDescription)
                 }
             }
         }
@@ -1060,34 +1295,38 @@ private struct InstructorDailyFormationEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                DatePicker("Date", selection: $date, displayedComponents: .date).disabled(originalEntry != nil)
-                Picker("Type", selection: $type) {
-                    Text("Fact").tag("fact"); Text("Saint").tag("saint"); Text("Liturgical Note").tag("note")
+                DatePicker(IlluminedL10n.string("Date"), selection: $date, displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .font(IlluminedTheme.font(size: 16, weight: .semibold))
+                    .foregroundStyle(IlluminedTheme.ink).tint(IlluminedTheme.blue)
+                    .disabled(originalEntry != nil)
+                Picker(IlluminedL10n.string("Type"), selection: $type) {
+                    Text(IlluminedL10n.string("Fact")).tag("fact"); Text(IlluminedL10n.string("Saint")).tag("saint"); Text(IlluminedL10n.string("Liturgical Note")).tag("note")
                 }
-                TextField("Title", text: $title)
-                Section("Details") { TextEditor(text: $details).frame(minHeight: 180) }
-                Picker("Liturgical Color", selection: $colorCode) {
-                    ForEach(["WHITE", "GOLD", "GREEN", "RED", "PURPLE", "ROSE"], id: \.self) { Text($0.capitalized).tag($0) }
+                TextField(IlluminedL10n.string("Title"), text: $title)
+                Section(IlluminedL10n.string("Details")) { TextEditor(text: $details).frame(minHeight: 180) }
+                Picker(IlluminedL10n.string("Liturgical Color"), selection: $colorCode) {
+                    ForEach(["WHITE", "GOLD", "GREEN", "RED", "PURPLE", "ROSE"], id: \.self) { Text(IlluminedL10n.string($0.capitalized)).tag($0) }
                 }
-                Toggle("Published", isOn: $isPublished)
-                if let error = service.errorMessage { Text(error).foregroundStyle(.red) }
+                Toggle(IlluminedL10n.string("Published"), isOn: $isPublished)
+                if let error = service.errorMessage { Text(IlluminedL10n.string(error)).foregroundStyle(.red) }
                 if originalEntry != nil {
-                    Button("Delete Entry", role: .destructive) { confirmingDelete = true }
+                    Button(IlluminedL10n.string("Delete Entry"), role: .destructive) { confirmingDelete = true }
                 }
             }
-            .navigationTitle(originalEntry == nil ? "New Entry" : "Edit Entry")
+            .navigationTitle(IlluminedL10n.string(originalEntry == nil ? "New Entry" : "Edit Entry"))
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .cancellationAction) { Button(IlluminedL10n.string("Cancel")) { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(saving ? "Saving…" : "Save") { Task { await save() } }
+                    Button(IlluminedL10n.string(saving ? "Saving…" : "Save")) { Task { await save() } }
                         .disabled(saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || details.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
-            .confirmationDialog("Delete this Daily Formation entry?", isPresented: $confirmingDelete, titleVisibility: .visible) {
-                Button("Delete", role: .destructive) { Task { if let originalEntry, await service.deleteEntry(originalEntry) { dismiss() } } }
-                Button("Cancel", role: .cancel) {}
+            .confirmationDialog(IlluminedL10n.string("Delete this Daily Formation entry?"), isPresented: $confirmingDelete, titleVisibility: .visible) {
+                Button(IlluminedL10n.string("Delete"), role: .destructive) { Task { if let originalEntry, await service.deleteEntry(originalEntry) { dismiss() } } }
+                Button(IlluminedL10n.string("Cancel"), role: .cancel) {}
             } message: {
-                Text("This removes the entry from this classroom.")
+                Text(IlluminedL10n.string("This removes the entry from this classroom."))
             }
         }
     }
@@ -1119,11 +1358,11 @@ private struct InstructorToolCard: View {
                     .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(title)
+                    Text(IlluminedL10n.string(title))
                         .font(IlluminedTheme.font(size: 18, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text(subtitle)
+                    Text(IlluminedL10n.string(subtitle))
                         .font(IlluminedTheme.font(size: 13))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
@@ -1131,7 +1370,7 @@ private struct InstructorToolCard: View {
 
                 Spacer(minLength: 0)
 
-                Text(status)
+                Text(IlluminedL10n.string(status))
                     .font(IlluminedTheme.font(size: 13, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.blue)
             }

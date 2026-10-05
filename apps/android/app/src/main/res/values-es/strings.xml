@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Illumined</string>
+    <string name="accessibility_brand_header">Illumined. Ser, Verdad, Bondad.</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_lessons">Lecciones</string>
+    <string name="nav_discussion">Discusión</string>
+    <string name="nav_formation">Formación</string>
+    <string name="nav_more">Más</string>
+
+    <string name="action_back">Atrás</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_continue">Continuar</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_import">Importar</string>
+    <string name="action_sign_out">Cerrar sesión</string>
+
+    <string name="auth_welcome_back">Bienvenido de nuevo</string>
+    <string name="auth_create_your_account">Crea tu cuenta</string>
+    <string name="auth_intro_description">Continúa tu formación de iniciación cristiana con lecciones, oración y conversación en clase.</string>
+    <string name="auth_invitation_saved">Invitación guardada</string>
+    <string name="auth_invitation_instructions">Crea una cuenta o inicia sesión. Tu invitación se aplicará automáticamente durante la configuración del perfil.</string>
+    <string name="auth_account">Cuenta</string>
+    <string name="auth_email">Correo electrónico</string>
+    <string name="auth_password">Contraseña</string>
+    <string name="auth_create_account">Crear una cuenta</string>
+    <string name="auth_sign_in">Iniciar sesión</string>
+    <string name="auth_use_existing_account">Usar una cuenta existente</string>
+    <string name="auth_create_new_account">Crear una cuenta nueva</string>
+    <string name="auth_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="auth_invalid_email">Ingresa un correo electrónico válido.</string>
+    <string name="auth_password_required">Ingresa tu contraseña.</string>
+    <string name="auth_reset_password">Restablecer contraseña</string>
+    <string name="auth_reset_description">Ingresa el correo electrónico asociado con tu cuenta de Illumined. Firebase enviará un enlace seguro para establecer una contraseña nueva.</string>
+    <string name="auth_send_reset_email">Enviar correo de restablecimiento</string>
+    <string name="auth_back_to_sign_in">Volver al inicio de sesión</string>
+    <string name="auth_loading_journey">Cargando tu camino…</string>
+    <string name="auth_developer_setup">Configuración para desarrolladores: agrega google-services.json a la carpeta de la aplicación.</string>
+
+    <string name="formation_unavailable">Formación no disponible</string>
+    <string name="action_try_again">Intentar de nuevo</string>
+
+    <string name="home_welcome">Te damos la bienvenida, %1$s</string>
+    <string name="home_no_class_assigned">No hay una clase asignada</string>
+    <string name="home_lesson_tracker">Progreso de lecciones</string>
+    <string name="home_completed">Completadas</string>
+    <string name="home_uncompleted">Pendientes</string>
+    <string name="home_upcoming">Próximamente</string>
+    <string name="home_no_class_scheduled">No hay una clase programada</string>
+    <string name="home_announcements">Anuncios</string>
+    <string name="home_instructor_updates">Novedades de tu instructor</string>
+    <string name="home_no_announcements">Todavía no hay anuncios.</string>
+    <string name="home_assignments">Tareas</string>
+    <string name="home_no_active_assignments">Todavía no hay tareas activas</string>
+    <string name="home_assignments_prompt">Toca aquí cuando tu instructor publique tareas.</string>
+    <string name="home_due">Fecha límite: %1$s</string>
+    <string name="home_due_not_set">No se estableció una fecha límite</string>
+    <string name="home_prayer_requests">Peticiones de oración</string>
+    <string name="home_prayer_invitation">Invita a tu clase a orar contigo</string>
+    <string name="home_new_prayer_request">Nueva petición de oración</string>
+    <string name="home_no_prayer_requests">Todavía no hay peticiones de oración activas. Sé el primero en invitar a la clase a orar.</string>
+    <string name="home_no_additional_details">No hay detalles adicionales.</string>
+
+    <string name="lesson_categories">Categorías de lecciones</string>
+    <string name="lesson_category_profession_of_faith">Profesión de la fe</string>
+    <string name="lesson_category_celebration_of_mysteries">Celebración del misterio cristiano</string>
+    <string name="lesson_category_life_in_christ">La vida en Cristo</string>
+    <string name="lesson_category_christian_prayer">La oración cristiana</string>
+
+    <plurals name="home_active_assignments">
+        <item quantity="one">%1$d tarea activa</item>
+        <item quantity="other">%1$d tareas activas</item>
+    </plurals>
+    <plurals name="home_more_assignments">
+        <item quantity="one">+ %1$d tarea más</item>
+        <item quantity="other">+ %1$d tareas más</item>
+    </plurals>
+    <plurals name="home_readings">
+        <item quantity="one">%1$d lectura</item>
+        <item quantity="other">%1$d lecturas</item>
+    </plurals>
+</resources>

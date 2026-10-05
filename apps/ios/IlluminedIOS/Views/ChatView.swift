@@ -2,9 +2,31 @@ import Foundation
 import SwiftUI
 
 struct ChatView: View {
+    var requestedClassId: String? = nil
+    private var currentProfile: UserProfile? {
+        guard var profile = profileService.profile else { return nil }
+        if let room = requestedClassId {
+            guard profile.activeClassIds.contains(room), !profile.inactiveClassIds.contains(room), !profile.removedClassIds.contains(room) else { return nil }
+            profile.activeClassId = room
+        }
+        return profile
+    }
+    init(requestedClassId: String? = nil, initialInbox: Bool = false) {
+        self.requestedClassId = requestedClassId
+        _instructorInbox = State(initialValue: initialInbox)
+    }
     @EnvironmentObject private var profileService: ProfileService
+    @EnvironmentObject private var chatUnread: ChatUnreadStore
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var visible = false
     @StateObject private var chatService = ChatService()
     @State private var draft = ""
+    @State private var instructorInbox = false
+    @State private var reply: ChatMessage?
+    @State private var editing: ChatMessage?
+    @State private var editText = ""
+    @State private var deleting: ChatMessage?
+    @State private var sending = false
 
     var body: some View {
         ZStack {
@@ -12,6 +34,15 @@ struct ChatView: View {
 
             VStack(spacing: 0) {
                 chatHeader
+                Picker(IlluminedL10n.string("Chat"), selection: $instructorInbox) {
+                    Text(IlluminedL10n.string("Classroom chat")).tag(false)
+                    Text(IlluminedL10n.string(currentProfile?.isInstructor == true ? "Inbox" : "Message instructor")).tag(true)
+                }.pickerStyle(.segmented).padding()
+
+                if instructorInbox, let profile = currentProfile {
+                    InstructorInboxView(profile: profile)
+                        .id("\(profile.userId):\(profile.primaryClassId):\(profile.isInstructor)")
+                } else {
 
                 ScrollViewReader { proxy in
                     ScrollView {
@@ -23,8 +54,21 @@ struct ChatView: View {
                                 ForEach(chatService.messages) { message in
                                     ChatBubble(
                                         message: message,
-                                        isCurrentUser: message.senderId == profileService.profile?.userId
+                                        isCurrentUser: message.senderId == currentProfile?.userId,
+                                        replyText: message.replyTo.map { id in chatService.messages.first(where: { $0.id == id }).map { "\($0.senderName): \($0.message.prefix(160))" } ?? IlluminedL10n.string("Reply to an earlier or deleted message") }
                                     )
+                                    .contextMenu {
+                                        Button(IlluminedL10n.string("Reply")) { reply = message }
+                                        ForEach(["🙏", "❤️", "👍"], id: \.self) { emoji in
+                                            Button(emoji) { Task { await chatService.react(message, emoji: emoji) } }
+                                        }
+                                        if message.senderId == currentProfile?.userId {
+                                            Button(IlluminedL10n.string("Edit message")) { editing = message; editText = message.message }
+                                        }
+                                        if message.senderId == currentProfile?.userId || currentProfile?.isInstructor == true {
+                                            Button(IlluminedL10n.string("Delete"), role: .destructive) { deleting = message }
+                                        }
+                                    }
                                     .id(message.id)
                                 }
                             }
@@ -34,6 +78,9 @@ struct ChatView: View {
                     }
                     .scrollDismissesKeyboard(.interactively)
                     .onChange(of: chatService.messages) { _, messages in
+                        if visible && scenePhase == .active && !instructorInbox {
+                            chatUnread.markDisplayed(messages, classId: currentProfile?.primaryClassId ?? "")
+                        }
                         if let last = messages.last?.id {
                             withAnimation(.easeOut(duration: 0.2)) {
                                 proxy.scrollTo(last, anchor: .bottom)
@@ -41,44 +88,77 @@ struct ChatView: View {
                         }
                     }
                 }
+                }
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !instructorInbox {
+            VStack(spacing: 0) {
+            if let reply {
+                HStack {
+                    Text(IlluminedL10n.string("Reply") + ": " + reply.senderName).font(.caption)
+                    Spacer()
+                    Button(IlluminedL10n.string("Cancel reply")) { self.reply = nil }
+                }.padding(.horizontal)
+            }
             ChatInputBar(
                 draft: $draft,
                 canSend: canSend,
                 onSend: sendMessage
             )
-        }
-        .illuminedNavigation()
-        .navigationTitle("")
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("Illumined")
-                    .font(IlluminedTheme.font(size: 24, weight: .semibold))
-                    .foregroundStyle(.white)
+            .disabled(sending)
+            }
             }
         }
-        .task(id: profileService.profile?.primaryClassId) {
-            if let classId = profileService.profile?.primaryClassId, !classId.isEmpty {
+        .illuminedBrandHeader()
+        .onChange(of: instructorInbox) { _, inbox in
+            if !inbox && visible && scenePhase == .active {
+                chatUnread.markDisplayed(chatService.messages, classId: currentProfile?.primaryClassId ?? "")
+            }
+        }
+        .onAppear {
+            visible = true
+            if scenePhase == .active && !instructorInbox {
+                chatUnread.markDisplayed(chatService.messages, classId: currentProfile?.primaryClassId ?? "")
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if visible && phase == .active && !instructorInbox {
+                chatUnread.markDisplayed(chatService.messages, classId: currentProfile?.primaryClassId ?? "")
+            }
+        }
+        .task(id: currentProfile?.primaryClassId) {
+            reply = nil; draft = ""
+            if let classId = currentProfile?.primaryClassId, !classId.isEmpty {
                 chatService.listen(classId: classId)
+            } else {
+                chatService.stopListening()
             }
         }
         .onDisappear {
+            visible = false
             chatService.stopListening()
         }
-        .alert("Chat Error", isPresented: Binding(
+        .alert(IlluminedL10n.string("Chat Error"), isPresented: Binding(
             get: { chatService.errorMessage != nil },
             set: { if !$0 { chatService.errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { chatService.errorMessage = nil }
+            Button(IlluminedL10n.string("OK"), role: .cancel) { chatService.errorMessage = nil }
         } message: {
-            Text(chatService.errorMessage ?? "")
+            Text(IlluminedL10n.string(chatService.errorMessage ?? ""))
+        }
+        .alert(IlluminedL10n.string("Edit message"), isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })) {
+            TextField(IlluminedL10n.string("Message"), text: $editText)
+            Button(IlluminedL10n.string("Save")) { if let editing { Task { await chatService.edit(editing, text: editText) } }; editing = nil }
+            Button(IlluminedL10n.string("Cancel"), role: .cancel) { editing = nil }
+        }
+        .confirmationDialog(IlluminedL10n.string("Delete this message for everyone?"), isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
+            Button(IlluminedL10n.string("Delete"), role: .destructive) { if let deleting { Task { await chatService.delete(deleting) } }; deleting = nil }
         }
     }
 
     private var canSend: Bool {
-        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && profileService.profile != nil
+        !sending && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && draft.utf16.count <= 4000 && currentProfile != nil
     }
 
     private var chatHeader: some View {
@@ -89,10 +169,10 @@ struct ChatView: View {
                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(profileService.profile?.primaryClassId.isEmpty == false ? profileService.profile?.primaryClassId ?? "Classroom" : "Classroom")
+                    Text(currentProfile?.primaryClassId.isEmpty == false ? currentProfile?.primaryClassId ?? IlluminedL10n.string("Classroom") : IlluminedL10n.string("Classroom"))
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
-                    Text("OCIA classroom conversation")
+                    Text(IlluminedL10n.string("OCIA classroom conversation"))
                         .font(IlluminedTheme.font(size: 12))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 }
@@ -111,12 +191,15 @@ struct ChatView: View {
     }
 
     private func sendMessage() {
-        guard let profile = profileService.profile else { return }
+        guard let profile = currentProfile else { return }
         let message = draft
-        draft = ""
-
+        let replyId = reply?.id
+        sending = true
         Task {
-            await chatService.send(message, profile: profile)
+            if await chatService.send(message, profile: profile, replyTo: replyId),
+               currentProfile?.userId == profile.userId,
+               currentProfile?.primaryClassId == profile.primaryClassId { draft = ""; reply = nil }
+            sending = false
         }
     }
 }
@@ -129,11 +212,11 @@ private struct EmptyChatView: View {
                     .font(IlluminedTheme.font(size: 34, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.gold)
 
-                Text("No messages yet")
+                Text(IlluminedL10n.string("No messages yet"))
                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                     .foregroundStyle(IlluminedTheme.ink)
 
-                Text("Start the conversation with your OCIA class.")
+                Text(IlluminedL10n.string("Start the conversation with your OCIA class."))
                     .font(IlluminedTheme.font(size: 15))
                     .foregroundStyle(IlluminedTheme.secondaryText)
                     .multilineTextAlignment(.center)
@@ -143,9 +226,10 @@ private struct EmptyChatView: View {
     }
 }
 
-private struct ChatBubble: View {
+struct ChatBubble: View {
     let message: ChatMessage
     let isCurrentUser: Bool
+    var replyText: String? = nil
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -153,6 +237,7 @@ private struct ChatBubble: View {
 
             VStack(alignment: isCurrentUser ? .trailing : .leading, spacing: 5) {
                 HStack(spacing: 6) {
+                    MemberProfilePhoto(userId: message.senderId, size: 28)
                     Text(message.senderName)
                         .font(IlluminedTheme.font(size: 12, weight: .semibold))
                         .foregroundStyle(isCurrentUser ? IlluminedTheme.blue : IlluminedTheme.ink)
@@ -162,6 +247,7 @@ private struct ChatBubble: View {
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 }
 
+                if let replyText { Text(replyText).font(.caption).foregroundStyle(.secondary).lineLimit(3) }
                 Text(linkedMessage)
                     .font(IlluminedTheme.font(size: 17))
                     .foregroundStyle(isCurrentUser ? .white : IlluminedTheme.ink)
@@ -182,6 +268,13 @@ private struct ChatBubble: View {
                         }
                     }
                     .shadow(color: IlluminedTheme.softShadow, radius: 8, x: 0, y: 4)
+                if message.editedAt != nil { Text(IlluminedL10n.string("Edited")).font(.caption2).foregroundStyle(.secondary) }
+                HStack {
+                    ForEach(["🙏", "❤️", "👍"], id: \.self) { emoji in
+                        let count = (message.reactions ?? [:]).values.filter { $0 == emoji }.count
+                        if count > 0 { Text("\(emoji) \(count)").font(.caption) }
+                    }
+                }
             }
 
             if !isCurrentUser { Spacer(minLength: 58) }
@@ -213,9 +306,10 @@ private struct ChatBubble: View {
     }
 }
 
-private struct ChatInputBar: View {
+struct ChatInputBar: View {
     @Binding var draft: String
     let canSend: Bool
+    var placeholder: String = "Send Message"
     let onSend: () -> Void
 
     var body: some View {
@@ -223,7 +317,7 @@ private struct ChatInputBar: View {
             TextField(
                 "",
                 text: $draft,
-                prompt: Text("Send Message")
+                prompt: Text(IlluminedL10n.string(placeholder))
                     .foregroundStyle(IlluminedTheme.secondaryText),
                 axis: .vertical
             )
@@ -241,11 +335,11 @@ private struct ChatInputBar: View {
                 Image(systemName: "paperplane.fill")
                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                     .foregroundStyle(.white)
-                    .frame(width: 42, height: 42)
+                    .frame(width: 44, height: 44)
                     .background(canSend ? IlluminedTheme.blue : Color.secondary.opacity(0.35), in: Circle())
             }
             .disabled(!canSend)
-            .accessibilityLabel("Send message")
+            .accessibilityLabel(IlluminedL10n.string("Send message"))
         }
         .padding(12)
         .background(.ultraThinMaterial)

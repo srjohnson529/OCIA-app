@@ -21,7 +21,7 @@ internal enum class FormationGameSymbolKind {
 }
 
 internal fun formationGameMenuSymbol(title: String) = when (title) {
-    "Match Terms" -> FormationGameSymbolKind.SearchDocument
+    "Match Terms", "Relacionar términos" -> FormationGameSymbolKind.SearchDocument
     "Name That Term" -> FormationGameSymbolKind.Checklist
     else -> FormationGameSymbolKind.Puzzle
 }

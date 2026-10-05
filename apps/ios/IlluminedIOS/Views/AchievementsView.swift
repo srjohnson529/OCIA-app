@@ -15,22 +15,22 @@ struct AchievementsView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        Group {
             ZStack {
                 IlluminedBackground()
 
                 if let error = service.loadingError {
-                    ContentUnavailableView("Achievements Unavailable", systemImage: "exclamationmark.triangle", description: Text(error))
+                    ContentUnavailableView(IlluminedL10n.string("Achievements Unavailable"), systemImage: "exclamationmark.triangle", description: Text(error))
                 } else if service.badges.isEmpty {
-                    ProgressView("Loading achievements...")
+                    ProgressView(IlluminedL10n.string("Loading achievements..."))
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 18) {
                             IlluminedCard {
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("Achievement Board")
+                                    Text(IlluminedL10n.string("Achievement Board"))
                                         .font(IlluminedTheme.font(size: 22, weight: .semibold))
-                                    Text("\(earnedCount) of \(service.badges.count) badges earned")
+                                    Text(IlluminedL10n.format("%d of %d badges earned", earnedCount, service.badges.count))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                     ProgressView(value: service.badges.isEmpty ? 0 : Double(earnedCount) / Double(service.badges.count))
                                         .tint(IlluminedTheme.gold)
@@ -55,15 +55,7 @@ struct AchievementsView: View {
                     }
                 }
             }
-            .illuminedNavigation()
-            .navigationTitle("")
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Illumined")
-                        .font(IlluminedTheme.font(size: 24, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-            }
+            .illuminedBrandHeader()
             .task {
                 service.load()
                 prayerCatalogService.load()
@@ -85,7 +77,7 @@ private final class AchievementCatalogService: ObservableObject {
         guard badges.isEmpty else { return }
 
         guard let url = Bundle.main.url(forResource: "achievements", withExtension: "json") else {
-            loadingError = "achievements.json was not found in the app bundle."
+            loadingError = IlluminedL10n.string("Achievements could not be loaded.")
             return
         }
 
@@ -93,7 +85,7 @@ private final class AchievementCatalogService: ObservableObject {
             let data = try Data(contentsOf: url)
             badges = try JSONDecoder().decode(AchievementCatalog.self, from: data).badges
         } catch {
-            loadingError = "Could not load achievements.json: \(error.localizedDescription)"
+            loadingError = IlluminedL10n.string("Achievements could not be loaded.")
         }
     }
 }
@@ -102,10 +94,20 @@ private struct AchievementBadge: Identifiable, Decodable {
     let id: String
     let name: String
     let description: String
+    let nameEs: String?
+    let descriptionEs: String?
     let imageUrl: String?
     let requiredCategory: String?
     let requiredMystery: String?
     let symbolName: String?
+
+    var localizedName: String {
+        Locale.current.languageCode == "es" ? (nameEs ?? name) : name
+    }
+
+    var localizedDescription: String {
+        Locale.current.languageCode == "es" ? (descriptionEs ?? description) : description
+    }
 }
 
 private struct MemorizedPrayersProgressCard: View {
@@ -136,11 +138,11 @@ private struct MemorizedPrayersProgressCard: View {
                         .background(IlluminedTheme.gold.opacity(0.12), in: Circle())
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Prayer Memorization")
+                        Text(IlluminedL10n.string("Prayer Memorization"))
                             .font(IlluminedTheme.font(size: 18, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
 
-                        Text("\(memorizedCount) of \(displayTotal) common prayers memorized")
+                        Text(IlluminedL10n.format("%d of %d common prayers memorized", memorizedCount, displayTotal))
                             .font(IlluminedTheme.font(size: 13))
                             .foregroundStyle(IlluminedTheme.secondaryText)
                     }
@@ -152,12 +154,12 @@ private struct MemorizedPrayersProgressCard: View {
                     .tint(IlluminedTheme.gold)
 
                 if memorizedPrayerNames.isEmpty {
-                    Text("No common prayers marked memorized yet.")
+                    Text(IlluminedL10n.string("No common prayers marked memorized yet."))
                         .font(IlluminedTheme.font(size: 13))
                         .foregroundStyle(IlluminedTheme.secondaryText)
                 } else {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Memorized")
+                        Text(IlluminedL10n.string("Memorized"))
                             .font(IlluminedTheme.font(size: 14, weight: .semibold))
                             .foregroundStyle(IlluminedTheme.ink)
 
@@ -189,18 +191,18 @@ private struct BadgeCard: View {
                     .foregroundStyle(isEarned ? IlluminedTheme.gold : IlluminedTheme.secondaryText)
             }
 
-            Text(badge.name)
+            Text(badge.localizedName)
                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(isEarned ? IlluminedTheme.ink : IlluminedTheme.secondaryText)
 
-            Text(badge.description)
+            Text(badge.localizedDescription)
                 .font(IlluminedTheme.font(size: 12))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(IlluminedTheme.secondaryText)
                 .lineLimit(4)
 
-            Text(isEarned ? "Earned" : "Locked")
+            Text(IlluminedL10n.string(isEarned ? "Earned" : "Locked"))
                 .font(IlluminedTheme.font(size: 12, weight: .semibold))
                 .foregroundStyle(isEarned ? .green : IlluminedTheme.secondaryText)
                 .padding(.horizontal, 10)

@@ -1,0 +1,57 @@
+    // Shared inbox: a student and CURRENT classroom instructors only.
+    function inboxMember(classId) {
+      let p = userProfile();
+      return signedIn() && classId in p.get('classIds', []) &&
+        !(classId in p.get('removedClassIds', [])) &&
+        !(classId in p.get('inactiveClassIds', [])) &&
+        !(classId in p.get('archivedClassIds', [])) &&
+        exists(/databases/$(database)/documents/classrooms/$(classId)) &&
+        get(/databases/$(database)/documents/classrooms/$(classId)).data.get('isArchived', false) == false;
+    }
+    function inboxParticipant(data) {
+      return inboxMember(data.classId) &&
+        (request.auth.uid == data.studentId || userProfile().get('isInstructor', false) == true);
+    }
+    function inboxName(name) {
+      return name is string && name.size() > 0 && name.size() <= 200 &&
+        (name == userProfile().get('displayName', '') || name == userProfile().get('username', ''));
+    }
+    match /instructorConversations/{conversationId} {
+      function eligibleStudent(data) {
+        let student = get(/databases/$(database)/documents/userProfiles/$(data.studentId)).data;
+        return student.get('isInstructor', false) == false && student.get('isAdmin', false) == false &&
+          data.classId in student.get('classIds', []) &&
+          !(data.classId in student.get('removedClassIds', [])) &&
+          !(data.classId in student.get('inactiveClassIds', [])) &&
+          !(data.classId in student.get('archivedClassIds', [])) &&
+          data.studentName is string && data.studentName.size() > 0 && data.studentName.size() <= 200 &&
+          (data.studentName == student.get('displayName', '') || data.studentName == student.get('username', ''));
+      }
+      allow read: if inboxParticipant(resource.data);
+      allow create: if inboxMember(request.resource.data.classId) &&
+        (request.resource.data.studentId == request.auth.uid || userProfile().get('isInstructor', false) == true) &&
+        eligibleStudent(request.resource.data) &&
+        conversationId == request.resource.data.classId + '__' + request.resource.data.studentId &&
+        request.resource.data.keys().hasOnly(['classId','studentId','studentName','updatedAt','lastSenderId']) &&
+        request.resource.data.lastSenderId == request.auth.uid &&
+        request.resource.data.updatedAt == request.time;
+      allow update: if inboxParticipant(resource.data) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt','lastSenderId']) &&
+        request.resource.data.lastSenderId == request.auth.uid &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+      match /messages/{messageId} {
+        function conversation() {
+          return get(/databases/$(database)/documents/instructorConversations/$(conversationId)).data;
+        }
+        allow read: if inboxParticipant(conversation());
+        allow create: if inboxParticipant(getAfter(/databases/$(database)/documents/instructorConversations/$(conversationId)).data) &&
+          request.resource.data.keys().hasOnly(['senderId','senderName','message','timestamp']) &&
+          request.resource.data.senderId == request.auth.uid &&
+          inboxName(request.resource.data.senderName) &&
+          request.resource.data.message is string &&
+          request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 4000 &&
+          request.resource.data.timestamp == request.time;
+        allow update, delete: if false;
+      }
+    }

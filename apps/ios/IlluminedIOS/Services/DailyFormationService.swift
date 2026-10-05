@@ -11,6 +11,14 @@ struct DailyFormationEntry: Identifiable {
     let title: String
     let details: String
     let colorCode: String
+
+    var localizedTypeLabel: String {
+        switch type.lowercased() {
+        case "fact": return IlluminedL10n.string("Fact of the Day")
+        case "saint": return IlluminedL10n.string("Saint of the Day")
+        default: return IlluminedL10n.string("Liturgical Note")
+        }
+    }
 }
 
 struct ManagedDailyFormationSettings: Equatable {
@@ -238,7 +246,7 @@ final class InstructorDailyFormationService: ObservableObject {
                 }
                 try await batch.commit()
             }
-            statusMessage = "\(rows.count) Daily Formation entries published."
+            statusMessage = IlluminedL10n.format("%d Daily Formation entries published.", rows.count)
             errorMessage = nil
             return true
         } catch {
@@ -345,7 +353,7 @@ final class DailyFormationService: ObservableObject {
 
         guard !classId.isEmpty, let uid = Auth.auth().currentUser?.uid else {
             presentedEntry = nil
-            if force { statusMessage = "Join a class before opening today’s card." }
+            if force { statusMessage = IlluminedL10n.string("Join a class before opening today’s card.") }
             return
         }
         do {
@@ -353,7 +361,7 @@ final class DailyFormationService: ObservableObject {
                 .collection("settings").document("dailyFormation").getDocument()
             guard generation == loadGeneration else { return }
             guard settings.get("enabled") as? Bool != false else {
-                if force { statusMessage = "Daily Formation is not enabled for this class." }
+                if force { statusMessage = IlluminedL10n.string("Daily Formation is not enabled for this class.") }
                 return
             }
             let zoneName = settings.get("timeZone") as? String ?? TimeZone.current.identifier
@@ -378,7 +386,7 @@ final class DailyFormationService: ObservableObject {
                 .collection("dailyFormation").document(date).getDocument()
             guard generation == loadGeneration else { return }
             guard document.exists, document.get("isPublished") as? Bool != false else {
-                if force { statusMessage = "No Daily Formation card is published for today." }
+                if force { statusMessage = IlluminedL10n.string("No Daily Formation card is published for today.") }
                 return
             }
             let entry = DailyFormationEntry(
@@ -400,7 +408,7 @@ final class DailyFormationService: ObservableObject {
         } catch {
             // Daily formation is supplemental and must never block app startup.
             if generation == loadGeneration, force {
-                statusMessage = "Today’s Daily Formation card could not be loaded."
+                statusMessage = IlluminedL10n.string("Today’s Daily Formation card could not be loaded.")
             }
         }
     }
@@ -425,7 +433,7 @@ struct DailyFormationCard: View {
             palette.background.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 22) {
-                    Text(entry.type.replacingOccurrences(of: "_", with: " ").uppercased())
+                    Text(entry.localizedTypeLabel.uppercased())
                         .font(.headline).tracking(2)
                     Text(entry.title).font(.largeTitle.bold()).multilineTextAlignment(.center)
                     Rectangle().fill(palette.accent).frame(width: 90, height: 3)

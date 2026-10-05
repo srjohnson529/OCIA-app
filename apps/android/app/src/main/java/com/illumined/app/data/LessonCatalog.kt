@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
 
 data class LessonCategory(
     val name: String,
@@ -20,7 +21,19 @@ data class CatechismLesson(
     val videoUrl: String?,
     val quiz: List<QuizQuestion>,
     val quizPolicy: QuizPolicy = QuizPolicy.REQUIRED,
-)
+    val titleEs: String? = null,
+    val contentHtmlEs: String? = null,
+    val quizEs: List<QuizQuestion>? = null,
+) {
+    val localizedTitle: String
+        get() = if (prefersSpanish()) titleEs.nonBlankOr(title) else title
+
+    val localizedContentHtml: String
+        get() = if (prefersSpanish()) contentHtmlEs.nonBlankOr(contentHtml) else contentHtml
+
+    val localizedQuiz: List<QuizQuestion>
+        get() = if (prefersSpanish()) quizEs?.takeIf { it.isNotEmpty() } ?: quiz else quiz
+}
 
 enum class QuizPolicy { REQUIRED, OPTIONAL, HIDDEN }
 
@@ -147,18 +160,11 @@ private fun Map<String, Any>.toLesson(id: String, fallback: CatechismLesson?): C
     val category = this["category"] as? String ?: fallback?.category ?: "Classroom Lessons"
     val content = this["content"] as? String ?: this["contentHTML"] as? String ?: fallback?.contentHtml.orEmpty()
     val quizData = this["quiz"] as? List<*>
-    val quiz = if (quizData == null) fallback?.quiz.orEmpty() else quizData.mapIndexedNotNull { index, value ->
-        val item = value as? Map<*, *> ?: return@mapIndexedNotNull null
-        val question = item["question"] as? String ?: return@mapIndexedNotNull null
-        val options = (item["options"] as? List<*>)?.filterIsInstance<String>() ?: return@mapIndexedNotNull null
-        QuizQuestion(
-            id = item["id"] as? String ?: "$index-${question.hashCode()}",
-            question = question,
-            options = options,
-            correctAnswerIndex = (item["correct"] as? Number)?.toInt()
-                ?: (item["correctAnswerIndex"] as? Number)?.toInt()
-                ?: 0,
-        )
+    val quiz = quizData?.toQuizQuestions() ?: fallback?.quiz.orEmpty()
+    val quizEs = if (containsKey("quizEs")) {
+        (this["quizEs"] as? List<*>)?.toQuizQuestions()
+    } else {
+        fallback?.quizEs
     }
     return CatechismLesson(
         id = id,
@@ -167,16 +173,19 @@ private fun Map<String, Any>.toLesson(id: String, fallback: CatechismLesson?): C
         contentHtml = content,
         videoUrl = this["videoUrl"] as? String ?: fallback?.videoUrl,
         quiz = quiz,
+        titleEs = if (containsKey("titleEs")) this["titleEs"] as? String else fallback?.titleEs,
+        contentHtmlEs = if (containsKey("contentEs") || containsKey("contentHTMLEs")) {
+            this["contentEs"] as? String ?: this["contentHTMLEs"] as? String
+        } else {
+            fallback?.contentHtmlEs
+        },
+        quizEs = quizEs,
     )
 }
 
 private fun JSONObject.toLesson(): CatechismLesson {
-    val quizValue = opt("quiz")
-    val questions = when (quizValue) {
-        is JSONArray -> quizValue
-        is JSONObject -> quizValue.optJSONArray("questions") ?: JSONArray()
-        else -> JSONArray()
-    }
+    val questions = optQuizQuestions("quiz") ?: JSONArray()
+    val spanishQuestions = if (has("quizEs")) optQuizQuestions("quizEs") else null
 
     return CatechismLesson(
         id = getString("id"),
@@ -184,25 +193,55 @@ private fun JSONObject.toLesson(): CatechismLesson {
         category = getString("category"),
         contentHtml = getString("contentHTML"),
         videoUrl = optString("videoUrl").takeIf { it.isNotBlank() },
-        quiz = buildList {
-            for (index in 0 until questions.length()) {
-                val question = questions.getJSONObject(index)
-                val options = question.getJSONArray("options")
-                add(
-                    QuizQuestion(
-                        id = question.optString("id", "$index-${question.getString("question").hashCode()}"),
-                        question = question.getString("question"),
-                        options = buildList {
-                            for (optionIndex in 0 until options.length()) add(options.getString(optionIndex))
-                        },
-                        correctAnswerIndex = if (question.has("correct")) {
-                            question.getInt("correct")
-                        } else {
-                            question.getInt("correctAnswerIndex")
-                        },
-                    ),
-                )
-            }
-        },
+        quiz = questions.toQuizQuestions(),
+        titleEs = optString("titleEs").takeIf { it.isNotBlank() },
+        contentHtmlEs = optString("contentEs").takeIf { it.isNotBlank() }
+            ?: optString("contentHTMLEs").takeIf { it.isNotBlank() },
+        quizEs = spanishQuestions?.toQuizQuestions(),
     )
+}
+
+private fun prefersSpanish(): Boolean = Locale.getDefault().language.equals("es", ignoreCase = true)
+
+private fun String?.nonBlankOr(fallback: String): String = this?.takeIf { it.isNotBlank() } ?: fallback
+
+private fun List<*>.toQuizQuestions(): List<QuizQuestion> = mapIndexedNotNull { index, value ->
+    val item = value as? Map<*, *> ?: return@mapIndexedNotNull null
+    val question = item["question"] as? String ?: return@mapIndexedNotNull null
+    val options = (item["options"] as? List<*>)?.filterIsInstance<String>() ?: return@mapIndexedNotNull null
+    QuizQuestion(
+        id = item["id"] as? String ?: "$index-${question.hashCode()}",
+        question = question,
+        options = options,
+        correctAnswerIndex = (item["correct"] as? Number)?.toInt()
+            ?: (item["correctAnswerIndex"] as? Number)?.toInt()
+            ?: 0,
+    )
+}
+
+private fun JSONObject.optQuizQuestions(key: String): JSONArray? = when (val value = opt(key)) {
+    is JSONArray -> value
+    is JSONObject -> value.optJSONArray("questions") ?: JSONArray()
+    else -> null
+}
+
+private fun JSONArray.toQuizQuestions(): List<QuizQuestion> = buildList {
+    for (index in 0 until length()) {
+        val question = getJSONObject(index)
+        val options = question.getJSONArray("options")
+        add(
+            QuizQuestion(
+                id = question.optString("id", "$index-${question.getString("question").hashCode()}"),
+                question = question.getString("question"),
+                options = buildList {
+                    for (optionIndex in 0 until options.length()) add(options.getString(optionIndex))
+                },
+                correctAnswerIndex = if (question.has("correct")) {
+                    question.getInt("correct")
+                } else {
+                    question.getInt("correctAnswerIndex")
+                },
+            ),
+        )
+    }
 }

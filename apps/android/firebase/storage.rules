@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Images are served by authorized backend functions, never directly by clients.
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

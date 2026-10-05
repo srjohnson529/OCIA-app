@@ -22,6 +22,14 @@ struct DailyFormationNotificationRequest: Identifiable, Equatable, Sendable {
 
 @MainActor
 final class NotificationService: NSObject, ObservableObject {
+    struct MessageRequest: Identifiable {
+        let id = UUID()
+        let classId: String
+        let recipientId: String
+        let privateMessage: Bool
+        var refreshments = false
+    }
+    @Published var messageOpenRequest: MessageRequest?
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
     @Published private(set) var lastTokenSavedAt: Date?
     @Published var errorMessage: String?
@@ -89,14 +97,17 @@ final class NotificationService: NSObject, ObservableObject {
 
             guard granted || notificationsAreEnabled else {
                 await updateAllPreferences(enabled: false)
-                statusMessage = "Notifications are off. You can turn them on later in iPhone Settings."
+                statusMessage = IlluminedL10n.string("Notifications are off. You can turn them on later in iPhone Settings.")
                 return
             }
 
             registerForRemoteNotificationsOnMainThread()
             fetchAndSaveCurrentToken()
             await updateAllPreferences(enabled: true)
-            statusMessage = "Notifications are ready for \(profile.primaryClassId.isEmpty ? "your class" : profile.primaryClassId)."
+            statusMessage = IlluminedL10n.format(
+                "Notifications are ready for %@.",
+                profile.primaryClassId.isEmpty ? IlluminedL10n.string("your class") : profile.primaryClassId
+            )
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -141,7 +152,7 @@ final class NotificationService: NSObject, ObservableObject {
             ], merge: true)
             errorMessage = nil
         } catch {
-            errorMessage = "Notification status could not be synchronized."
+            errorMessage = IlluminedL10n.string("Notification status could not be synchronized.")
         }
     }
 
@@ -199,6 +210,7 @@ final class NotificationService: NSObject, ObservableObject {
                 "fcmTokens": FieldValue.arrayUnion([token]),
                 "lastFcmToken": token,
                 "notificationPlatform": "ios",
+                "notificationLanguage": Locale.preferredLanguages.first?.lowercased().hasPrefix("es") == true ? "es" : "en",
                 "notificationClassId": profile.primaryClassId,
                 "notificationUpdatedAt": FieldValue.serverTimestamp(),
                 "notificationNewPrayerRequests": notificationsAreEnabled,
@@ -245,6 +257,15 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         let request = DailyFormationNotificationRequest(
             userInfo: response.notification.request.content.userInfo
         )
+        let info = response.notification.request.content.userInfo
+        let messageType = info["type"] as? String ?? ""
+        let room = info["classId"] as? String ?? ""
+        let recipient = info["recipientId"] as? String ?? ""
+        if ["classroom_message", "chat_reply", "chat_reaction", "private_message", "refreshment_reminder"].contains(messageType), !room.isEmpty, !recipient.isEmpty {
+            Task { @MainActor [weak self] in
+                self?.messageOpenRequest = MessageRequest(classId: room, recipientId: recipient, privateMessage: messageType == "private_message", refreshments: messageType == "refreshment_reminder")
+            }
+        }
 
         // Complete the notification callback immediately. This deliberately avoids
         // the async delegate bridge, which can resume on a cooperative thread while

@@ -16,11 +16,11 @@ struct InstructorClassScheduleView: View {
                     IlluminedCard {
                         VStack(alignment: .leading, spacing: 16) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Label("Class Schedule", systemImage: "calendar.badge.clock")
+                            Label(IlluminedL10n.string("Class Schedule"), systemImage: "calendar.badge.clock")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Create classes one at a time, or import a full schedule from a spreadsheet.")
+                            Text(IlluminedL10n.string("Create classes one at a time, or import a full schedule from a spreadsheet."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -30,7 +30,7 @@ struct InstructorClassScheduleView: View {
                                 Button {
                                     isShowingEditor = true
                                 } label: {
-                                    Label("New Class", systemImage: "plus.circle.fill")
+                                Label(IlluminedL10n.string("New Class"), systemImage: "plus.circle.fill")
                                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
@@ -40,7 +40,7 @@ struct InstructorClassScheduleView: View {
                                 Button {
                                     isShowingImport = true
                                 } label: {
-                                    Label("Import", systemImage: "square.and.arrow.down")
+                                Label(IlluminedL10n.string("Import"), systemImage: "square.and.arrow.down")
                                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
@@ -55,7 +55,7 @@ struct InstructorClassScheduleView: View {
                             ContentUnavailableView(
                                 "No Schedule Items",
                                 systemImage: "calendar",
-                                description: Text("Create your first class date for this group.")
+                                description: Text(IlluminedL10n.string("Create your first class date for this group."))
                             )
                         }
                     } else {
@@ -115,9 +115,9 @@ struct InstructorClassScheduleView: View {
             get: { scheduleService.errorMessage != nil },
             set: { if !$0 { scheduleService.errorMessage = nil } }
         )) {
-            Button("OK", role: .cancel) { scheduleService.errorMessage = nil }
+            Button(IlluminedL10n.string("OK"), role: .cancel) { scheduleService.errorMessage = nil }
         } message: {
-            Text(scheduleService.errorMessage ?? "")
+            Text(IlluminedL10n.string(scheduleService.errorMessage ?? ""))
         }
     }
 }
@@ -200,24 +200,24 @@ date,topic,details
                     VStack(alignment: .leading, spacing: 18) {
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Label("Import Full Schedule", systemImage: "square.and.arrow.down")
+                            Label(IlluminedL10n.string("Import Full Schedule"), systemImage: "square.and.arrow.down")
                                     .font(IlluminedTheme.font(size: 22, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.blue)
 
-                                Text("Use this when you already have your OCIA calendar in Numbers, Excel, or Google Sheets. Copy the rows from your spreadsheet, paste them below, preview the classes, then import them.")
+                            Text(IlluminedL10n.string("Use this when you already have your OCIA calendar in Numbers, Excel, or Google Sheets. Copy the rows from your spreadsheet, paste them below, preview the classes, then import them."))
                                     .font(IlluminedTheme.font(size: 15))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
 
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text("Expected columns")
+                            Text(IlluminedL10n.string("Expected columns"))
                                         .font(IlluminedTheme.font(size: 15, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.ink)
 
-                                    Text("date, topic, details")
+                            Text(IlluminedL10n.string("date, topic, details"))
                                         .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.gold)
 
-                                    Text("The details column is optional. Dates can be written as 2026-09-03 or 9/3/2026.")
+                            Text(IlluminedL10n.string("The details column is optional. Dates can be written as 2026-09-03 or 9/3/2026."))
                                         .font(IlluminedTheme.font(size: 13))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
                                 }
@@ -226,7 +226,7 @@ date,topic,details
 
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Paste Schedule")
+                            Text(IlluminedL10n.string("Paste Schedule"))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(IlluminedTheme.ink)
 
@@ -246,7 +246,7 @@ date,topic,details
                                 Button {
                                     previewImport()
                                 } label: {
-                                    Text("Preview Schedule")
+                                    Text(IlluminedL10n.string("Preview Schedule"))
                                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
@@ -265,19 +265,19 @@ date,topic,details
                         if !previewItems.isEmpty {
                             IlluminedCard {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("Preview")
+                                Text(IlluminedL10n.string("Preview"))
                                         .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.ink)
 
-                                    Text("\(previewItems.count) class dates ready to import.")
+                                    Text(IlluminedL10n.format("%d class dates ready to import.", previewItems.count))
                                         .font(IlluminedTheme.font(size: 14))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
 
-                                    Toggle("Replace existing schedule", isOn: $replacingExisting)
+                                Toggle(IlluminedL10n.string("Replace existing schedule"), isOn: $replacingExisting)
                                         .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                         .tint(IlluminedTheme.blue)
 
-                                    Text(replacingExisting ? "This will remove the current schedule for this class and use the imported rows instead." : "This will add the imported rows to the schedule you already have.")
+                                    Text(IlluminedL10n.string(replacingExisting ? "This will remove the current schedule for this class and use the imported rows instead." : "This will add the imported rows to the schedule you already have."))
                                         .font(IlluminedTheme.font(size: 13))
                                         .foregroundStyle(IlluminedTheme.secondaryText)
 
@@ -292,7 +292,7 @@ date,topic,details
                             Button {
                                 importSchedule()
                             } label: {
-                                Text(isSaving ? "Importing..." : "Import Schedule")
+                                Text(IlluminedL10n.string(isSaving ? "Importing..." : "Import Schedule"))
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -307,7 +307,7 @@ date,topic,details
             .illuminedNavigation()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(IlluminedL10n.string("Cancel")) {
                         isPresented = false
                     }
                     .disabled(isSaving)
@@ -443,7 +443,7 @@ private struct ClassScheduleEditorView: View {
 
                                 IlluminedTextField(title: "Topic", text: $topic, autocapitalization: .sentences)
 
-                                TextField("", text: $details, prompt: Text("Optional details").foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
+                                TextField("", text: $details, prompt: Text(IlluminedL10n.string("Optional details")).foregroundStyle(IlluminedTheme.secondaryText), axis: .vertical)
                                     .font(IlluminedTheme.font(size: 17))
                                     .foregroundStyle(IlluminedTheme.ink)
                                     .tint(IlluminedTheme.blue)
@@ -461,7 +461,7 @@ private struct ClassScheduleEditorView: View {
                         Button {
                             save()
                         } label: {
-                            Text(isSaving ? "Saving..." : "Save Class")
+                            Text(IlluminedL10n.string(isSaving ? "Saving..." : "Save Class"))
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
@@ -472,7 +472,7 @@ private struct ClassScheduleEditorView: View {
                             Button(role: .destructive) {
                                 isConfirmingDelete = true
                             } label: {
-                                Label("Delete Class", systemImage: "trash")
+                                Label(IlluminedL10n.string("Delete Class"), systemImage: "trash")
                                     .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                     .frame(maxWidth: .infinity)
                             }
@@ -487,17 +487,17 @@ private struct ClassScheduleEditorView: View {
             .illuminedNavigation()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(IlluminedL10n.string("Cancel")) {
                         isPresented = false
                     }
                     .disabled(isSaving)
                 }
             }
-            .confirmationDialog("Delete this class date?", isPresented: $isConfirmingDelete, titleVisibility: .visible) {
-                Button("Delete", role: .destructive) {
+            .confirmationDialog(IlluminedL10n.string("Delete this class date?"), isPresented: $isConfirmingDelete, titleVisibility: .visible) {
+                Button(IlluminedL10n.string("Delete"), role: .destructive) {
                     deleteItem()
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(IlluminedL10n.string("Cancel"), role: .cancel) {}
             }
         }
     }

@@ -1,0 +1,10 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Private originals/thumbnails are accessed only through the Admin SDK callable.
+    // Merge with verified deployed Storage rules before deploying; never widen other paths.
+    match /profile-images/{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

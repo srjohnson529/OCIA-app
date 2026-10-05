@@ -19,7 +19,8 @@ class ProfileSetupRepository(
     fun joinStudent(name: String, classId: String, success: () -> Unit, error: (Throwable) -> Unit) {
         val user = auth.currentUser ?: return error(IllegalStateException(ProfileSetupIdentityPolicy.missingUserMessage(startingClass = false)))
         val cleanedClass = classId.trim()
-        db.collection("userProfiles").document(user.uid).set(profileData(user.uid, user.email.orEmpty(), name.trim(), cleanedClass, false), SetOptions.merge())
+        com.google.firebase.functions.FirebaseFunctions.getInstance("us-central1").getHttpsCallable("joinStudentClass")
+            .call(mapOf("displayName" to name.trim(), "code" to cleanedClass))
             .addOnSuccessListener { success() }.addOnFailureListener(error)
     }
 
@@ -70,21 +71,23 @@ class ProfileSetupRepository(
         }
     }
 
-    fun startClass(name: String, parish: String, classId: String, code: String, success: () -> Unit, error: (Throwable) -> Unit) {
-        val user = auth.currentUser ?: return error(IllegalStateException(ProfileSetupIdentityPolicy.missingUserMessage(startingClass = true)))
-        val cleanedCode = code.trim().uppercase(); val cleanedClass = classId.trim().uppercase(); val profileRef = db.collection("userProfiles").document(user.uid); val setup = db.collection("parishSetupCodes").document(cleanedCode); val classroom = db.collection("classrooms").document(cleanedClass)
-        db.runTransaction { transaction ->
-            val profile = transaction.get(profileRef); val snapshot = transaction.get(setup); if (!snapshot.exists()) throw IllegalStateException("That parish setup code was not found.")
-            if (snapshot.getBoolean("isActive") != true || !snapshot.getString("usedBy").isNullOrBlank()) throw IllegalStateException("That parish setup code has already been used.")
-            val existingClasses = (profile.get("classIds") as? List<*>)?.filterIsInstance<String>().orEmpty()
-            val classes = (existingClasses + cleanedClass).distinct()
-            val data = profileData(user.uid, user.email.orEmpty(), name.trim(), cleanedClass, true, mapOf("parishSetupCode" to cleanedCode, "classIds" to classes)).toMutableMap()
-            if (profile.exists()) {
-                listOf("completedLessons", "earnedBadges", "completedMysteries", "memorizedPrayerIds", "selectedPrayerIds", "currentLessonIndex", "createdAt").forEach(data::remove)
-            }
-            transaction.set(profileRef, data, SetOptions.merge())
-            transaction.set(classroom, mapOf("id" to cleanedClass, "classId" to cleanedClass, "name" to parish.trim(), "parishName" to parish.trim(), "instructorId" to user.uid, "instructorName" to name.trim(), "studentIds" to emptyList<String>(), "createdAt" to FieldValue.serverTimestamp(), "createdBy" to user.uid, "isArchived" to false))
-            transaction.update(setup, mapOf("isActive" to false, "usedBy" to user.uid, "usedByEmail" to user.email.orEmpty(), "usedByName" to name.trim(), "classId" to cleanedClass, "parishName" to parish.trim(), "usedAt" to FieldValue.serverTimestamp()))
-        }.addOnSuccessListener { success() }.addOnFailureListener(error)
+    fun checkParishAccess(success: (Boolean) -> Unit, error: (Throwable) -> Unit) {
+        val uid = auth.currentUser?.uid ?: return error(IllegalStateException("Please sign in."))
+        com.google.firebase.functions.FirebaseFunctions.getInstance("us-central1").getHttpsCallable("getParishAccess")
+            .call().addOnSuccessListener { result ->
+                if (auth.currentUser?.uid == uid) {
+                    when ((result.data as? Map<*, *>)?.get("status")) {
+                        "ready", "not_activated", "completed" -> success((result.data as? Map<*, *>)?.get("status") == "ready")
+                        else -> error(IllegalStateException("Could not confirm parish access. Please retry."))
+                    }
+                }
+            }.addOnFailureListener { problem -> if (auth.currentUser?.uid == uid) error(problem) }
+    }
+
+    fun startClass(name: String, parish: String, code: String, success: () -> Unit, error: (Throwable) -> Unit, city: String) {
+        if (auth.currentUser == null) return error(IllegalStateException(ProfileSetupIdentityPolicy.missingUserMessage(startingClass = true)))
+        com.google.firebase.functions.FirebaseFunctions.getInstance("us-central1").getHttpsCallable("startParishClass")
+            .call(mapOf("displayName" to name.trim(), "parishName" to parish.trim(), "city" to city.trim(), "setupCode" to code.trim().uppercase()))
+            .addOnSuccessListener { success() }.addOnFailureListener(error)
     }
 }

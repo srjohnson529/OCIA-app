@@ -3,7 +3,8 @@ import UIKit
 
 enum IlluminedTheme {
     static let fontName = "Georgia"
-    static let blue = Color(red: 0.231, green: 0.435, blue: 0.627)
+    // One fixed sRGB asset shared with the launch storyboard; no dark-mode variant.
+    static let blue = Color("IlluminedBlue")
     static let gold = Color(red: 0.749, green: 0.580, blue: 0.290)
     static let cream = Color(red: 0.969, green: 0.969, blue: 0.961)
     static let parchment = Color(red: 0.890, green: 0.890, blue: 0.855)
@@ -82,7 +83,7 @@ struct IlluminedTextField: View {
     var autocapitalization: TextInputAutocapitalization = .never
 
     var body: some View {
-        TextField("", text: $text, prompt: Text(title).foregroundStyle(IlluminedTheme.secondaryText))
+        TextField("", text: $text, prompt: Text(IlluminedL10n.string(title)).foregroundStyle(IlluminedTheme.secondaryText))
             .font(IlluminedTheme.font(size: 17))
             .foregroundStyle(IlluminedTheme.ink)
             .tint(IlluminedTheme.blue)
@@ -104,7 +105,7 @@ struct IlluminedSecureField: View {
     var textContentType: UITextContentType?
 
     var body: some View {
-        SecureField("", text: $text, prompt: Text(title).foregroundStyle(IlluminedTheme.secondaryText))
+        SecureField("", text: $text, prompt: Text(IlluminedL10n.string(title)).foregroundStyle(IlluminedTheme.secondaryText))
             .font(IlluminedTheme.font(size: 17))
             .foregroundStyle(IlluminedTheme.ink)
             .tint(IlluminedTheme.blue)
@@ -155,16 +156,22 @@ struct IlluminedDestructiveButtonStyle: ButtonStyle {
     }
 }
 
+// Shared settings for every branded navigation header. Page titles belong in content.
+private enum IlluminedHeaderStyle {
+    static let width: CGFloat = 230
+    static let iconSize: CGFloat = 46
+    static let titleSize: CGFloat = 22
+    static let mottoSize: CGFloat = 8
+    static let background = LinearGradient(
+        colors: [IlluminedTheme.blue, IlluminedTheme.blue.opacity(0.86)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+}
+
 extension View {
-    func illuminedBrandHeader(_ title: String = "Illumined", showsAccountButton: Bool = true) -> some View {
-        self
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    IlluminedBrandToolbarTitle(title: title)
-                }
-            }
+    func illuminedBrandHeader(showsAccountButton: Bool = true) -> some View {
+        modifier(IlluminedBrandHeaderModifier(showsAccountButton: showsAccountButton))
     }
 
     func illuminedNavigation() -> some View {
@@ -173,14 +180,7 @@ extension View {
             .onAppear {
                 IlluminedNavigationAppearance.configure()
             }
-            .toolbarBackground(
-                LinearGradient(
-                    colors: [IlluminedTheme.blue, IlluminedTheme.blue.opacity(0.86)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ),
-                for: .navigationBar
-            )
+            .toolbarBackground(IlluminedHeaderStyle.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
@@ -188,14 +188,94 @@ extension View {
     }
 }
 
-private struct IlluminedBrandToolbarTitle: View {
-    let title: String
+private struct IlluminedBrandHeaderModifier: ViewModifier {
+    let showsAccountButton: Bool
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.isPresented) private var isPresented
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @State private var pageCenterX: CGFloat?
+
+    func body(content: Content) -> some View {
+        content
+            .illuminedNavigation()
+            .onGeometryChange(for: CGFloat.self) { geometry in
+                geometry.frame(in: .global).midX
+            } action: { pageCenterX = $0 }
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(isPresented)
+            .toolbar {
+                if isPresented {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button { dismiss() } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 23, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 44, height: 44)
+                                .background(reduceTransparency ? IlluminedTheme.blue : Color.white.opacity(0.22), in: Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(IlluminedL10n.string("Back"))
+                    }.sharedBackgroundVisibility(.hidden)
+                }
+                ToolbarItem(placement: .principal) {
+                    IlluminedBrandToolbarTitle(pageCenterX: pageCenterX)
+                }
+                if showsAccountButton {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        IlluminedHeaderAccountControls()
+                    }.sharedBackgroundVisibility(.hidden)
+                }
+            }
+    }
+
+}
+
+private struct IlluminedHeaderAccountControls: View {
+    @EnvironmentObject private var profileService: ProfileService
+    @EnvironmentObject private var requestInbox: ClassroomRequestInboxStore
+    @EnvironmentObject private var chatUnread: ChatUnreadStore
+    @EnvironmentObject private var inboxUnread: InboxUnreadStore
 
     var body: some View {
-        ZStack(alignment: .leading) {
+        if let profile = profileService.profile, !profile.primaryClassId.isEmpty {
+            ZStack(alignment: .topTrailing) {
+                NavigationLink { AccountView() } label: {
+                    HeaderProfilePhoto(userId: profile.userId)
+                }.buttonStyle(.plain).accessibilityLabel(IlluminedL10n.string("Account"))
+                if requestInbox.total != 0 {
+                    NavigationLink { ClassroomRequestInboxPage(store: requestInbox) } label: {
+                        Text(requestInbox.total < 0 ? "!" : requestInbox.total > 99 ? "99+" : String(requestInbox.total))
+                            .font(.system(size: 12, weight: .bold)).foregroundStyle(.white)
+                            .padding(7).background(.red, in: Circle())
+                    }.buttonStyle(.plain).offset(x: 5, y: -4).accessibilityLabel(classroomT("Student join requests", "Solicitudes de ingreso"))
+                }
+            }.frame(width: 44, height: 44)
+            .overlay(alignment: .bottomLeading) {
+                if chatUnread.count != 0 || inboxUnread.count > 0 {
+                    NavigationLink { ChatView(initialInbox: inboxUnread.count > 0) } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "bubble.left.fill")
+                            Text(chatUnread.count < 0 ? "!" : String(min(99, chatUnread.count + inboxUnread.count)))
+                        }
+                        .font(.system(size: 10, weight: .bold)).foregroundStyle(.white)
+                        .padding(5).background(.red, in: Capsule())
+                    }.buttonStyle(.plain).offset(x: -8, y: 5)
+                        .accessibilityLabel(classroomT("Unread messages", "Mensajes sin leer"))
+                }
+            }
+        }
+    }
+}
+
+private struct IlluminedBrandToolbarTitle: View {
+    let pageCenterX: CGFloat?
+    var body: some View {
+        GeometryReader { geometry in
+        ZStack {
             VStack(spacing: 2) {
-                Text(title)
-                    .font(IlluminedTheme.font(size: 22, weight: .semibold))
+                Text("Illumined")
+                    .font(IlluminedTheme.font(size: IlluminedHeaderStyle.titleSize, weight: .semibold))
                     .foregroundStyle(.white)
 
                 HStack(spacing: 4) {
@@ -213,21 +293,26 @@ private struct IlluminedBrandToolbarTitle: View {
                 }
 
                 Text("Being • Truth • Goodness")
-                    .font(IlluminedTheme.font(size: 8, weight: .semibold))
+                    .font(IlluminedTheme.font(size: IlluminedHeaderStyle.mottoSize, weight: .semibold))
                     .textCase(.uppercase)
                     .tracking(0.7)
                     .foregroundStyle(IlluminedTheme.gold.opacity(0.95))
             }
             .fixedSize()
-            .frame(maxWidth: .infinity)
+            .frame(width: 180)
 
             Image("LaunchIcon")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 46, height: 46)
+                .frame(width: IlluminedHeaderStyle.iconSize, height: IlluminedHeaderStyle.iconSize)
                 .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .offset(x: -116)
         }
-        .frame(width: 230)
+        .frame(width: IlluminedHeaderStyle.width, height: IlluminedHeaderStyle.iconSize)
+        // Correct for native toolbar placement without moving the account/back controls.
+        .offset(x: (pageCenterX ?? geometry.frame(in: .global).midX) - geometry.frame(in: .global).midX)
+        }
+        .frame(width: IlluminedHeaderStyle.width, height: IlluminedHeaderStyle.iconSize)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Illumined. Being, Truth, Goodness.")
     }

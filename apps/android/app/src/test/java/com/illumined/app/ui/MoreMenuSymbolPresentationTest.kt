@@ -5,7 +5,7 @@ import org.junit.Test
 
 class MoreMenuSymbolPresentationTest {
     @Test fun `all current iOS More routes have distinct symbol intents`() {
-        val titles = listOf("Awards", "Chat", "Account", "Notifications", "Games", "Instructor Tools", "Admin Tools")
+        val titles = listOf("My Guides", "Awards", "Chat", "Account", "Notifications", "Games", "Instructor Tools", "Admin Tools")
         assertEquals(MoreMenuSymbolKind.entries, titles.map(::moreMenuSymbol))
     }
 }

@@ -17,11 +17,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -59,6 +62,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -76,6 +81,7 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.illumined.app.BuildConfig
+import com.illumined.app.DailyFormationOpenRequest
 import com.illumined.app.R
 import com.illumined.app.data.FormationOverview
 import com.illumined.app.data.FormationRepository
@@ -86,6 +92,7 @@ import com.illumined.app.data.AssignmentReading
 import com.illumined.app.data.CatechismLesson
 import com.illumined.app.data.ClassScheduleDay
 import com.illumined.app.data.ClassScheduleSelection
+import com.illumined.app.data.DiscussionRepository
 import com.illumined.app.data.InstructorRepository
 import com.illumined.app.data.InstructorReadinessCalculator
 import com.illumined.app.data.LessonCatalog
@@ -102,12 +109,12 @@ private sealed interface SessionState {
     data class Error(val message: String) : SessionState
 }
 
-private enum class FormationSection(val label: String) {
-    Home("Home"),
-    Lessons("Lessons"),
-    Discussion("Discussion"),
-    Formation("Formation"),
-    More("More"),
+private enum class FormationSection(val labelResource: Int) {
+    Home(R.string.nav_home),
+    Lessons(R.string.nav_lessons),
+    Discussion(R.string.nav_discussion),
+    Formation(R.string.nav_formation),
+    More(R.string.nav_more),
 }
 
 private class AuthController(context: Context) {
@@ -203,7 +210,7 @@ private class AuthController(context: Context) {
 }
 
 @Composable
-fun IlluminedApp(inviteUri: String? = null, dailyFormationOpenRequest: Int = 0) {
+fun IlluminedApp(inviteUri: String? = null, dailyFormationOpenRequest: DailyFormationOpenRequest? = null) {
     IlluminedTheme {
         val context = LocalContext.current
         val controller = remember { AuthController(context.applicationContext) }
@@ -231,7 +238,7 @@ fun IlluminedApp(inviteUri: String? = null, dailyFormationOpenRequest: Int = 0) 
         }
 
         Surface(modifier = Modifier.fillMaxSize()) {
-            if (showBrandedLaunch) {
+            if (showBrandedLaunch && session is SessionState.SignedIn) {
                 BrandedLaunchScreen()
             } else {
                 when (val current = session) {
@@ -242,14 +249,29 @@ fun IlluminedApp(inviteUri: String? = null, dailyFormationOpenRequest: Int = 0) 
                         onInviteConsumed = {
                             pendingInvite = null
                             inviteStore.clear()
+                            ClassroomChoiceStore(context).clear()
                         },
-                        onSignOut = { session = controller.signOut() },
+                        onSignOut = {
+                            // Reset only local onboarding/navigation; a pending server request remains intact.
+                            pendingInvite = null
+                            inviteStore.clear()
+                            ClassroomChoiceStore(context).clear()
+                            session = controller.signOut()
+                        },
                         dailyFormationOpenRequest = dailyFormationOpenRequest,
                     )
                     else -> SignInScreen(
                         state = current,
+                        reveal = !showBrandedLaunch,
+                        onStudentCode = { code ->
+                            val invite = IlluminedInviteLink(InviteRole.STUDENT, code = code)
+                            inviteStore.save(invite)
+                            pendingInvite = invite
+                        },
                         inviteLink = pendingInvite,
                         isConfigured = BuildConfig.FIREBASE_CONFIGURED,
+                        onClassroomSelected = { pendingInvite = null; inviteStore.clear() },
+                        onInviteScanned = { invite -> inviteStore.save(invite); pendingInvite = invite },
                         onSignIn = { email, password ->
                             controller.signIn(email, password) { session = it }
                         },
@@ -269,39 +291,18 @@ fun IlluminedApp(inviteUri: String? = null, dailyFormationOpenRequest: Int = 0) 
 
 @Composable
 private fun BrandedLaunchScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize().background(IlluminedThemeTokens.Blue),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(22.dp),
-        ) {
-            // The iOS launch mark is 200pt. This is deliberately 50% larger.
-            Image(
-                painter = painterResource(R.drawable.illumined_launch_icon),
-                contentDescription = "Illumined",
-                modifier = Modifier.size(300.dp),
-            )
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text("Illumined", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(Modifier.width(78.dp).height(1.dp).background(IlluminedThemeTokens.Gold.copy(.95f)))
-                    Box(Modifier.size(4.dp).background(IlluminedThemeTokens.Gold.copy(.98f), CircleShape))
-                    Box(Modifier.width(78.dp).height(1.dp).background(IlluminedThemeTokens.Gold.copy(.95f)))
-                }
-                Text("BEING • TRUTH • GOODNESS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = IlluminedThemeTokens.Gold.copy(.95f))
-            }
-        }
+    Box(Modifier.fillMaxSize().background(IlluminedThemeTokens.Blue), contentAlignment = Alignment.Center) {
+        AuthLaunchBrand(Modifier.offset(y = (-12).dp))
     }
 }
 
 @Composable
 private fun SignInScreen(
     state: SessionState,
+    reveal: Boolean = true,
+    onStudentCode: (String) -> Unit = {},
+    onClassroomSelected: () -> Unit = {},
+    onInviteScanned: (IlluminedInviteLink) -> Unit = {},
     inviteLink: IlluminedInviteLink?,
     isConfigured: Boolean,
     onSignIn: (String, String) -> Unit,
@@ -309,17 +310,30 @@ private fun SignInScreen(
     onResetPassword: (String, () -> Unit) -> Unit,
     onClearMessage: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val classroomStore = remember { ClassroomChoiceStore(context) }
+    var selectedClassroom by remember { mutableStateOf(classroomStore.load()) }
+    var findingClassroom by rememberSaveable { mutableStateOf(inviteLink == null && selectedClassroom == null) }
+    var searchingClassroom by rememberSaveable { mutableStateOf(false) }
+    var enteringCode by rememberSaveable { mutableStateOf(false) }
+    var instructorEntry by rememberSaveable { mutableStateOf(false) }
+    var enteringParishCode by rememberSaveable { mutableStateOf(false) }
+    var parishStartupCode by rememberSaveable { mutableStateOf("") }
+    var contactUnavailable by remember { mutableStateOf(false) }
+    var classroomCode by rememberSaveable { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var localMessage by remember { mutableStateOf<String?>(null) }
-    var isCreatingAccount by rememberSaveable { mutableStateOf(inviteLink != null) }
+    var isCreatingAccount by rememberSaveable { mutableStateOf(inviteLink != null || selectedClassroom != null) }
     var showReset by remember { mutableStateOf(false) }
     var resetEmail by remember { mutableStateOf("") }
     val isWorking = state is SessionState.Working
-    val message = (state as? SessionState.Error)?.message ?: localMessage
+    val message = ((state as? SessionState.Error)?.message ?: localMessage)?.let(::localizedUserMessage)
+    val invalidEmailMessage = stringResource(R.string.auth_invalid_email)
+    val passwordRequiredMessage = stringResource(R.string.auth_password_required)
 
     LaunchedEffect(inviteLink) {
-        if (inviteLink != null) isCreatingAccount = true
+        if (inviteLink != null) { isCreatingAccount = true; findingClassroom = false; selectedClassroom = null; classroomStore.clear() }
     }
 
     if (showReset) {
@@ -341,35 +355,107 @@ private fun SignInScreen(
         return
     }
 
-    Column(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f))) {
-        IlluminedBrandHeader()
-        Column(
-            Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-        ) {
-            inviteLink?.let { invite ->
-                AuthCard {
-                    Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Invitation saved", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
-                        Text(invite.title, fontSize = 16.sp, color = IlluminedThemeTokens.Ink)
-                        Text("Create an account or sign in. Your invitation will be applied automatically during profile setup.", fontSize = 14.sp, color = IlluminedThemeTokens.SecondaryText)
+    val welcome = findingClassroom && !searchingClassroom && !enteringCode && !enteringParishCode
+    val welcomeLinkColor = Color(0xFFD7EDFF)
+    AnimatedAuthShell(reveal = reveal, welcome = welcome) {
+        AuthCard(cornerRadius = 26.dp, transparent = welcome) {
+            Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                if(findingClassroom) {
+                    if (enteringParishCode) {
+                        TextButton(onClick = { enteringParishCode = false }) { Text(appT("‹ Back", "‹ Atrás")) }
+                        Text(appT("Start Your Parish Classroom", "Crea el aula de tu parroquia"), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                        Text(appT("First, enter the parish startup code provided by Illumined. Next, create an account or sign in, then enter your name, parish name, and city.", "Primero, introduce el código de inicio de Illumined. Después, crea una cuenta o inicia sesión y completa tu nombre, parroquia y ciudad."), color = IlluminedThemeTokens.SecondaryText)
+                        OutlinedTextField(parishStartupCode, { parishStartupCode = it.uppercase() }, Modifier.fillMaxWidth(), label = { Text(appT("Parish Startup Code", "Código de inicio de la parroquia")) }, singleLine = true)
+                        Button(onClick = {
+                            onInviteScanned(IlluminedInviteLink(InviteRole.PARISH, code = parishStartupCode.trim().uppercase()))
+                            enteringParishCode = false; findingClassroom = false; isCreatingAccount = true; instructorEntry = true
+                        }, enabled = parishStartupCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text(appT("Continue to Account Setup", "Continuar a la cuenta")) }
+                        Text(appT("Your one-use code will be verified when you create the classroom.", "Tu código de un solo uso se verificará al crear el aula."), fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                        Box(Modifier.fillMaxWidth().height(1.dp).background(IlluminedThemeTokens.Gold.copy(alpha = .35f)))
+                        Text(appT("Need a parish startup code?", "¿Necesitas un código de inicio?"), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                        Text(appT("Contact Illumined with your name, parish, and city to request a code. No account is needed.", "Contacta a Illumined con tu nombre, parroquia y ciudad para solicitar un código. No necesitas una cuenta."), fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText)
+                        OutlinedButton(onClick = {
+                            contactUnavailable = false
+                            val subject = appT("Parish startup code request", "Solicitud de código de inicio parroquial")
+                            val body = appT("Hello Illumined,\n\nI would like to request a parish startup code.\n\nMy name: \nParish name: \nCity: \nMy role at the parish: \n\nThank you!", "Hola Illumined:\n\nQuisiera solicitar un código de inicio para mi parroquia.\n\nMi nombre: \nNombre de la parroquia: \nCiudad: \nMi función en la parroquia: \n\n¡Gracias!")
+                            val uri = android.net.Uri.parse("mailto:stephen.johnson@illumined.net?subject=" + android.net.Uri.encode(subject) + "&body=" + android.net.Uri.encode(body))
+                            try { context.startActivity(android.content.Intent(android.content.Intent.ACTION_SENDTO, uri)) }
+                            catch (_: android.content.ActivityNotFoundException) { contactUnavailable = true }
+                            catch (_: SecurityException) { contactUnavailable = true }
+                        }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(14.dp), border = androidx.compose.foundation.BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(alpha = .35f)), colors = ButtonDefaults.outlinedButtonColors(contentColor = IlluminedThemeTokens.Blue)) {
+                            Text(appT("Contact Illumined", "Contactar a Illumined"), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                        androidx.compose.foundation.text.selection.SelectionContainer { Text("stephen.johnson@illumined.net", fontSize = 14.sp, color = IlluminedThemeTokens.Blue) }
+                        if (contactUnavailable) Text(appT("An email app could not be opened. Copy the address above and email us from your preferred service.", "No se pudo abrir una aplicación de correo. Copia la dirección y escríbenos desde tu servicio preferido."), fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                    } else if (searchingClassroom) {
+                        TextButton(onClick = { searchingClassroom = false }) { Text(appT("‹ Back", "‹ Encontrar mi aula")) }
+                        ClassroomSearch { room ->
+                            classroomStore.save(room); selectedClassroom = room; onClassroomSelected()
+                            findingClassroom = false; isCreatingAccount = true; instructorEntry = false
+                        }
+                    } else if (enteringCode) {
+                    TextButton(onClick = { enteringCode = false }) { Text(appT("‹ Back", "‹ Encontrar mi aula")) }
+                    Text(appT("Your classroom starts here.", "Tu aula comienza aquí."), fontSize = 23.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                    Text(appT("Enter the student invitation code shared by your instructor. You’ll sign in or create an account before joining.", "Introduce el código de invitación de estudiante que te dio tu instructor. Iniciarás sesión o crearás una cuenta antes de unirte."), fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText)
+                    OutlinedTextField(classroomCode, { classroomCode = it }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text(appT("Student invitation code", "Código de invitación")) }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Characters, imeAction = ImeAction.Done))
+                    Button(onClick = {
+                        onStudentCode(classroomCode.trim().uppercase())
+                        findingClassroom = false; isCreatingAccount = true
+                    }, enabled = classroomCode.isNotBlank(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+                        Text(appT("Continue to Account Setup", "Continuar a la cuenta"), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                     }
-                }
-            }
-            AuthCard {
-                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(AuthPresentation.introTitle(isCreatingAccount), fontSize = 26.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
-                    Text(AuthPresentation.IntroDescription, fontSize = 16.sp, color = IlluminedThemeTokens.SecondaryText)
-                }
-            }
-            AuthCard {
-                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text("Account", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                    Text(appT("No code yet? Ask your instructor for an invitation. Codes are checked securely during profile setup.", "¿Aún no tienes código? Pide una invitación a tu instructor. Los códigos se verifican al configurar el perfil."), fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                    } else {
+                        Button(onClick = { searchingClassroom = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                            .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFE8C775), IlluminedThemeTokens.Gold, Color(0xFFA87A33))), RoundedCornerShape(14.dp))
+                            .border(1.dp, Color.White.copy(alpha = .20f), RoundedCornerShape(14.dp)),
+                            shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = IlluminedThemeTokens.Ink)) {
+                            Text(appT("Find My Class", "Encontrar mi aula"), fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Column(Modifier.weight(1f)) { ClassroomQRButton(transparent = true) { invite -> onInviteScanned(invite); findingClassroom = false; isCreatingAccount = true } }
+                            Box(Modifier.width(1.dp).height(24.dp).background(welcomeLinkColor.copy(alpha = .65f)))
+                            TextButton(onClick = { findingClassroom = false; isCreatingAccount = false; instructorEntry = false }, modifier = Modifier.weight(1f), colors = ButtonDefaults.textButtonColors(contentColor = welcomeLinkColor)) {
+                                Text(appT("Sign In", "Iniciar sesión"), modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Start, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                        TextButton(onClick = { enteringCode = true }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.textButtonColors(contentColor = welcomeLinkColor)) { Text(appT("Enter an invitation code", "Introducir código de invitación"), fontSize = 14.sp) }
+                        TextButton(onClick = {
+                            instructorEntry = true; enteringParishCode = true; classroomStore.clear(); selectedClassroom = null; onClassroomSelected()
+                        }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.textButtonColors(contentColor = welcomeLinkColor)) { Text(appT("Instructor? Start a Classroom", "¿Eres instructor? Crear un aula"), fontSize = 14.sp) }
+                        var approvalExpanded by remember { mutableStateOf(false) }
+                        Surface(color = Color.Transparent) {
+                            Column(Modifier.fillMaxWidth()) {
+                                TextButton(onClick = { approvalExpanded = !approvalExpanded }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), colors = ButtonDefaults.textButtonColors(contentColor = welcomeLinkColor)) {
+                                    Text((if (approvalExpanded) "− " else "+ ") + "Nihil Obstat & Imprimatur", fontSize = 14.sp, fontWeight = FontWeight.Normal)
+                                }
+                                if (approvalExpanded) {
+                                    Text(appT("Applies only to the English-language lesson and quiz materials and English-language spiritual formation materials submitted for review. It does not extend to translations, later additions, or user-created content.", "Se aplica únicamente a los materiales de lecciones y cuestionarios en inglés y a los materiales de formación espiritual en inglés presentados para revisión. No se extiende a traducciones, incorporaciones posteriores ni contenido creado por los usuarios."), color = welcomeLinkColor, fontSize = 14.sp)
+                                    Spacer(Modifier.height(14.dp))
+                                    Text("Nihil Obstat:\nThe Reverend James M. Dunfee, MA, STL\nCensor Librorum\nSeptember 28, 2026\n\nImprimatur:\nThe Most Reverend Edward M. Lohse, JCD\nApostolic Administrator of Steubenville\nSeptember 28, 2026\n\nThe nihil obstat and imprimatur do not signify agreement with the content, opinions, or statements expressed but simply affirm that the content does not contradict faith and morals.", color = welcomeLinkColor, fontSize = 14.sp)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    TextButton(onClick = { findingClassroom = true; onClearMessage() }, enabled = !isWorking) { Text(appT("‹ Back", "‹ Encontrar mi aula")) }
+                    selectedClassroom?.let { room ->
+                        Text("${room.parishName} · ${room.city}\n${room.className}", fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                        Text(appT("After profile setup, your instructor will review your request.", "Después de configurar el perfil, el instructor revisará la solicitud."), color = IlluminedThemeTokens.SecondaryText)
+                    }
+                    inviteLink?.let { invite ->
+                        Text(stringResource(R.string.auth_invitation_saved), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                        Text(invite.title, fontSize = 14.sp, color = IlluminedThemeTokens.Blue)
+                        Text(appT("We’ll apply your invitation during profile setup.", "Aplicaremos tu invitación al configurar el perfil."), fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                    }
+                    if(isCreatingAccount) Text(stringResource(R.string.auth_create_your_account), fontSize = 23.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; localMessage = null; onClearMessage() },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.auth_email)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -381,7 +467,7 @@ private fun SignInScreen(
                 value = password,
                 onValueChange = { password = it; localMessage = null; onClearMessage() },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.auth_password)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -394,8 +480,8 @@ private fun SignInScreen(
                 onClick = {
                     when {
                         !Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches() ->
-                            localMessage = "Enter a valid email address."
-                        password.isBlank() -> localMessage = "Enter your password."
+                            localMessage = invalidEmailMessage
+                        password.isBlank() -> localMessage = passwordRequiredMessage
                         else -> if (isCreatingAccount) onCreateAccount(email, password) else onSignIn(email, password)
                     }
                 },
@@ -410,16 +496,16 @@ private fun SignInScreen(
                 if (isWorking) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
-                    Text(if (isCreatingAccount) "Create Account" else "Sign In", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(if (isCreatingAccount) R.string.auth_create_account else R.string.auth_sign_in), fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
-                    OutlinedButton(onClick = { isCreatingAccount = !isCreatingAccount; localMessage = null; onClearMessage() }, modifier = Modifier.fillMaxWidth().height(52.dp), enabled = !isWorking) { Text(if (isCreatingAccount) "Use Existing Account" else "Create New Account") }
-                    if (!isCreatingAccount) TextButton(onClick = { resetEmail = email; localMessage = null; onClearMessage(); showReset = true }, modifier = Modifier.fillMaxWidth(), enabled = !isWorking) { Text("Forgot Password?") }
+                    if (isCreatingAccount || instructorEntry || inviteLink != null || selectedClassroom != null) OutlinedButton(onClick = { isCreatingAccount = !isCreatingAccount; localMessage = null; onClearMessage() }, modifier = Modifier.fillMaxWidth().height(52.dp), enabled = !isWorking) { Text(stringResource(if (isCreatingAccount) R.string.auth_use_existing_account else R.string.auth_create_new_account)) }
+                    if (!isCreatingAccount) TextButton(onClick = { resetEmail = email; localMessage = null; onClearMessage(); showReset = true }, modifier = Modifier.fillMaxWidth(), enabled = !isWorking) { Text(stringResource(R.string.auth_forgot_password)) }
                 }
             }
-            message?.let { AuthMessageCard(it, it == AuthErrorPresentation.ResetEmailSent) }
-            if (!isConfigured) Text("Developer setup: add google-services.json to the app folder.", color = Color.Red)
         }
+        message?.let { AuthMessageCard(it, it == AuthErrorPresentation.ResetEmailSent) }
+        if (!isConfigured) Text(stringResource(R.string.auth_developer_setup), color = Color.White)
     }
 }
 
@@ -445,9 +531,9 @@ private fun PasswordResetScreen(
         ) {
             AuthCard {
                 Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(AuthPresentation.ResetTitle, fontSize = 26.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                    Text(stringResource(R.string.auth_reset_password), fontSize = 26.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
                     Text(
-                        AuthPresentation.ResetDescription,
+                        stringResource(R.string.auth_reset_description),
                         fontSize = 15.sp,
                         lineHeight = 21.sp,
                         color = IlluminedThemeTokens.SecondaryText,
@@ -460,7 +546,7 @@ private fun PasswordResetScreen(
                         value = email,
                         onValueChange = onEmail,
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Email") },
+                        label = { Text(stringResource(R.string.auth_email)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done),
                         enabled = !working,
@@ -472,13 +558,13 @@ private fun PasswordResetScreen(
                         shape = RoundedCornerShape(14.dp),
                     ) {
                         if (working) CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                        else Text("Send Reset Email", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                        else Text(stringResource(R.string.auth_send_reset_email), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                     }
                     OutlinedButton(
                         onClick = onBack,
                         enabled = !working,
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                    ) { Text("Back to Sign In", fontSize = 16.sp, fontWeight = FontWeight.SemiBold) }
+                    ) { Text(stringResource(R.string.auth_back_to_sign_in), fontSize = 16.sp, fontWeight = FontWeight.SemiBold) }
                 }
             }
             message?.let { AuthMessageCard(it, it == AuthErrorPresentation.ResetEmailSent) }
@@ -487,13 +573,13 @@ private fun PasswordResetScreen(
 }
 
 @Composable
-private fun AuthCard(content: @Composable () -> Unit) {
+private fun AuthCard(cornerRadius: androidx.compose.ui.unit.Dp = 16.dp, transparent: Boolean = false, content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White.copy(.94f),
-        shadowElevation = 6.dp,
-        border = androidx.compose.foundation.BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.22f)),
+        shape = RoundedCornerShape(cornerRadius),
+        color = if (transparent) Color.Transparent else Color.White.copy(.94f),
+        shadowElevation = if (transparent) 0.dp else 6.dp,
+        border = if (transparent) null else androidx.compose.foundation.BorderStroke(1.dp, IlluminedThemeTokens.Gold.copy(.22f)),
         content = content,
     )
 }
@@ -513,7 +599,12 @@ private fun AuthMessageCard(message: String, success: Boolean) {
 }
 
 @Composable
-private fun FormationHome(userId: String, email: String, inviteLink: IlluminedInviteLink?, onInviteConsumed: () -> Unit, onSignOut: () -> Unit, dailyFormationOpenRequest: Int = 0) {
+private fun FormationHome(userId: String, email: String, inviteLink: IlluminedInviteLink?, onInviteConsumed: () -> Unit, onSignOut: () -> Unit, dailyFormationOpenRequest: DailyFormationOpenRequest? = null) {
+    LaunchedEffect(userId) {
+        com.google.firebase.functions.FirebaseFunctions.getInstance("us-central1")
+            .getHttpsCallable("refreshAssignmentProgress").call()
+            .addOnFailureListener { android.util.Log.w("AssignmentProgress", "Progress refresh unavailable", it) }
+    }
     val repository = remember { FormationRepository() }
     val notificationRegistrar = remember { NotificationRegistrar() }
     val notificationContext = LocalContext.current
@@ -525,8 +616,45 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
     var completionWorking by remember { mutableStateOf(false) }
     var completionError by remember { mutableStateOf<String?>(null) }
     var profileReload by remember { mutableIntStateOf(0) }
+    var headerAccountOpen by rememberSaveable(userId) { mutableStateOf(false) }
+    var requestInboxOpen by rememberSaveable(userId) { mutableStateOf(false) }
+    val requestCounts = pendingClassroomRequests(overview?.profile)
+    val messageRequest = com.illumined.app.notifications.MessageNotificationNavigation.request
+    val messageProfile = overview?.profile
+    val privateUnread = inboxUnreadCount(messageProfile)
+    val classroomUnread = classroomUnreadCount(messageProfile)
+    if (messageRequest != null && messageProfile != null &&
+        com.illumined.app.notifications.canOpenMessageRequest(messageRequest, userId,
+            messageProfile.activeClassIds, messageProfile.removedClassIds, messageProfile.inactiveClassIds)) {
+        if(messageRequest.refreshments) RefreshmentSignup(messageRequest.classId, userId, initiallyOpen = true) {
+            com.illumined.app.notifications.MessageNotificationNavigation.request = null
+        } else androidx.compose.ui.window.Dialog(
+            onDismissRequest = { com.illumined.app.notifications.MessageNotificationNavigation.request = null },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
+            ChatPage(userId, messageProfile.copy(activeClassId = messageRequest.classId), initialInbox = messageRequest.privateMessage) {
+                com.illumined.app.notifications.MessageNotificationNavigation.request = null
+            }
+        }
+    }
+    val requestCount = if(requestCounts.values.any { it < 0 }) -1 else requestCounts.values.sum()
+    var headerPhotoRefresh by remember(userId) { mutableIntStateOf(0) }
     var dailyFormation by remember { mutableStateOf<DailyFormationEntry?>(null) }
+    var startupFormationChecked by remember(userId) { mutableStateOf(false) }
     var loadedDailyFormationKey by remember { mutableStateOf("") }
+    var dailyFormationLoadGeneration by remember { mutableIntStateOf(0) }
+    val walkthrough = remember(userId) { InstructorWalkthroughState() }
+    LaunchedEffect(overview?.profile?.isConfigured, overview?.profile?.isInstructor) {
+        if (overview?.profile?.isInstructor == false) walkthrough.stop()
+        overview?.profile?.takeIf { it.isConfigured }?.let { walkthrough.prepare(notificationContext, userId, it.isInstructor, it.isAdmin) }
+    }
+    LaunchedEffect(walkthrough.page, walkthrough.active) {
+        if (walkthrough.active) {
+            selectedAssignmentId = null
+            selectedSectionReset += 1
+            selectedSection = FormationSection.entries.first { it.name.lowercase() == walkthrough.page }
+        }
+    }
+    val walkthroughBlocking = !walkthrough.checked || walkthrough.loadingRemote || walkthrough.invitation || walkthrough.active
 
     BackHandler(enabled = selectedAssignmentId != null) {
         if (!completionWorking) {
@@ -543,17 +671,30 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
                 overview = updated
                 if (!hadOverview) error = null
             },
-            onError = { error = "We couldn’t load your formation. Please try again." },
+            onError = { error = appT("We couldn’t load your formation. Please try again.", "No pudimos cargar tu formación. Inténtalo de nuevo.") },
         )
         onDispose { listener.remove() }
+    }
+
+    val setupPhotoPreferences = notificationContext.getSharedPreferences("setup-photos", 0)
+    val setupPhotoProfile = overview?.profile
+    val pendingPhotoClassroom = ClassroomChoiceStore(notificationContext).load()
+    if (setupPhotoProfile?.isConfigured == true && setupPhotoPreferences.getBoolean(userId, false) &&
+        (pendingPhotoClassroom == null || pendingPhotoClassroom.classId in setupPhotoProfile.classIds)) {
+        SetupPhotosPage(userId, setupPhotoProfile.selectedClassId, setupPhotoProfile.isInstructor) {
+            setupPhotoPreferences.edit().remove(userId).apply()
+            onInviteConsumed()
+            profileReload += 1
+        }
+        return
     }
 
     if (OverviewPresentation.errorPresentation(overview != null, error) == OverviewErrorPresentation.Alert) {
         AlertDialog(
             onDismissRequest = { error = null },
-            title = { Text("Dashboard Error") },
-            text = { Text(error.orEmpty()) },
-            confirmButton = { TextButton(onClick = { error = null }) { Text("OK") } },
+            title = { Text(appT("Dashboard Error", "Error de la página de inicio")) },
+            text = { Text(localizedUserMessage(error.orEmpty())) },
+            confirmButton = { TextButton(onClick = { error = null }) { Text(appT("OK", "Aceptar")) } },
         )
     }
 
@@ -569,24 +710,39 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
         val profile = dailyProfile ?: return@LaunchedEffect
         if (dailyKey.isNotBlank() && loadedDailyFormationKey != dailyKey) {
             loadedDailyFormationKey = dailyKey
-            repository.loadDailyFormation(profile, onSuccess = { dailyFormation = it }, onError = { /* supplemental startup content */ })
+            dailyFormationLoadGeneration += 1
+            val generation = dailyFormationLoadGeneration
+            repository.loadDailyFormation(
+                profile,
+                onSuccess = { if (generation == dailyFormationLoadGeneration) dailyFormation = it; startupFormationChecked = true },
+                onError = { startupFormationChecked = true },
+            )
         }
     }
 
-    LaunchedEffect(dailyFormationOpenRequest, dailyProfile?.userId) {
+    LaunchedEffect(dailyFormationOpenRequest?.id, dailyProfile?.userId) {
         val profile = dailyProfile ?: return@LaunchedEffect
-        if (dailyFormationOpenRequest > 0) {
-            repository.loadDailyFormation(profile, force = true, onSuccess = { dailyFormation = it }, onError = { /* supplemental content */ })
-        }
+        val request = dailyFormationOpenRequest ?: return@LaunchedEffect
+        dailyFormationLoadGeneration += 1
+        val generation = dailyFormationLoadGeneration
+        repository.loadDailyFormation(
+            profile = profile,
+            force = true,
+            requestedClassId = request.classId,
+            requestedDate = request.date,
+            onSuccess = { if (generation == dailyFormationLoadGeneration) dailyFormation = it },
+            onError = { /* supplemental content */ },
+        )
     }
 
-    dailyFormation?.let { entry ->
+    dailyFormation?.takeUnless { walkthroughBlocking }?.let { entry ->
         DailyFormationDialog(entry = entry) {
             dailyFormation = null
             dailyProfile?.let { repository.dismissDailyFormation(it, entry) }
         }
     }
 
+    InstructorStartupCard(dailyProfile, startupFormationChecked && dailyFormation == null && !walkthroughBlocking)
     val nextScheduleDay = overview?.let { ClassScheduleSelection.nextDay(it.schedule) }
     val selectedAssignment = overview?.assignments?.firstOrNull { it.id == selectedAssignmentId }
     LaunchedEffect(selectedAssignmentId, overview?.assignments) {
@@ -595,7 +751,8 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
         }
     }
 
-    if (overview?.profile?.isConfigured == false) {
+    val requestedClassroom = remember(userId, profileReload) { ClassroomChoiceStore(notificationContext).load() }
+    if (overview?.profile?.isConfigured == false || (overview != null && requestedClassroom != null && requestedClassroom.classId !in overview!!.profile.classIds)) {
         Column(Modifier.fillMaxSize().background(IlluminedThemeTokens.Cream)) {
             IlluminedBrandHeader()
             ProfileSetupExperience(
@@ -647,7 +804,7 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
                     },
                     onError = {
                         completionWorking = false
-                        completionError = "We couldn’t save your progress. Please try again."
+                        completionError = appT("We couldn’t save your progress. Please try again.", "No pudimos guardar tu progreso. Inténtalo de nuevo.")
                     },
                 )
             },
@@ -656,19 +813,16 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
                 completionError = null
                 repository.setReadingCompleted(activeProfile, assignment, reading, completed, completedReadingIds, {
                     val readingKey = "${assignment.id}__reading__${reading.id}"
-                    val parentCompleted = InstructorReadinessCalculator.parentCompletedAfterReadingChange(assignment.readings.map { it.id }, reading.id, completed, completedReadingIds)
-                    val updatedRecords = overview?.assignmentCompletions.orEmpty().filterNot { it.assignmentId == readingKey || it.assignmentId == assignment.id } + listOf(
+                    val updatedRecords = overview?.assignmentCompletions.orEmpty().filterNot { it.assignmentId == readingKey } + listOf(
                         AssignmentCompletion(readingKey, userId, overview?.profile?.displayName.orEmpty(), completed, assignment.id, reading.id, reading.title, "reading"),
-                        AssignmentCompletion(assignment.id, userId, overview?.profile?.displayName.orEmpty(), parentCompleted),
                     )
                     overview = overview?.copy(
                         assignmentCompletions = updatedRecords,
-                        completedAssignmentIds = if (parentCompleted) overview!!.completedAssignmentIds + assignment.id else overview!!.completedAssignmentIds - assignment.id,
                     )
                     completionWorking = false
                 }, {
                     completionWorking = false
-                    completionError = "We couldn’t save your reading progress. Please try again."
+                    completionError = appT("We couldn’t save your reading progress. Please try again.", "No pudimos guardar el progreso de tu lectura. Inténtalo de nuevo.")
                 })
             },
             onMarkLessonComplete = { lessonId, badgeIds, success, failure ->
@@ -697,6 +851,8 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
         return
     }
 
+    androidx.compose.runtime.CompositionLocalProvider(LocalInstructorWalkthrough provides walkthrough) {
+    BackHandler(enabled = headerAccountOpen) { headerAccountOpen = false; headerPhotoRefresh++ }
     Column(
         modifier = Modifier.fillMaxSize().background(
             Brush.radialGradient(
@@ -705,9 +861,17 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
             ),
         ),
     ) {
-        IlluminedBrandHeader()
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            key(selectedSection, selectedSectionReset) { when (selectedSection) {
+        IlluminedBrandHeader(userId, headerPhotoRefresh, requestCount, { requestInboxOpen=true; headerAccountOpen=false }) { headerAccountOpen = true; requestInboxOpen=false }
+        if ((privateUnread > 0 || classroomUnread > 0) && messageProfile != null) {
+            TextButton(onClick = {
+                com.illumined.app.notifications.MessageNotificationNavigation.request =
+                    com.illumined.app.notifications.MessageOpenRequest(messageProfile.selectedClassId, userId, privateUnread > 0)
+            }) { Text(appT("Unread messages", "Mensajes sin leer") + " · ${privateUnread + classroomUnread}") }
+        }
+        Box(modifier = Modifier.weight(1f).fillMaxWidth().walkthroughAnchor("viewport")) {
+            if (requestInboxOpen) ClassroomRequestInbox(requestCounts) { requestInboxOpen=false }
+            else if (headerAccountOpen) AccountPage(email, overview?.profile, onSignOut) { headerAccountOpen = false; headerPhotoRefresh++ }
+            else key(selectedSection, selectedSectionReset) { when (selectedSection) {
                 FormationSection.Home -> HomeSection(
                     userId = userId,
                     email = email,
@@ -715,7 +879,7 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
                     overview = overview,
                     error = error,
                     nextScheduleDay = nextScheduleDay,
-                    onOpenLessons = { selectedSection = FormationSection.Lessons },
+                    onOpenLessons = { selectedSection = FormationSection.Lessons; walkthrough.selected("lessons") },
                     onOpenAssignment = { selectedAssignmentId = it.id },
                     onPrayerPosted = { profileReload += 1 },
                     onRetry = { error = null; profileReload += 1 },
@@ -751,11 +915,12 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
                         )
                     },
                 )
-                FormationSection.Discussion -> DiscussionExperience(
+                FormationSection.Discussion -> Box(Modifier.fillMaxSize().walkthroughAnchor("discussion")) { DiscussionExperience(
                     userId = userId,
                     profile = overview?.profile,
                     prompts = overview?.discussionPrompts.orEmpty(),
                     assignments = overview?.assignments.orEmpty(),
+                    assignmentCompletions = overview?.assignmentCompletions.orEmpty(),
                     loadError = OverviewPresentation.sectionLoadError(overview != null, error),
                     onCompleteAssignment = { assignment, success, failure ->
                         repository.setAssignmentCompleted(
@@ -772,6 +937,7 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
                         )
                     },
                 )
+                }
                 FormationSection.Formation -> SpiritualFormationExperience(
                     profile = overview?.profile,
                     memorizedPrayerIds = overview?.profile?.memorizedPrayerIds.orEmpty(),
@@ -843,8 +1009,14 @@ private fun FormationHome(userId: String, email: String, inviteLink: IlluminedIn
             } }
         }
         FormationNavigation(selectedSection) {
+            headerAccountOpen = false
+            requestInboxOpen = false
+            headerPhotoRefresh++
             if (selectedSection == it) selectedSectionReset += 1 else selectedSection = it
+            walkthrough.selected(it.name.lowercase())
         }
+    }
+    InstructorWalkthroughOverlay(walkthrough)
     }
 }
 
@@ -859,12 +1031,22 @@ internal fun DailyFormationDialog(entry: DailyFormationEntry, onDismiss: () -> U
         textContentColor = colors.third,
         title = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(entry.type.replace('_', ' ').uppercase(), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(dailyFormationTypeLabel(entry.type), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 Text(entry.title, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 Box(Modifier.width(86.dp).height(3.dp).background(colors.second))
             }
         },
-        text = { Text(entry.details, fontSize = 18.sp, lineHeight = 27.sp) },
+        text = {
+            Text(
+                text = entry.details,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 360.dp)
+                    .verticalScroll(rememberScrollState()),
+                fontSize = 18.sp,
+                lineHeight = 27.sp,
+            )
+        },
         confirmButton = {
             Button(
                 onClick = onDismiss,
@@ -873,10 +1055,19 @@ internal fun DailyFormationDialog(entry: DailyFormationEntry, onDismiss: () -> U
                     contentColor = buttonContentColor,
                 ),
             ) {
-                Text("Dismiss for Today")
+                Text(appT("Dismiss for Today", "Cerrar por hoy"))
             }
         },
     )
+}
+
+internal fun appT(english: String, spanish: String): String =
+    if (java.util.Locale.getDefault().language == "es") spanish else english
+
+private fun dailyFormationTypeLabel(type: String): String = when (type.lowercase()) {
+    "fact" -> appT("FACT OF THE DAY", "DATO DEL DÍA")
+    "saint" -> appT("SAINT OF THE DAY", "SANTO DEL DÍA")
+    else -> appT("LITURGICAL NOTE", "NOTA LITÚRGICA")
 }
 
 private fun dailyFormationButtonContentColor(code: String): Color = when (code.uppercase()) {
@@ -905,24 +1096,24 @@ private fun CommunitySection(overview: FormationOverview?, error: String?) {
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {
-            Text("Discussion", color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
-            Text("Discuss, reflect, and pray with your OCIA class", color = IlluminedThemeTokens.SecondaryText)
+            Text(stringResource(R.string.nav_discussion), color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
+            Text(appT("Discuss, reflect, and pray with your OCIA class", "Conversa, reflexiona y ora con tu clase de OCIA"), color = IlluminedThemeTokens.SecondaryText)
             Spacer(modifier = Modifier.height(12.dp))
         }
         when {
-            error != null -> item { Text(error, color = Color(0xFFFFB4AB)) }
+            error != null -> item { Text(localizedUserMessage(error), color = Color(0xFFFFB4AB)) }
             overview == null -> item { LoadingFormation() }
             else -> {
                 item {
-                    Text("DISCUSSIONS", color = IlluminedThemeTokens.Gold, fontSize = 11.sp,
+                    Text(appT("DISCUSSIONS", "DISCUSIONES"), color = IlluminedThemeTokens.Gold, fontSize = 11.sp,
                         fontWeight = FontWeight.Bold, letterSpacing = 1.3.sp)
                 }
                 if (overview.discussionPrompts.isEmpty()) {
-                    item { FormationCard("DISCUSSIONS", "No active prompts", "Your instructor’s prompts will appear here.") }
+                    item { FormationCard(appT("DISCUSSIONS", "DISCUSIONES"), appT("No active prompts", "No hay temas activos"), appT("Your instructor’s prompts will appear here.", "Los temas de tu instructor aparecerán aquí.")) }
                 } else {
                     items(overview.discussionPrompts, key = { "prompt-${it.id}" }) { prompt ->
                         FormationCard(
-                            eyebrow = if (prompt.requiredForAssignment) "REQUIRED DISCUSSION" else "DISCUSSION",
+                            eyebrow = if (prompt.requiredForAssignment) appT("REQUIRED DISCUSSION", "DISCUSIÓN OBLIGATORIA") else appT("DISCUSSION", "DISCUSIÓN"),
                             title = prompt.title,
                             detail = prompt.prompt,
                         )
@@ -1003,7 +1194,7 @@ private fun HomeSection(
                     prayerWorking=false;prayerComposer=false;prayerTitle="";prayerDetails="";onPrayerPosted()
                 }, { throwable ->
                     prayerWorking = false
-                    prayerError = throwable.message ?: "Prayer request could not be posted."
+                    prayerError = localizedUserMessage(throwable.message ?: appT("Prayer request could not be posted.", "No se pudo publicar la petición de oración."))
                 })
             },
         )
@@ -1027,44 +1218,18 @@ private fun HomeSection(
                 FormationLoadUnavailable(error.orEmpty(), onRetry)
             overview == null -> LoadingFormation()
             else -> {
-                HomeWelcomeCard(overview.profile)
+                Box(Modifier.walkthroughAnchor("welcome")) { HomeWelcomeCard(overview.profile) }
                 Spacer(modifier = Modifier.height(14.dp))
-                NextScheduledDayCard(nextScheduleDay)
-                Spacer(modifier = Modifier.height(14.dp))
-                Surface(
-                    onClick = onOpenLessons,
-                    modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
-                    color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp,
-                ) {
-                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        if (usesStackedTracker) {
-                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("Lesson Tracker", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-                                Text("$lessonCompleteCount/${allLessons.size}", color = IlluminedThemeTokens.Blue, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-                            }
-                        } else {
-                            Row { Text("Lesson Tracker", fontSize = 17.sp, fontWeight = FontWeight.SemiBold); Spacer(Modifier.weight(1f)); Text("$lessonCompleteCount/${allLessons.size}", color = IlluminedThemeTokens.Blue, fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
-                        }
-                        LinearProgressIndicator(progress = { if (allLessons.isEmpty()) 0f else lessonCompleteCount.toFloat() / allLessons.size }, modifier = Modifier.fillMaxWidth(), color = IlluminedThemeTokens.Gold)
-                        if (usesStackedTracker) {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                TrackerStat("Completed", "$lessonCompleteCount", IlluminedThemeTokens.Blue, Modifier.fillMaxWidth())
-                                TrackerStat("Uncompleted", "$lessonRemaining", IlluminedThemeTokens.Gold, Modifier.fillMaxWidth())
-                            }
-                        } else {
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                TrackerStat("Completed", "$lessonCompleteCount", IlluminedThemeTokens.Blue, Modifier.weight(1f))
-                                TrackerStat("Uncompleted", "$lessonRemaining", IlluminedThemeTokens.Gold, Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
+                NextScheduledDayCard(nextScheduleDay, overview.profile.selectedClassId, userId)
                 Spacer(modifier = Modifier.height(14.dp))
                 HomeAnnouncementsCard(
                     announcements = announcements.take(3),
                     onOpen = { selectedAnnouncement = it },
                 )
                 Spacer(modifier = Modifier.height(14.dp))
+                Box(Modifier.walkthroughAnchor("guides")) {
+                    RitePreparationDashboard(classId = classId, userId = userId)
+                }
                 HomeAssignmentsCard(
                     assignments = overview.assignments,
                     completedIds = overview.completedAssignmentIds,
@@ -1085,6 +1250,7 @@ private fun HomeSection(
 
 @Composable
 private fun HomeWelcomeCard(profile: com.illumined.app.data.UserProfile) {
+    val noClassAssigned = stringResource(R.string.home_no_class_assigned)
     Surface(
         modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
         color = Color.White.copy(.94f),
@@ -1092,10 +1258,11 @@ private fun HomeWelcomeCard(profile: com.illumined.app.data.UserProfile) {
         shadowElevation = 6.dp,
     ) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Welcome, ${profile.displayName}", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+            SavedProfilePhoto("classroom", profile.selectedClassId)
+            Text(stringResource(R.string.home_welcome, profile.displayName), fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 HomeSymbol(HomeSymbolKind.ClassMembers, IlluminedThemeTokens.SecondaryText, Modifier.size(22.dp))
-                Text(profile.selectedClassId.ifBlank { "No class assigned" }, color = IlluminedThemeTokens.SecondaryText)
+                Text(profile.selectedClassId.ifBlank { noClassAssigned }, color = IlluminedThemeTokens.SecondaryText)
             }
         }
     }
@@ -1109,25 +1276,25 @@ private fun HomePrayerRequestsCard(
     onOpen: (PrayerRequest) -> Unit,
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
+        modifier = Modifier.walkthroughAnchor("prayers").fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
         color = Color.White.copy(.94f),
         shape = RoundedCornerShape(16.dp),
         shadowElevation = 6.dp,
     ) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Prayer Requests", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-                Text("Invite your class to pray with you", fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
+                Text(stringResource(R.string.home_prayer_requests), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.home_prayer_invitation), fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText)
             }
             Button(
                 onClick = onNewRequest,
                 enabled = canPost,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RoundedCornerShape(14.dp),
-            ) { Row(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalAlignment=Alignment.CenterVertically){InstructorSymbol(InstructorSymbolKind.PlusCircle,Color.White,Modifier.size(18.dp));Text("New Prayer Request",fontSize=15.sp,fontWeight=FontWeight.SemiBold)} }
+            ) { Row(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalAlignment=Alignment.CenterVertically){InstructorSymbol(InstructorSymbolKind.PlusCircle,Color.White,Modifier.size(18.dp));Text(stringResource(R.string.home_new_prayer_request),fontSize=15.sp,fontWeight=FontWeight.SemiBold)} }
             if (requests.isEmpty()) {
                 Text(
-                    "No active prayer requests yet. Be the first to invite the class to pray.",
+                    stringResource(R.string.home_no_prayer_requests),
                     color = IlluminedThemeTokens.SecondaryText,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
@@ -1145,7 +1312,7 @@ private fun HomePrayerRequestsCard(
                             Text(request.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 2)
                             val cleaned = request.details.trim()
                             Text(
-                                if (cleaned.isEmpty()) "No additional details." else cleaned.let { if (it.length <= 50) it else "${it.take(50)}..." },
+                                if (cleaned.isEmpty()) stringResource(R.string.home_no_additional_details) else cleaned.let { if (it.length <= 50) it else "${it.take(50)}..." },
                                 fontSize = 12.sp,
                                 color = IlluminedThemeTokens.SecondaryText,
                                 maxLines = 2,
@@ -1160,9 +1327,9 @@ private fun HomePrayerRequestsCard(
 }
 
 @Composable
-private fun NextScheduledDayCard(day: ClassScheduleDay?) {
+private fun NextScheduledDayCard(day: ClassScheduleDay?, classId: String, userId: String) {
     Surface(
-        modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
+        modifier = Modifier.walkthroughAnchor("schedule").fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)),
         color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp,
     ) {
         Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.Top) {
@@ -1171,9 +1338,9 @@ private fun NextScheduledDayCard(day: ClassScheduleDay?) {
             }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Upcoming", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                Text(stringResource(R.string.home_upcoming), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
                 if (day == null) {
-                    Text("No class scheduled", fontSize = 19.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                    Text(stringResource(R.string.home_no_class_scheduled), fontSize = 19.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
                 } else {
                     day.sessions.forEach { session ->
                         Text(
@@ -1189,6 +1356,7 @@ private fun NextScheduledDayCard(day: ClassScheduleDay?) {
                         color = IlluminedThemeTokens.SecondaryText,
                     )
                 }
+                RefreshmentSignup(classId, userId)
             }
         }
     }
@@ -1199,16 +1367,16 @@ private fun HomeAnnouncementsCard(
     announcements: List<com.illumined.app.data.Announcement>,
     onOpen: (com.illumined.app.data.Announcement) -> Unit,
 ) {
-    Surface(modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp) {
+    Surface(modifier = Modifier.walkthroughAnchor("announcements").fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Announcements", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
-                    Text("Updates from your instructor", fontSize = 12.sp, color = IlluminedThemeTokens.SecondaryText)
+                    Text(stringResource(R.string.home_announcements), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                    Text(stringResource(R.string.home_instructor_updates), fontSize = 12.sp, color = IlluminedThemeTokens.SecondaryText)
                 }
                 HomeSymbol(HomeSymbolKind.Megaphone, IlluminedThemeTokens.Gold, Modifier.size(23.dp))
             }
-            if (announcements.isEmpty()) Text("No announcements yet.", fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText, modifier = Modifier.padding(vertical = 8.dp))
+            if (announcements.isEmpty()) Text(stringResource(R.string.home_no_announcements), fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText, modifier = Modifier.padding(vertical = 8.dp))
             else announcements.forEach { announcement ->
                 Surface(
                     onClick = { onOpen(announcement) },
@@ -1245,7 +1413,7 @@ private fun AnnouncementDetail(
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("‹ Back") }
             Spacer(Modifier.weight(1f))
-            Text("Announcement", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+            Text(appT("Announcement", "Anuncio"), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
             Spacer(Modifier.weight(1f))
             Spacer(Modifier.width(60.dp))
         }
@@ -1281,31 +1449,42 @@ private fun AnnouncementDetail(
 private fun HomeAssignmentsCard(assignments: List<Assignment>, completedIds: Set<String>, onClick: () -> Unit) {
     val visible = homeAssignmentPreview(assignments)
     val remaining = remainingHomeAssignmentCount(assignments)
-    Surface(onClick = onClick, modifier = Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp) {
+    Surface(onClick = onClick, modifier = Modifier.walkthroughAnchor("assignments").fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), color = Color.White.copy(.94f), shape = RoundedCornerShape(16.dp), shadowElevation = 6.dp) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Assignments", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
-                    Text(if (visible.isEmpty()) "No active assignments yet" else "${assignments.size} active assignment${if (assignments.size == 1) "" else "s"}", fontSize = 12.sp, color = IlluminedThemeTokens.SecondaryText)
+                    Text(stringResource(R.string.home_assignments), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                    Text(if (visible.isEmpty()) stringResource(R.string.home_no_active_assignments) else pluralStringResource(R.plurals.home_active_assignments, assignments.size, assignments.size), fontSize = 12.sp, color = IlluminedThemeTokens.SecondaryText)
                 }
                 HomeSymbol(HomeSymbolKind.Checklist, IlluminedThemeTokens.Gold, Modifier.size(22.dp)); Spacer(Modifier.width(8.dp)); HomeSymbol(HomeSymbolKind.ChevronRight, IlluminedThemeTokens.SecondaryText, Modifier.size(12.dp))
             }
-            if (visible.isEmpty()) Text("Tap here when your instructor posts assignments.", fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText, modifier = Modifier.padding(vertical = 8.dp))
+            if (visible.isEmpty()) Text(stringResource(R.string.home_assignments_prompt), fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText, modifier = Modifier.padding(vertical = 8.dp))
             else visible.forEach { assignment -> AssignmentSummaryRow(assignment, assignment.id in completedIds) }
-            if (remaining > 0) Text("+ $remaining more assignment${if (remaining == 1) "" else "s"}", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.SecondaryText)
+            if (remaining > 0) Text(pluralStringResource(R.plurals.home_more_assignments, remaining, remaining), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.SecondaryText)
         }
     }
 }
 
 @Composable
 private fun AssignmentSummaryRow(assignment: Assignment, completed: Boolean) {
+    val dueDate = assignment.dueAt?.toDate()
+    val dueText = if (dueDate == null) {
+        stringResource(R.string.home_due_not_set)
+    } else {
+        stringResource(R.string.home_due, java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(dueDate))
+    }
     Row(Modifier.fillMaxWidth().background(IlluminedThemeTokens.Blue.copy(.07f), RoundedCornerShape(12.dp)).padding(12.dp), verticalAlignment = Alignment.Top) {
         LessonSymbol(if (completed) LessonSymbolKind.CheckCircle else LessonSymbolKind.RadioOff, if (completed) IlluminedThemeTokens.Blue else IlluminedThemeTokens.SecondaryText, Modifier.size(20.dp))
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(assignment.title, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue, maxLines = 2)
-            Text(assignment.dueAt?.toDate()?.let { "Due ${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it)}" } ?: "Due date not set", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.SecondaryText)
-            assignment.homeContentLabel()?.let {
+            Text(dueText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.SecondaryText)
+            val contentLabel = when {
+                assignment.readings.isNotEmpty() -> pluralStringResource(R.plurals.home_readings, assignment.readings.size, assignment.readings.size)
+                assignment.lessonLinks.isNotEmpty() -> assignment.lessonLinks.first().lessonTitle.ifBlank { assignment.lessonLinks.first().lessonId }
+                else -> null
+            }
+            contentLabel?.let {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     LessonSymbol(if (assignment.readings.isNotEmpty()) LessonSymbolKind.DocumentText else LessonSymbolKind.BookClosed, IlluminedThemeTokens.Gold, Modifier.size(13.dp))
                     Spacer(Modifier.width(6.dp))
@@ -1319,9 +1498,9 @@ private fun AssignmentSummaryRow(assignment: Assignment, completed: Boolean) {
 @Composable
 private fun HomeAssignmentsList(assignments: List<Assignment>, completedIds: Set<String>, onBack: () -> Unit, onOpen: (Assignment) -> Unit) {
     LazyColumn(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(IlluminedThemeTokens.Parchment, IlluminedThemeTokens.Cream), radius = 1600f)), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { TextButton(onClick = onBack) { Text("‹ Back") } }
-        item { AssignmentDetailCard { Text("Assignments", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue); Text("Select an assignment to open the full details, readings, lesson links, and completion check.", fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText) } }
-        if (assignments.isEmpty()) item { FormationCard("ASSIGNMENTS", "No Assignments", "Your instructor has not posted active assignments yet.") }
+        item { TextButton(onClick = onBack) { Text(appT("‹ Back", "‹ Atrás")) } }
+        item { AssignmentDetailCard { Text(appT("Assignments", "Tareas"), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue); Text(appT("Select an assignment to open the full details, readings, lesson links, and completion check.", "Selecciona una tarea para ver todos los detalles, las lecturas, los enlaces a las lecciones y el estado de finalización."), fontSize = 15.sp, color = IlluminedThemeTokens.SecondaryText) } }
+        if (assignments.isEmpty()) item { FormationCard(appT("ASSIGNMENTS", "TAREAS"), appT("No Assignments", "No hay tareas"), appT("Your instructor has not posted active assignments yet.", "Tu instructor todavía no ha publicado tareas activas.")) }
         else items(assignments, key = { it.id }) { assignment ->
             Surface(onClick = { onOpen(assignment) }, modifier = Modifier.border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), shape = RoundedCornerShape(16.dp), color = Color.White.copy(.94f), shadowElevation = 6.dp) {
                 Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.Top) {
@@ -1329,17 +1508,17 @@ private fun HomeAssignmentsList(assignments: List<Assignment>, completedIds: Set
                     LessonSymbol(
                         if (completed) LessonSymbolKind.CheckCircle else LessonSymbolKind.RadioOff,
                         if (completed) IlluminedThemeTokens.Blue else IlluminedThemeTokens.SecondaryText,
-                        Modifier.size(22.dp).semantics { contentDescription = if (completed) "Completed" else "Not completed" },
+                        Modifier.size(22.dp).semantics { contentDescription = if (completed) appT("Completed", "Completada") else appT("Not completed", "No completada") },
                     )
                     Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(assignment.title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink, maxLines = 2)
-                        Text(assignment.dueAt?.toDate()?.let { "Due ${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it)}" } ?: "Due date not set", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
+                        Text(assignment.dueAt?.toDate()?.let { appT("Due ${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it)}", "Fecha límite: ${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it)}") } ?: appT("Due date not set", "Sin fecha límite"), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             if (assignment.readings.isNotEmpty()) Row(verticalAlignment = Alignment.CenterVertically) {
-                                LessonSymbol(LessonSymbolKind.DocumentText, IlluminedThemeTokens.Gold, Modifier.size(13.dp)); Spacer(Modifier.width(4.dp)); Text("${assignment.readings.size} reading${if (assignment.readings.size == 1) "" else "s"}", fontSize = 12.sp, color = IlluminedThemeTokens.Gold)
+                                LessonSymbol(LessonSymbolKind.DocumentText, IlluminedThemeTokens.Gold, Modifier.size(13.dp)); Spacer(Modifier.width(4.dp)); Text(if (assignment.readings.size == 1) appT("1 reading", "1 lectura") else appT("${assignment.readings.size} readings", "${assignment.readings.size} lecturas"), fontSize = 12.sp, color = IlluminedThemeTokens.Gold)
                             }
                             if (assignment.lessonLinks.isNotEmpty()) Row(verticalAlignment = Alignment.CenterVertically) {
-                                LessonSymbol(LessonSymbolKind.BookClosed, IlluminedThemeTokens.Gold, Modifier.size(13.dp)); Spacer(Modifier.width(4.dp)); Text("${assignment.lessonLinks.size} lesson${if (assignment.lessonLinks.size == 1) "" else "s"}", fontSize = 12.sp, color = IlluminedThemeTokens.Gold)
+                                LessonSymbol(LessonSymbolKind.BookClosed, IlluminedThemeTokens.Gold, Modifier.size(13.dp)); Spacer(Modifier.width(4.dp)); Text(if (assignment.lessonLinks.size == 1) appT("1 lesson", "1 lección") else appT("${assignment.lessonLinks.size} lessons", "${assignment.lessonLinks.size} lecciones"), fontSize = 12.sp, color = IlluminedThemeTokens.Gold)
                             }
                         }
                         if (assignment.instructions.isNotBlank()) Text(assignment.instructions, fontSize = 13.sp, color = IlluminedThemeTokens.SecondaryText, maxLines = 2)
@@ -1355,9 +1534,9 @@ private fun PrayerRequestDetail(request: PrayerRequest, currentUserId: String, r
     var reactionWorking by remember { mutableStateOf(false) }
     var reactionError by remember { mutableStateOf<String?>(null) }
     val reactionOptions = listOf(
-        Triple("praying", "🙏", "Praying"),
-        Triple("with_you", "❤️", "With you"),
-        Triple("amen", "🕊️", "Amen"),
+        Triple("praying", "🙏", appT("Praying", "Orando")),
+        Triple("with_you", "❤️", appT("With you", "Contigo")),
+        Triple("amen", "🕊️", appT("Amen", "Amén")),
     )
     Column(
         Modifier.fillMaxSize()
@@ -1365,9 +1544,9 @@ private fun PrayerRequestDetail(request: PrayerRequest, currentUserId: String, r
             .verticalScroll(rememberScrollState()),
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("‹ Back") }
+            TextButton(onClick = onBack) { Text(appT("‹ Back", "‹ Atrás")) }
             Spacer(Modifier.weight(1f))
-            Text("Prayer Request", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+            Text(appT("Prayer Request", "Petición de oración"), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
             Spacer(Modifier.weight(1f))
             Spacer(Modifier.width(60.dp))
         }
@@ -1384,13 +1563,13 @@ private fun PrayerRequestDetail(request: PrayerRequest, currentUserId: String, r
                 androidx.compose.material3.HorizontalDivider()
                 val cleanedDetails = request.details.trim()
                 Text(
-                    cleanedDetails.ifEmpty { "No additional details were added." },
+                    cleanedDetails.ifEmpty { appT("No additional details were added.", "No se añadieron detalles adicionales.") },
                     fontSize = if (cleanedDetails.isEmpty()) 16.sp else 17.sp,
                     lineHeight = if (cleanedDetails.isEmpty()) 22.sp else 27.sp,
                     color = if (cleanedDetails.isEmpty()) IlluminedThemeTokens.SecondaryText else IlluminedThemeTokens.Ink,
                 )
                 androidx.compose.material3.HorizontalDivider()
-                Text("Prayer acknowledgements", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Text(appT("Prayer acknowledgements", "Respuestas de oración"), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     reactionOptions.forEach { (value, emoji, label) ->
                         val selected = request.reactions[currentUserId] == value
@@ -1403,7 +1582,7 @@ private fun PrayerRequestDetail(request: PrayerRequest, currentUserId: String, r
                                     reactionWorking = false
                                 }, { problem ->
                                     reactionWorking = false
-                                    reactionError = problem.message ?: "Prayer response could not be saved."
+                                    reactionError = problem.message ?: appT("Prayer response could not be saved.", "No se pudo guardar la respuesta de oración.")
                                 })
                             },
                             enabled = request.requesterId != currentUserId && !reactionWorking,
@@ -1421,12 +1600,16 @@ private fun PrayerRequestDetail(request: PrayerRequest, currentUserId: String, r
                 }
                 if (request.requesterId == currentUserId) {
                     Text(
-                        "Classmates can acknowledge this request. ${request.reactions.size} response${if (request.reactions.size == 1) "" else "s"} received.",
+                        if (request.reactions.size == 1) {
+                            appT("Classmates can acknowledge this request. 1 response received.", "Los compañeros pueden reconocer esta petición. Se recibió 1 respuesta.")
+                        } else {
+                            appT("Classmates can acknowledge this request. ${request.reactions.size} responses received.", "Los compañeros pueden reconocer esta petición. Se recibieron ${request.reactions.size} respuestas.")
+                        },
                         fontSize = 12.sp,
                         color = IlluminedThemeTokens.SecondaryText,
                     )
                 }
-                reactionError?.let { Text(it, fontSize = 12.sp, color = Color.Red) }
+                reactionError?.let { Text(localizedUserMessage(it), fontSize = 12.sp, color = Color.Red) }
             }
         }
     }
@@ -1453,20 +1636,20 @@ private fun PrayerRequestComposer(
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = onCancel, enabled = !working, modifier = Modifier.size(width = 72.dp, height = 48.dp)) {
-                    Text("‹ Back", fontWeight = FontWeight.SemiBold)
+                    Text(appT("‹ Back", "‹ Atrás"), fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(Modifier.weight(1f))
                 TextButton(onClick = onPost, enabled = title.isNotBlank() && !working) {
-                    Text(if (working) "Posting..." else "Post", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    Text(if (working) appT("Posting...", "Publicando...") else appT("Post", "Publicar"), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
         item {
             AssignmentDetailCard {
-                Text("New Prayer Request", fontSize = 26.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                Text(appT("New Prayer Request", "Nueva petición de oración"), fontSize = 26.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "Share a request with your class so they can pray with you.",
+                    appT("Share a request with your class so they can pray with you.", "Comparte una petición con tu clase para que puedan orar contigo."),
                     fontSize = 15.sp,
                     color = IlluminedThemeTokens.SecondaryText,
                 )
@@ -1474,13 +1657,13 @@ private fun PrayerRequestComposer(
         }
         item {
             AssignmentDetailCard {
-                Text("Prayer Request", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                Text(appT("Prayer Request", "Petición de oración"), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
                 Spacer(Modifier.height(14.dp))
                 OutlinedTextField(
                     value = title,
                     onValueChange = onTitle,
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Title") },
+                    label = { Text(appT("Title", "Título")) },
                     singleLine = true,
                     enabled = !working,
                 )
@@ -1489,7 +1672,7 @@ private fun PrayerRequestComposer(
                     value = details,
                     onValueChange = onDetails,
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Optional details") },
+                    label = { Text(appT("Optional details", "Detalles opcionales")) },
                     minLines = 4,
                     maxLines = 8,
                     enabled = !working,
@@ -1501,7 +1684,7 @@ private fun PrayerRequestComposer(
                 Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     LessonSymbol(LessonSymbolKind.Clock,IlluminedThemeTokens.Gold,Modifier.size(22.dp))
                     Text(
-                        "Requests stay visible for 3 days and then expire from the board.",
+                        appT("Requests stay visible for 3 days and then expire from the board.", "Las peticiones permanecen visibles durante 3 días y luego desaparecen del tablero."),
                         fontSize = 15.sp,
                         color = IlluminedThemeTokens.SecondaryText,
                         modifier = Modifier.weight(1f),
@@ -1514,7 +1697,7 @@ private fun PrayerRequestComposer(
                 AssignmentDetailCard {
                     Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         DiscussionSymbol(DiscussionSymbolKind.Warning,Color.Red,Modifier.size(18.dp))
-                        Text(message, fontSize = 15.sp, color = Color.Red, modifier = Modifier.weight(1f))
+                        Text(localizedUserMessage(message), fontSize = 15.sp, color = Color.Red, modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -1536,26 +1719,26 @@ private fun LessonsSection(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {
-            Text("Lessons", color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
-            Text("Your assignments and formation readings", color = IlluminedThemeTokens.SecondaryText)
+            Text(stringResource(R.string.nav_lessons), color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
+            Text(appT("Your assignments and formation readings", "Tus tareas y lecturas de formación"), color = IlluminedThemeTokens.SecondaryText)
             Spacer(modifier = Modifier.height(12.dp))
         }
         when {
-            error != null -> item { Text(error, color = Color(0xFFFFB4AB)) }
+            error != null -> item { Text(localizedUserMessage(error), color = Color(0xFFFFB4AB)) }
             overview == null -> item { LoadingFormation() }
             overview.assignments.isEmpty() -> item {
-                FormationCard("ASSIGNMENTS", "Nothing assigned yet", "New lessons will appear here.")
+                FormationCard(appT("ASSIGNMENTS", "TAREAS"), appT("Nothing assigned yet", "Todavía no hay tareas"), appT("New lessons will appear here.", "Las nuevas lecciones aparecerán aquí."))
             }
             else -> items(overview.assignments, key = { it.id }) { assignment ->
                 val completed = assignment.id in overview.completedAssignmentIds
                 FormationCard(
-                    eyebrow = if (completed) "COMPLETED" else "TO DO",
+                    eyebrow = if (completed) appT("COMPLETED", "COMPLETADA") else appT("TO DO", "PENDIENTE"),
                     title = assignment.title,
                     detail = assignment.dueAt?.toDate()?.let {
                         buildString {
-                            append("Due ${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it)}")
-                            if (assignment.lessonLinks.isNotEmpty()) append("  •  ${assignment.lessonLinks.size} lesson${if (assignment.lessonLinks.size == 1) "" else "s"}")
-                            if (assignment.readings.isNotEmpty()) append("  •  ${assignment.readings.size} reading${if (assignment.readings.size == 1) "" else "s"}")
+                            append(appT("Due ${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it)}", "Fecha límite: ${java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it)}"))
+                            if (assignment.lessonLinks.isNotEmpty()) append("  •  ${if (assignment.lessonLinks.size == 1) appT("1 lesson", "1 lección") else appT("${assignment.lessonLinks.size} lessons", "${assignment.lessonLinks.size} lecciones")}")
+                            if (assignment.readings.isNotEmpty()) append("  •  ${if (assignment.readings.size == 1) appT("1 reading", "1 lectura") else appT("${assignment.readings.size} readings", "${assignment.readings.size} lecturas")}")
                         }
                     } ?: assignment.instructions,
                     onClick = { onOpenAssignment(assignment) },
@@ -1575,21 +1758,21 @@ private fun ScheduleSection(overview: FormationOverview?, error: String?) {
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {
-            Text("Formation", color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
-            Text("Your spiritual formation", color = IlluminedThemeTokens.SecondaryText)
+            Text(stringResource(R.string.nav_formation), color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
+            Text(appT("Your spiritual formation", "Tu formación espiritual"), color = IlluminedThemeTokens.SecondaryText)
             Spacer(modifier = Modifier.height(12.dp))
         }
         when {
-            error != null -> item { Text(error, color = Color(0xFFFFB4AB)) }
+            error != null -> item { Text(localizedUserMessage(error), color = Color(0xFFFFB4AB)) }
             overview == null -> item { LoadingFormation() }
             overview.schedule.isEmpty() -> item {
-                FormationCard("SCHEDULE", "No sessions scheduled", "Check back with your instructor.")
+                FormationCard(appT("SCHEDULE", "HORARIO"), appT("No sessions scheduled", "No hay sesiones programadas"), appT("Check back with your instructor.", "Consulta de nuevo con tu instructor."))
             }
             else -> items(overview.schedule, key = { it.id }) { session ->
                 FormationCard(
                     eyebrow = session.date?.toDate()?.let {
                         java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(it).uppercase()
-                    } ?: "SESSION",
+                    } ?: appT("SESSION", "SESIÓN"),
                     title = session.topic,
                     detail = session.details,
                 )
@@ -1601,21 +1784,21 @@ private fun ScheduleSection(overview: FormationOverview?, error: String?) {
 @Composable
 private fun ProfileSection(overview: FormationOverview?, email: String, onSignOut: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 44.dp)) {
-        Text("More", color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.nav_more), color = IlluminedThemeTokens.Ink, fontSize = 36.sp, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(24.dp))
         FormationCard(
-            eyebrow = "PARTICIPANT",
-            title = overview?.profile?.displayName ?: "Illumined participant",
+            eyebrow = appT("PARTICIPANT", "PARTICIPANTE"),
+            title = overview?.profile?.displayName ?: appT("Illumined participant", "Participante de Illumined"),
             detail = email,
         )
         Spacer(modifier = Modifier.height(14.dp))
         FormationCard(
-            eyebrow = "OCIA CLASS",
-            title = overview?.profile?.classIds?.joinToString().orEmpty().ifBlank { "Not assigned" },
-            detail = "Your parish formation group",
+            eyebrow = appT("OCIA CLASS", "CLASE DE OCIA"),
+            title = overview?.profile?.classIds?.joinToString().orEmpty().ifBlank { appT("Not assigned", "Sin asignar") },
+            detail = appT("Your parish formation group", "Tu grupo de formación parroquial"),
         )
         Spacer(modifier = Modifier.weight(1f))
-        OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) { Text("Sign out") }
+        OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) { Text(appT("Sign out", "Cerrar sesión")) }
     }
 }
 
@@ -1623,7 +1806,7 @@ private fun ProfileSection(overview: FormationOverview?, email: String, onSignOu
 private fun LoadingFormation() {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
-        Text("Loading your journey…", color = IlluminedThemeTokens.SecondaryText)
+        Text(stringResource(R.string.auth_loading_journey), color = IlluminedThemeTokens.SecondaryText)
     }
 }
 
@@ -1643,9 +1826,9 @@ private fun FormationLoadUnavailable(message: String, onRetry: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 DiscussionSymbol(DiscussionSymbolKind.Warning,IlluminedThemeTokens.Gold,Modifier.size(34.dp))
-                Text("Formation Unavailable", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
+                Text(stringResource(R.string.formation_unavailable), fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Ink)
                 Text(message, color = IlluminedThemeTokens.SecondaryText, textAlign = TextAlign.Center, lineHeight = 21.sp)
-                Button(onClick = onRetry, shape = RoundedCornerShape(14.dp)) { Text("Try Again") }
+                Button(onClick = onRetry, shape = RoundedCornerShape(14.dp)) { Text(stringResource(R.string.action_try_again)) }
             }
         }
     }
@@ -1668,6 +1851,7 @@ private fun FormationNavigation(
                     TextButton(
                         onClick = { onSelected(section) },
                         modifier = Modifier.weight(1f)
+                            .walkthroughAnchor("nav-" + section.name.lowercase())
                             .background(if (selected == section) IlluminedThemeTokens.Blue.copy(.08f) else Color.Transparent, RoundedCornerShape(AppChromePresentation.TabCornerRadius))
                             .semantics { this.selected = selected == section },
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 7.dp),
@@ -1686,7 +1870,7 @@ private fun FormationNavigation(
                                 modifier = Modifier.size(AppChromePresentation.TabIconSize),
                             )
                             Text(
-                                section.label,
+                                stringResource(section.labelResource),
                                 color = if (selected == section) IlluminedThemeTokens.Blue else IlluminedThemeTokens.Ink,
                                 fontSize = AppChromePresentation.fixedFontSize(AppChromePresentation.TabLabelSize.value, chromeFontScale).sp,
                                 fontWeight = if (selected == section) FontWeight.SemiBold else FontWeight.Normal,
@@ -1740,7 +1924,7 @@ private fun FormationCard(
 }
 
 @Composable
-private fun TrackerStat(title: String, value: String, color: Color, modifier: Modifier = Modifier) {
+internal fun TrackerStat(title: String, value: String, color: Color, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.background(color.copy(alpha = 0.07f), RoundedCornerShape(12.dp)).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -1774,16 +1958,50 @@ private fun LessonScreen(
         val ids = assignment.lessonLinks.map { it.lessonId }.toSet()
         lessonCategories.flatMap { it.lessons }.filter { it.id in ids }
     }
+    val assignmentPrompts = prompts.filter { it.assignmentId == assignment.id }.ifEmpty {
+        prompts.filter { prompt -> prompt.assignmentId.isBlank() && assignment.lessonLinks.any { it.lessonId == prompt.lessonId } }
+    }
+    val discussionRepository = remember { DiscussionRepository() }
+    var completedPromptIds by remember(assignment.id) { mutableStateOf(emptySet<String>()) }
     var selectedReading by remember(assignment.id) { mutableStateOf<AssignmentReading?>(null) }
     var selectedLesson by remember(assignment.id) { mutableStateOf<CatechismLesson?>(null) }
+    var selectedDiscussion by remember(assignment.id) { mutableStateOf<com.illumined.app.data.DiscussionPrompt?>(null) }
+    val readingsCompleted = assignment.readings.all { it.id in completedReadingIds }
+    val lessonsCompleted = assignment.lessonLinks.all { it.lessonId in completedLessonIds }
+    val prerequisitesCompleted = readingsCompleted && lessonsCompleted
+    val requiredPrompts = assignmentPrompts.filter { it.requiredForAssignment }
+    val totalActivities = assignment.readings.size + assignment.lessonLinks.size + requiredPrompts.size
+    val completedActivities = assignment.readings.count { it.id in completedReadingIds } + assignment.lessonLinks.count { it.lessonId in completedLessonIds } + requiredPrompts.count { it.id in completedPromptIds }
+    val nextReading = assignment.readings.firstOrNull { it.id !in completedReadingIds }
+    val nextLesson = assignment.lessonLinks.firstOrNull { it.lessonId !in completedLessonIds }
+    val nextDiscussion = requiredPrompts.firstOrNull { it.id !in completedPromptIds }
+    var continuationError by remember(assignment.id) { mutableStateOf<String?>(null) }
+    DisposableEffect(profile?.selectedClassId, userId) {
+        val listener = profile?.selectedClassId?.takeIf { it.isNotBlank() }?.let { classId ->
+            discussionRepository.listenParticipation(classId, userId, { completedPromptIds = it }, {})
+        }
+        onDispose { listener?.remove() }
+    }
     BackHandler {
         if (!isWorking) {
             when {
+                selectedDiscussion != null -> selectedDiscussion = null
                 selectedLesson != null -> selectedLesson = null
                 selectedReading != null -> selectedReading = null
                 else -> onBack()
             }
         }
+    }
+    selectedDiscussion?.let { discussion ->
+        DiscussionBoard(
+            prompt = discussion,
+            userId = userId,
+            profile = profile,
+            linkedAssignments = listOf(assignment),
+            onCompleteAssignment = onCompleteLinkedAssignment,
+            onBack = { selectedDiscussion = null },
+        )
+        return
     }
     selectedLesson?.let { lesson ->
         AssignedLessonExperience(
@@ -1820,24 +2038,41 @@ private fun LessonScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        TextButton(onClick = onBack, enabled = !isWorking) { Text("‹ Back") }
+        TextButton(onClick = onBack, enabled = !isWorking) { Text(appT("‹ Back", "‹ Atrás")) }
         AssignmentDetailCard {
             Text(assignment.title, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = IlluminedThemeTokens.Blue)
             Text(
                 assignment.dueAt?.toDate()?.let {
-                    "Due ${java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL).format(it)}"
-                } ?: "Due date not set",
+                    appT("Due ${java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL).format(it)}", "Fecha límite: ${java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL).format(it)}")
+                } ?: appT("Due date not set", "Sin fecha límite"),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = IlluminedThemeTokens.SecondaryText,
             )
         }
+        if (totalActivities > 0) AssignmentDetailCard {
+            Text(appT("$completedActivities of $totalActivities activities completed", "$completedActivities de $totalActivities actividades completadas"), fontWeight = FontWeight.SemiBold)
+            if (completedActivities < totalActivities) Button(onClick = {
+                continuationError = null
+                when {
+                    nextReading != null -> selectedReading = nextReading
+                    nextLesson != null -> {
+                        selectedLesson = linkedLessons.firstOrNull { it.id == nextLesson.lessonId }
+                        if (selectedLesson == null) continuationError = appT("The next lesson is unavailable. Please contact your instructor.", "La siguiente lección no está disponible. Contacta a tu instructor.")
+                    }
+                    nextDiscussion != null -> selectedDiscussion = nextDiscussion
+                }
+            }, enabled = !isWorking, modifier = Modifier.fillMaxWidth()) {
+                Text(appT("Continue Assignment", "Continuar tarea"))
+            }
+            continuationError?.let { Text(it, color = IlluminedThemeTokens.SecondaryText) }
+        }
         if (assignment.instructions.isNotBlank()) AssignmentDetailCard {
-            Text("Instructions", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(appT("Instructions", "Instrucciones"), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             Text(assignment.instructions, fontSize = 16.sp, lineHeight = 23.sp)
         }
         if (assignment.readings.isNotEmpty()) AssignmentDetailCard {
-            Text("Assigned Readings", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(appT("Step 1 · Assigned Readings", "Paso 1 · Lecturas asignadas"), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             assignment.readings.forEach { reading ->
                 Surface(
                     onClick = { selectedReading = reading },
@@ -1857,6 +2092,7 @@ private fun LessonScreen(
                                 color = IlluminedThemeTokens.SecondaryText,
                                 maxLines = 1,
                             )
+                            AssignmentItemProgressLabel(reading.id in completedReadingIds)
                         }
                         LessonSymbol(LessonSymbolKind.ChevronRight, IlluminedThemeTokens.SecondaryText, Modifier.size(12.dp))
                     }
@@ -1864,7 +2100,7 @@ private fun LessonScreen(
             }
         }
         if (linkedLessons.isNotEmpty()) AssignmentDetailCard {
-            Text("Lesson Links", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(appT("Step ${if (assignment.readings.isNotEmpty()) 2 else 1} · Lessons", "Paso ${if (assignment.readings.isNotEmpty()) 2 else 1} · Lecciones"), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             linkedLessons.forEach { lesson ->
                 val category = lessonCategories.firstOrNull { group -> group.lessons.any { it.id == lesson.id } }
                 Surface(onClick = { selectedLesson = lesson }, color = Color.White.copy(.72f), shape = RoundedCornerShape(12.dp)) {
@@ -1876,25 +2112,48 @@ private fun LessonScreen(
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(lesson.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                             category?.let { Text(it.name, fontSize = 12.sp, color = IlluminedThemeTokens.SecondaryText) }
+                            AssignmentItemProgressLabel(lesson.id in completedLessonIds)
                         }
                         LessonSymbol(LessonSymbolKind.ChevronRight, IlluminedThemeTokens.SecondaryText, Modifier.size(12.dp))
                     }
                 }
             }
         }
-        error?.let { Text(it, color = Color.Red, modifier = Modifier.padding(horizontal = 4.dp)) }
-        if (assignment.readings.isEmpty()) Button(
+        assignmentPrompts.forEach { discussion ->
+            val discussionCompleted = discussion.id in completedPromptIds
+            AssignmentDetailCard {
+                val step = (if (assignment.readings.isNotEmpty()) 1 else 0) + (if (linkedLessons.isNotEmpty()) 1 else 0) + 1
+                Text(appT("Step $step · Discussion", "Paso $step · Discusión"), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Surface(
+                    onClick = { selectedDiscussion = discussion },
+                    color = Color.White.copy(.72f),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LessonSymbol(if (discussionCompleted) LessonSymbolKind.CheckCircle else LessonSymbolKind.RadioOff, if (discussionCompleted) Color(0xFF2E7D32) else IlluminedThemeTokens.Blue, Modifier.size(22.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(discussion.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                            Text(if (discussionCompleted) appT("Completed", "Completada") else appT("Ready to discuss", "Lista para participar"), fontSize = 12.sp, color = IlluminedThemeTokens.SecondaryText)
+                        }
+                        LessonSymbol(LessonSymbolKind.ChevronRight, IlluminedThemeTokens.SecondaryText, Modifier.size(12.dp))
+                    }
+                }
+            }
+        }
+        error?.let { Text(localizedUserMessage(it), color = Color.Red, modifier = Modifier.padding(horizontal = 4.dp)) }
+        if (assignmentPrompts.none { it.requiredForAssignment } && assignment.readings.isEmpty() && assignment.lessonLinks.isEmpty()) Button(
             onClick = onComplete,
-            enabled = !isWorking,
+            enabled = !isWorking && prerequisitesCompleted,
             modifier = Modifier.fillMaxWidth().height(54.dp),
             shape = RoundedCornerShape(14.dp),
         ) {
             when {
                 isWorking -> CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                isComplete -> { LessonSymbol(LessonSymbolKind.CheckCircle, Color.White, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Mark Assignment Incomplete", fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
-                else -> { LessonSymbol(LessonSymbolKind.RadioOff, Color.White, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Mark Assignment Completed", fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
+                isComplete -> { LessonSymbol(LessonSymbolKind.CheckCircle, Color.White, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(appT("Mark Assignment Incomplete", "Marcar tarea como incompleta"), fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
+                else -> { LessonSymbol(LessonSymbolKind.RadioOff, Color.White, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(appT("Mark Assignment Completed", "Marcar tarea como completada"), fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
             }
-        }
+        } else Text(appT("The assignment completes automatically when every assigned reading, lesson, and discussion response is finished.", "La tarea se completa automáticamente al terminar todas las lecturas, lecciones y respuestas de discusión asignadas."), fontSize = 14.sp, color = IlluminedThemeTokens.SecondaryText)
     }
 }
 
@@ -1907,6 +2166,15 @@ private fun AssignmentDetailCard(content: @Composable androidx.compose.foundatio
         shadowElevation = 6.dp,
     ) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+    }
+}
+
+@Composable
+private fun AssignmentItemProgressLabel(completed: Boolean) {
+    val color = if (completed) Color(0xFF2E6B33) else IlluminedThemeTokens.SecondaryText
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+        LessonSymbol(if (completed) LessonSymbolKind.CheckCircle else LessonSymbolKind.RadioOff, color, Modifier.size(14.dp))
+        Text(if (completed) appT("Completed", "Completado") else appT("To do", "Pendiente"), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
     }
 }
 
@@ -1925,7 +2193,7 @@ private fun AssignmentReadingScreen(
             .verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        TextButton(onClick = onBack, enabled = !isWorking) { Text("‹ Back") }
+        TextButton(onClick = onBack, enabled = !isWorking) { Text(appT("‹ Back", "‹ Atrás")) }
         Surface(Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), color=Color.White.copy(.94f), shape=RoundedCornerShape(16.dp), shadowElevation=6.dp) {
             Column(Modifier.padding(20.dp), verticalArrangement=Arrangement.spacedBy(8.dp)) {
                 Text(reading.title.trim(),fontSize=24.sp,fontWeight=FontWeight.SemiBold,color=IlluminedThemeTokens.Blue)
@@ -1935,13 +2203,13 @@ private fun AssignmentReadingScreen(
         Surface(Modifier.fillMaxWidth().border(1.dp, IlluminedThemeTokens.Gold.copy(.22f), RoundedCornerShape(16.dp)), color=Color.White.copy(.94f), shape=RoundedCornerShape(16.dp), shadowElevation=6.dp) {
             Text(reading.text.trim(),Modifier.padding(20.dp),fontSize=17.sp,lineHeight=27.sp,color=IlluminedThemeTokens.Ink)
         }
-        error?.let { Text(it,color=Color.Red) }
+        error?.let { Text(localizedUserMessage(it),color=Color.Red) }
         Button(onClick=onToggle,enabled=!isWorking,modifier=Modifier.fillMaxWidth().height(54.dp),colors=ButtonDefaults.buttonColors(containerColor=IlluminedThemeTokens.Blue),shape=RoundedCornerShape(14.dp)) {
             if(isWorking) CircularProgressIndicator(Modifier.size(22.dp),strokeWidth=2.dp,color=Color.White)
             else {
                 LessonSymbol(if(completed) LessonSymbolKind.CheckCircle else LessonSymbolKind.RadioOff, Color.White, Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(if(completed)"Mark Reading Incomplete" else "Mark Reading Completed",fontWeight=FontWeight.SemiBold)
+                Text(if(completed) appT("Mark Reading Incomplete", "Marcar lectura como incompleta") else appT("Mark Reading Completed", "Marcar lectura como completada"),fontWeight=FontWeight.SemiBold)
             }
         }
         Spacer(Modifier.height(20.dp))
@@ -1966,8 +2234,9 @@ private fun BrandMark() {
 }
 
 @Composable
-private fun IlluminedBrandHeader() {
+internal fun IlluminedBrandHeader(userId: String? = null, photoRefresh: Int = 0, requestCount: Int = 0, onRequests: (() -> Unit)? = null, onAccount: (() -> Unit)? = null) {
     val chromeFontScale = LocalDensity.current.fontScale
+    val brandAccessibilityLabel = stringResource(R.string.accessibility_brand_header)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -1977,11 +2246,10 @@ private fun IlluminedBrandHeader() {
             .background(IlluminedThemeTokens.Blue)
             .windowInsetsPadding(WindowInsets.statusBars)
             .height(AppChromePresentation.HeaderContentHeight)
-            .padding(horizontal = 16.dp, vertical = 5.dp)
-            .semantics(mergeDescendants = true) { contentDescription = AppChromePresentation.HeaderAccessibilityLabel },
+            .padding(horizontal = 16.dp, vertical = 5.dp),
     ) {
-        // The iOS toolbar centers this 230pt brand group, rather than pinning the mark to the screen edge.
-        Box(modifier = Modifier.align(Alignment.Center).width(230.dp)) {
+        // Keep the wordmark and motto at the screen center, independent of the profile controls.
+        Box(modifier = Modifier.align(Alignment.Center).width(230.dp).semantics(mergeDescendants = true) { contentDescription = brandAccessibilityLabel }) {
             Image(
                 painter = painterResource(R.drawable.illumined_launch_icon),
                 contentDescription = null,
@@ -2008,6 +2276,12 @@ private fun IlluminedBrandHeader() {
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.7.sp,
                 )
+            }
+        }
+        if (onAccount != null && userId != null) Box(Modifier.align(Alignment.CenterEnd)) {
+            HeaderProfileButton(userId, photoRefresh, onAccount)
+            if(requestCount != 0 && onRequests != null) Surface(onClick=onRequests, color=Color(0xFFB3261E), contentColor=Color.White, shape=CircleShape, modifier=Modifier.align(Alignment.TopEnd).size(26.dp).semantics { contentDescription = if(requestCount < 0) "Check student requests" else "$requestCount pending student requests" }) {
+                Box(contentAlignment=Alignment.Center) { Text(if(requestCount < 0) "!" else if(requestCount > 99) "99+" else "$requestCount", fontSize=11.sp, fontWeight=FontWeight.Bold) }
             }
         }
     }

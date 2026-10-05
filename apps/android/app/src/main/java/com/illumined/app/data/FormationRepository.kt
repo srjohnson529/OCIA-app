@@ -21,6 +21,8 @@ data class UserProfile(
     val classIds: List<String>,
     val completedLessons: Set<String>,
     val archivedClassIds: List<String> = emptyList(),
+    val inactiveClassIds: List<String> = emptyList(),
+    val removedClassIds: List<String> = emptyList(),
     val memorizedPrayerIds: Set<String> = emptySet(),
     val selectedPrayerIds: Set<String> = emptySet(),
     val earnedBadges: Set<String> = emptySet(),
@@ -63,6 +65,7 @@ data class Assignment(
 )
 
 data class DailyFormationEntry(
+    val classId: String,
     val date: String,
     val type: String,
     val title: String,
@@ -106,6 +109,8 @@ data class DiscussionPrompt(
     val requiredForAssignment: Boolean,
     val classId: String? = null,
     val isVisible: Boolean = true,
+    val assignmentId: String = "",
+    val assignmentTitle: String = "",
 )
 
 data class PrayerRequest(
@@ -196,6 +201,8 @@ private fun DocumentSnapshot?.toUserProfile(): UserProfile {
         classIds = classIds,
         completedLessons = document?.get("completedLessons").asStringList().toSet(),
         archivedClassIds = document?.get("archivedClassIds").asStringList().distinct(),
+        inactiveClassIds = document?.get("inactiveClassIds").asStringList().distinct(),
+        removedClassIds = document?.get("removedClassIds").asStringList().distinct(),
         memorizedPrayerIds = document?.get("memorizedPrayerIds").asStringList().toSet(),
         selectedPrayerIds = document?.get("selectedPrayerIds").asStringList().toSet(),
         earnedBadges = document?.get("earnedBadges").asStringList().toSet(),
@@ -307,6 +314,8 @@ private fun QuerySnapshot.toDiscussionPrompts(): List<DiscussionPrompt> = docume
             requiredForAssignment = document.getBoolean("requiredForAssignment") == true,
             classId = document.getString("classId"),
             isVisible = document.getBoolean("isActive") != false,
+            assignmentId = document.getString("assignmentId").orEmpty(),
+            assignmentTitle = document.getString("assignmentTitle").orEmpty(),
         )
     }
     .sortedBy { it.title.lowercase() }
@@ -340,11 +349,15 @@ class FormationRepository(
     fun loadDailyFormation(
         profile: UserProfile,
         force: Boolean = false,
+        requestedClassId: String? = null,
+        requestedDate: String? = null,
         onSuccess: (DailyFormationEntry?) -> Unit,
         onError: (Throwable) -> Unit,
     ) {
         val uid = auth.currentUser?.uid ?: return onSuccess(null)
-        val classId = profile.selectedClassId
+        val requestedClass = requestedClassId?.trim().orEmpty()
+        val classId = requestedClass.takeIf { it in profile.activeClassIds && '/' !in it }
+            ?: profile.selectedClassId
         if (classId.isBlank()) return onSuccess(null)
         val classroom = firestore.collection("classrooms").document(classId)
         classroom.collection("settings").document("dailyFormation").get()
@@ -352,13 +365,15 @@ class FormationRepository(
                 if (settings.getBoolean("enabled") == false) return@addOnSuccessListener onSuccess(null)
                 val zone = runCatching { TimeZone.getTimeZone(settings.getString("timeZone") ?: TimeZone.getDefault().id) }
                     .getOrDefault(TimeZone.getDefault())
-                val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply { timeZone = zone }.format(Date())
+                val date = requestedDate?.trim()?.takeIf { it.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$")) }
+                    ?: SimpleDateFormat("yyyy-MM-dd", Locale.US).apply { timeZone = zone }.format(Date())
                 val receiptId = "${classId}_${date}_${uid}"
                 fun loadEntry() {
                         classroom.collection("dailyFormation").document(date).get()
                             .addOnSuccessListener entry@{ document ->
                                 if (!document.exists() || document.getBoolean("isPublished") == false) return@entry onSuccess(null)
                                 val entry = DailyFormationEntry(
+                                    classId = classId,
                                     date = date,
                                     type = document.getString("type") ?: "note",
                                     title = document.getString("title") ?: "Daily Formation",
@@ -386,7 +401,7 @@ class FormationRepository(
 
     fun dismissDailyFormation(profile: UserProfile, entry: DailyFormationEntry) {
         val uid = auth.currentUser?.uid ?: return
-        val classId = profile.selectedClassId
+        val classId = entry.classId.takeIf(String::isNotBlank) ?: profile.selectedClassId
         firestore.collection("dailyFormationReceipts").document("${classId}_${entry.date}_${uid}").set(
             mapOf("userId" to uid, "classId" to classId, "date" to entry.date, "dismissedAt" to FieldValue.serverTimestamp()),
             SetOptions.merge(),
@@ -503,6 +518,8 @@ class FormationRepository(
                     classIds = classIds,
                     completedLessons = profileDocument.get("completedLessons").asStringList().toSet(),
                     archivedClassIds = profileDocument.get("archivedClassIds").asStringList().distinct(),
+                    inactiveClassIds = profileDocument.get("inactiveClassIds").asStringList().distinct(),
+                    removedClassIds = profileDocument.get("removedClassIds").asStringList().distinct(),
                     memorizedPrayerIds = profileDocument.get("memorizedPrayerIds").asStringList().toSet(),
                     selectedPrayerIds = profileDocument.get("selectedPrayerIds").asStringList().toSet(),
                     earnedBadges = profileDocument.get("earnedBadges").asStringList().toSet(),
@@ -648,6 +665,8 @@ class FormationRepository(
                                         requiredForAssignment = document.getBoolean("requiredForAssignment") == true,
                                         classId = document.getString("classId"),
                                         isVisible = document.getBoolean("isActive") != false,
+                                        assignmentId = document.getString("assignmentId").orEmpty(),
+                                        assignmentTitle = document.getString("assignmentTitle").orEmpty(),
                                     )
                                 }
                                 .sortedBy { it.title.lowercase() }
@@ -737,8 +756,6 @@ class FormationRepository(
         val userId = user.uid
         val readingKey = "${assignment.id}__reading__${reading.id}"
         val readingDocument = firestore.collection("assignmentCompletions").document("${readingKey}_$userId")
-        val parentDocument = firestore.collection("assignmentCompletions").document("${assignment.id}_$userId")
-        val parentCompleted = InstructorReadinessCalculator.parentCompletedAfterReadingChange(assignment.readings.map { it.id }, reading.id, completed, completedReadingIds)
         val common = mapOf(
             "userId" to userId,
             "studentName" to profile.displayName,
@@ -753,11 +770,8 @@ class FormationRepository(
             "assignmentItemType" to "reading",
             "isCompleted" to completed,
         ) + if (completed) mapOf("completedAt" to FieldValue.serverTimestamp()) else emptyMap()
-        val parentData = common + mapOf("assignmentId" to assignment.id, "isCompleted" to parentCompleted) +
-            if (parentCompleted) mapOf("completedAt" to FieldValue.serverTimestamp()) else emptyMap()
         firestore.runBatch { batch ->
             batch.set(readingDocument, readingData, SetOptions.merge())
-            batch.set(parentDocument, parentData, SetOptions.merge())
         }.addOnSuccessListener { onSuccess() }.addOnFailureListener(onError)
     }
 

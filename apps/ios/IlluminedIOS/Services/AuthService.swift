@@ -51,7 +51,7 @@ final class AuthService: ObservableObject {
         let email = cleanedEmail(email)
 
         guard !email.isEmpty else {
-            errorMessage = "Enter your email address first, then request a password reset."
+            errorMessage = NSLocalizedString("Enter your email address first, then request a password reset.", comment: "Missing reset email")
             statusMessage = nil
             return
         }
@@ -59,7 +59,7 @@ final class AuthService: ObservableObject {
         do {
             clearMessages()
             try await Auth.auth().sendPasswordReset(withEmail: email)
-            statusMessage = "Password reset email sent. Check your inbox for a secure reset link."
+            statusMessage = NSLocalizedString("Password reset email sent. Check your inbox for a secure reset link.", comment: "Password reset sent")
         } catch {
             errorMessage = friendlyAuthMessage(for: error)
         }
@@ -76,17 +76,17 @@ final class AuthService: ObservableObject {
 
     func deleteAccount(password: String) async -> Bool {
         guard let currentUser = Auth.auth().currentUser else {
-            errorMessage = "Please sign in before deleting your account."
+            errorMessage = NSLocalizedString("Please sign in before deleting your account.", comment: "Account deletion requires sign in")
             statusMessage = nil
             return false
         }
         guard let email = currentUser.email else {
-            errorMessage = "This account does not have an email address."
+            errorMessage = NSLocalizedString("This account does not have an email address.", comment: "Account missing email")
             statusMessage = nil
             return false
         }
         guard !password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            errorMessage = "Enter your password to continue."
+            errorMessage = NSLocalizedString("Enter your password to continue.", comment: "Account deletion password required")
             statusMessage = nil
             return false
         }
@@ -152,15 +152,15 @@ final class AuthService: ObservableObject {
 
         switch code {
         case .invalidEmail:
-            return "Enter a valid email address."
+            return NSLocalizedString("Enter a valid email address.", comment: "Invalid email")
         case .wrongPassword, .userNotFound, .invalidCredential:
-            return "The email or password was not correct."
+            return NSLocalizedString("The email or password was not correct.", comment: "Invalid credentials")
         case .emailAlreadyInUse:
-            return "That email already has an account. Try signing in instead."
+            return NSLocalizedString("That email already has an account. Try signing in instead.", comment: "Email already registered")
         case .weakPassword:
-            return "Use a password with at least 6 characters."
+            return NSLocalizedString("Use a password with at least 6 characters.", comment: "Weak password")
         case .tooManyRequests:
-            return "Too many attempts. Please wait a few minutes and try again."
+            return NSLocalizedString("Too many attempts. Please wait a few minutes and try again.", comment: "Authentication throttled")
         default:
             return error.localizedDescription
         }
@@ -172,11 +172,11 @@ final class AuthService: ObservableObject {
         if let authCode = AuthErrorCode(rawValue: nsError.code) {
             switch authCode {
             case .wrongPassword, .invalidCredential:
-                return "The password was not correct. Your account was not deleted."
+                return NSLocalizedString("The password was not correct. Your account was not deleted.", comment: "Deletion authentication failed")
             case .tooManyRequests:
-                return "Too many attempts. Please wait a few minutes and try again."
+                return NSLocalizedString("Too many attempts. Please wait a few minutes and try again.", comment: "Authentication throttled")
             case .networkError:
-                return "Account deletion could not connect to the server. Please try again."
+                return NSLocalizedString("Account deletion could not connect to the server. Please try again.", comment: "Deletion network failure")
             default:
                 break
             }
@@ -186,14 +186,14 @@ final class AuthService: ObservableObject {
            let functionsCode = FunctionsErrorCode(rawValue: nsError.code) {
             switch functionsCode {
             case .failedPrecondition:
-                return "Please sign out and sign back in, then try deleting your account again."
+                return NSLocalizedString("Please sign out and sign back in, then try deleting your account again.", comment: "Deletion requires recent sign in")
             case .unavailable:
-                return "Account deletion is temporarily unavailable. Please try again."
+                return NSLocalizedString("Account deletion is temporarily unavailable. Please try again.", comment: "Deletion unavailable")
             default:
                 break
             }
         }
 
-        return "Your account could not be deleted. Nothing has been changed. Please try again."
+        return NSLocalizedString("Your account could not be deleted. Nothing has been changed. Please try again.", comment: "Deletion failed")
     }
 }

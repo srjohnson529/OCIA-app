@@ -19,15 +19,13 @@ struct AccountView: View {
                             IlluminedCard {
                                 VStack(alignment: .leading, spacing: 16) {
                                     HStack(spacing: 14) {
-                                        Image(systemName: "person.crop.circle.fill")
-                                            .font(IlluminedTheme.font(size: 42))
-                                            .foregroundStyle(IlluminedTheme.blue)
+                                        AccountPhotoButton(userId: profile.userId)
 
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(profile.displayName)
                                                 .font(IlluminedTheme.font(size: 24, weight: .semibold))
                                                 .foregroundStyle(IlluminedTheme.ink)
-                                            Text(profile.primaryClassId.isEmpty ? "No class assigned" : profile.primaryClassId)
+                                            Text(profile.primaryClassId.isEmpty ? IlluminedL10n.string("No class assigned") : profile.primaryClassId)
                                                 .font(IlluminedTheme.font(size: 15))
                                                 .foregroundStyle(IlluminedTheme.secondaryText)
                                         }
@@ -37,26 +35,17 @@ struct AccountView: View {
 
                                     Divider()
 
-                                    AccountDetailRow(title: "Name", value: profile.displayName, systemImage: "person")
-                                    AccountDetailRow(title: "Email", value: profile.email, systemImage: "envelope")
-                                    AccountDetailRow(title: "Class", value: profile.primaryClassId.isEmpty ? "Not assigned" : profile.primaryClassId, systemImage: "person.3")
-                                    AccountDetailRow(title: "Role", value: profile.isInstructor ? "Instructor" : "Student", systemImage: profile.isInstructor ? "person.text.rectangle" : "graduationcap")
+                                    AccountDetailRow(title: IlluminedL10n.string("Name"), value: profile.displayName, systemImage: "person")
+                                    AccountDetailRow(title: IlluminedL10n.string("Email"), value: profile.email, systemImage: "envelope")
+                                    AccountDetailRow(title: IlluminedL10n.string("Class"), value: profile.primaryClassId.isEmpty ? IlluminedL10n.string("Not assigned") : profile.primaryClassId, systemImage: "person.3")
+                                    AccountDetailRow(title: IlluminedL10n.string("Role"), value: IlluminedL10n.string(profile.isInstructor ? "Instructor" : "Student"), systemImage: profile.isInstructor ? "person.text.rectangle" : "graduationcap")
                                 }
                             }
 
-                            IlluminedCard {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("Formation")
-                                        .font(IlluminedTheme.font(size: 18, weight: .semibold))
-                                        .foregroundStyle(IlluminedTheme.ink)
-
-                                    AccountDetailRow(title: "Lessons Completed", value: "\(profile.completedLessons.count)", systemImage: "book")
-                                    AccountDetailRow(title: "Badges Earned", value: "\(profile.earnedBadges.count)", systemImage: "rosette")
-                                }
-                            }
+                            NotificationSettingsView()
                         } else {
                             IlluminedCard {
-                                ContentUnavailableView("Profile Needed", systemImage: "person.crop.circle.badge.exclamationmark", description: Text("Your profile will appear here after setup."))
+                                ContentUnavailableView(IlluminedL10n.string("Profile Needed"), systemImage: "person.crop.circle.badge.exclamationmark", description: Text(IlluminedL10n.string("Your profile will appear here after setup.")))
                             }
                         }
 
@@ -64,7 +53,7 @@ struct AccountView: View {
                             profileService.stopListening()
                             authService.signOut()
                         } label: {
-                            Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                            Label(IlluminedL10n.string("Sign Out"), systemImage: "rectangle.portrait.and.arrow.right")
                                 .font(IlluminedTheme.font(size: 17, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                         }
@@ -72,11 +61,11 @@ struct AccountView: View {
 
                         IlluminedCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Delete Account")
+                                Text(IlluminedL10n.string("Delete Account"))
                                     .font(IlluminedTheme.font(size: 18, weight: .semibold))
                                     .foregroundStyle(.red)
 
-                                Text("Permanently delete your Illumined account and associated personal data.")
+                                Text(IlluminedL10n.string("Permanently delete your Illumined account and associated personal data."))
                                     .font(IlluminedTheme.font(size: 14))
                                     .foregroundStyle(IlluminedTheme.secondaryText)
 
@@ -85,14 +74,14 @@ struct AccountView: View {
                                     deletionError = nil
                                     showsAccountDeletion = true
                                 } label: {
-                                    Text("Delete My Account")
+                                    Text(IlluminedL10n.string("Delete My Account"))
                                         .font(IlluminedTheme.font(size: 16, weight: .semibold))
                                         .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(IlluminedDestructiveButtonStyle())
 
                                 if let deletionInformationURL = URL(string: "https://illumined-account-deletion.srjohnson529.chatgpt.site") {
-                                    Link("Account deletion information", destination: deletionInformationURL)
+                                    Link(IlluminedL10n.string("Account deletion information"), destination: deletionInformationURL)
                                         .font(IlluminedTheme.font(size: 14, weight: .semibold))
                                         .foregroundStyle(IlluminedTheme.blue)
                                 }
@@ -138,7 +127,7 @@ struct AccountView: View {
             showsAccountDeletion = false
         } else {
             deletionError = authService.errorMessage
-                ?? "Your account could not be deleted. Nothing has been changed. Please try again."
+                ?? IlluminedL10n.string("Your account could not be deleted. Nothing has been changed. Please try again.")
         }
     }
 }
@@ -159,19 +148,19 @@ private struct AccountDeletionConfirmationView: View {
                         .foregroundStyle(.red)
                         .frame(maxWidth: .infinity)
 
-                    Text("Permanently Delete Account?")
+                    Text(IlluminedL10n.string("Permanently Delete Account?"))
                         .font(IlluminedTheme.font(size: 24, weight: .semibold))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text("This permanently removes your Illumined account, profile, progress, messages, discussion responses, and prayer requests. This cannot be undone.")
+                    Text(IlluminedL10n.string("This permanently removes your Illumined account, profile, progress, messages, discussion responses, and prayer requests. This cannot be undone."))
                         .font(IlluminedTheme.font(size: 16))
                         .foregroundStyle(IlluminedTheme.ink)
 
-                    Text("Class-wide materials created by an instructor may remain available to the class without the instructor’s identity.")
+                    Text(IlluminedL10n.string("Class-wide materials created by an instructor may remain available to the class without the instructor’s identity."))
                         .font(IlluminedTheme.font(size: 14))
                         .foregroundStyle(IlluminedTheme.secondaryText)
 
-                    SecureField("Password", text: $password)
+                    SecureField(IlluminedL10n.string("Password"), text: $password)
                         .textContentType(.password)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -191,20 +180,20 @@ private struct AccountDeletionConfirmationView: View {
                     }
 
                     if isWorking {
-                        ProgressView("Deleting account…")
+                        ProgressView(IlluminedL10n.string("Deleting account…"))
                             .tint(.red)
                             .frame(maxWidth: .infinity)
                     }
 
                     Button(role: .destructive, action: onDelete) {
-                        Text(isWorking ? "Deleting…" : "Delete Permanently")
+                        Text(IlluminedL10n.string(isWorking ? "Deleting…" : "Delete Permanently"))
                             .font(IlluminedTheme.font(size: 17, weight: .semibold))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(IlluminedDestructiveButtonStyle())
                     .disabled(password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isWorking)
 
-                    Button("Cancel", action: onCancel)
+                    Button(IlluminedL10n.string("Cancel"), action: onCancel)
                         .font(IlluminedTheme.font(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .disabled(isWorking)
@@ -212,7 +201,7 @@ private struct AccountDeletionConfirmationView: View {
                 .padding(24)
             }
             .background(IlluminedBackground())
-            .navigationTitle("Delete Account")
+            .navigationTitle(IlluminedL10n.string("Delete Account"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }

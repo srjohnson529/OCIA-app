@@ -7,9 +7,13 @@ import org.junit.Test
 class InviteLinkTest {
     @Test fun `invite links round trip and privileged roles require one use codes`() {
         val instructor = IlluminedInviteLink(InviteRole.INSTRUCTOR, "OCIA", "ABCD-2345")
+        val student = IlluminedInviteLink(InviteRole.STUDENT, code = "ABC2345678")
+        assertEquals(student, IlluminedInviteLink.parse(student.url))
+        assertNull(IlluminedInviteLink.parse("illumined://join?role=instructor&code=ABCD-2345"))
         assertEquals(instructor, IlluminedInviteLink.parse(instructor.url))
-        assertEquals(InviteRole.STUDENT, IlluminedInviteLink.parse("illumined://join?role=student&classId=OCIA")?.role)
-        assertEquals(InviteRole.STUDENT, IlluminedInviteLink.parse("https://illumined.net/join?role=student&classId=OCIA")?.role)
+        assertEquals(InviteRole.STUDENT, IlluminedInviteLink.parse("illumined://join?role=student&classId=OCIA&code=ABC2345678")?.role)
+        assertEquals(InviteRole.STUDENT, IlluminedInviteLink.parse("https://illumined.net/join?role=student&classId=OCIA&code=ABC2345678")?.role)
+        assertNull(IlluminedInviteLink.parse("illumined://join?role=student&classId=OCIA"))
         assertNull(IlluminedInviteLink.parse("illumined://join?role=instructor&classId=OCIA"))
         assertNull(IlluminedInviteLink.parse("illumined://join?role=parish"))
         assertNull(IlluminedInviteLink.parse("https://example.com/join?role=student&classId=OCIA"))
