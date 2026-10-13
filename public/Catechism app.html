@@ -3118,12 +3118,14 @@ The nihil obstat and imprimatur do not signify agreement with the content, opini
 <section id="instructor-section" class="hidden">
     <div class="instructor-shell">
         <div class="instructor-hero">
-            <div><div class="auth-kicker">Illumined OCIA</div><h2 data-i18n="Instructor Workspace">Instructor Workspace</h2><p data-i18n="Plan formation, care for your class, and see how students are progressing.">Plan formation, care for your class, and see how students are progressing.</p></div>
+            <div><div class="auth-kicker">Illumined OCIA</div><h2 data-i18n="Instructor Tools">Instructor Tools</h2><p data-i18n="Plan formation, care for your class, and see how students are progressing.">Plan formation, care for your class, and see how students are progressing.</p></div>
             <div class="instructor-class-picker"><label for="instructor-class-select" data-i18n="Active classroom">Active classroom</label><select id="instructor-class-select"></select><button class="button-theme" id="instructor-open-chat" data-i18n="Open classroom chat">Open classroom chat</button></div>
         </div>
         <div id="instructor-summary" class="instructor-summary"></div>
         <article class="instructor-card"><button id="instructor-tour-open" class="button-theme" onclick="InstructorTour.open()">Explore Illumined</button><div id="instructor-tour-offer"></div></article>
         <div class="instructor-tabs" role="tablist">
+            <button data-instructor-tab="assignments" data-i18n="Assignments">Assignments</button>
+            <button data-instructor-tab="discussions" data-i18n="Discussion Boards">Discussion Boards</button>
             <button data-instructor-tab="attendance" data-i18n="Students & Attendance">Students & Attendance</button>
             <button data-instructor-tab="rites" data-i18n="Rite and Sacrament Preparation">Rite and Sacrament Preparation</button>
             <button data-instructor-tab="lessons" data-i18n="Lessons">Lessons</button><button data-instructor-tab="classes" data-i18n="Classroom Management">Classroom Management</button><button data-instructor-tab="announcements" data-i18n="Announcements">Announcements</button><button data-instructor-tab="prayers" data-i18n="Prayer requests">Prayer requests</button><button data-instructor-tab="progress" data-i18n="Student Details" hidden>Student Details</button>
@@ -7596,7 +7598,7 @@ async function submitPrayerRequest() {
                 ]) : [{docs:[]},{docs:[]},{docs:[]}];
                 const studentCount=students.docs.filter(d=>d.data().isInstructor!==true && d.data().isAdmin!==true && !(d.data().inactiveClassIds||[]).includes(instructorClassId)).length;
                 document.getElementById('instructor-summary').innerHTML=[['Class ID',instructorClassId||'—'],['Students',studentCount],['Sessions',schedule.size||0],['Prayer requests',prayers.size||0]].map(([l,v])=>`<div class="instructor-stat"><strong>${esc(v)}</strong>${esc(uiText(l))}</div>`).join('');
-                await ({attendance:renderInstructorAttendance,rites:RitePrep.manager,lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorAnnouncements,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
+                await ({assignments:renderInstructorPlanning,discussions:renderInstructorPlanning,attendance:renderInstructorAttendance,rites:RitePrep.manager,lessons:renderInstructorLessons,daily:renderInstructorDailyFormation,classes:renderInstructorClasses,announcements:renderInstructorPlanning,prayers:renderInstructorPrayers,progress:renderInstructorProgress,schedule:renderInstructorSchedule}[instructorTab]||renderInstructorLessons)(panel);
                 if(instructorTab==='classes') window.WebParity?.enhanceClasses(panel);
                 if(instructorTab==='schedule') {
                     const back=document.createElement('button');
@@ -8082,6 +8084,18 @@ async function submitPrayerRequest() {
             bindInstructorDeletes(panel);
         }
         async function renderInstructorPrayers(panel){const snap=await db.collection('prayerRequests').where('classId','==',instructorClassId).get();const rows=snap.docs.map(d=>({id:d.id,...d.data()}));panel.innerHTML=`<h3>${uiText('Prayer request moderation')}</h3><div class="instructor-list">${rows.map(x=>instructorCard(x.title||uiText('Prayer request'),x.requesterName||uiText('Class member'),x.details,`<button data-toggle-prayer="${x.id}">${uiText(x.isHidden?'Restore':'Hide')}</button><button class="danger" data-delete-doc="prayerRequests:${x.id}">${uiText('Delete')}</button>`)).join('')||`<p class="muted">${uiText('No prayer requests in this class.')}</p>`}</div>`;panel.querySelectorAll('[data-toggle-prayer]').forEach(b=>b.onclick=async()=>{const ref=db.collection('prayerRequests').doc(b.dataset.togglePrayer),s=await ref.get();await ref.update({isHidden:s.data()?.isHidden!==true,moderatedAt:instructorTimestamp(),moderatedBy:currentUser.uid});await renderInstructorWorkspace();});bindInstructorDeletes(panel);}
+        async function renderInstructorPlanning(panel) {
+            const classId=instructorClassId,uid=currentUser.uid,mode=instructorTab;
+            const isCurrent=()=>instructorClassId===classId&&currentUser?.uid===uid&&instructorTab===mode&&userProfile?.isInstructor===true;
+            if(!isCurrent())return;
+            let lessons=[];
+            if(mode==='assignments') {
+                if(!canonicalLessonsData.length)await loadSharedLessons();
+                lessons=await mergeClassroomLessons(canonicalLessonsData,classId,true);
+            }
+            if(!isCurrent())return;
+            return InstructorPlanning.render(panel,{db,firebase,classId,uid,mode,isCurrent,name:userProfile.username||'',spanish:uiLanguage==='es',lessons});
+        }
         async function renderInstructorAttendance(panel) {
             const classId=instructorClassId, instructorId=currentUser.uid;
             const isCurrent=()=>instructorClassId===classId&&currentUser?.uid===instructorId&&instructorTab==='attendance';
@@ -8297,6 +8311,7 @@ document.getElementById('forgot-password-button').addEventListener('click', send
     </script>
 <script src="admin-support.js"></script>
 <script src="admin-tools.js"></script>
+<script src="instructor-planning.js"></script>
 <script src="instructor-resources.js"></script>
 <script src="update-management.js"></script>
 <script src="instructor-tour.js"></script>
