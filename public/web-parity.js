@@ -6,7 +6,8 @@
  const readKey=(uid,room)=>'illumined.chatRead.web.v1:'+JSON.stringify([uid,room]);
  const unreadCount=(messages,uid,read)=>messages.filter(d=>d.senderId!==uid&&d.timestamp&&after(stamp(d.timestamp),read)).length;
  const latestRead=(messages,room,read)=>messages.filter(d=>d.classId===room&&d.timestamp).map(d=>stamp(d.timestamp)).reduce((a,b)=>after(b,a)?b:a,read);
- if(typeof module!=='undefined'){module.exports={after,stamp,readKey,unreadCount,latestRead};return;}
+ const singleActiveClass=ids=>{const unique=[...new Set(ids.filter(Boolean))];return unique.length===1?unique[0]:null;};
+ if(typeof module!=='undefined'){module.exports={after,stamp,readKey,unreadCount,latestRead,singleActiveClass};return;}
  const t=(en,es)=>uiLanguage==='es'?es:en;
  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n;};
  const button=(text,fn)=>{const n=el('button',text,'parity-action');n.type='button';n.onclick=fn;return n;};
@@ -35,10 +36,13 @@
  function markDisplayed(){
   if(root.InstructorInbox?.isOpen())return;
   if(!allowed()||document.hidden||document.getElementById('chat-section')?.classList.contains('hidden')||!read)return;
+  const actual=latestRead(displayed,room,{seconds:0,nanoseconds:0});
+  if(actual.seconds)root.MessageReads?.mark(uid,'chat',room,room,actual);
   const latest=latestRead(displayed,room,read);
   if(after(latest,read)){read=latest;try{localStorage.setItem(readKey(uid,room),JSON.stringify(read));}catch{}refreshChatBadge();}
  }
  function sync(){
+  root.MessageReads?.sync(allowed()?currentUser.uid:'');
   if(!allowed()){reset();return;}
   const ids=activeClasses();const next=JSON.stringify([currentUser.uid,userProfile.classId,!!userProfile.isInstructor,ids]);
   if(next===identity)return;
@@ -54,7 +58,7 @@
   if(userProfile.isInstructor)ids.forEach(id=>stops.push(db.collection('classroomJoinRequests').where('classId','==',id).onSnapshot(s=>{
    if(token!==epoch)return;requestCounts.set(id,s.docs.filter(d=>d.data().status==='pending').length);renderRequestBadge();
   },()=>{if(token!==epoch)return;requestCounts.set(id,-1);renderRequestBadge();})));
-  try{read=JSON.parse(localStorage.getItem(readKey(uid,room)));}catch{}
+  try{read=root.MessageReads?.get(uid,'chat',room)||JSON.parse(localStorage.getItem(readKey(uid,room)));}catch{}
   if(!read||!Number.isInteger(read.seconds)||!Number.isInteger(read.nanoseconds)){read=stamp(firebase.firestore.Timestamp.now());try{localStorage.setItem(readKey(uid,room),JSON.stringify(read));}catch{}}
   if(room)stops.push(db.collection('chatMessages').where('classId','==',room).where('timestamp','>',new firebase.firestore.Timestamp(read.seconds,read.nanoseconds)).orderBy('timestamp').onSnapshot(s=>{
    if(token!==epoch)return;chatDocs=s.docs.map(d=>d.data());refreshChatBadge();
@@ -128,18 +132,50 @@
  }
  function enhanceClasses(panel){
   archiveActions.clear();
+  panel._singleClassOptions=null;
+  panel._refreshmentSettings=new Map(Array.from(panel.querySelectorAll('[data-refreshment-class]')).map(node=>[node.dataset.refreshmentClass,node]));
+  panel._classCreate=panel.querySelector?.('#class-create-bottom')||null;
   panel.querySelectorAll('[data-select-class]').forEach(b=>b.onclick=()=>classroomTools(panel,b.dataset.selectClass));
   panel.querySelectorAll('[data-toggle-archive]').forEach(b=>{const action=b.onclick;const guarded=async()=>{if(confirm(t('Change the archive status of this classroom?','¿Cambiar el estado de archivo del aula?')))await action();};archiveActions.set(b.dataset.toggleArchive,{label:b.textContent,action:guarded});b.onclick=guarded;if(activeClasses().includes(b.dataset.toggleArchive))b.hidden=true;});
+  const ids=(panel._activeManagementClasses||activeClasses()).filter(id=>activeClasses().includes(id));
+  const only=singleActiveClass(ids);
+  const picker=document.getElementById('instructor-class-select');
+  picker.hidden=ids.length<=1;
+  document.querySelector('label[for="instructor-class-select"]').hidden=ids.length<=1;
+  if(only){
+   // Preserve maintenance forms and their handlers while opening the daily tools.
+   const options=el('details');options.append(el('summary',t('Additional classroom options','Otras opciones del aula')));
+   panel.querySelectorAll('[data-select-class]').forEach(b=>{
+    if(b.dataset.selectClass===only)b.closest('.instructor-card').hidden=true;
+    else b.hidden=true;
+   });
+   panel._classCreate?.remove();
+   panel._refreshmentSettings.forEach(node=>node.remove());
+   panel.querySelector?.('.classroom-management-intro')?.remove();
+   options.append(...Array.from(panel.children));panel._singleClassOptions=options;
+   classroomTools(panel,only);
+  }
  }
  async function classroomTools(panel,classId,initial){
   if(!allowed()||!userProfile.isInstructor||!activeClasses().includes(classId))return;
-  stopRequests();instructorClassId=classId;const token=epoch;panel.replaceChildren(button(t('‹ Classrooms','‹ Aulas'),()=>openInstructorWorkspace('classes')),el('h3',classId));
+  stopRequests();instructorClassId=classId;instructorTab='classes';const token=epoch;panel.replaceChildren();
+  if(!panel._singleClassOptions)panel.append(button(t('‹ Classrooms','‹ Aulas'),()=>openInstructorWorkspace('classes')));
+  const intro=el('header',null,'instructor-card classroom-management-intro');
+  intro.id='tour-management-heading';
+  intro.append(el('h3',t('Classroom Management','Administración del aula')));
+  intro.append(el('p',t('Manage class schedules, Daily Formation, classroom details, invitations, join requests, and settings.','Administra calendarios, Formación diaria, datos del aula, invitaciones, solicitudes de ingreso y ajustes.'),'muted'));
+  panel.append(intro,el('h3',classId));
   document.getElementById('instructor-class-select').value=classId;
   let viewVersion=0;
-  const menu=el('div',null,'parity-tool-grid'),content=el('div');panel.append(menu,content);
+  const menu=el('div',null,'parity-tool-grid classroom-tool-grid'),content=el('div');panel.append(menu,content);
+  const refreshments=panel._refreshmentSettings?.get(classId);
+  if(refreshments){refreshments.id='tour-management-refreshments';panel.append(refreshments);}
+  if(panel._singleClassOptions)panel.append(panel._singleClassOptions);
+  if(panel._classCreate)panel.append(panel._classCreate);
   function open(kind){
    const version=++viewVersion;
    stopRequests();content.replaceChildren();if(token!==epoch)return;instructorTab='classes';
+   if(kind==='schedule'||kind==='daily'){openInstructorWorkspace(kind);return;}
    if(kind==='photo')photoEditor(content,'classroom',classId);
    if(kind==='invites')mountStudentInvitation(content,classId);
    if(kind==='progress'){
@@ -163,11 +199,17 @@
     },e=>{if(token===epoch&&version===viewVersion&&content.isConnected)content.replaceChildren(el('p',e.message));});
    }
   }
-  [['photo',t('Classroom photo','Foto del aula')],['progress',t('Students & Progress','Estudiantes y progreso')],['invites',t('Student invitations & codes','Invitaciones y códigos')],['requests',t('Join requests','Solicitudes de ingreso')]].forEach(([key,label])=>menu.append(button(label,()=>open(key))));
+  [['schedule',t('Class Schedule','Calendario de clases')],['daily',t('Daily Formation','Formación diaria')],['photo',t('Classroom photo','Foto del aula')],['invites',t('Student invitations & codes','Invitaciones y códigos')],['requests',t('Join requests','Solicitudes de ingreso')]].forEach(([key,label])=>{const control=button(label,()=>open(key));control.id='tour-management-'+key;menu.append(control);});
   const archive=archiveActions.get(classId);
-  if(archive)menu.append(button(archive.label,async()=>{try{instructorTab='classes';await archive.action();}catch(e){content.replaceChildren(el('p',e.message));}}));
+  if(archive&&!panel._singleClassOptions)menu.append(button(archive.label,async()=>{try{instructorTab='classes';await archive.action();}catch(e){content.replaceChildren(el('p',e.message));}}));
   if(initial)open(initial);
  }
+ root.addEventListener('illumined-message-reads',()=>{
+  const shared=root.MessageReads?.get(uid,'chat',room);
+  if(shared && (!read || after(shared,read)||after(read,shared))){identity='';sync();}
+  else refreshChatBadge();
+  root.InstructorInbox?.refreshLanguage?.();
+ });
  document.addEventListener('visibilitychange',markDisplayed);
- root.WebParity={sync,reset,enhanceClasses,photoEditor,refreshMessages:refreshChatBadge,onSection(){sync();refreshChatBadge();markDisplayed();if(!document.getElementById('instructor-section')||document.getElementById('instructor-section').classList.contains('hidden'))stopRequests();},displayed(messages){displayed=messages;markDisplayed();}};
+ root.WebParity={sync,reset,enhanceClasses,async previewClassroom(){const panel=document.getElementById('instructor-panel');if(panel)await classroomTools(panel,instructorClassId);},photoEditor,refreshMessages:refreshChatBadge,onSection(){sync();refreshChatBadge();markDisplayed();if(!document.getElementById('instructor-section')||document.getElementById('instructor-section').classList.contains('hidden'))stopRequests();},displayed(messages){displayed=messages;markDisplayed();}};
 })(typeof window!=='undefined'?window:globalThis);

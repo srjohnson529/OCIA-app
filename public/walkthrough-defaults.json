@@ -1,0 +1,296 @@
+{
+  "welcome": {
+    "title": "Your classroom dashboard",
+    "body": "Your name and classroom appear here. This is the starting point for your classroom’s learning and activities.",
+    "titleEs": "El panel de tu aula",
+    "bodyEs": "Aquí aparecen tu nombre y aula. Empieza aquí para ver el aprendizaje y las actividades de tu clase."
+  },
+  "schedule": {
+    "title": "Next class",
+    "body": "Upcoming dates and topics help everyone prepare for the next gathering. Maintain these in the instructor’s class schedule.",
+    "titleEs": "Próxima clase",
+    "bodyEs": "Las fechas y temas ayudan a preparar la próxima reunión. Adminístralos en el calendario del instructor."
+  },
+  "announcements": {
+    "title": "Announcements",
+    "body": "Class updates appear here. Publish announcements from Instructor Tools; check visibility and notification options before sending.",
+    "titleEs": "Anuncios",
+    "bodyEs": "Aquí aparecen las novedades de la clase. Publica anuncios desde Herramientas del instructor y revisa su visibilidad y las notificaciones."
+  },
+  "guides": {
+    "title": "Preparation Guides",
+    "body": "Published guides help students prepare for rites, sacraments, and parish life. This card is not a permanent fixture on the homescreen dashboard. It will appear once an instructor has published a guide. It will fanish again after the student has read and acknowledge its content. ",
+    "titleEs": "Guías de preparación",
+    "bodyEs": "Las guías publicadas preparan para los ritos, sacramentos y vida parroquial. Tras confirmarlas, salen de Inicio y siguen en Mis guías."
+  },
+  "assignments": {
+    "title": "Assignments",
+    "body": "Students see assigned lessons, readings, discussions, and due dates here. Completion indicators show which required parts remain.",
+    "titleEs": "Tareas",
+    "bodyEs": "Aquí aparecen lecciones, lecturas, debates y fechas de entrega. Los indicadores muestran las partes obligatorias pendientes."
+  },
+  "prayers": {
+    "title": "Prayer requests",
+    "body": "Your class can share intentions and support one another in prayer. Use New Prayer Request to contribute.",
+    "titleEs": "Peticiones de oración",
+    "bodyEs": "La clase puede compartir intenciones y apoyarse en la oración. Usa Nueva petición para participar."
+  },
+  "nav-home": {
+    "title": "Home navigation",
+    "body": "Return here for your class’s latest updates, assignments, and progress.",
+    "titleEs": "Navegación: Inicio",
+    "bodyEs": "Vuelve aquí para ver novedades, tareas y progreso de tu clase."
+  },
+  "nav-lessons": {
+    "title": "Lessons navigation",
+    "body": "This opens the lesson library, organized by topic, with quizzes to review your learning.",
+    "titleEs": "Navegación: Lecciones",
+    "bodyEs": "Abre la biblioteca de lecciones, organizada por temas, con cuestionarios para repasar lo aprendido."
+  },
+  "nav-discussion": {
+    "title": "Discussion navigation",
+    "body": "Open classroom discussion assignments and read or contribute responses here.",
+    "titleEs": "Navegación: Debate",
+    "bodyEs": "Abre los debates de clase para leer y compartir respuestas."
+  },
+  "nav-formation": {
+    "title": "Formation navigation",
+    "body": "Find prayers, the Mass guide, spiritual practices, and Daily Formation here.",
+    "titleEs": "Navegación: Formación",
+    "bodyEs": "Encuentra oraciones, la guía de la Misa, prácticas espirituales y Formación diaria."
+  },
+  "nav-more": {
+    "title": "More navigation",
+    "body": "Find Instructor Tools, Chat, Account, Guides, Awards, and Games. Profile photos and notification settings are under Account.",
+    "titleEs": "Navegación: Más",
+    "bodyEs": "Encuentra Herramientas del instructor, Chat, Cuenta, Guías, Premios y Juegos. La foto de perfil y los ajustes de notificaciones están en Cuenta."
+  },
+  "tracker": {
+    "title": "Lesson Tracker",
+    "body": "These counts show your own lesson progress, not your students’ progress. Tap to resume an unfinished lesson or open the next lesson in catalog order.",
+    "titleEs": "Seguimiento de lecciones",
+    "bodyEs": "Estos contadores muestran tu propio progreso, no el de tus estudiantes. Toca para continuar una lección o abrir la siguiente en orden."
+  },
+  "lessons": {
+    "title": "Lessons & Quizzes",
+    "body": "Lessons generally follow the same outline: a definition introduces the topic, Scripture references connect it to the Bible, and Catechism references ground it in Church teaching. A proclamation presents the central message, followed by an explanation that develops it. A quiz at the end helps review what you have learned.",
+    "titleEs": "Lecciones y cuestionarios",
+    "bodyEs": "Las lecciones suelen seguir el mismo esquema: una definición introduce el tema, las referencias bíblicas lo conectan con la Biblia y las referencias al Catecismo lo fundamentan en la enseñanza de la Iglesia. Una proclamación presenta el mensaje central, seguida de una explicación que lo desarrolla. Un cuestionario final ayuda a repasar lo aprendido."
+  },
+  "discussion": {
+    "title": "Classroom discussion",
+    "body": "Discussion assignments and responses appear here. A new class may be empty until an instructor adds a discussion.",
+    "titleEs": "Debate de clase",
+    "bodyEs": "Aquí aparecen tareas de debate y respuestas. Una clase nueva puede estar vacía hasta que un instructor añada un debate."
+  },
+  "formation": {
+    "title": "Prayer and spiritual formation",
+    "body": "These formation tools helps students put their learning into practice and develop spiritual habits. Open Prayers for common prayers, a guided Rosary, Lectio Divina, and the Liturgy of the Hours.",
+    "titleEs": "Oración y formación espiritual",
+    "bodyEs": "Formación ayuda a poner en práctica lo aprendido. Abre Oraciones para encontrar oraciones comunes, el Rosario guiado, la Lectio Divina y la Liturgia de las Horas. Úsalas para la oración personal o preséntalas en clase."
+  },
+  "formation-examination": {
+    "title": "Examination of Conscience",
+    "body": "Help students prepare thoughtfully for Reconciliation or reflect on their day with a daily examen. Encourage honest, private reflection; this is not a classroom quiz or a request to share sins.",
+    "titleEs": "Examen de conciencia",
+    "bodyEs": "Ayuda a preparar la Reconciliación o a reflexionar sobre el día con un examen diario. Invita a una reflexión sincera y privada; no es un cuestionario ni una petición de compartir los pecados."
+  },
+  "formation-mass": {
+    "title": "Guide to the Mass",
+    "body": "Explore the order of the Mass, its prayers, readings, and Eucharistic Prayer. Help students recognize what they hear and see at Mass and understand how to participate.",
+    "titleEs": "Guía de la Misa",
+    "bodyEs": "Explora el orden de la Misa, sus oraciones, lecturas y Plegaria eucarística. Ayuda a reconocer lo que se escucha y se ve en la Misa y a comprender cómo participar."
+  },
+  "formation-practices": {
+    "title": "Spiritual Practices",
+    "body": "Connect faith with daily life through works of mercy, the precepts of the Church, and habits of Catholic living. Invite students to choose a practice they can begin between class meetings.",
+    "titleEs": "Prácticas espirituales",
+    "bodyEs": "Conecta la fe con la vida diaria mediante las obras de misericordia, los preceptos de la Iglesia y hábitos de vida católica. Invita a elegir una práctica para comenzar entre las reuniones de clase."
+  },
+  "formation-daily": {
+    "title": "Daily Formation",
+    "body": "This card opens today’s saint, liturgical fact, or class note. This daily formation cards can be created through the instructor tools. Use a short daily reading, saint of the day, or feast to connect classroom learning with the life and seasons of the Church.",
+    "titleEs": "Formación diaria",
+    "bodyEs": "Esta tarjeta da acceso al santo, dato litúrgico o nota de clase del día cuando está disponible. Una lectura breve conecta lo aprendido con la vida y los tiempos litúrgicos de la Iglesia."
+  },
+  "formation-daily-open": {
+    "title": "Open today’s card",
+    "body": "Tap here to open the available reading. If no card is available, a status message explains why. Manage Daily Formation content and scheduling in Instructor Tools.",
+    "titleEs": "Abrir la tarjeta de hoy",
+    "bodyEs": "Toca aquí para abrir la lectura disponible. Si no hay tarjeta, un mensaje explica el motivo. Administra el contenido y la programación en Herramientas del instructor."
+  },
+  "more": {
+    "title": "Instructor Tools",
+    "body": "Manage your classroom’s announcements, schedule, assignments, student details, preparation guides, and classroom codes here. This card is not accessible to students.",
+    "titleEs": "Herramientas del instructor",
+    "bodyEs": "Administra anuncios, calendario, tareas, datos de estudiantes, guías y códigos del aula. Esta tarjeta no está disponible para estudiantes."
+  },
+  "more-chat": {
+    "title": "Classroom chat & Inbox",
+    "body": "Use Classroom chat for class conversation. Open Inbox to send a message to a specific student; students use it to message their instructors. Chat is separate from assigned discussions.",
+    "titleEs": "Chat de clase y bandeja de entrada",
+    "bodyEs": "Usa el chat de clase para conversar con el grupo. Abre la bandeja de entrada para escribir a un estudiante específico; los estudiantes la usan para escribir a sus instructores. El chat es distinto de los debates asignados."
+  },
+  "more-account": {
+    "title": "Your account, photo & notifications",
+    "body": "Review your profile here. Tap the photo beside your name to upload, change, or remove your profile picture. Notification settings are below your profile. Sign-out and account deletion are also here.",
+    "titleEs": "Tu cuenta, foto y notificaciones",
+    "bodyEs": "Revisa aquí tu perfil. Toca la foto junto a tu nombre para subir, cambiar o eliminar tu foto de perfil. Los ajustes de notificaciones están debajo del perfil. Aquí también puedes cerrar sesión o eliminar la cuenta."
+  },
+  "more-games": {
+    "title": "Games",
+    "body": "Practice virtue terms with matching and quiz games. These are another way to reinforce learning alongside lessons and class activities.",
+    "titleEs": "Juegos",
+    "bodyEs": "Practica los términos de las virtudes con juegos de parejas y cuestionarios. Complementan las lecciones y actividades de clase."
+  },
+  "more-guides": {
+    "title": "My Guides",
+    "body": "Return to your class’s preparation guides here, including guides you have acknowledged and no longer see on Home. This keeps helpful preparation material within reach.",
+    "titleEs": "Mis guías",
+    "bodyEs": "Vuelve a las guías de preparación de tu clase, incluidas las que ya confirmaste y no aparecen en Inicio. Así puedes consultar de nuevo ese material."
+  },
+  "tools-overview": {
+    "title": "Your classroom workspace",
+    "body": "Follow the tools from top to bottom, then explore Classroom Management.",
+    "titleEs": "El espacio de tu aula",
+    "bodyEs": "Recorre las herramientas de arriba abajo y luego explora Administración del aula."
+  },
+  "tools-announcements": {
+    "title": "Keep your class informed",
+    "body": "Create an announcement with a clear title and message. Check Visible to Students before saving, and choose whether to send a push notification. Published announcements appear on the class dashboard; use them for reminders and class news.",
+    "titleEs": "Mantén informada a tu clase",
+    "bodyEs": "Crea un anuncio con título y mensaje claros. Revisa Visible para estudiantes y decide si enviar una notificación antes de guardar. Los anuncios publicados aparecen en Inicio; úsalos para recordatorios y noticias de clase."
+  },
+  "tools-assignments": {
+    "title": "Build a learning plan",
+    "body": "Create an assignment, set its due date, and select lessons from the categories. Add optional assigned readings and review student visibility before saving. Required parts determine completion, so keep the workload clear and manageable.",
+    "titleEs": "Organiza el aprendizaje",
+    "bodyEs": "Crea una tarea, establece la fecha de entrega y selecciona lecciones de las categorías. Añade lecturas opcionales y revisa la visibilidad antes de guardar. Las partes obligatorias determinan la finalización; procura que el trabajo sea claro y manejable."
+  },
+  "tools-discussions": {
+    "title": "Invite thoughtful discussion",
+    "body": "Create prompts that connect the teaching with reflection and conversation. Link a discussion to an assignment when it belongs to that work. Review the prompt and assignment connection so students understand what they are being asked to contribute.",
+    "titleEs": "Invita a un debate reflexivo",
+    "bodyEs": "Crea preguntas que conecten la enseñanza con la reflexión y la conversación. Vincula el debate a una tarea cuando forme parte de ella. Revisa la pregunta y su vínculo para que los estudiantes entiendan qué deben aportar."
+  },
+  "tools-attendance-grid": {
+    "title": "Students & Attendance",
+    "body": "Open Students & Attendance from Instructor Tools. The scheduled class appears at the top. Tap a student: Present, Absent, then Unmarked. Hold the card for details and progress. Unmarked students are not counted absent.",
+    "titleEs": "Estudiantes y asistencia",
+    "bodyEs": "Abre Estudiantes y asistencia desde las herramientas. La clase programada aparece arriba. Toca a un estudiante: Presente, Ausente y Sin marcar. Mantén pulsada la tarjeta para ver datos y progreso. Sin marcar no cuenta como ausencia."
+  },
+  "tools-guides": {
+    "title": "Prepare for rites and sacraments",
+    "body": "Start a new guide and choose a rite, sacrament, or additional guide template. Adapt its headings and text to your parish, then review the date, time zone, and visibility. Students acknowledge the guide; afterward they can revisit it in My Guides.",
+    "titleEs": "Prepara los ritos y sacramentos",
+    "bodyEs": "Crea una guía y elige una plantilla de rito, sacramento o guía adicional. Adapta títulos y texto a tu parroquia; revisa fecha, zona horaria y visibilidad. Los estudiantes confirman su lectura y pueden volver a ella en Mis guías."
+  },
+  "tools-classes": {
+    "title": "Classroom Management",
+    "body": "Next, we will open Classroom Management and explore its tools in order.",
+    "titleEs": "Administración del aula",
+    "bodyEs": "Ahora abriremos Administración del aula y recorreremos sus herramientas en orden."
+  },
+  "tools-class-entry": {
+    "title": "Inside Classroom Management",
+    "body": "Here are your classroom’s schedule, Daily Formation, details, invitations, join requests, and refreshment settings. Let’s work down the page.",
+    "titleEs": "Dentro de Administración del aula",
+    "bodyEs": "Aquí están el calendario, la Formación diaria, los datos, las invitaciones, las solicitudes y los refrigerios. Recorramos la página de arriba abajo."
+  },
+  "tools-schedule": {
+    "title": "Plan your class meetings",
+    "body": "In Classroom Management, open Class Schedule for your classroom. Add meeting dates, topics, and details so students know what to expect. You can import a schedule instead of entering each meeting individually. Review dates and imported content before saving; upcoming class information also appears on Home.",
+    "titleEs": "Planifica las reuniones",
+    "bodyEs": "En Administración del aula, abre Calendario de clases para tu aula. Añade fechas, temas y detalles para que los estudiantes sepan qué esperar. Puedes importar un calendario en lugar de introducir cada reunión. Revisa las fechas y el contenido antes de guardar; la próxima clase también aparece en Inicio."
+  },
+  "tools-daily": {
+    "title": "Encourage daily formation",
+    "body": "In Classroom Management, open Daily Formation for your classroom. Create dated saints, liturgical facts, or class notes and review their publication settings. Check whether Daily Formation is enabled, along with the reminder time and parish time zone. When importing, review carefully: an entry with the same date can be replaced.",
+    "titleEs": "Fomenta la formación diaria",
+    "bodyEs": "En Administración del aula, abre Formación diaria para tu aula. Crea santos, datos litúrgicos o notas con fecha y revisa su publicación. Comprueba que Formación diaria esté activada, la hora del recordatorio y la zona horaria parroquial. Revisa las importaciones: una entrada con la misma fecha puede reemplazarse."
+  },
+  "tools-class-photo": {
+    "title": "Classroom photo",
+    "body": "Open Classroom photo in Classroom Management to upload, replace, or remove the image shown on your classroom dashboard.",
+    "titleEs": "Foto del aula",
+    "bodyEs": "Abre Foto del aula en Administración del aula para subir, reemplazar o quitar la imagen del panel de tu clase."
+  },
+  "tools-codes": {
+    "title": "Invite the right people",
+    "body": "Share the generated student code, link, or QR code with your class. Student codes expire after 90 days; replacing or disabling one does not remove enrolled students. Co-instructor codes are one-use invitations granting instructor access—share those only with trusted teaching partners.",
+    "titleEs": "Invita a las personas adecuadas",
+    "bodyEs": "Comparte el código, enlace o QR generado para estudiantes. Los códigos vencen a los 90 días; reemplazarlos o desactivarlos no retira a los inscritos. Los códigos de coinstructor son de un solo uso y dan acceso docente: compártelos solo con colaboradores de confianza."
+  },
+  "codes-overview": {
+    "title": "Two different invitations",
+    "body": "Student invitations enroll learners; instructor invitations grant teaching access. Never give students an instructor code.",
+    "titleEs": "Dos invitaciones distintas",
+    "bodyEs": "Las invitaciones de estudiante inscriben alumnos; las de instructor dan acceso docente. Nunca entregues un código de instructor a estudiantes."
+  },
+  "codes-student-create": {
+    "title": "1. Prepare the student invitation",
+    "body": "After the tour, open this page normally to manage the student invitation. Use New Student Code when a fresh invitation is needed. The generated code is reusable by your students; they should use this invitation, not invent a class ID or enter your class name.",
+    "titleEs": "1. Prepara la invitación de estudiante",
+    "bodyEs": "Después del recorrido, abre esta página normalmente para administrar la invitación. Usa Nuevo código de estudiante cuando necesites una nueva. El código generado es reutilizable; los estudiantes deben usarlo, no inventar un ID ni introducir el nombre de la clase."
+  },
+  "codes-student-share": {
+    "title": "2. Share with your students",
+    "body": "When an active code is available, Copy Link copies its invitation link, QR Code displays a scannable invitation, and Email opens a prepared email. You can also provide the code directly. Share with your intended class, not on a public page.",
+    "titleEs": "2. Comparte con tus estudiantes",
+    "bodyEs": "Con un código activo, Copiar enlace copia la invitación, Código QR la muestra para escanear y Correo abre un mensaje preparado. También puedes entregar el código directamente. Compártelo con tu clase, no en una página pública."
+  },
+  "codes-student-join": {
+    "title": "3. Help a student join",
+    "body": "Ask a new student to create an account, choose Student during profile setup, and enter the student invitation code. An invitation link can supply the invitation details. Check that they reach the intended classroom, then use Students & Attendance to review your roster.",
+    "titleEs": "3. Ayuda a un estudiante a entrar",
+    "bodyEs": "Pide al nuevo estudiante crear una cuenta, elegir Estudiante al configurar el perfil e introducir el código de invitación. Un enlace puede proporcionar los datos de la invitación. Comprueba que entre en el aula correcta y revisa la lista en Datos de estudiantes."
+  },
+  "codes-student-renew": {
+    "title": "4. Expired or shared too widely?",
+    "body": "Student codes expire after 90 days. Replacing or deactivating an invitation stops use of the old code but does not remove enrolled students. Share the new invitation with anyone still joining. For an invalid code, check for typing errors and request the current invitation instead of creating another account.",
+    "titleEs": "4. ¿Caducó o se compartió demasiado?",
+    "bodyEs": "Los códigos vencen a los 90 días. Reemplazar o desactivar una invitación impide usar el código anterior, pero no retira a los inscritos. Comparte la nueva con quienes aún deban entrar. Si un código no es válido, revisa errores y solicita el actual en lugar de crear otra cuenta."
+  },
+  "codes-instructor-create": {
+    "title": "1. Invite a co-instructor",
+    "body": "New Code at the top creates an instructor invitation, not a student invitation. Create one for each trusted teaching partner. Each code can be redeemed once and gives instructor access to this classroom.",
+    "titleEs": "1. Invita a un coinstructor",
+    "bodyEs": "Nuevo código, arriba, crea una invitación de instructor, no de estudiante. Crea una para cada colaborador de confianza. Cada código se canjea una vez y da acceso docente a esta aula."
+  },
+  "codes-instructor-share": {
+    "title": "2. Share the instructor invitation privately",
+    "body": "Your instructor invitations appear here; an empty list is normal before you create one. For an active invitation, use its Copy Link, QR Code, or Email controls. Check the invitation status before sharing, and send it only to the intended co-instructor.",
+    "titleEs": "2. Comparte la invitación en privado",
+    "bodyEs": "Aquí aparecen las invitaciones de instructor; la lista estará vacía si aún no creaste ninguna. Usa Copiar enlace, Código QR o Correo en una invitación activa. Comprueba el estado y envíala solo al coinstructor previsto."
+  },
+  "codes-instructor-join": {
+    "title": "3. Choose Co-Instructor, not New Parish",
+    "body": "The invited person creates an account and chooses Co-Instructor during profile setup. They need the class ID and instructor invitation code; the shared link carries those details. New Parish is for starting a separate classroom, not joining yours.",
+    "titleEs": "3. Elige Coinstructor, no Nueva parroquia",
+    "bodyEs": "La persona invitada crea una cuenta y elige Coinstructor al configurar su perfil. Necesita el ID de clase y el código de instructor; el enlace compartido incluye esos datos. Nueva parroquia sirve para iniciar otra aula, no para entrar en la tuya."
+  },
+  "codes-instructor-status": {
+    "title": "4. Review status and protect access",
+    "body": "After redemption, the invitation closes and can show who used it. Deactivate an unused invitation if plans change or it reaches the wrong person. Deactivation controls the invitation—it is not a way to remove an instructor who already joined. Next, we return to Classroom Management.",
+    "titleEs": "4. Revisa el estado y protege el acceso",
+    "bodyEs": "Tras canjearla, la invitación se cierra y puede mostrar quién la usó. Desactiva una invitación sin usar si cambian los planes o llega a otra persona. Esto controla la invitación, no retira a un instructor ya incorporado. Ahora volvemos a Administración del aula."
+  },
+  "tools-class-requests": {
+    "title": "Join requests",
+    "body": "Review pending requests and approve students who belong to your classroom.",
+    "titleEs": "Solicitudes de ingreso",
+    "bodyEs": "Revisa las solicitudes pendientes y aprueba a los estudiantes que pertenezcan a tu aula."
+  },
+  "tools-class-refreshments": {
+    "title": "Refreshment sign-up",
+    "body": "The Refreshment sign-up switch is directly in Classroom Management. Turning it off hides sign-up from student dashboards and pauses reminders; existing sign-ups are kept.",
+    "titleEs": "Inscripción para refrigerios",
+    "bodyEs": "El interruptor de refrigerios está en Administración del aula. Desactivarlo oculta la inscripción en el panel y pausa los recordatorios; se conservan las inscripciones existentes."
+  },
+  "tools-updates": {
+    "title": "Stay informed",
+    "body": "From Illumined contains news and guidance from Illumined. Check here for app changes and information for instructors. These updates are separate from announcements you create for your students.",
+    "titleEs": "Mantente informado",
+    "bodyEs": "De Illumined contiene noticias y orientación de Illumined. Consulta los cambios de la aplicación y la información para instructores. Son distintas de los anuncios que creas para tus estudiantes."
+  }
+}

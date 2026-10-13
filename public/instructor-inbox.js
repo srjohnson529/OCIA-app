@@ -17,11 +17,16 @@ function createInstructorInbox({db, auth, timestamp, document, storage}) {
   function readKey(id) { return 'illumined.inboxRead.' + JSON.stringify([user?.uid, id]); }
   function isUnread(thread) {
     let seen = 0; try { seen = Number(storage.getItem(readKey(thread.id))) || 0; } catch {}
-    return thread.lastSenderId !== user?.uid && (thread.updatedAt?.toMillis() || 0) > seen;
+    const shared = globalThis.MessageReads?.get(user?.uid, 'inbox', thread.id);
+    return thread.lastSenderId !== user?.uid && (shared
+      ? globalThis.MessageReads.after(thread.updatedAt, shared)
+      : (thread.updatedAt?.toMillis() || 0) > seen);
   }
   function rememberRead() {
     if (!opened || root.classList.contains('hidden') || document.visibilityState === 'hidden' || !selected) return;
-    const last = messages.at(-1)?.timestamp?.toMillis();
+    const time = messages.at(-1)?.timestamp;
+    if(time) globalThis.MessageReads?.mark(user?.uid, 'inbox', profile?.classId, selected, time);
+    const last = time?.toMillis();
     if (last) try { storage.setItem(readKey(selected), String(last)); } catch {}
     globalThis.WebParity?.refreshMessages?.();
   }

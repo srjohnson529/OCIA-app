@@ -18,6 +18,19 @@ importScripts('/web-push-config.js');
 importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging-compat.js');
 firebase.initializeApp(self.IlluminedPushConfig.firebase);
-firebase.messaging();
+importScripts('/message-notification-policy.js');
+function clearReadNotifications(marker) {
+  return self.registration.getNotifications().then(notifications=>{
+    notifications.forEach(notification=>{
+      if(MessageNotificationPolicy.covered(notification.tag,marker))notification.close();
+    });
+  });
+}
+self.addEventListener('message',event=>{
+  if(event.data?.type==='message_read_sync')event.waitUntil(clearReadNotifications(event.data));
+});
+firebase.messaging().onBackgroundMessage(payload=>{
+  if(payload.data?.type==='message_read_sync')return clearReadNotifications(payload.data);
+});
 // FCM automatically displays background notification payloads. Do not display a
 // second notification from onBackgroundMessage.

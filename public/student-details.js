@@ -1,6 +1,6 @@
 /* Instructor roster controls. Membership changes are authorized by the callable, never client writes. */
 window.StudentDetails = {
-    async render(panel, {db,firebase,classId,instructorId,lessons,spanish,isCurrent}) {
+    async render(panel, {db,firebase,classId,instructorId,lessons,spanish,isCurrent,initialStudentId,onBack}) {
         const token = Symbol('roster');
         panel._rosterToken=token;
         const valid=()=>panel.isConnected && panel._rosterToken===token && isCurrent();
@@ -23,7 +23,8 @@ window.StudentDetails = {
         panel.replaceChildren();
         el('h3',t('Student Details','Detalles de estudiantes'),panel);
         el('p',t('Review progress and manage your classroom roster. Removing a student preserves their account and progress. Only an instructor can restore class access.','Consulta el progreso y administra tu clase. Retirar a un estudiante conserva su cuenta y progreso. Solo un instructor puede restablecer el acceso.'),panel);
-        const form=el('div','',panel,'instructor-form');
+        if(onBack)el('button',t('‹ Students & Attendance','‹ Estudiantes y asistencia'),panel).onclick=onBack;
+        const form=el('div','',panel,'instructor-form');form.hidden=!!initialStudentId;
         const searchLabel=el('label',t('Search name or email','Buscar nombre o correo'),form);
         const search=el('input','',searchLabel);search.type='search';
         const filterLabel=el('label',t('Roster status','Estado en la clase'),form);
@@ -49,7 +50,7 @@ window.StudentDetails = {
         }
         function detail(student) {
             list.replaceChildren();
-            const back=el('button',t('‹ Back to roster','‹ Volver a la lista'),list);back.onclick=draw;
+            const back=el('button',t('‹ Back to roster','‹ Volver a la lista'),list);back.onclick=initialStudentId&&onBack?onBack:draw;
             const card=el('article','',list,'instructor-card');
             if(globalThis.memberPhoto) card.append(globalThis.memberPhoto(student.id));
             el('h4',student.displayName||student.email,card);
@@ -57,6 +58,9 @@ window.StudentDetails = {
             if(student.email)el('a',t('Email Student','Enviar correo al estudiante'),card).href='mailto:'+encodeURIComponent(student.email);
             el('p',t('Lessons: ','Lecciones: ')+(student.completedLessons||[]).length+' / '+lessons.length+' · '+t('Badges: ','Insignias: ')+(student.earnedBadges||[]).length+' · '+t('Memorized prayers: ','Oraciones memorizadas: ')+(student.memorizedPrayerIds||[]).length,card);
             const titles=new Map(lessons.map(l=>[l.id,l.title]));
+            const attendance=el('section','',card);
+            if(window.Attendance) window.Attendance.history(attendance,{db,classId,userId:student.id,spanish,isCurrent:valid});
+            else el('p',t('Attendance is unavailable. Reload the page to retry.','La asistencia no está disponible. Recarga la página para reintentar.'),attendance).setAttribute('role','alert');
             el('h4',t('Completed Lessons','Lecciones completadas'),card);
             const completed=el('ul','',card);(student.completedLessons||[]).forEach(id=>el('li',titles.get(id)||id,completed));
             const actions=el('div','',card,'instructor-actions');
@@ -72,13 +76,18 @@ window.StudentDetails = {
                     actions.querySelectorAll('button').forEach(b=>b.disabled=true);back.disabled=true;errorBox.textContent='';
                     try {
                         await firebase.functions().httpsCallable('manageStudentRoster')({classId,userId:student.id,action});
-                        if(valid())await window.StudentDetails.render(panel,{db,firebase,classId,instructorId,lessons,spanish,isCurrent});
+                        if(valid()) {
+                            if(onBack)onBack();
+                            else await window.StudentDetails.render(panel,{db,firebase,classId,instructorId,lessons,spanish,isCurrent});
+                        }
                     } catch(error) {
                         if(valid()){errorBox.textContent=t('The roster could not be updated. ','No se pudo actualizar la lista. ')+error.message;actions.querySelectorAll('button').forEach(b=>b.disabled=false);back.disabled=false;}
                     }
                 };
             });
         }
-        search.oninput=draw;filter.onchange=draw;draw();
+        search.oninput=draw;filter.onchange=draw;
+        const initial=students.find(s=>s.id===initialStudentId);
+        if(initial)detail(initial);else draw();
     }
 };

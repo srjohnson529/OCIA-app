@@ -19,11 +19,14 @@ function createWebPush({firebase, db, auth, current, document, browser, config, 
     if (!messaging) {
       messaging = firebase.messaging();
       messaging.onMessage(payload => {
+        if(payload.data?.type === 'message_read_sync') return;
+        if(globalThis.MessageReads?.covers(payload.data || {})) return;
         const data = policy.clean(payload.data);
         const {user, profile} = current();
         if (!policy.allowed(data, user?.uid, profile)) return;
         if (payload.data?.['google.c.a.c_id']) return;
         const toast = document.createElement('div'); toast.className = 'web-push-toast'; toast.setAttribute('role', 'status');
+        toast.setAttribute('data-read-payload',JSON.stringify(payload.data || {}));
         const title = document.createElement('span'); title.textContent = payload.notification?.title || t('New Illumined notification', 'Nueva notificación de Illumined');
         const open = document.createElement('button'); open.textContent = t('Open', 'Abrir'); open.onclick = () => { toast.remove(); pending = data; route(); };
         const dismiss = document.createElement('button'); dismiss.textContent = '×'; dismiss.setAttribute('aria-label', t('Dismiss', 'Cerrar')); dismiss.onclick = () => toast.remove();
@@ -64,6 +67,7 @@ function createWebPush({firebase, db, auth, current, document, browser, config, 
     const old = saved();
     try { await db.collection('userProfiles').doc(user.uid).update({
       fcmTokens: firebase.firestore.FieldValue.arrayUnion(token),
+      messageReadSyncTokens: firebase.firestore.FieldValue.arrayUnion(token),
       notificationLanguage: document.documentElement.lang.startsWith('es') ? 'es' : 'en',
       ...(enableAccount ? {notificationsEnabled: true} : {})
     }); } catch (error) {

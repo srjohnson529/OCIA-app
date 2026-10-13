@@ -261,6 +261,27 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/instructorUpdates/$(updateId));
     }
 
+    // Read cursors belong to one account, never to the entire classroom.
+    match /userProfiles/{userId}/messageReads/{markerId} {
+      function validRead() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['kind', 'classId', 'targetId', 'readThrough']) &&
+          d.kind in ['chat', 'inbox'] && d.classId is string && d.targetId is string &&
+          markerId == d.kind + '_' + d.targetId &&
+          d.readThrough is timestamp && d.readThrough <= request.time &&
+          ((d.kind == 'chat' && d.targetId == d.classId && inboxMember(d.classId)) ||
+           (d.kind == 'inbox' &&
+            get(/databases/$(database)/documents/instructorConversations/$(d.targetId)).data.classId == d.classId &&
+            inboxParticipant(get(/databases/$(database)/documents/instructorConversations/$(d.targetId)).data)));
+      }
+      allow read: if isOwnDocument(userId);
+      allow create: if isOwnDocument(userId) && validRead();
+      allow update: if isOwnDocument(userId) && validRead() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readThrough']) &&
+        request.resource.data.readThrough >= resource.data.readThrough;
+      allow delete: if false;
+    }
+
     match /userProfiles/{userId} {
       allow create: if validOwnProfileCreate(userId);
       allow get: if isOwnDocument(userId) || isAdmin() ||
@@ -530,6 +551,33 @@ service cloud.firestore {
       allow read: if isInstructorForClass(classId) ||
         (isInClass(classId) && resource.data.isPublished == true);
       allow create, update, delete: if isInstructorForClass(classId);
+    }
+
+// Attendance is private to the assigned instructors, never the classroom feed.
+    match /classrooms/{classId}/attendance/{recordId} {
+      function studentBelongs() {
+        let student = get(/databases/$(database)/documents/userProfiles/$(request.resource.data.userId)).data;
+        return student.isInstructor == false && student.get('isAdmin', false) == false &&
+          classId in student.classIds &&
+          !(classId in student.get('removedClassIds', [])) &&
+          !(classId in student.get('inactiveClassIds', []));
+      }
+      function validMark() {
+        let data = request.resource.data;
+        return data.keys().hasAll(['userId', 'date', 'status', 'markedBy', 'updatedAt']) &&
+          data.keys().hasOnly(['userId', 'date', 'status', 'markedBy', 'updatedAt']) &&
+          data.userId is string && data.date is string &&
+          data.date.matches('^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$') &&
+          recordId == data.date + '_' + data.userId &&
+          data.status in ['present', 'absent'] &&
+          data.markedBy == request.auth.uid && data.updatedAt == request.time;
+      }
+      allow read: if isInstructor() && isInClass(classId);
+      allow create: if isInstructorForClass(classId) && validMark() && studentBelongs();
+      allow update: if isInstructorForClass(classId) && validMark() &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.date == resource.data.date;
+      allow delete: if isInstructorForClass(classId);
     }
 
     match /classrooms/{classId}/settings/{settingId} {
