@@ -1,5 +1,49 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('public/instructor-tour.js','utf8');
+test('all walkthrough targets resolve to explicit page anchors or tool labels',()=>{
+ const c={window:{}};
+ vm.runInNewContext(source.replace('return {open,offer,beginStartup,runStartup,onSection,reset};','return {steps};'),c);
+ const html=fs.readFileSync('public/Catechism app.html','utf8');
+ const parity=fs.readFileSync('public/web-parity.js','utf8');
+ const management=['heading','schedule','daily','photo','invites','requests','refreshments'];
+ assert.equal(c.window.InstructorTour.steps.length,24);
+ for(const step of c.window.InstructorTour.steps){
+  assert.ok(step.body.every(text=>text.length>0));
+  if(step.unanchored){assert.equal(step.title[0],'Instructor invitations');assert.match(step.body[0],/iPhone or Android/);continue;}
+  const id=step.target;
+  if(id.startsWith('tab:'))assert.ok(html.includes(`data-instructor-tab="${id.slice(4)}"`),id);
+  else if(id.startsWith('tour-management-')){assert.ok(management.includes(id.slice(16)),id);assert.ok(parity.includes("'tour-management-'"));}
+  else assert.ok(html.includes(`id="${id}"`),id);
+  assert.ok(!['categories-container','dashboard-container','instructor-summary'].includes(id),'No broad layout containers');
+ }
+});
+test('highlight uses centered text bounds instead of the left edge of its container',()=>{
+ const s=setup();
+ s.c.document.createRange=()=>({selectNodeContents(){},getBoundingClientRect:()=>({left:150,top:100,bottom:140,width:170,height:40})});
+ s.c.window.InstructorTour.open();
+ assert.equal(parseFloat(s.nodes.get('tour-focus').style.left),150);
+ assert.equal(parseFloat(s.nodes.get('tour-focus').style.width),170);
+ const css=s.nodes.get('walkthrough-style').textContent;
+ assert.match(css,/#tour-card \.tour-description\{[^}]*overflow-y:auto/);
+ assert.match(css,/#tour-card \.walkthrough-actions\{flex:0 0 auto/);
+});
+test('next-class step highlights the topic itself, never refreshments or a generic descendant',()=>{
+ const s=setup();let scrolled=false;
+ const target=s.nodes.get('upcoming-topic-stat');
+ target.scrollIntoView=()=>{scrolled=true;};
+ target.querySelector=()=>{throw Error('Must not pick a descendant');};
+ s.c.window.InstructorTour.open();s.click('tour-card');
+ assert.ok(scrolled);assert.match(s.nodes.get('walkthrough-heading').textContent,/Your next class/);
+ assert.doesNotMatch(s.nodes.get('tour-card').children[1].textContent,/counters|lesson progress/);
+ assert.doesNotMatch(source,/candidate=candidate\?\.querySelector/);
+});
+test('web tool walkthrough follows the current card order and includes new editors',()=>{
+ const html=fs.readFileSync('public/Catechism app.html','utf8');
+ const visibleTabs=[...html.matchAll(/<button data-instructor-tab="([^"]+)"[^>]*>/g)].filter(m=>!m[0].includes('hidden')).map(m=>m[1]);
+ const tourTabs=[...source.matchAll(/target['"]?\s*:\s*['"]tab:([^'"]+)/g)].map(m=>m[1]);
+ assert.deepEqual(tourTabs,visibleTabs);
+ assert.match(source,/workspace:'assignments'/);assert.match(source,/workspace:'discussions'/);
+});
 test('lesson walkthrough gives one general outline without opening lesson details',()=>{
  const swift=fs.readFileSync('../../apps/ios/IlluminedIOS/Views/InstructorWalkthrough.swift','utf8');
  const kotlin=fs.readFileSync('../../apps/android/app/src/main/java/com/illumined/app/ui/WalkthroughSteps.kt','utf8');
@@ -29,7 +73,8 @@ test('walkthrough uses free space instead of covering the target, with instructi
   {left:10,top:250,bottom:450,width:300,height:200},
   {left:10,top:550,bottom:800,width:300,height:250},
   {left:0,top:0,bottom:844,width:390,height:844},
-  {left:0,top:-400,bottom:1400,width:390,height:1800}
+  {left:0,top:-400,bottom:1400,width:390,height:1800},
+  {left:300,top:100,bottom:200,width:300,height:100}
  ]) {
   const s=setup();
   s.nodes.get('dashboard-user-welcome').getBoundingClientRect=()=>rect;
@@ -40,6 +85,7 @@ test('walkthrough uses free space instead of covering the target, with instructi
   const focusTop=parseFloat(ring.style.top),focusHeight=parseFloat(ring.style.height);
   assert.ok(focusHeight<=80);
   assert.ok(parseFloat(ring.style.width)<=320);
+  assert.ok(parseFloat(ring.style.left)+parseFloat(ring.style.width)<=s.c.window.innerWidth-12);
   assert.ok(top+height<=focusTop-12 || top>=focusTop+focusHeight+12);
   assert.ok(parseFloat(card.style.maxHeight)>=200,'explanation must remain usable');
   assert.ok(top>=12 && top+height<=s.c.window.innerHeight-12);
@@ -60,13 +106,13 @@ test('card tap and keyboard advance; buttons never bubble into advance',()=>{
  assert.equal(s.nodes.has('tour-next'),false);
  const card=s.nodes.get('tour-card');
  card.onclick({target:{closest:()=>({})}});
- assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 22/);
+ assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 24/);
  card.onkeydown({target:card,key:'Enter',preventDefault(){}});
- assert.match(s.nodes.get('walkthrough-heading').textContent,/2 \/ 22/);
+ assert.match(s.nodes.get('walkthrough-heading').textContent,/2 \/ 24/);
  let stopped=false;
  s.nodes.get('tour-back').onclick({stopPropagation(){stopped=true;}});
  assert.equal(stopped,true);
- assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 22/);
+ assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 24/);
 });
 function setup({instructor=true,newAccount=true,lang='en'}={}) {
  const storage=new Map(),nodes=new Map(),events=new Map();let shown='';
@@ -92,7 +138,7 @@ function setup({instructor=true,newAccount=true,lang='en'}={}) {
   userProfile:{isInstructor:instructor},uiLanguage:lang,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)}};
  const pages=['main-menu-section','lessons-list-section','discussion-list-section','spiritual-formation-section','chat-section','account-section','instructor-section'];
  const navs=['home-nav-button','lessons-nav-button','discussion-nav-button','spiritual-nav-button','chat-menu-button','quit-nav-button','instructor-nav-button'];
- [...pages,'dashboard-user-welcome','dashboard-container','categories-container','instructor-summary','instructor-tour-open'].forEach(id=>{const n=el();n.id=id;document.body.appendChild(n);});
+ [...pages,'dashboard-user-welcome','upcoming-topic-stat','dashboard-container','categories-container','instructor-summary','instructor-tour-open'].forEach(id=>{const n=el();n.id=id;document.body.appendChild(n);});
  navs.forEach((id,i)=>{const n=el('button');n.id=id;n.onclick=()=>{shown=pages[i];c.window.InstructorTour.onSection(shown);};document.body.appendChild(n);});
  vm.createContext(c);vm.runInContext(source,c);
  return {c,nodes,storage,events,shown:()=>shown,click:id=>{assert.ok(nodes.has(id),id);nodes.get(id).click();}};
@@ -102,7 +148,7 @@ test('new instructor gets one invitation; startup waits for finish or skip',asyn
  assert.equal(s.nodes.get('walkthrough-invite-title').textContent,'Would you like to explore Illumined?');
  await Promise.resolve();assert.equal(settled,false);
  s.click('tour-explore');assert.equal(s.shown(),'main-menu-section');
- s.click('tour-card');assert.match(s.nodes.get('walkthrough-heading').textContent,/2 \/ 22/);
+ s.click('tour-card');assert.match(s.nodes.get('walkthrough-heading').textContent,/2 \/ 24/);
  s.click('tour-card');assert.equal(s.shown(),'lessons-list-section');
  s.click('tour-card');assert.equal(s.shown(),'discussion-list-section');
  s.click('tour-card');assert.equal(s.shown(),'spiritual-formation-section');
@@ -114,9 +160,9 @@ test('new instructor gets one invitation; startup waits for finish or skip',asyn
 });
 test('Not now, Escape, Back, and replay work without changing classroom data',async()=>{
  const s=setup();const p=s.c.window.InstructorTour.beginStartup();s.click('tour-not-now');await p;
- s.c.window.InstructorTour.open();s.click('tour-card');s.click('tour-back');assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 22/);
+ s.c.window.InstructorTour.open();s.click('tour-card');s.click('tour-back');assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 24/);
  s.events.get('keydown')({key:'Escape',preventDefault(){}});assert.equal(s.nodes.has('tour-card'),false);
- s.c.window.InstructorTour.open();assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 22/);
+ s.c.window.InstructorTour.open();assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 24/);
  assert.doesNotMatch(source,/httpsCallable|fetch\(|\.collection\(|\.set\(\{/);
 });
 test('existing instructors have replay but no unsolicited invitation; students have neither',async()=>{
@@ -125,7 +171,7 @@ test('existing instructors have replay but no unsolicited invitation; students h
  const student=setup({instructor:false});await student.c.window.InstructorTour.beginStartup();student.c.window.InstructorTour.open();assert.equal(student.nodes.has('tour-card'),false);
 });
 test('direct page navigation updates callout; leaving main pages ends tour',()=>{
- const s=setup();s.c.window.InstructorTour.open();s.click('lessons-nav-button');assert.match(s.nodes.get('walkthrough-heading').textContent,/3 \/ 22/);
+ const s=setup();s.c.window.InstructorTour.open();s.click('lessons-nav-button');assert.match(s.nodes.get('walkthrough-heading').textContent,/3 \/ 24/);
  s.c.window.InstructorTour.onSection('quiz-section');assert.equal(s.nodes.has('tour-card'),false);
 });
 test('Spanish and unavailable storage still work without repeat invitation in session',async()=>{
@@ -138,7 +184,7 @@ test('missing targets, small screens, and changed account are safe',()=>{
  const s=setup();s.nodes.get('dashboard-user-welcome').remove();s.c.window.innerWidth=320;s.c.window.innerHeight=480;
  s.c.window.InstructorTour.open();const stale=s.nodes.get('tour-card').onclick;
  s.c.currentUser={uid:'two'};stale();assert.equal(s.nodes.has('tour-card'),false);
- s.c.window.InstructorTour.open();assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 22/);
+ s.c.window.InstructorTour.open();assert.match(s.nodes.get('walkthrough-heading').textContent,/1 \/ 24/);
 });
 test('web hooks startup before daily formation and disconnects the old sample data',()=>{
  const html=fs.readFileSync('public/Catechism app.html','utf8');
@@ -171,7 +217,7 @@ test('web waits for management, previews actual tools, and restores interaction 
  s.c.openInstructorWorkspace=async tab=>{visits.push(tab);};
  s.c.window.WebParity={previewClassroom:async()=>{previews++;}};
  s.c.window.InstructorTour.open();
- for(let i=0;i<12;i++){s.click('tour-card');await new Promise(resolve=>setImmediate(resolve));}
+ for(let i=0;i<14;i++){s.click('tour-card');await new Promise(resolve=>setImmediate(resolve));}
  assert.match(s.nodes.get('walkthrough-heading').textContent,/Inside Classroom Management/);
  assert.equal(visits.at(-1),'classes');assert.equal(previews,1);
  assert.equal(s.nodes.get('instructor-section').inert,true);

@@ -8,29 +8,35 @@ window.InstructorTour = (() => {
     {page:'main-menu-section',target:'dashboard-user-welcome',nav:'home-nav-button',
       title:['Your classroom dashboard','El panel de tu aula'],
       body:['The welcome card shows your name and classroom. Start here for your classroom’s learning and activities.','La tarjeta de bienvenida muestra tu nombre y aula. Empieza aquí para ver el aprendizaje y las actividades.']},
-    {page:'main-menu-section',target:'dashboard-container',nav:'home-nav-button',
-      title:['Lesson progress','Progreso de lecciones'],
-      body:['These counters track your own lesson progress, not your students’ progress. Tap this card to continue to Lessons & Quizzes.','Estos contadores muestran tu propio progreso, no el de tus estudiantes. Toca esta tarjeta para continuar a Lecciones y cuestionarios.']},
-    {page:'lessons-list-section',target:'categories-container',nav:'lessons-nav-button',
+    {page:'main-menu-section',target:'upcoming-topic-stat',nav:'home-nav-button',
+      title:['Your next class','Tu próxima clase'],
+      body:['This shows the next topic from your classroom schedule. Manage meeting dates and topics in Instructor Tools → Classroom Management → Class Schedule.','Aquí aparece el próximo tema del calendario de tu aula. Administra las fechas y temas en Herramientas del instructor → Administración del aula → Calendario de clases.']},
+    {page:'lessons-list-section',target:'tour-lesson-categories',nav:'lessons-nav-button',
       title:['Lessons & Quizzes','Lecciones y cuestionarios'],
       body:['Lessons generally follow the same outline: a definition introduces the topic, Scripture references connect it to the Bible, and Catechism references ground it in Church teaching. A proclamation presents the central message, followed by an explanation that develops it. A quiz at the end helps review what you have learned.','Las lecciones suelen seguir el mismo esquema: una definición introduce el tema, las referencias bíblicas lo conectan con la Biblia y las referencias al Catecismo lo fundamentan en la enseñanza de la Iglesia. Una proclamación presenta el mensaje central, seguida de una explicación que lo desarrolla. Un cuestionario final ayuda a repasar lo aprendido.']},
-    {page:'discussion-list-section',target:'discussion-list-section',nav:'discussion-nav-button',
+    {page:'discussion-list-section',target:'tour-discussion-heading',nav:'discussion-nav-button',
       title:['Classroom discussion','Debate de clase'],
       body:['Discussion assignments and responses appear here. A new class may be empty until its instructor adds a discussion.','Aquí aparecen las tareas de debate y respuestas del aula. Una clase nueva puede estar vacía hasta que el instructor añada un debate.']},
-    {page:'spiritual-formation-section',target:'spiritual-formation-section',nav:'spiritual-nav-button',
+    {page:'spiritual-formation-section',target:'tour-formation-heading',nav:'spiritual-nav-button',
       title:['Spiritual Formation','Formación espiritual'],
-      body:['Explore prayer and spiritual practices alongside lessons. Daily Formation and preparation guides support this journey; availability depends on your class setup.','Explora la oración y las prácticas espirituales junto con las lecciones. La Formación diaria y las guías apoyan este camino; su disponibilidad depende de tu clase.']},
+      body:['Open Prayers, Examination of Conscience, or Spiritual Practices to support your formation alongside lessons.','Abre Oraciones, Examen de conciencia o Prácticas espirituales para apoyar tu formación junto con las lecciones.']},
     {page:'chat-section',target:'chat-header',nav:'chat-menu-button',
       title:['Classroom chat & Inbox','Chat de clase y bandeja de entrada'],
       body:['Use Classroom chat for class conversation. Open Inbox to send a message to a specific student; students use it to message their instructors.','Usa el chat de clase para conversar con el grupo. Abre la bandeja de entrada para enviar un mensaje a un estudiante específico; los estudiantes la usan para escribir a sus instructores.']},
     {page:'account-section',target:'account-name',nav:'quit-nav-button',
       title:['Your account & profile photo','Tu cuenta y foto de perfil'],
       body:['Review your name, email, and classroom here. Select the photo beside your name to upload, change, or remove your profile picture. On the web, browser notification controls are under Student Resources → Notifications.','Revisa aquí tu nombre, correo y aula. Selecciona la foto junto a tu nombre para subir, cambiar o eliminar tu foto de perfil. En la web, los controles de notificaciones están en Recursos para estudiantes → Notificaciones.']},
-    {page:'instructor-section',target:'instructor-summary',nav:'instructor-nav-button',
+    {page:'instructor-section',target:'instructor-tour-open',nav:'instructor-nav-button',
       title:['Instructor Tools','Herramientas del instructor'],
-      body:['Follow the Instructor Tools in their displayed order. Classroom Management opens during the tour so you can see its tools.','Recorre las herramientas en su orden. Abriremos Administración del aula para ver sus herramientas.']}
+      body:['Use Explore Illumined to replay this walkthrough. Next, follow the tool cards in their displayed order. Classroom Management opens so you can see the tools inside.','Usa Explora Illumined para repetir este recorrido. Ahora seguiremos las tarjetas en su orden y abriremos Administración del aula para ver sus herramientas.']}
   ];
   steps.push(...[
+  {page:'instructor-section',target:'tab:assignments',nav:'instructor-nav-button',workspace:'assignments',
+    title:['Assignments','Tareas'],
+    body:['Create assignments with a due date, lessons and quizzes, and full-text readings. Edit existing work or hide it from students without deleting it.','Crea tareas con fecha de entrega, lecciones y cuestionarios, y lecturas completas. Edita las tareas u ocúltalas sin eliminarlas.']},
+  {page:'instructor-section',target:'tab:discussions',nav:'instructor-nav-button',workspace:'discussions',
+    title:['Discussion Boards','Foros de discusión'],
+    body:['Write a discussion prompt, optionally link it to an assignment, and choose whether participation is required. Publish or hide the prompt here; students respond in Discussion.','Escribe un tema, vincúlalo opcionalmente a una tarea y elige si la participación es obligatoria. Publica u oculta el tema aquí; los estudiantes responden en Debate.']},
   {
     "page": "instructor-section",
     "target": "tab:attendance",
@@ -65,12 +71,12 @@ window.InstructorTour = (() => {
     "nav": "instructor-nav-button",
     "workspace": null,
     "title": [
-      "Lessons and assignments",
-      "Lecciones y tareas"
+      "Lesson library & quiz settings",
+      "Biblioteca de lecciones y ajustes de cuestionarios"
     ],
     "body": [
-      "Organize lessons and quizzes for your classroom.",
-      "Organiza lecciones y cuestionarios para tu aula."
+      "Customize lessons, create classroom lessons, and choose which lesson groups students can see. Set quizzes as required, optional, or hidden, then save your settings.",
+      "Personaliza lecciones, crea lecciones del aula y elige los grupos visibles. Configura los cuestionarios como obligatorios, opcionales u ocultos y guarda los ajustes."
     ]
   },
   {
@@ -162,6 +168,7 @@ window.InstructorTour = (() => {
     "target": "tour-management-invites",
     "nav": "instructor-nav-button",
     "workspace": "classes",
+    "unanchored": true,
     "title": [
       "Instructor invitations",
       "Invitaciones de instructores"
@@ -209,8 +216,8 @@ window.InstructorTour = (() => {
       "Anuncios"
     ],
     "body": [
-      "Publish class news and reminders. Review visibility and notification settings before sending.",
-      "Publica noticias y recordatorios. Revisa visibilidad y notificaciones antes de enviar."
+      "Create a title and message for your students’ dashboards. Use Visible to students to publish an announcement, or hide it while keeping it for later.",
+      "Crea un título y mensaje para el panel de tus estudiantes. Activa Visible para estudiantes para publicarlo u ocúltalo para conservarlo."
     ]
   },
   {
@@ -239,7 +246,18 @@ window.InstructorTour = (() => {
     if(document.getElementById('walkthrough-style'))return;
     const css=element('style');css.id='walkthrough-style';
     css.textContent='.walkthrough-highlight{outline:3px solid #bf944a!important;outline-offset:4px!important}.walkthrough-bubble{position:fixed;z-index:100020;width:min(350px,calc(100vw - 24px));box-sizing:border-box;padding:18px;background:#3b6fa0;color:#fff;border:2px solid #bf944a;border-radius:18px;box-shadow:0 6px 24px #0003;text-align:left;font:16px/1.5 system-ui,sans-serif;max-height:calc(100dvh - 24px);overflow:auto;text-shadow:none}.walkthrough-bubble h3{margin:0 0 10px;color:#fff;font:700 19px/1.3 system-ui,sans-serif}.walkthrough-bubble h3::after{content:"";display:block;width:56px;height:3px;margin-top:12px;border-radius:2px;background:#bf944a}.walkthrough-bubble p{margin:0 0 14px;font:inherit;color:#fff;text-shadow:none}.walkthrough-bubble button{font:600 15px/1.4 system-ui,sans-serif;margin:4px;padding:9px 13px;border:1px solid #ffffff80;border-radius:10px;background:transparent;color:#fff;box-shadow:none;text-shadow:none}.walkthrough-bubble button:last-child{background:#bf944a;color:#171717;border-color:#bf944a}.walkthrough-bubble button:disabled{opacity:.5}.walkthrough-bubble button:focus-visible{outline:3px solid #bf944a;outline-offset:2px}.walkthrough-actions{display:flex;justify-content:space-between;flex-wrap:wrap}.walkthrough-invitation{position:fixed;inset:0;background:#0005;z-index:100021;display:grid;place-items:center}.walkthrough-invitation .walkthrough-bubble{position:relative}';
+    css.textContent += '#tour-card{display:flex;flex-direction:column;overflow:hidden;max-width:calc(100vw - 24px)}#tour-card h3{flex:0 0 auto;font-size:17px;margin-bottom:8px}#tour-card .tour-description{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin-bottom:10px;padding-right:5px}#tour-card .tour-hint{flex:0 0 auto;font-size:14px;margin:8px 0}#tour-card .walkthrough-actions{flex:0 0 auto;flex-wrap:nowrap;gap:8px}#tour-card .walkthrough-actions button{min-height:44px;margin:0}';
     document.head.appendChild(css);
+  }
+  function anchorRect(node){
+    if(!node)return null;
+    // Measure the actual label rather than the empty area of a wide container.
+    if(document.createRange){
+      const range=document.createRange();range.selectNodeContents(node);
+      const rect=range.getBoundingClientRect();
+      if(rect.width>0&&rect.height>0)return rect;
+    }
+    return node.getBoundingClientRect();
   }
   function unmark(){document.getElementById('tour-focus')?.remove();highlight=null;observer?.disconnect();observer=null;}
   let navigationVersion=0, lockedSection=null, previousInert=false, tourWorkspace=null;
@@ -263,10 +281,10 @@ window.InstructorTour = (() => {
   function position(){
     if(step<0||!bubble)return;
     if(!allowed()){close();return;}
-    const source=highlight?.getBoundingClientRect(),width=bubble.offsetWidth;
+    const source=anchorRect(highlight),width=bubble.offsetWidth;
     const vw=window.innerWidth,vh=window.innerHeight;
     const focusTop=source?Math.max(12,Math.min(source.top,vh-24)):12;
-    const rect=source?{left:Math.max(12,source.left),top:focusTop,
+    const rect=source?{left:Math.max(12,Math.min(source.left,vw-Math.min(320,source.width,vw-24)-12)),top:focusTop,
       width:Math.min(320,source.width,vw-24),height:Math.min(80,(vh-24)*.18,Math.max(1,source.bottom-focusTop))}:null;
     if(rect)rect.bottom=rect.top+rect.height;
     const ring=document.getElementById('tour-focus');
@@ -289,8 +307,8 @@ window.InstructorTour = (() => {
     unmark();bubble?.remove();
     bubble=element('aside');bubble.className='walkthrough-bubble';bubble.setAttribute('role','dialog');bubble.setAttribute('aria-labelledby','walkthrough-heading');
     element('h3',(step+1)+' / '+steps.length+' · '+local(data.title),bubble).id='walkthrough-heading';
-    element('p',local(data.body),bubble);
-    element('p',step===steps.length-1?t('Tap the card to finish.','Toca la tarjeta para finalizar.'):t('Tap the card to continue.','Toca la tarjeta para continuar.'),bubble);
+    element('p',local(data.body),bubble).className='tour-description';
+    element('p',step===steps.length-1?t('Tap the card to finish.','Toca la tarjeta para finalizar.'):t('Tap the card to continue.','Toca la tarjeta para continuar.'),bubble).className='tour-hint';
     const actions=element('div',null,bubble);actions.className='walkthrough-actions';
     button(t('Back','Atrás'),()=>go(step-1),actions,'tour-back').disabled=step===0;
     button(t('End tour','Terminar recorrido'),close,actions,'tour-skip');
@@ -303,8 +321,10 @@ window.InstructorTour = (() => {
     };
     document.body.appendChild(bubble);
     let candidate=data.target.startsWith('tab:') ? document.querySelector('[data-instructor-tab="'+data.target.slice(4)+'"]') : document.getElementById(data.target);
-    candidate=candidate?.querySelector('h1,h2,h3,h4,button,label')||candidate;
-    if(!candidate?.getClientRects().length)candidate=document.getElementById(data.nav);
+    // Co-instructor invitations are mobile-only; don't point at the student invitation tool.
+    if(data.unanchored)candidate=null;
+    // Never substitute a descendant or navigation button: it may describe another feature.
+    if(!candidate?.getClientRects().length)candidate=null;
     highlight=candidate;
     const ring=element('div',null,document.body);ring.id='tour-focus';ring.setAttribute('aria-hidden','true');
     highlight?.scrollIntoView({behavior:'instant',block:'center'});

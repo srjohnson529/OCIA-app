@@ -161,8 +161,8 @@
   stopRequests();instructorClassId=classId;instructorTab='classes';const token=epoch;panel.replaceChildren();
   if(!panel._singleClassOptions)panel.append(button(t('‹ Classrooms','‹ Aulas'),()=>openInstructorWorkspace('classes')));
   const intro=el('header',null,'instructor-card classroom-management-intro');
-  intro.id='tour-management-heading';
-  intro.append(el('h3',t('Classroom Management','Administración del aula')));
+  const managementHeading=el('h3',t('Classroom Management','Administración del aula'));
+  managementHeading.id='tour-management-heading';intro.append(managementHeading);
   intro.append(el('p',t('Manage class schedules, Daily Formation, classroom details, invitations, join requests, and settings.','Administra calendarios, Formación diaria, datos del aula, invitaciones, solicitudes de ingreso y ajustes.'),'muted'));
   panel.append(intro,el('h3',classId));
   document.getElementById('instructor-class-select').value=classId;
