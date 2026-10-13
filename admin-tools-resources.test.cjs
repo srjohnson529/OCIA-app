@@ -27,8 +27,16 @@ test('resource library exposes upload only to administrators and clears on sign-
  assert.equal(instructor.calls[0].data.action,'list');
  assert.equal(instructor.all().filter(x=>x.tagName==='form').length,0);
  const admin=setup({isAdmin:true});await admin.context.window.InstructorResources.open();
+ assert.equal(admin.all().filter(x=>x.tagName==='form').length,0);
+ await admin.context.window.InstructorResources.open({manage:true});
  assert.equal(admin.all().filter(x=>x.tagName==='form').length,1);
  admin.context.window.InstructorResources.reset();assert.equal(admin.nodes.has('instructor-resources-section'),false);
+});
+test('instructor cannot enter the admin upload screen even by requesting management mode',async()=>{
+ for(const profile of [{isInstructor:true},{isInstructor:true,isAdmin:'true'}]){
+  const s=setup(profile);await s.context.window.InstructorResources.open({manage:true});
+  assert.equal(s.calls.length,0);assert.equal(s.nodes.size,0);
+ }
 });
 test('web shell gates admin and instructor entry points separately',()=>{
  const html=fs.readFileSync('public/Catechism app.html','utf8');

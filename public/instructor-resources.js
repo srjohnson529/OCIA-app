@@ -3,19 +3,20 @@ window.InstructorResources = (() => {
   const t=(en,es)=>uiLanguage==='es'?es:en;
   const call=data=>firebase.functions().httpsCallable('instructorResources')(data).then(r=>r.data);
   function element(tag,text,parent){const el=document.createElement(tag);if(text)el.textContent=text;parent?.appendChild(el);return el;}
-  async function open(){
+  async function open({manage=false}={}){
     const owner=currentUser?.uid, token=++generation;
-    if(!owner || !(userProfile?.isInstructor || userProfile?.isAdmin))return;
+    if(!owner || !(userProfile?.isInstructor===true || userProfile?.isAdmin===true))return;
+    if(manage && userProfile?.isAdmin!==true)return;
     let section=document.getElementById('instructor-resources-section');
     if(!section){section=element('section',null,document.querySelector('.main-content-container'));section.id='instructor-resources-section';section.className='hidden';}
     section.replaceChildren();
-    const valid=()=>token===generation && currentUser?.uid===owner && section.isConnected;
-    const back=element('button',t('‹ Back','‹ Atrás'),section);back.onclick=()=>showSection('main-menu-section');
+    const valid=()=>token===generation && currentUser?.uid===owner && section.isConnected && (manage?userProfile?.isAdmin===true:(userProfile?.isInstructor===true||userProfile?.isAdmin===true));
+    const back=element('button',t('‹ Back','‹ Atrás'),section);back.onclick=()=>manage?AdminTools.open():showSection('main-menu-section');
     const card=element('article',null,section);card.className='instructor-card';
-    element('h2',t('Instructor Resources','Recursos para instructores'),card);
+    element('h2',manage?t('Manage Instructor Resources','Administrar recursos para instructores'):t('Instructor Resources','Recursos para instructores'),card);
     element('p',t('Download formation files and teaching resources shared by Illumined.','Descarga archivos de formación y recursos docentes de Illumined.'),card);
     const status=element('p',null,card);status.setAttribute('role','status');
-    if(userProfile.isAdmin){
+    if(manage && userProfile.isAdmin===true){
       const form=element('form',null,card);
       const field=(label,tag)=>{const wrap=element('label',label,form);return element(tag,null,wrap);};
       const title=field(t('Title','Título'),'input');title.required=true;title.maxLength=120;
@@ -40,8 +41,9 @@ window.InstructorResources = (() => {
     async function load(){
       const result=await call({action:'list'});if(!valid())return;
       list.replaceChildren();
-      if(!result.items.length)element('p',t('No resources published yet.','Todavía no hay recursos publicados.'),list);
-      result.items.forEach(item=>{
+      const items=result.items.filter(item=>manage||item.isArchived!==true);
+      if(!items.length)element('p',t('No resources published yet.','Todavía no hay recursos publicados.'),list);
+      items.forEach(item=>{
         const tile=element('article',null,list);tile.className='instructor-card';
         element('h3',item.title,tile);element('p',item.description,tile);
         element('p',item.fileName+' · '+Math.ceil(item.size/1024)+' KB'+(item.isArchived?t(' · Archived',' · Archivado'):''),tile);
@@ -54,7 +56,7 @@ window.InstructorResources = (() => {
             const link=element('a',null,document.body);link.href=url;link.download=result.fileName;link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
           }catch(e){if(valid())status.textContent=e.message;}finally{if(valid())download.disabled=false;}
         };
-        if(userProfile.isAdmin){
+        if(manage && userProfile.isAdmin===true){
           const archive=element('button',item.isArchived?t('Restore','Restaurar'):t('Archive','Archivar'),tile);
           archive.onclick=async()=>{
             if(!valid()||archive.disabled||!confirm(item.isArchived?t('Make this resource available again?','¿Volver a publicar este recurso?'):t('Hide this resource from instructors? The file will be kept.','¿Ocultar este recurso? Se conservará el archivo.')))return;

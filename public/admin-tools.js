@@ -23,7 +23,7 @@ window.AdminTools=(()=>{
         [t('Instructor Updates · Drafts & Scheduling','Novedades · Borradores y programación'),()=>UpdateManagement.open()],
         [t('Walkthrough Management','Administrar recorrido'),()=>open('walkthrough')],
         [t('Edit Walkthrough','Editar recorrido'),()=>open('editor')],
-        [t('Instructor Resources · Uploads & Downloads','Recursos · Subidas y descargas'),()=>InstructorResources.open()]
+        [t('Instructor Resources · Uploads & Downloads','Recursos · Subidas y descargas'),()=>InstructorResources.open({manage:true})]
       ];
       const grid=el('div',null,section);grid.className='admin-tool-grid';
       items.forEach(([title,action])=>{const tile=el('article',null,grid);tile.className='instructor-card';button(title,action,tile);});
