@@ -25,7 +25,8 @@ window.AdminTools=(()=>{
         [t('Edit Walkthrough','Editar recorrido'),()=>open('editor')],
         [t('Instructor Resources · Uploads & Downloads','Recursos · Subidas y descargas'),()=>InstructorResources.open()]
       ];
-      items.forEach(([title,action])=>{const tile=el('article',null,section);tile.className='instructor-card';button(title,action,tile);});
+      const grid=el('div',null,section);grid.className='admin-tool-grid';
+      items.forEach(([title,action])=>{const tile=el('article',null,grid);tile.className='instructor-card';button(title,action,tile);});
     } else if(mode==='codes'){
       el('h3',t('Parish Setup Codes','Códigos de configuración parroquial'),card);
       el('p',t('Create a one-use code for the first instructor at a new parish. Share it privately.','Crea un código de un solo uso para el primer instructor de una parroquia. Compártelo en privado.'),card);

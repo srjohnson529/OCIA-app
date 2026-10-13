@@ -1,4 +1,63 @@
 /* Shared mobile-parity components; keep marketing and payment flows unchanged. */
+/* Shared administration surfaces: scoped to avoid changing student screens. */
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) {
+  text-align: left; max-width: 1100px; margin-inline: auto; color: #344653;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) * { box-sizing: border-box; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) [hidden] { display: none !important; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) .instructor-card {
+  padding: clamp(20px, 3vw, 32px); margin: 0 0 20px; border: 1px solid #e4ddcd; border-radius: 22px;
+  background: #fff; box-shadow: 0 5px 20px #2446620d; text-align: left; min-width: 0;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) h2 {
+  margin: 0 0 20px; padding-bottom: 16px; border-bottom: 3px solid #bf944a;
+  color: #315775; text-align: left; font-size: clamp(1.5rem, 2.5vw, 2rem); line-height: 1.25;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) h3 {
+  color: #315775; text-align: left; font-size: 1.25rem; line-height: 1.35; margin: 0 0 12px; overflow-wrap: anywhere;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) p {
+  font-size: 1rem; line-height: 1.6; color: #58636a; margin: 10px 0 18px; text-align: left; overflow-wrap: anywhere;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) [role="status"]:empty { display: none; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) [role="status"]:not(:empty) {
+  padding: 12px 16px; border-left: 3px solid #bf944a; border-radius: 8px; background: #f5f2ea; color: #344653;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) label {
+  display: flex; flex-direction: column; gap: 8px; margin: 18px 0; color: #315775;
+  font: 600 .95rem/1.5 system-ui, sans-serif; text-align: left; min-width: 0;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) :is(input, select, textarea) {
+  width: 100%; max-width: 100%; min-width: 0; min-height: 46px; margin: 0; padding: 11px 14px;
+  border: 1px solid #bfccd6; border-radius: 10px; background: #fbfcfd; color: #263f53;
+  font: 400 1rem/1.5 system-ui, sans-serif; box-shadow: none;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) textarea { min-height: 130px; resize: vertical; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) label:has(input[type="checkbox"]) { flex-direction: row; align-items: center; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) input[type="checkbox"] { width: 20px; height: 20px; min-height: 20px; flex: 0 0 20px; accent-color: #3d739e; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) button {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px; max-width: 100%;
+  margin: 4px 8px 4px 0; padding: 11px 18px; border: 1px solid #cad7e1; border-radius: 12px;
+  background: #edf3f7; color: #315775; font: 600 .95rem/1.4 system-ui, sans-serif;
+  white-space: normal; overflow-wrap: anywhere; text-align: center; box-shadow: none; cursor: pointer;
+}
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) button:hover:not(:disabled) { background: #dce9f2; border-color: #8caac0; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) button:disabled { opacity: .55; cursor: wait; }
+:is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) > button:first-child { border-color: transparent; background: transparent; margin: 0 0 14px; padding-left: 0; }
+#instructor-resources-section button[type="submit"], #update-management-section #um-publish-button { background: #3d739e; border-color: #3d739e; color: #fff; }
+#instructor-resources-section button[type="submit"]:hover:not(:disabled), #update-management-section #um-publish-button:hover:not(:disabled) { background: #315775; }
+#instructor-resources-section input[type="file"] { padding: 12px; border-style: dashed; background: #f3f6f8; }
+#instructor-resources-section input::file-selector-button { border: 0; border-radius: 7px; padding: 9px 12px; margin-right: 12px; background: #dfeaf2; color: #315775; font: inherit; cursor: pointer; }
+#admin-tools-section .admin-tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+#admin-tools-section .admin-tool-grid .instructor-card { margin: 0; padding: 0; overflow: hidden; }
+#admin-tools-section .admin-tool-grid button { width: 100%; min-height: 100px; margin: 0; padding: 24px; justify-content: flex-start; text-align: left; background: transparent; border: 0; border-left: 4px solid #bf944a; border-radius: 0; font-size: 1.05rem; }
+#update-management-section .instructor-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+#update-management-section .instructor-actions button { margin: 0; }
+@media (max-width: 650px) {
+  #admin-tools-section .admin-tool-grid { grid-template-columns: minmax(0, 1fr); }
+  #admin-tools-section .admin-tool-grid button { min-height: 76px; padding: 20px; }
+  :is(#admin-tools-section, #admin-support-section, #update-management-section, #instructor-resources-section) .instructor-card { padding: 18px; }
+}
 /* Keyboard access and operating-system accessibility preferences. */
 #custom-alert-modal {
   top: 50%;
