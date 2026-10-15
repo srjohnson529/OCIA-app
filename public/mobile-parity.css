@@ -220,6 +220,20 @@ button { min-width: 44px; }
               0 14px 32px rgba(20, 40, 60, .14);
 }
 /* Keep the brand divider independent of editable landing-page text/styles. */
+#landing-about .landing-walkthrough-step {
+  grid-template-rows: 1fr auto;
+  align-content: stretch;
+}
+#landing-about .landing-walkthrough-step::after {
+  content: '';
+  display: block;
+  justify-self: end;
+  align-self: end;
+  width: clamp(64px, 7vw, 88px);
+  aspect-ratio: 722 / 654;
+  background: url('images/illumined-card-emblem.jpg') center / contain no-repeat;
+  pointer-events: none;
+}
 header .brand-name { text-decoration: none; }
 header .brand-divider-dot {
   display: flex;
